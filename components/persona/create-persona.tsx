@@ -496,10 +496,10 @@ export function CreatePersonaPage() {
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-              <Sparkles className="h-4 w-4 mr-2" />
-              Create Persona
-            </Button>
+              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                <Sparkles className="h-4 w-4 mr-2" />
+                {editingPersona ? "Update Persona" : "Create Persona"}
+              </Button>
           </DialogTrigger>
           <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>

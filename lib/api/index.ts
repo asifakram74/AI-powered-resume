@@ -91,7 +91,8 @@ api.interceptors.response.use(
 export const getPersonas = async (): Promise<PersonaResponse[]> => {
   try {
     const response = await api.get("/personas")
-    return response.data
+    // Handle Laravel API response structure: { status: true, data: [...] }
+    return response.data.data || response.data
   } catch (error) {
     console.error("Error fetching personas:", error)
     throw error
