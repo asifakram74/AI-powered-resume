@@ -164,7 +164,7 @@ export function CreatePersonaPage() {
               ? data.additional
               : [],
         },
-        createdAt: data.created_at || data.createdAt || new Date().toISOString(),
+        createdAt: data.created_at || new Date().toISOString(),
       })
 
       setPrefilledData({
@@ -421,7 +421,7 @@ export function CreatePersonaPage() {
               ? response.additional
               : [],
         },
-        createdAt: response.created_at || response.createdAt || new Date().toISOString(),
+        createdAt: response.created_at || new Date().toISOString(),
         generatedPersona: newPersona.generatedPersona,
       }
 
