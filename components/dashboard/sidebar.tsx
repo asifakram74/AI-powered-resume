@@ -54,11 +54,11 @@ const menuItems = [
     label: "Profile",
     icon: UserCircle,
   },
-  {
-    id: "settings",
-    label: "Settings",
-    icon: Settings,
-  },
+  // {
+  //   id: "settings",
+  //   label: "Settings",
+  //   icon: Settings,
+  // },
 ]
 
 export function Sidebar({ activePage, setActivePage }: SidebarProps) {
