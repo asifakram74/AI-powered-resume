@@ -221,72 +221,92 @@ export default function HomePage() {
                 Reviews
               </a>
 
-              {/* User Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                    <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
-                      <AvatarImage src="/placeholder.svg?height=40&width=40" alt="User" />
-                      <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white font-semibold">
-                        {user?.name?.charAt(0) || "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-64 p-2" align="end" forceMount>
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{user?.name || "User"}</p>
-                      <p className="text-xs leading-none text-muted-foreground">{user?.email || "user@example.com"}</p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
+              {user ? (
+                <>
+                  {/* User Dropdown */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                        <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                          <AvatarImage src="/placeholder.svg?height=40&width=40" alt="User" />
+                          <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white font-semibold">
+                            {user?.name?.charAt(0) || "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-64 p-2" align="end" forceMount>
+                      <DropdownMenuLabel className="font-normal">
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm font-medium leading-none">{user?.name || "User"}</p>
+                          <p className="text-xs leading-none text-muted-foreground">{user?.email || "user@example.com"}</p>
+                        </div>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
 
-                  <div className="space-y-1">
-                    {dashboardMenuItems.map((item) => (
-                      <DropdownMenuItem key={item.id} className="cursor-pointer p-3 rounded-lg hover:bg-gray-50">
-                        <a href={item.href} className="flex items-center gap-3 w-full">
-                          <div className="p-1.5 rounded-md bg-gray-100">
-                            <item.icon className="h-4 w-4 text-gray-600" />
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium text-gray-900">{item.label}</span>
-                              {item.badge && (
-                                <Badge
-                                  variant={item.badge === "AI" ? "default" : "secondary"}
-                                  className="text-xs px-1.5 py-0.5"
-                                >
-                                  {item.badge}
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                        </a>
-                      </DropdownMenuItem>
-                    ))}
-                  </div>
-
-                  <DropdownMenuSeparator />
-
-                  <DropdownMenuItem className="cursor-pointer p-3 rounded-lg hover:bg-gray-50" onClick={handleLogout}>
-                    <div className="flex items-center gap-3 w-full">
-                      <div className="p-1.5 rounded-md bg-red-100">
-                        <ArrowRight className="h-4 w-4 text-red-600 rotate-180" />
+                      <div className="space-y-1">
+                        {dashboardMenuItems.map((item) => (
+                          <DropdownMenuItem key={item.id} className="cursor-pointer p-3 rounded-lg hover:bg-gray-50">
+                            <a href={item.href} className="flex items-center gap-3 w-full">
+                              <div className="p-1.5 rounded-md bg-gray-100">
+                                <item.icon className="h-4 w-4 text-gray-600" />
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium text-gray-900">{item.label}</span>
+                                  {item.badge && (
+                                    <Badge
+                                      variant={item.badge === "AI" ? "default" : "secondary"}
+                                      className="text-xs px-1.5 py-0.5"
+                                    >
+                                      {item.badge}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </a>
+                          </DropdownMenuItem>
+                        ))}
                       </div>
-                      <span className="font-medium text-gray-900">Sign Out</span>
-                    </div>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <Link href="/dashboard">
-                <Button
-                  size="sm"
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                >
-                  Dashboard
-                </Button>
-              </Link>
+
+                      <DropdownMenuSeparator />
+
+                      <DropdownMenuItem className="cursor-pointer p-3 rounded-lg hover:bg-gray-50" onClick={handleLogout}>
+                        <div className="flex items-center gap-3 w-full">
+                          <div className="p-1.5 rounded-md bg-red-100">
+                            <ArrowRight className="h-4 w-4 text-red-600 rotate-180" />
+                          </div>
+                          <span className="font-medium text-gray-900">Sign Out</span>
+                        </div>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <Link href="/dashboard">
+                    <Button
+                      size="sm"
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    >
+                      Dashboard
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                <div className="flex items-center space-x-4">
+                  <Link href="/auth/signin">
+                    <Button variant="ghost" size="sm">
+                      Login
+                    </Button>
+                  </Link>
+                  <Link href="/auth/signup">
+                    <Button
+                      size="sm"
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    >
+                      Sign Up
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </div>
 
             {/* Mobile menu button */}
