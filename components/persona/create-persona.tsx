@@ -1,8 +1,14 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Sparkles,
   Grid,
@@ -15,9 +21,8 @@ import {
   TrendingUp,
   User,
   Briefcase,
-  
   Target,
-} from "lucide-react"
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -25,15 +30,22 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import type { CVData } from "@/types/cv-data"
-import { PersonaCreationOptions } from "@/components/persona/PersonaCreationOptions"
-import { PersonaForm } from "@/components/persona/PersonaForm"
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import type { CVData } from "@/types/cv-data";
+import { PersonaCreationOptions } from "@/components/persona/PersonaCreationOptions";
+import { PersonaForm } from "@/components/persona/PersonaForm";
 import {
   getPersonaById,
   createPersona,
@@ -41,43 +53,45 @@ import {
   deletePersona,
   type PersonaData,
   type PersonaResponse,
-} from "@/lib/api"
-import { useAppSelector, useAppDispatch } from "@/lib/redux/hooks"
-import { fetchPersonas, setPersonas } from "@/lib/redux/slices/personaSlice"
+} from "@/lib/api";
+import { useAppSelector, useAppDispatch } from "@/lib/redux/hooks";
+import { fetchPersonas, setPersonas } from "@/lib/redux/slices/personaSlice";
 
 export function CreatePersonaPage() {
-  const dispatch = useAppDispatch()
-  const personas = useAppSelector((state) => state.persona.personas)
-  const loading = useAppSelector((state) => state.persona.loading)
-  const error = useAppSelector((state) => state.persona.error)
-  const [viewMode, setViewMode] = useState<"grid" | "table">("table")
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [editingPersona, setEditingPersona] = useState<CVData | null>(null)
-  const [showForm, setShowForm] = useState(false)
-  const [prefilledData, setPrefilledData] = useState<Partial<Omit<CVData, "id" | "createdAt">> | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const { user } = useAppSelector((state) => state.auth)
+  const dispatch = useAppDispatch();
+  const personas = useAppSelector((state) => state.persona.personas);
+  const loading = useAppSelector((state) => state.persona.loading);
+  const error = useAppSelector((state) => state.persona.error);
+  const [viewMode, setViewMode] = useState<"grid" | "table">("table");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [editingPersona, setEditingPersona] = useState<CVData | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [prefilledData, setPrefilledData] = useState<Partial<
+    Omit<CVData, "id" | "createdAt">
+  > | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     if (!user?.id) {
-      console.log("No user ID available - user might not be logged in")
-      return
+      console.log("No user ID available - user might not be logged in");
+      return;
     }
-    dispatch(fetchPersonas())
-  }, [user?.id, dispatch])
+    dispatch(fetchPersonas());
+  }, [user?.id, dispatch]);
 
   const handleOptionSelect = (
     option: "manual" | "pdf" | "linkedin",
-    data?: Partial<Omit<CVData, "id" | "createdAt">>,
+    data?: Partial<Omit<CVData, "id" | "createdAt">>
   ) => {
-    setPrefilledData(data || null)
-    setShowForm(true)
-  }
+    setPrefilledData(data || null);
+    setShowForm(true);
+  };
 
   const handleEdit = async (persona: CVData) => {
     try {
-      const data = await getPersonaById(Number.parseInt(persona.id))
+      const data = await getPersonaById(Number.parseInt(persona.id));
       setEditingPersona({
         ...persona,
         personalInfo: {
@@ -99,8 +113,8 @@ export function CreatePersonaPage() {
           technical: Array.isArray(data.skills?.technical)
             ? data.skills.technical
             : Array.isArray(data.skills)
-              ? data.skills
-              : [],
+            ? data.skills
+            : [],
           soft: Array.isArray(data.skills?.soft) ? data.skills.soft : [],
         },
         languages: Array.isArray(data.languages)
@@ -109,8 +123,19 @@ export function CreatePersonaPage() {
               name: typeof lang === "string" ? lang : lang.name || "",
               proficiency:
                 typeof lang === "object" &&
-                ["Native", "Fluent", "Advanced", "Intermediate", "Basic"].includes(lang.proficiency)
-                  ? (lang.proficiency as "Native" | "Fluent" | "Advanced" | "Intermediate" | "Basic")
+                [
+                  "Native",
+                  "Fluent",
+                  "Advanced",
+                  "Intermediate",
+                  "Basic",
+                ].includes(lang.proficiency)
+                  ? (lang.proficiency as
+                      | "Native"
+                      | "Fluent"
+                      | "Advanced"
+                      | "Intermediate"
+                      | "Basic")
                   : "Basic",
             }))
           : [],
@@ -120,11 +145,11 @@ export function CreatePersonaPage() {
           interests: Array.isArray(data.additional?.interests)
             ? data.additional.interests
             : Array.isArray(data.additional)
-              ? data.additional
-              : [],
+            ? data.additional
+            : [],
         },
         createdAt: data.created_at || new Date().toISOString(),
-      })
+      });
 
       setPrefilledData({
         personalInfo: {
@@ -146,8 +171,8 @@ export function CreatePersonaPage() {
           technical: Array.isArray(data.skills?.technical)
             ? data.skills.technical
             : Array.isArray(data.skills)
-              ? data.skills
-              : [],
+            ? data.skills
+            : [],
           soft: Array.isArray(data.skills?.soft) ? data.skills.soft : [],
         },
         languages: Array.isArray(data.languages)
@@ -156,8 +181,19 @@ export function CreatePersonaPage() {
               name: typeof lang === "string" ? lang : lang.name || "",
               proficiency:
                 typeof lang === "object" &&
-                ["Native", "Fluent", "Advanced", "Intermediate", "Basic"].includes(lang.proficiency)
-                  ? (lang.proficiency as "Native" | "Fluent" | "Advanced" | "Intermediate" | "Basic")
+                [
+                  "Native",
+                  "Fluent",
+                  "Advanced",
+                  "Intermediate",
+                  "Basic",
+                ].includes(lang.proficiency)
+                  ? (lang.proficiency as
+                      | "Native"
+                      | "Fluent"
+                      | "Advanced"
+                      | "Intermediate"
+                      | "Basic")
                   : "Basic",
             }))
           : [],
@@ -167,67 +203,83 @@ export function CreatePersonaPage() {
           interests: Array.isArray(data.additional?.interests)
             ? data.additional.interests
             : Array.isArray(data.additional)
-              ? data.additional
-              : [],
+            ? data.additional
+            : [],
         },
-      })
-      setShowForm(true)
-      setIsDialogOpen(true)
+      });
+      setShowForm(true);
+      setIsDialogOpen(true);
     } catch (error) {
-      console.error("Error fetching persona:", error)
+      console.error("Error fetching persona:", error);
     }
-  }
+  };
 
   const handleDownload = (persona: CVData) => {
-    const dataStr = JSON.stringify(persona, null, 2)
-    const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr)
-    const exportFileDefaultName = `${persona.personalInfo.fullName.replace(/\s+/g, "_")}_CV_Persona.json`
-    const linkElement = document.createElement("a")
-    linkElement.setAttribute("href", dataUri)
-    linkElement.setAttribute("download", exportFileDefaultName)
-    linkElement.click()
-  }
+    const dataStr = JSON.stringify(persona, null, 2);
+    const dataUri =
+      "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+    const exportFileDefaultName = `${persona.personalInfo.fullName.replace(
+      /\s+/g,
+      "_"
+    )}_CV_Persona.json`;
+    const linkElement = document.createElement("a");
+    linkElement.setAttribute("href", dataUri);
+    linkElement.setAttribute("download", exportFileDefaultName);
+    linkElement.click();
+  };
 
   const handleView = (persona: CVData) => {
-    alert(`Viewing persona for ${persona.personalInfo.fullName}\n\nGenerated Persona:\n${persona.generatedPersona}`)
-  }
+    alert(
+      `Viewing persona for ${persona.personalInfo.fullName}\n\nGenerated Persona:\n${persona.generatedPersona}`
+    );
+  };
 
   const handleDelete = async (persona: CVData) => {
-    if (confirm(`Are you sure you want to delete the persona for ${persona.personalInfo.fullName}?`)) {
+    if (
+      confirm(
+        `Are you sure you want to delete the persona for ${persona.personalInfo.fullName}?`
+      )
+    ) {
       try {
-        await deletePersona(Number.parseInt(persona.id))
-        dispatch(setPersonas(personas.filter((p) => p.id !== persona.id)))
+        await deletePersona(Number.parseInt(persona.id));
+        dispatch(setPersonas(personas.filter((p) => p.id !== persona.id)));
       } catch (error) {
-        console.error("Error deleting persona:", error)
-        alert("Failed to delete persona")
+        console.error("Error deleting persona:", error);
+        alert("Failed to delete persona");
       }
     }
-  }
+  };
 
   const handlePersonaGenerated = async (newPersona: CVData) => {
-    console.log("Persona data being processed:", JSON.stringify(newPersona, null, 2))
-    setIsLoading(true)
+    console.log(
+      "Persona data being processed:",
+      JSON.stringify(newPersona, null, 2)
+    );
+    setIsLoading(true);
 
     try {
       // Validate URLs before processing
       const validateUrl = (url: string): string => {
-        if (!url || url.trim() === "") return ""
+        if (!url || url.trim() === "") return "";
 
-        const trimmedUrl = url.trim()
+        const trimmedUrl = url.trim();
 
         // If it's already a valid URL, return it
-        if (trimmedUrl.startsWith("http://") || trimmedUrl.startsWith("https://")) {
-          return trimmedUrl
+        if (
+          trimmedUrl.startsWith("http://") ||
+          trimmedUrl.startsWith("https://")
+        ) {
+          return trimmedUrl;
         }
 
         // If it looks like a domain, add https://
         if (trimmedUrl.includes(".") && !trimmedUrl.includes(" ")) {
-          return `https://${trimmedUrl}`
+          return `https://${trimmedUrl}`;
         }
 
         // If it's not a valid URL format, return empty string
-        return ""
-      }
+        return "";
+      };
 
       // Transform to API format with URL validation
       const personaData: PersonaData = {
@@ -263,8 +315,12 @@ export function CreatePersonaPage() {
           additionalInfo: edu.additionalInfo || "",
         })),
         skills: {
-          technical: Array.isArray(newPersona.skills?.technical) ? newPersona.skills.technical : [],
-          soft: Array.isArray(newPersona.skills?.soft) ? newPersona.skills.soft : [],
+          technical: Array.isArray(newPersona.skills?.technical)
+            ? newPersona.skills.technical
+            : [],
+          soft: Array.isArray(newPersona.skills?.soft)
+            ? newPersona.skills.soft
+            : [],
         },
         languages: newPersona.languages.map((lang) => lang.name || ""),
         certifications: newPersona.certifications.map((cert) => ({
@@ -277,25 +333,35 @@ export function CreatePersonaPage() {
           name: proj.name || "",
           role: proj.role || "",
           description: proj.description || "",
-          technologies: Array.isArray(proj.technologies) ? proj.technologies : [],
+          technologies: Array.isArray(proj.technologies)
+            ? proj.technologies
+            : [],
           liveDemoLink: proj.liveDemoLink || "",
           githubLink: proj.githubLink || "",
         })),
         additional: {
-          interests: Array.isArray(newPersona.additional?.interests) ? newPersona.additional.interests : [],
+          interests: Array.isArray(newPersona.additional?.interests)
+            ? newPersona.additional.interests
+            : [],
         },
-      }
+      };
 
-      console.log("Transformed persona data for API:", JSON.stringify(personaData, null, 2))
+      console.log(
+        "Transformed persona data for API:",
+        JSON.stringify(personaData, null, 2)
+      );
 
-      let response: PersonaResponse
+      let response: PersonaResponse;
       if (editingPersona) {
-        console.log("Updating existing persona with ID:", editingPersona.id)
-        response = await updatePersona(Number.parseInt(editingPersona.id), personaData)
+        console.log("Updating existing persona with ID:", editingPersona.id);
+        response = await updatePersona(
+          Number.parseInt(editingPersona.id),
+          personaData
+        );
       } else {
-        console.log("Creating new persona")
-        response = await createPersona(personaData)
-        console.log("Persona created successfully with ID:", response.id)
+        console.log("Creating new persona");
+        response = await createPersona(personaData);
+        console.log("Persona created successfully with ID:", response.id);
       }
 
       // Transform back to frontend format
@@ -326,7 +392,9 @@ export function CreatePersonaPage() {
             startDate: exp.startDate || exp.start_date || "",
             endDate: exp.endDate || exp.end_date || "",
             current: exp.current || false,
-            responsibilities: Array.isArray(exp.responsibilities) ? exp.responsibilities : [],
+            responsibilities: Array.isArray(exp.responsibilities)
+              ? exp.responsibilities
+              : [],
           })) || [],
         education:
           response.education?.map((edu: any) => ({
@@ -343,23 +411,30 @@ export function CreatePersonaPage() {
           technical: Array.isArray(response.skills?.technical)
             ? response.skills.technical
             : Array.isArray(response.skills)
-              ? response.skills
-              : [],
-          soft: Array.isArray(response.skills?.soft) ? response.skills.soft : [],
+            ? response.skills
+            : [],
+          soft: Array.isArray(response.skills?.soft)
+            ? response.skills.soft
+            : [],
         },
         languages:
           response.languages?.map((lang: any) => ({
             id: Date.now().toString(),
             name: typeof lang === "string" ? lang : lang.name || "",
-            proficiency: typeof lang === "object" ? lang.proficiency || "Intermediate" : "Intermediate",
+            proficiency:
+              typeof lang === "object"
+                ? lang.proficiency || "Intermediate"
+                : "Intermediate",
           })) || [],
         certifications:
           response.certifications?.map((cert: any) => ({
             id: Date.now().toString(),
             title: cert.title || "",
-            issuingOrganization: cert.issuingOrganization || cert.issuing_organization || "",
+            issuingOrganization:
+              cert.issuingOrganization || cert.issuing_organization || "",
             dateObtained: cert.dateObtained || cert.date_obtained || "",
-            verificationLink: cert.verificationLink || cert.verification_link || "",
+            verificationLink:
+              cert.verificationLink || cert.verification_link || "",
           })) || [],
         projects:
           response.projects?.map((proj: any) => ({
@@ -367,7 +442,9 @@ export function CreatePersonaPage() {
             name: proj.name || "",
             role: proj.role || "",
             description: proj.description || "",
-            technologies: Array.isArray(proj.technologies) ? proj.technologies : [],
+            technologies: Array.isArray(proj.technologies)
+              ? proj.technologies
+              : [],
             liveDemoLink: proj.liveDemoLink || proj.live_demo_link || "",
             githubLink: proj.githubLink || proj.github_link || "",
           })) || [],
@@ -375,66 +452,78 @@ export function CreatePersonaPage() {
           interests: Array.isArray(response.additional?.interests)
             ? response.additional.interests
             : Array.isArray(response.additional)
-              ? response.additional
-              : [],
+            ? response.additional
+            : [],
         },
         createdAt: response.created_at || new Date().toISOString(),
         generatedPersona: newPersona.generatedPersona,
-      }
+      };
 
       if (editingPersona) {
-        dispatch(setPersonas(personas.map((p) => (p.id === editingPersona.id ? updatedPersona : p))))
+        dispatch(
+          setPersonas(
+            personas.map((p) =>
+              p.id === editingPersona.id ? updatedPersona : p
+            )
+          )
+        );
       } else {
-        dispatch(setPersonas([updatedPersona, ...personas]))
+        dispatch(setPersonas([updatedPersona, ...personas]));
       }
 
-      setIsDialogOpen(false)
-      setShowForm(false)
-      setPrefilledData(null)
-      setEditingPersona(null)
+      setIsDialogOpen(false);
+      setShowForm(false);
+      setPrefilledData(null);
+      setEditingPersona(null);
     } catch (error) {
-      console.error("Error saving persona:", error)
+      console.error("Error saving persona:", error);
 
       // Provide more specific error messages
-      let errorMessage = "Unknown error occurred"
+      let errorMessage = "Unknown error occurred";
       if (error instanceof Error) {
-        errorMessage = error.message
+        errorMessage = error.message;
       } else if (typeof error === "string") {
-        errorMessage = error
+        errorMessage = error;
       }
 
-      alert(`Failed to save persona: ${errorMessage}`)
+      alert(`Failed to save persona: ${errorMessage}`);
     } finally {
-        setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   // Filter personas based on search term
   const filteredPersonas = personas.filter((persona) => {
-    const searchLower = searchTerm.toLowerCase()
+    const searchLower = searchTerm.toLowerCase();
     return (
       persona.personalInfo.fullName.toLowerCase().includes(searchLower) ||
       persona.personalInfo.jobTitle.toLowerCase().includes(searchLower) ||
       persona.personalInfo.email.toLowerCase().includes(searchLower) ||
-      persona.skills.technical.some((skill) => skill.toLowerCase().includes(searchLower)) ||
-      persona.skills.soft.some((skill) => skill.toLowerCase().includes(searchLower)) ||
+      persona.skills.technical.some((skill) =>
+        skill.toLowerCase().includes(searchLower)
+      ) ||
+      persona.skills.soft.some((skill) =>
+        skill.toLowerCase().includes(searchLower)
+      ) ||
       persona.experience.some(
         (exp) =>
-          exp.jobTitle?.toLowerCase().includes(searchLower) || exp.companyName?.toLowerCase().includes(searchLower),
+          exp.jobTitle?.toLowerCase().includes(searchLower) ||
+          exp.companyName?.toLowerCase().includes(searchLower)
       ) ||
       persona.education.some(
         (edu) =>
-          edu.degree?.toLowerCase().includes(searchLower) || edu.institutionName?.toLowerCase().includes(searchLower),
+          edu.degree?.toLowerCase().includes(searchLower) ||
+          edu.institutionName?.toLowerCase().includes(searchLower)
       )
-    )
-  })
+    );
+  });
 
   if (loading && personas.length === 0) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
       </div>
-    )
+    );
   }
 
   return (
@@ -446,21 +535,39 @@ export function CreatePersonaPage() {
             <Sparkles className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Create Personas</h1>
-            <p className="text-gray-600">Generate professional personas from complete CV information</p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Create Personas
+            </h1>
+            <p className="text-gray-600">
+              Generate professional personas from complete CV information
+            </p>
           </div>
         </div>
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-                Create Persona
-              </Button>
+            <Button
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              onClick={() => {
+                setShowForm(false);
+                setPrefilledData(null);
+                setEditingPersona(null);
+                setIsDialogOpen(true);
+              }}
+            >
+              Create Persona
+            </Button>
           </DialogTrigger>
           <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
             <DialogHeader>
-              <DialogTitle>{editingPersona ? "Edit CV Persona" : "Create Complete CV Persona"}</DialogTitle>
-              <DialogDescription>Choose how you'd like to create your professional persona</DialogDescription>
+              <DialogTitle>
+                {editingPersona
+                  ? "Edit CV Persona"
+                  : "Create Complete CV Persona"}
+              </DialogTitle>
+              <DialogDescription>
+                Choose how you'd like to create your professional persona
+              </DialogDescription>
             </DialogHeader>
 
             {!showForm ? (
@@ -471,10 +578,10 @@ export function CreatePersonaPage() {
                 editingPersona={editingPersona}
                 onPersonaGenerated={handlePersonaGenerated}
                 onCancel={() => {
-                  setIsDialogOpen(false)
-                  setShowForm(false)
-                  setPrefilledData(null)
-                  setEditingPersona(null)
+                  setIsDialogOpen(false);
+                  setShowForm(false);
+                  setPrefilledData(null);
+                  setEditingPersona(null);
                 }}
               />
             )}
@@ -489,8 +596,12 @@ export function CreatePersonaPage() {
             <CardContent className="p-4">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-lg font-semibold">Generated Personas ({filteredPersonas.length})</h3>
-                  <p className="text-sm text-gray-600">View and manage your AI-generated personas</p>
+                  <h3 className="text-lg font-semibold">
+                    Generated Personas ({filteredPersonas.length})
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    View and manage your AI-generated personas
+                  </p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
@@ -546,7 +657,12 @@ export function CreatePersonaPage() {
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10">
-                              <AvatarImage src={persona.personalInfo.profilePicture || "/placeholder.svg"} />
+                              <AvatarImage
+                                src={
+                                  persona.personalInfo.profilePicture ||
+                                  "/placeholder.svg"
+                                }
+                              />
                               <AvatarFallback>
                                 {persona.personalInfo.fullName
                                   .split(" ")
@@ -555,40 +671,68 @@ export function CreatePersonaPage() {
                               </AvatarFallback>
                             </Avatar>
                             <div>
-                              <div className="font-medium">{persona.personalInfo.fullName}</div>
-                              <div className="text-sm text-gray-600">{persona.personalInfo.email}</div>
+                              <div className="font-medium">
+                                {persona.personalInfo.fullName}
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                {persona.personalInfo.email}
+                              </div>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>{persona.personalInfo.jobTitle}</TableCell>
-                        <TableCell>{persona.experience.length} positions</TableCell>
+                        <TableCell>
+                          {persona.experience.length} positions
+                        </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
-                            {(Array.isArray(persona.skills.technical) ? persona.skills.technical.slice(0, 3) : []).map(
-                              (skill) => (
-                                <Badge key={skill} variant="secondary" className="text-xs">
-                                  {skill}
-                                </Badge>
-                              ),
-                            )}
-                            {Array.isArray(persona.skills.technical) && persona.skills.technical.length > 3 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{persona.skills.technical.length - 3}
+                            {(Array.isArray(persona.skills.technical)
+                              ? persona.skills.technical.slice(0, 3)
+                              : []
+                            ).map((skill) => (
+                              <Badge
+                                key={skill}
+                                variant="secondary"
+                                className="text-xs"
+                              >
+                                {skill}
                               </Badge>
-                            )}
+                            ))}
+                            {Array.isArray(persona.skills.technical) &&
+                              persona.skills.technical.length > 3 && (
+                                <Badge variant="outline" className="text-xs">
+                                  +{persona.skills.technical.length - 3}
+                                </Badge>
+                              )}
                           </div>
                         </TableCell>
-                        <TableCell>{persona.education.length} degrees</TableCell>
-                        <TableCell>{new Date(persona.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          {persona.education.length} degrees
+                        </TableCell>
+                        <TableCell>
+                          {new Date(persona.createdAt).toLocaleDateString()}
+                        </TableCell>
                         <TableCell>
                           <div className="flex gap-1">
-                            <Button variant="ghost" size="sm" onClick={() => handleView(persona)}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleView(persona)}
+                            >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleEdit(persona)}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEdit(persona)}
+                            >
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleDownload(persona)}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDownload(persona)}
+                            >
                               <Download className="h-4 w-4" />
                             </Button>
                             <Button
@@ -610,12 +754,20 @@ export function CreatePersonaPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredPersonas.map((persona) => (
-                <Card key={persona.id} className="hover:shadow-lg transition-shadow">
+                <Card
+                  key={persona.id}
+                  className="hover:shadow-lg transition-shadow"
+                >
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-12 w-12">
-                          <AvatarImage src={persona.personalInfo.profilePicture || "/placeholder.svg"} />
+                          <AvatarImage
+                            src={
+                              persona.personalInfo.profilePicture ||
+                              "/placeholder.svg"
+                            }
+                          />
                           <AvatarFallback>
                             {persona.personalInfo.fullName
                               .split(" ")
@@ -624,8 +776,12 @@ export function CreatePersonaPage() {
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <CardTitle className="text-lg">{persona.personalInfo.fullName}</CardTitle>
-                          <CardDescription>{persona.personalInfo.jobTitle}</CardDescription>
+                          <CardTitle className="text-lg">
+                            {persona.personalInfo.fullName}
+                          </CardTitle>
+                          <CardDescription>
+                            {persona.personalInfo.jobTitle}
+                          </CardDescription>
                         </div>
                       </div>
                     </div>
@@ -633,15 +789,25 @@ export function CreatePersonaPage() {
                   <CardContent>
                     <div className="space-y-4">
                       <div>
-                        <Label className="text-sm font-medium">Experience</Label>
-                        <p className="text-sm text-gray-600">{persona.experience.length} positions</p>
+                        <Label className="text-sm font-medium">
+                          Experience
+                        </Label>
+                        <p className="text-sm text-gray-600">
+                          {persona.experience.length} positions
+                        </p>
                       </div>
 
                       <div>
-                        <Label className="text-sm font-medium">Top Skills</Label>
+                        <Label className="text-sm font-medium">
+                          Top Skills
+                        </Label>
                         <div className="flex flex-wrap gap-1 mt-1">
                           {persona.skills.technical.slice(0, 4).map((skill) => (
-                            <Badge key={skill} variant="secondary" className="text-xs">
+                            <Badge
+                              key={skill}
+                              variant="secondary"
+                              className="text-xs"
+                            >
                               {skill}
                             </Badge>
                           ))}
@@ -655,16 +821,21 @@ export function CreatePersonaPage() {
 
                       <div>
                         <Label className="text-sm font-medium">Education</Label>
-                        <p className="text-sm text-gray-600">{persona.education.length} degrees</p>
+                        <p className="text-sm text-gray-600">
+                          {persona.education.length} degrees
+                        </p>
                       </div>
 
                       <div>
                         <Label className="text-sm font-medium">Languages</Label>
-                        <p className="text-sm text-gray-600">{persona.languages.length} languages</p>
+                        <p className="text-sm text-gray-600">
+                          {persona.languages.length} languages
+                        </p>
                       </div>
 
                       <div className="text-xs text-gray-500">
-                        Created: {new Date(persona.createdAt).toLocaleDateString()}
+                        Created:{" "}
+                        {new Date(persona.createdAt).toLocaleDateString()}
                       </div>
 
                       <div className="flex gap-2">
@@ -723,8 +894,12 @@ export function CreatePersonaPage() {
             <div className="rounded-full bg-gray-100 p-6 mb-4">
               <Search className="h-8 w-8 text-gray-400" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No personas found</h3>
-            <p className="text-gray-500 mb-4">Try adjusting your search terms or create a new persona</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No personas found
+            </h3>
+            <p className="text-gray-500 mb-4">
+              Try adjusting your search terms or create a new persona
+            </p>
             <Button variant="outline" onClick={() => setSearchTerm("")}>
               Clear Search
             </Button>
@@ -737,9 +912,12 @@ export function CreatePersonaPage() {
             <div className="rounded-full bg-gray-100 p-6 mb-4">
               <Sparkles className="h-8 w-8 text-gray-400" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No personas created yet</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No personas created yet
+            </h3>
             <p className="text-gray-500 mb-4">
-              Create your first AI persona by clicking the "Create Persona" button above
+              Create your first AI persona by clicking the "Create Persona"
+              button above
             </p>
           </CardContent>
         </Card>
@@ -760,8 +938,12 @@ export function CreatePersonaPage() {
                 <User className="h-4 w-4 text-blue-600" />
               </div>
               <div>
-                <h4 className="font-medium text-gray-900">Complete Information</h4>
-                <p className="text-sm text-gray-600">Fill in all sections for the most comprehensive persona</p>
+                <h4 className="font-medium text-gray-900">
+                  Complete Information
+                </h4>
+                <p className="text-sm text-gray-600">
+                  Fill in all sections for the most comprehensive persona
+                </p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -769,8 +951,12 @@ export function CreatePersonaPage() {
                 <Briefcase className="h-4 w-4 text-green-600" />
               </div>
               <div>
-                <h4 className="font-medium text-gray-900">Detailed Experience</h4>
-                <p className="text-sm text-gray-600">Include specific responsibilities and achievements</p>
+                <h4 className="font-medium text-gray-900">
+                  Detailed Experience
+                </h4>
+                <p className="text-sm text-gray-600">
+                  Include specific responsibilities and achievements
+                </p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -779,12 +965,14 @@ export function CreatePersonaPage() {
               </div>
               <div>
                 <h4 className="font-medium text-gray-900">Relevant Skills</h4>
-                <p className="text-sm text-gray-600">Focus on skills that match your career goals</p>
+                <p className="text-sm text-gray-600">
+                  Focus on skills that match your career goals
+                </p>
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

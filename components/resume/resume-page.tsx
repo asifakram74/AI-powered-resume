@@ -160,7 +160,7 @@ export function ResumePage() {
 
   if (isLoading && cvs.length === 0) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex justify-center items-center h-screen w-full">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
       </div>
     )
@@ -182,7 +182,15 @@ export function ResumePage() {
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700">
+            <Button
+              className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+              onClick={() => {
+                setShowForm(false);
+                setSelectedTemplate("");
+                setEditingCV(null);
+                setIsDialogOpen(true);
+              }}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Create Resume
             </Button>

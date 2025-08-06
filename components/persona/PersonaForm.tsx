@@ -1,58 +1,69 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { Sparkles, X, Plus } from "lucide-react"
-import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
-import type { CVData } from "@/types/cv-data"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Sparkles, X, Plus } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import type { CVData } from "@/types/cv-data";
 
 // Helper function to validate and format URLs
 const formatUrl = (url: string): string => {
-  if (!url || url.trim() === "") return ""
+  if (!url || url.trim() === "") return "";
 
-  const trimmedUrl = url.trim()
+  const trimmedUrl = url.trim();
 
   // If it's already a valid URL, return it
   if (trimmedUrl.startsWith("http://") || trimmedUrl.startsWith("https://")) {
-    return trimmedUrl
+    return trimmedUrl;
   }
 
   // If it looks like a domain, add https://
   if (trimmedUrl.includes(".") && !trimmedUrl.includes(" ")) {
-    return `https://${trimmedUrl}`
+    return `https://${trimmedUrl}`;
   }
 
   // If it's not a valid URL format, return empty string
-  return ""
-}
+  return "";
+};
 
 // Helper function to validate URL
 const isValidUrl = (url: string): boolean => {
-  if (!url || url.trim() === "") return true // Empty is valid
+  if (!url || url.trim() === "") return true; // Empty is valid
 
   try {
-    new URL(url)
-    return true
+    new URL(url);
+    return true;
   } catch {
-    return false
+    return false;
   }
-}
+};
 
 interface PersonaFormProps {
-  prefilledData: Partial<Omit<CVData, "id" | "createdAt">> | null
-  editingPersona: CVData | null
-  onPersonaGenerated: (persona: CVData) => void
-  onCancel: () => void
+  prefilledData: Partial<Omit<CVData, "id" | "createdAt">> | null;
+  editingPersona: CVData | null;
+  onPersonaGenerated: (persona: CVData) => void;
+  onCancel: () => void;
 }
 
-export function PersonaForm({ prefilledData, editingPersona, onPersonaGenerated, onCancel }: PersonaFormProps) {
-  const [isGenerating, setIsGenerating] = useState(false)
+export function PersonaForm({
+  prefilledData,
+  editingPersona,
+  onPersonaGenerated,
+  onCancel,
+}: PersonaFormProps) {
+  const [isGenerating, setIsGenerating] = useState(false);
 
   // Form state with default empty structure
   const [formData, setFormData] = useState<Omit<CVData, "id" | "createdAt">>({
@@ -81,7 +92,7 @@ export function PersonaForm({ prefilledData, editingPersona, onPersonaGenerated,
     additional: {
       interests: [],
     },
-  })
+  });
 
   // Individual form states for adding new items
   const [currentExperience, setCurrentExperience] = useState({
@@ -92,7 +103,7 @@ export function PersonaForm({ prefilledData, editingPersona, onPersonaGenerated,
     endDate: "",
     current: false,
     responsibilities: [""],
-  })
+  });
 
   const [currentEducation, setCurrentEducation] = useState({
     degree: "",
@@ -102,19 +113,19 @@ export function PersonaForm({ prefilledData, editingPersona, onPersonaGenerated,
     gpa: "",
     honors: "",
     additionalInfo: "",
-  })
+  });
 
   const [currentLanguage, setCurrentLanguage] = useState({
     name: "",
     proficiency: "Intermediate" as const,
-  })
+  });
 
   const [currentCertification, setCurrentCertification] = useState({
     title: "",
     issuingOrganization: "",
     dateObtained: "",
     verificationLink: "",
-  })
+  });
 
   const [currentProject, setCurrentProject] = useState({
     name: "",
@@ -123,11 +134,11 @@ export function PersonaForm({ prefilledData, editingPersona, onPersonaGenerated,
     technologies: [""],
     liveDemoLink: "",
     githubLink: "",
-  })
+  });
 
-  const [skillInput, setSkillInput] = useState("")
-  const [skillType, setSkillType] = useState<"technical" | "soft">("technical")
-  const [interestInput, setInterestInput] = useState("")
+  const [skillInput, setSkillInput] = useState("");
+  const [skillType, setSkillType] = useState<"technical" | "soft">("technical");
+  const [interestInput, setInterestInput] = useState("");
 
   // Load prefilled data when component mounts or prefilledData changes
   useEffect(() => {
@@ -141,9 +152,9 @@ export function PersonaForm({ prefilledData, editingPersona, onPersonaGenerated,
         certifications: prefilledData.certifications || prev.certifications,
         projects: prefilledData.projects || prev.projects,
         additional: { ...prev.additional, ...prefilledData.additional },
-      }))
+      }));
     }
-  }, [prefilledData])
+  }, [prefilledData]);
 
   const addSkill = () => {
     if (skillInput.trim()) {
@@ -153,10 +164,10 @@ export function PersonaForm({ prefilledData, editingPersona, onPersonaGenerated,
           ...prev.skills,
           [skillType]: [...prev.skills[skillType], skillInput.trim()],
         },
-      }))
-      setSkillInput("")
+      }));
+      setSkillInput("");
     }
-  }
+  };
 
   const removeSkill = (type: "technical" | "soft", skillToRemove: string) => {
     setFormData((prev) => ({
@@ -165,8 +176,8 @@ export function PersonaForm({ prefilledData, editingPersona, onPersonaGenerated,
         ...prev.skills,
         [type]: prev.skills[type].filter((skill) => skill !== skillToRemove),
       },
-    }))
-  }
+    }));
+  };
 
   const addInterest = () => {
     if (interestInput.trim()) {
@@ -175,19 +186,21 @@ export function PersonaForm({ prefilledData, editingPersona, onPersonaGenerated,
         additional: {
           interests: [...prev.additional.interests, interestInput.trim()],
         },
-      }))
-      setInterestInput("")
+      }));
+      setInterestInput("");
     }
-  }
+  };
 
   const removeInterest = (interestToRemove: string) => {
     setFormData((prev) => ({
       ...prev,
       additional: {
-        interests: prev.additional.interests.filter((interest) => interest !== interestToRemove),
+        interests: prev.additional.interests.filter(
+          (interest) => interest !== interestToRemove
+        ),
       },
-    }))
-  }
+    }));
+  };
 
   const addExperience = () => {
     if (currentExperience.jobTitle && currentExperience.companyName) {
@@ -200,7 +213,7 @@ export function PersonaForm({ prefilledData, editingPersona, onPersonaGenerated,
             id: Date.now().toString(),
           },
         ],
-      }))
+      }));
       setCurrentExperience({
         jobTitle: "",
         companyName: "",
@@ -209,9 +222,9 @@ export function PersonaForm({ prefilledData, editingPersona, onPersonaGenerated,
         endDate: "",
         current: false,
         responsibilities: [""],
-      })
+      });
     }
-  }
+  };
 
   const addEducation = () => {
     if (currentEducation.degree && currentEducation.institutionName) {
@@ -224,7 +237,7 @@ export function PersonaForm({ prefilledData, editingPersona, onPersonaGenerated,
             id: Date.now().toString(),
           },
         ],
-      }))
+      }));
       setCurrentEducation({
         degree: "",
         institutionName: "",
@@ -233,9 +246,9 @@ export function PersonaForm({ prefilledData, editingPersona, onPersonaGenerated,
         gpa: "",
         honors: "",
         additionalInfo: "",
-      })
+      });
     }
-  }
+  };
 
   const addLanguage = () => {
     if (currentLanguage.name) {
@@ -248,16 +261,19 @@ export function PersonaForm({ prefilledData, editingPersona, onPersonaGenerated,
             id: Date.now().toString(),
           },
         ],
-      }))
+      }));
       setCurrentLanguage({
         name: "",
         proficiency: "Intermediate",
-      })
+      });
     }
-  }
+  };
 
   const addCertification = () => {
-    if (currentCertification.title && currentCertification.issuingOrganization) {
+    if (
+      currentCertification.title &&
+      currentCertification.issuingOrganization
+    ) {
       setFormData((prev) => ({
         ...prev,
         certifications: [
@@ -267,15 +283,15 @@ export function PersonaForm({ prefilledData, editingPersona, onPersonaGenerated,
             id: Date.now().toString(),
           },
         ],
-      }))
+      }));
       setCurrentCertification({
         title: "",
         issuingOrganization: "",
         dateObtained: "",
         verificationLink: "",
-      })
+      });
     }
-  }
+  };
 
   const addProject = () => {
     if (currentProject.name && currentProject.role) {
@@ -286,10 +302,12 @@ export function PersonaForm({ prefilledData, editingPersona, onPersonaGenerated,
           {
             ...currentProject,
             id: Date.now().toString(),
-            technologies: currentProject.technologies.filter((tech) => tech.trim()),
+            technologies: currentProject.technologies.filter((tech) =>
+              tech.trim()
+            ),
           },
         ],
-      }))
+      }));
       setCurrentProject({
         name: "",
         role: "",
@@ -297,28 +315,28 @@ export function PersonaForm({ prefilledData, editingPersona, onPersonaGenerated,
         technologies: [""],
         liveDemoLink: "",
         githubLink: "",
-      })
+      });
     }
-  }
+  };
 
   const generatePersona = async () => {
-    setIsGenerating(true)
+    setIsGenerating(true);
 
     // Validate and format URLs
-    const formattedLinkedIn = formatUrl(formData.personalInfo.linkedin || "")
-    const formattedGitHub = formatUrl(formData.personalInfo.github || "")
+    const formattedLinkedIn = formatUrl(formData.personalInfo.linkedin || "");
+    const formattedGitHub = formatUrl(formData.personalInfo.github || "");
 
     // Validate URLs
     if (formData.personalInfo.linkedin && !isValidUrl(formattedLinkedIn)) {
-      alert("Please enter a valid LinkedIn URL or leave it empty")
-      setIsGenerating(false)
-      return
+      alert("Please enter a valid LinkedIn URL or leave it empty");
+      setIsGenerating(false);
+      return;
     }
 
     if (formData.personalInfo.github && !isValidUrl(formattedGitHub)) {
-      alert("Please enter a valid GitHub URL or leave it empty")
-      setIsGenerating(false)
-      return
+      alert("Please enter a valid GitHub URL or leave it empty");
+      setIsGenerating(false);
+      return;
     }
 
     // Update form data with formatted URLs
@@ -329,44 +347,63 @@ export function PersonaForm({ prefilledData, editingPersona, onPersonaGenerated,
         linkedin: formattedLinkedIn,
         github: formattedGitHub,
       },
-    }
+    };
 
     // Simulate API call
     setTimeout(() => {
-      const persona = `Professional Summary for ${updatedFormData.personalInfo.fullName}:
+      const persona = `Professional Summary for ${
+        updatedFormData.personalInfo.fullName
+      }:
 
-As a ${updatedFormData.personalInfo.jobTitle} with ${updatedFormData.experience.length} years of professional experience, you bring a unique combination of technical expertise and leadership skills to drive organizational success.
+As a ${updatedFormData.personalInfo.jobTitle} with ${
+        updatedFormData.experience.length
+      } years of professional experience, you bring a unique combination of technical expertise and leadership skills to drive organizational success.
 
 Professional Experience:
-${updatedFormData.experience.map((exp) => `• ${exp.jobTitle} at ${exp.companyName} (${exp.startDate} - ${exp.current ? "Present" : exp.endDate})`).join("\n")}
+${updatedFormData.experience
+  .map(
+    (exp) =>
+      `• ${exp.jobTitle} at ${exp.companyName} (${exp.startDate} - ${
+        exp.current ? "Present" : exp.endDate
+      })`
+  )
+  .join("\n")}
 
 Education:
-${updatedFormData.education.map((edu) => `• ${edu.degree} from ${edu.institutionName}`).join("\n")}
+${updatedFormData.education
+  .map((edu) => `• ${edu.degree} from ${edu.institutionName}`)
+  .join("\n")}
 
 Core Technical Skills: ${updatedFormData.skills.technical.join(", ")}
 Soft Skills: ${updatedFormData.skills.soft.join(", ")}
 
-Languages: ${updatedFormData.languages.map((lang) => `${lang.name} (${lang.proficiency})`).join(", ")}
+Languages: ${updatedFormData.languages
+        .map((lang) => `${lang.name} (${lang.proficiency})`)
+        .join(", ")}
 
 Key Projects:
-${updatedFormData.projects.map((project) => `• ${project.name} - ${project.role}`).join("\n")}
+${updatedFormData.projects
+  .map((project) => `• ${project.name} - ${project.role}`)
+  .join("\n")}
 
 Career Objective:
-Seeking to leverage extensive experience in ${updatedFormData.personalInfo.jobTitle} to contribute to innovative projects and drive business growth in a dynamic technology environment.
+Seeking to leverage extensive experience in ${
+        updatedFormData.personalInfo.jobTitle
+      } to contribute to innovative projects and drive business growth in a dynamic technology environment.
 
-Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
+Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
 
       const newPersona: CVData = {
         ...updatedFormData,
         id: editingPersona?.id || Date.now().toString(),
         createdAt: editingPersona?.createdAt || new Date().toISOString(),
         generatedPersona: persona,
-      }
+      };
 
-      setIsGenerating(false)
-      onPersonaGenerated(newPersona)
-    }, 3000)
-  }
+      setIsGenerating(false);
+      onPersonaGenerated(newPersona);
+    }, 3000);
+  };
 
   return (
     <div className="space-y-6 max-h-[70vh] overflow-y-auto">
@@ -377,9 +414,12 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
               <Sparkles className="h-4 w-4 text-green-600" />
             </div>
             <div>
-              <h4 className="font-medium text-green-900">Data Pre-filled Successfully!</h4>
+              <h4 className="font-medium text-green-900">
+                Data Pre-filled Successfully!
+              </h4>
               <p className="text-sm text-green-700">
-                Review the information below and complete any missing fields before generating your persona.
+                Review the information below and complete any missing fields
+                before generating your persona.
               </p>
             </div>
           </div>
@@ -400,7 +440,10 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
-                    personalInfo: { ...prev.personalInfo, fullName: e.target.value },
+                    personalInfo: {
+                      ...prev.personalInfo,
+                      fullName: e.target.value,
+                    },
                   }))
                 }
                 placeholder="John Doe"
@@ -413,7 +456,10 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
-                    personalInfo: { ...prev.personalInfo, jobTitle: e.target.value },
+                    personalInfo: {
+                      ...prev.personalInfo,
+                      jobTitle: e.target.value,
+                    },
                   }))
                 }
                 placeholder="Software Engineer"
@@ -430,7 +476,10 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
-                    personalInfo: { ...prev.personalInfo, email: e.target.value },
+                    personalInfo: {
+                      ...prev.personalInfo,
+                      email: e.target.value,
+                    },
                   }))
                 }
                 placeholder="john@example.com"
@@ -443,7 +492,10 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
-                    personalInfo: { ...prev.personalInfo, phone: e.target.value },
+                    personalInfo: {
+                      ...prev.personalInfo,
+                      phone: e.target.value,
+                    },
                   }))
                 }
                 placeholder="+1 (555) 123-4567"
@@ -459,7 +511,10 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
-                    personalInfo: { ...prev.personalInfo, city: e.target.value },
+                    personalInfo: {
+                      ...prev.personalInfo,
+                      city: e.target.value,
+                    },
                   }))
                 }
                 placeholder="San Francisco"
@@ -472,7 +527,10 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
-                    personalInfo: { ...prev.personalInfo, country: e.target.value },
+                    personalInfo: {
+                      ...prev.personalInfo,
+                      country: e.target.value,
+                    },
                   }))
                 }
                 placeholder="United States"
@@ -485,7 +543,10 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
-                    personalInfo: { ...prev.personalInfo, address: e.target.value },
+                    personalInfo: {
+                      ...prev.personalInfo,
+                      address: e.target.value,
+                    },
                   }))
                 }
                 placeholder="123 Main St"
@@ -501,13 +562,18 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
-                    personalInfo: { ...prev.personalInfo, linkedin: e.target.value },
+                    personalInfo: {
+                      ...prev.personalInfo,
+                      linkedin: e.target.value,
+                    },
                   }))
                 }
                 placeholder="https://linkedin.com/in/your-profile"
                 type="url"
               />
-              <p className="text-xs text-gray-500">Enter full URL or leave empty</p>
+              <p className="text-xs text-gray-500">
+                Enter full URL or leave empty
+              </p>
             </div>
             <div className="space-y-2">
               <Label>GitHub</Label>
@@ -516,13 +582,18 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
-                    personalInfo: { ...prev.personalInfo, github: e.target.value },
+                    personalInfo: {
+                      ...prev.personalInfo,
+                      github: e.target.value,
+                    },
                   }))
                 }
                 placeholder="https://github.com/your-username"
                 type="url"
               />
-              <p className="text-xs text-gray-500">Enter full URL or leave empty</p>
+              <p className="text-xs text-gray-500">
+                Enter full URL or leave empty
+              </p>
             </div>
           </div>
 
@@ -533,7 +604,10 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
               onChange={(e) =>
                 setFormData((prev) => ({
                   ...prev,
-                  personalInfo: { ...prev.personalInfo, summary: e.target.value },
+                  personalInfo: {
+                    ...prev.personalInfo,
+                    summary: e.target.value,
+                  },
                 }))
               }
               placeholder="Brief professional summary..."
@@ -554,7 +628,12 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
               <Label>Job Title</Label>
               <Input
                 value={currentExperience.jobTitle}
-                onChange={(e) => setCurrentExperience((prev) => ({ ...prev, jobTitle: e.target.value }))}
+                onChange={(e) =>
+                  setCurrentExperience((prev) => ({
+                    ...prev,
+                    jobTitle: e.target.value,
+                  }))
+                }
                 placeholder="Senior Software Engineer"
               />
             </div>
@@ -562,7 +641,12 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
               <Label>Company Name</Label>
               <Input
                 value={currentExperience.companyName}
-                onChange={(e) => setCurrentExperience((prev) => ({ ...prev, companyName: e.target.value }))}
+                onChange={(e) =>
+                  setCurrentExperience((prev) => ({
+                    ...prev,
+                    companyName: e.target.value,
+                  }))
+                }
                 placeholder="Tech Corp"
               />
             </div>
@@ -573,7 +657,12 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
               <Label>Location</Label>
               <Input
                 value={currentExperience.location}
-                onChange={(e) => setCurrentExperience((prev) => ({ ...prev, location: e.target.value }))}
+                onChange={(e) =>
+                  setCurrentExperience((prev) => ({
+                    ...prev,
+                    location: e.target.value,
+                  }))
+                }
                 placeholder="San Francisco, CA"
               />
             </div>
@@ -582,7 +671,12 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
               <Input
                 type="date"
                 value={currentExperience.startDate}
-                onChange={(e) => setCurrentExperience((prev) => ({ ...prev, startDate: e.target.value }))}
+                onChange={(e) =>
+                  setCurrentExperience((prev) => ({
+                    ...prev,
+                    startDate: e.target.value,
+                  }))
+                }
               />
             </div>
             <div className="space-y-2">
@@ -590,7 +684,12 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
               <Input
                 type="date"
                 value={currentExperience.endDate}
-                onChange={(e) => setCurrentExperience((prev) => ({ ...prev, endDate: e.target.value }))}
+                onChange={(e) =>
+                  setCurrentExperience((prev) => ({
+                    ...prev,
+                    endDate: e.target.value,
+                  }))
+                }
                 disabled={currentExperience.current}
               />
             </div>
@@ -599,7 +698,9 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
           <div className="flex items-center space-x-2">
             <Switch
               checked={currentExperience.current}
-              onCheckedChange={(checked) => setCurrentExperience((prev) => ({ ...prev, current: checked }))}
+              onCheckedChange={(checked) =>
+                setCurrentExperience((prev) => ({ ...prev, current: checked }))
+              }
             />
             <Label>Currently working here</Label>
           </div>
@@ -611,9 +712,12 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
                 <Input
                   value={resp}
                   onChange={(e) => {
-                    const newResp = [...currentExperience.responsibilities]
-                    newResp[index] = e.target.value
-                    setCurrentExperience((prev) => ({ ...prev, responsibilities: newResp }))
+                    const newResp = [...currentExperience.responsibilities];
+                    newResp[index] = e.target.value;
+                    setCurrentExperience((prev) => ({
+                      ...prev,
+                      responsibilities: newResp,
+                    }));
                   }}
                   placeholder="Describe your responsibility..."
                 />
@@ -666,7 +770,12 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex gap-2">
-            <Select value={skillType} onValueChange={(value: "technical" | "soft") => setSkillType(value)}>
+            <Select
+              value={skillType}
+              onValueChange={(value: "technical" | "soft") =>
+                setSkillType(value)
+              }
+            >
               <SelectTrigger className="w-40">
                 <SelectValue />
               </SelectTrigger>
@@ -691,7 +800,11 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
               <Label className="text-sm font-medium">Technical Skills</Label>
               <div className="flex flex-wrap gap-2 mt-2">
                 {formData.skills.technical.map((skill) => (
-                  <Badge key={skill} variant="secondary" className="flex items-center gap-1">
+                  <Badge
+                    key={skill}
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
                     {skill}
                     <X
                       className="h-3 w-3 cursor-pointer hover:text-red-500"
@@ -706,7 +819,11 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
               <Label className="text-sm font-medium">Soft Skills</Label>
               <div className="flex flex-wrap gap-2 mt-2">
                 {formData.skills.soft.map((skill) => (
-                  <Badge key={skill} variant="outline" className="flex items-center gap-1">
+                  <Badge
+                    key={skill}
+                    variant="outline"
+                    className="flex items-center gap-1"
+                  >
                     {skill}
                     <X
                       className="h-3 w-3 cursor-pointer hover:text-red-500"
@@ -729,12 +846,19 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
           <div className="flex gap-2">
             <Input
               value={currentLanguage.name}
-              onChange={(e) => setCurrentLanguage((prev) => ({ ...prev, name: e.target.value }))}
+              onChange={(e) =>
+                setCurrentLanguage((prev) => ({
+                  ...prev,
+                  name: e.target.value,
+                }))
+              }
               placeholder="Language name"
             />
             <Select
               value={currentLanguage.proficiency}
-              onValueChange={(value: any) => setCurrentLanguage((prev) => ({ ...prev, proficiency: value }))}
+              onValueChange={(value: any) =>
+                setCurrentLanguage((prev) => ({ ...prev, proficiency: value }))
+              }
             >
               <SelectTrigger className="w-40">
                 <SelectValue />
@@ -786,9 +910,16 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
           </div>
           <div className="flex flex-wrap gap-2">
             {formData.additional.interests.map((interest) => (
-              <Badge key={interest} variant="secondary" className="flex items-center gap-1">
+              <Badge
+                key={interest}
+                variant="secondary"
+                className="flex items-center gap-1"
+              >
                 {interest}
-                <X className="h-3 w-3 cursor-pointer hover:text-red-500" onClick={() => removeInterest(interest)} />
+                <X
+                  className="h-3 w-3 cursor-pointer hover:text-red-500"
+                  onClick={() => removeInterest(interest)}
+                />
               </Badge>
             ))}
           </div>
@@ -802,7 +933,11 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
         </Button>
         <Button
           onClick={generatePersona}
-          disabled={!formData.personalInfo.fullName || !formData.personalInfo.jobTitle || isGenerating}
+          disabled={
+            !formData.personalInfo.fullName ||
+            !formData.personalInfo.jobTitle ||
+            isGenerating
+          }
           className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
         >
           {isGenerating ? (
@@ -819,5 +954,5 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`
         </Button>
       </div>
     </div>
-  )
+  );
 }
