@@ -73,7 +73,7 @@ export function Sidebar({ activePage, setActivePage }: SidebarProps) {
 
   const handleLogout = async () => {
     await dispatch(logoutUser())
-    router.push("/auth/signin")
+    router.push("/")
   }
 
   return (

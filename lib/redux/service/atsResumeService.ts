@@ -1,4 +1,4 @@
-import { api } from "./index"
+import { api } from "../../api"
 
 export interface ATSResume {
   id: string
@@ -16,7 +16,6 @@ export interface CreateATSResumeData {
   analysis_result?: string
 }
 
-// 🟢 GET all ATS resumes
 export const getATSResumes = async (): Promise<ATSResume[]> => {
   try {
     const response = await api.get("/ats-resumes")
@@ -27,7 +26,6 @@ export const getATSResumes = async (): Promise<ATSResume[]> => {
   }
 }
 
-// 🟢 GET a single ATS resume
 export const getATSResumeById = async (id: string): Promise<ATSResume> => {
   try {
     const response = await api.get(`/ats-resumes/${id}`)
@@ -38,7 +36,6 @@ export const getATSResumeById = async (id: string): Promise<ATSResume> => {
   }
 }
 
-// 🟢 CREATE ATS resume
 export const createATSResume = async (data: CreateATSResumeData): Promise<ATSResume> => {
   try {
     console.log("Sending ATS resume data to API:", JSON.stringify(data, null, 2))
@@ -51,7 +48,6 @@ export const createATSResume = async (data: CreateATSResumeData): Promise<ATSRes
   }
 }
 
-// 🟡 UPDATE ATS resume
 export const updateATSResume = async (id: string, data: Partial<CreateATSResumeData>): Promise<ATSResume> => {
   try {
     const response = await api.put(`/ats-resumes/${id}`, data)
@@ -62,7 +58,6 @@ export const updateATSResume = async (id: string, data: Partial<CreateATSResumeD
   }
 }
 
-// 🔴 DELETE ATS resume
 export const deleteATSResume = async (id: string): Promise<void> => {
   try {
     await api.delete(`/ats-resumes/${id}`)

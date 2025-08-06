@@ -31,9 +31,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { CVTemplates } from "./cv-templates"
-import { CVForm } from "./cv-form"
-import { getCVs, createCV, updateCV, deleteCV, type CV, type CreateCVData } from "@/lib/api/cv"
+import { CVTemplates } from "./ChooseResumeTemplte"
+import { CVForm } from "./AddEditResume"
+import { getCVs, createCV, updateCV, deleteCV, type CV, type CreateCVData } from "@/lib/redux/service/cvService"
 import { useAppSelector } from "@/lib/redux/hooks"
 
 export function ResumePage() {
@@ -46,16 +46,13 @@ export function ResumePage() {
   const [selectedTemplate, setSelectedTemplate] = useState("")
   const [isLoading, setIsLoading] = useState(true)
   const { user } = useAppSelector((state) => state.auth)
+  const userId = user?.id;
 
   useEffect(() => {
     const fetchCVs = async () => {
       try {
-        if (!user?.id) {
-          console.log("No user ID available - user might not be logged in")
-          return
-        }
         setIsLoading(true)
-        const data = await getCVs()
+        const data = await getCVs(userId?.toString() || '')
         console.log("Fetched CVs:", data)
         setCVs(data)
       } catch (error) {

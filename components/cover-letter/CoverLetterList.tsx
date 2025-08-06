@@ -31,7 +31,7 @@ import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { CoverLetterGenerator } from "./cover-letter-generator"
+import { CoverLetterGenerator } from "./AddEditCoverLetter"
 import {
   getCoverLetters,
   createCoverLetter,
@@ -39,7 +39,7 @@ import {
   deleteCoverLetter,
   type CoverLetter,
   type CreateCoverLetterData,
-} from "@/lib/api/cover-letter"
+} from "@/lib/redux/service/coverLetterService"
 import { useAppSelector } from "@/lib/redux/hooks"
 
 export function CoverLetterPage() {
@@ -54,7 +54,8 @@ export function CoverLetterPage() {
   const [currentJobDescription, setCurrentJobDescription] = useState("")
   const [currentTone, setCurrentTone] = useState("")
   const [isLoading, setIsLoading] = useState(true)
-  const { user } = useAppSelector((state) => state.auth)
+  const { user } = useAppSelector((state) => state.auth);
+  const userId = user?.id;
 
   useEffect(() => {
     const fetchCoverLetters = async () => {
@@ -64,11 +65,13 @@ export function CoverLetterPage() {
           return
         }
         setIsLoading(true)
-        const data = await getCoverLetters()
+        const data = await getCoverLetters(userId?.toString() || '');
         console.log("Fetched cover letters:", data)
-        setCoverLetters(data)
+
+        setCoverLetters(Array.isArray(data) ? data : [])
       } catch (error) {
         console.error("Error fetching cover letters:", error)
+        setCoverLetters([])
       } finally {
         setIsLoading(false)
       }
@@ -88,15 +91,14 @@ export function CoverLetterPage() {
 
 I am writing to express my strong interest in the position described in your job posting. After carefully reviewing the requirements and responsibilities, I am confident that my background and skills make me an ideal candidate for this role.
 
-${
-  tone === "enthusiastic"
-    ? "I am thrilled about the opportunity to contribute to your team and bring my passion for excellence to this position."
-    : tone === "confident"
-      ? "With my proven track record and expertise in this field, I am well-positioned to make an immediate impact."
-      : tone === "creative"
-        ? "Your company's innovative approach and commitment to creativity align perfectly with my professional values and aspirations."
-        : "I believe my professional experience and dedication to quality work would be valuable assets to your organization."
-}
+${tone === "enthusiastic"
+          ? "I am thrilled about the opportunity to contribute to your team and bring my passion for excellence to this position."
+          : tone === "confident"
+            ? "With my proven track record and expertise in this field, I am well-positioned to make an immediate impact."
+            : tone === "creative"
+              ? "Your company's innovative approach and commitment to creativity align perfectly with my professional values and aspirations."
+              : "I believe my professional experience and dedication to quality work would be valuable assets to your organization."
+        }
 
 Based on the job description, I understand you are looking for someone who can:
 • Deliver high-quality results in a fast-paced environment

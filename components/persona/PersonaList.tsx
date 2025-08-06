@@ -44,24 +44,21 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import type { CVData } from "@/types/cv-data";
-import { PersonaCreationOptions } from "@/components/persona/PersonaCreationOptions";
+import { PersonaCreationOptions } from "@/components/persona/CreatePersona";
 import { PersonaForm } from "@/components/persona/PersonaForm";
 import {
+  getPersonas,
   getPersonaById,
   createPersona,
   updatePersona,
   deletePersona,
   type PersonaData,
   type PersonaResponse,
-} from "@/lib/api";
+} from "@/lib/redux/service/pasonaService";
 import { useAppSelector, useAppDispatch } from "@/lib/redux/hooks";
-import { fetchPersonas, setPersonas } from "@/lib/redux/slices/personaSlice";
 
 export function CreatePersonaPage() {
-  const dispatch = useAppDispatch();
-  const personas = useAppSelector((state) => state.persona.personas);
-  const loading = useAppSelector((state) => state.persona.loading);
-  const error = useAppSelector((state) => state.persona.error);
+  const [personas, setPersonas] = useState<CVData[]>([])
   const [viewMode, setViewMode] = useState<"grid" | "table">("table");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -72,14 +69,63 @@ export function CreatePersonaPage() {
   > | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAppSelector((state) => state.auth);
+  const userId = user?.id;
 
   useEffect(() => {
-    if (!user?.id) {
-      console.log("No user ID available - user might not be logged in");
-      return;
+    const fetchPersonas = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getPersonas(userId?.toString() || '');
+        const formattedPersonas = data.map((persona: PersonaResponse) => ({
+          id: persona.id.toString(),
+          personalInfo: {
+            fullName: persona.full_name || "",
+            jobTitle: persona.job_title || "",
+            email: persona.email || "",
+            phone: persona.phone || "",
+            address: persona.address || "",
+            city: persona.city || "",
+            country: persona.country || "",
+            profilePicture: persona.profile_picture || "",
+            summary: persona.summary || "",
+            linkedin: persona.linkedin || "",
+            github: persona.github || "",
+          },
+          experience: persona.experience || [],
+          education: persona.education || [],
+          skills: {
+            technical: Array.isArray(persona.skills?.technical)
+              ? persona.skills.technical
+              : Array.isArray(persona.skills)
+                ? persona.skills
+                : [],
+            soft: Array.isArray(persona.skills?.soft) ? persona.skills.soft : [],
+          },
+          languages: persona.languages || [],
+          certifications: persona.certifications || [],
+          projects: persona.projects || [],
+          additional: {
+            interests: Array.isArray(persona.additional?.interests)
+              ? persona.additional.interests
+              : Array.isArray(persona.additional)
+                ? persona.additional
+                : [],
+          },
+          createdAt: persona.created_at || new Date().toISOString(),
+          generatedPersona: "",
+        }));
+        setPersonas(formattedPersonas);
+      } catch (error) {
+        console.error("Error fetching personas:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (userId) {
+      fetchPersonas();
     }
-    dispatch(fetchPersonas());
-  }, [user?.id, dispatch]);
+  }, [userId]);
 
   const handleOptionSelect = (
     option: "manual" | "pdf" | "linkedin",
@@ -113,16 +159,16 @@ export function CreatePersonaPage() {
           technical: Array.isArray(data.skills?.technical)
             ? data.skills.technical
             : Array.isArray(data.skills)
-            ? data.skills
-            : [],
+              ? data.skills
+              : [],
           soft: Array.isArray(data.skills?.soft) ? data.skills.soft : [],
         },
         languages: Array.isArray(data.languages)
           ? data.languages.map((lang: any) => ({
-              id: lang.id || Date.now().toString(),
-              name: typeof lang === "string" ? lang : lang.name || "",
-              proficiency:
-                typeof lang === "object" &&
+            id: lang.id || Date.now().toString(),
+            name: typeof lang === "string" ? lang : lang.name || "",
+            proficiency:
+              typeof lang === "object" &&
                 [
                   "Native",
                   "Fluent",
@@ -130,14 +176,14 @@ export function CreatePersonaPage() {
                   "Intermediate",
                   "Basic",
                 ].includes(lang.proficiency)
-                  ? (lang.proficiency as
-                      | "Native"
-                      | "Fluent"
-                      | "Advanced"
-                      | "Intermediate"
-                      | "Basic")
-                  : "Basic",
-            }))
+                ? (lang.proficiency as
+                  | "Native"
+                  | "Fluent"
+                  | "Advanced"
+                  | "Intermediate"
+                  | "Basic")
+                : "Basic",
+          }))
           : [],
         certifications: data.certifications || [],
         projects: data.projects || [],
@@ -145,8 +191,8 @@ export function CreatePersonaPage() {
           interests: Array.isArray(data.additional?.interests)
             ? data.additional.interests
             : Array.isArray(data.additional)
-            ? data.additional
-            : [],
+              ? data.additional
+              : [],
         },
         createdAt: data.created_at || new Date().toISOString(),
       });
@@ -171,16 +217,16 @@ export function CreatePersonaPage() {
           technical: Array.isArray(data.skills?.technical)
             ? data.skills.technical
             : Array.isArray(data.skills)
-            ? data.skills
-            : [],
+              ? data.skills
+              : [],
           soft: Array.isArray(data.skills?.soft) ? data.skills.soft : [],
         },
         languages: Array.isArray(data.languages)
           ? data.languages.map((lang: any) => ({
-              id: lang.id || Date.now().toString(),
-              name: typeof lang === "string" ? lang : lang.name || "",
-              proficiency:
-                typeof lang === "object" &&
+            id: lang.id || Date.now().toString(),
+            name: typeof lang === "string" ? lang : lang.name || "",
+            proficiency:
+              typeof lang === "object" &&
                 [
                   "Native",
                   "Fluent",
@@ -188,14 +234,14 @@ export function CreatePersonaPage() {
                   "Intermediate",
                   "Basic",
                 ].includes(lang.proficiency)
-                  ? (lang.proficiency as
-                      | "Native"
-                      | "Fluent"
-                      | "Advanced"
-                      | "Intermediate"
-                      | "Basic")
-                  : "Basic",
-            }))
+                ? (lang.proficiency as
+                  | "Native"
+                  | "Fluent"
+                  | "Advanced"
+                  | "Intermediate"
+                  | "Basic")
+                : "Basic",
+          }))
           : [],
         certifications: data.certifications || [],
         projects: data.projects || [],
@@ -203,8 +249,8 @@ export function CreatePersonaPage() {
           interests: Array.isArray(data.additional?.interests)
             ? data.additional.interests
             : Array.isArray(data.additional)
-            ? data.additional
-            : [],
+              ? data.additional
+              : [],
         },
       });
       setShowForm(true);
@@ -235,14 +281,10 @@ export function CreatePersonaPage() {
   };
 
   const handleDelete = async (persona: CVData) => {
-    if (
-      confirm(
-        `Are you sure you want to delete the persona for ${persona.personalInfo.fullName}?`
-      )
-    ) {
+    if (confirm(`Are you sure you want to delete the persona for ${persona.personalInfo.fullName}?`)) {
       try {
         await deletePersona(Number.parseInt(persona.id));
-        dispatch(setPersonas(personas.filter((p) => p.id !== persona.id)));
+        setPersonas(personas.filter((p) => p.id !== persona.id));
       } catch (error) {
         console.error("Error deleting persona:", error);
         alert("Failed to delete persona");
@@ -251,37 +293,9 @@ export function CreatePersonaPage() {
   };
 
   const handlePersonaGenerated = async (newPersona: CVData) => {
-    console.log(
-      "Persona data being processed:",
-      JSON.stringify(newPersona, null, 2)
-    );
     setIsLoading(true);
 
     try {
-      // Validate URLs before processing
-      const validateUrl = (url: string): string => {
-        if (!url || url.trim() === "") return "";
-
-        const trimmedUrl = url.trim();
-
-        // If it's already a valid URL, return it
-        if (
-          trimmedUrl.startsWith("http://") ||
-          trimmedUrl.startsWith("https://")
-        ) {
-          return trimmedUrl;
-        }
-
-        // If it looks like a domain, add https://
-        if (trimmedUrl.includes(".") && !trimmedUrl.includes(" ")) {
-          return `https://${trimmedUrl}`;
-        }
-
-        // If it's not a valid URL format, return empty string
-        return "";
-      };
-
-      // Transform to API format with URL validation
       const personaData: PersonaData = {
         personalInfo: {
           full_name: newPersona.personalInfo.fullName || "",
@@ -293,27 +307,11 @@ export function CreatePersonaPage() {
           country: newPersona.personalInfo.country || "",
           profilePicture: newPersona.personalInfo.profilePicture || "",
           summary: newPersona.personalInfo.summary || "",
-          linkedin: validateUrl(newPersona.personalInfo.linkedin || ""),
-          github: validateUrl(newPersona.personalInfo.github || ""),
+          linkedin: newPersona.personalInfo.linkedin || "",
+          github: newPersona.personalInfo.github || "",
         },
-        experience: newPersona.experience.map((exp) => ({
-          jobTitle: exp.jobTitle || "",
-          companyName: exp.companyName || "",
-          location: exp.location || "",
-          startDate: exp.startDate || "",
-          endDate: exp.endDate || "",
-          current: exp.current || false,
-          responsibilities: exp.responsibilities || [],
-        })),
-        education: newPersona.education.map((edu) => ({
-          degree: edu.degree || "",
-          institutionName: edu.institutionName || "",
-          location: edu.location || "",
-          graduationDate: edu.graduationDate || "",
-          gpa: edu.gpa || "",
-          honors: edu.honors || "",
-          additionalInfo: edu.additionalInfo || "",
-        })),
+        experience: newPersona.experience || [],
+        education: newPersona.education || [],
         skills: {
           technical: Array.isArray(newPersona.skills?.technical)
             ? newPersona.skills.technical
@@ -322,23 +320,9 @@ export function CreatePersonaPage() {
             ? newPersona.skills.soft
             : [],
         },
-        languages: newPersona.languages.map((lang) => lang.name || ""),
-        certifications: newPersona.certifications.map((cert) => ({
-          title: cert.title || "",
-          issuingOrganization: cert.issuingOrganization || "",
-          dateObtained: cert.dateObtained || "",
-          verificationLink: cert.verificationLink || "",
-        })),
-        projects: newPersona.projects.map((proj) => ({
-          name: proj.name || "",
-          role: proj.role || "",
-          description: proj.description || "",
-          technologies: Array.isArray(proj.technologies)
-            ? proj.technologies
-            : [],
-          liveDemoLink: proj.liveDemoLink || "",
-          githubLink: proj.githubLink || "",
-        })),
+        languages: newPersona.languages.map(lang => lang.name) || [],
+        certifications: newPersona.certifications || [],
+        projects: newPersona.projects || [],
         additional: {
           interests: Array.isArray(newPersona.additional?.interests)
             ? newPersona.additional.interests
@@ -346,31 +330,18 @@ export function CreatePersonaPage() {
         },
       };
 
-      console.log(
-        "Transformed persona data for API:",
-        JSON.stringify(personaData, null, 2)
-      );
-
       let response: PersonaResponse;
       if (editingPersona) {
-        console.log("Updating existing persona with ID:", editingPersona.id);
-        response = await updatePersona(
-          Number.parseInt(editingPersona.id),
-          personaData
-        );
+        response = await updatePersona(Number.parseInt(editingPersona.id), personaData);
       } else {
-        console.log("Creating new persona");
         response = await createPersona(personaData);
-        console.log("Persona created successfully with ID:", response.id);
       }
 
-      // Transform back to frontend format
       const updatedPersona: CVData = {
         ...newPersona,
         id: response.id.toString(),
         personalInfo: {
           ...newPersona.personalInfo,
-          // Handle the actual Laravel response structure
           fullName: response.full_name || newPersona.personalInfo.fullName,
           jobTitle: response.job_title || newPersona.personalInfo.jobTitle,
           email: response.email || newPersona.personalInfo.email,
@@ -383,92 +354,36 @@ export function CreatePersonaPage() {
           linkedin: response.linkedin || "",
           github: response.github || "",
         },
-        experience:
-          response.experience?.map((exp: any) => ({
-            id: exp.id || Date.now().toString(),
-            jobTitle: exp.jobTitle || exp.job_title || "",
-            companyName: exp.companyName || exp.company_name || "",
-            location: exp.location || "",
-            startDate: exp.startDate || exp.start_date || "",
-            endDate: exp.endDate || exp.end_date || "",
-            current: exp.current || false,
-            responsibilities: Array.isArray(exp.responsibilities)
-              ? exp.responsibilities
-              : [],
-          })) || [],
-        education:
-          response.education?.map((edu: any) => ({
-            id: edu.id || Date.now().toString(),
-            degree: edu.degree || "",
-            institutionName: edu.institutionName || edu.institution_name || "",
-            location: edu.location || "",
-            graduationDate: edu.graduationDate || edu.graduation_date || "",
-            gpa: edu.gpa || "",
-            honors: edu.honors || "",
-            additionalInfo: edu.additionalInfo || edu.additional_info || "",
-          })) || [],
+        experience: response.experience || [],
+        education: response.education || [],
         skills: {
           technical: Array.isArray(response.skills?.technical)
             ? response.skills.technical
             : Array.isArray(response.skills)
-            ? response.skills
-            : [],
+              ? response.skills
+              : [],
           soft: Array.isArray(response.skills?.soft)
             ? response.skills.soft
             : [],
         },
-        languages:
-          response.languages?.map((lang: any) => ({
-            id: Date.now().toString(),
-            name: typeof lang === "string" ? lang : lang.name || "",
-            proficiency:
-              typeof lang === "object"
-                ? lang.proficiency || "Intermediate"
-                : "Intermediate",
-          })) || [],
-        certifications:
-          response.certifications?.map((cert: any) => ({
-            id: Date.now().toString(),
-            title: cert.title || "",
-            issuingOrganization:
-              cert.issuingOrganization || cert.issuing_organization || "",
-            dateObtained: cert.dateObtained || cert.date_obtained || "",
-            verificationLink:
-              cert.verificationLink || cert.verification_link || "",
-          })) || [],
-        projects:
-          response.projects?.map((proj: any) => ({
-            id: Date.now().toString(),
-            name: proj.name || "",
-            role: proj.role || "",
-            description: proj.description || "",
-            technologies: Array.isArray(proj.technologies)
-              ? proj.technologies
-              : [],
-            liveDemoLink: proj.liveDemoLink || proj.live_demo_link || "",
-            githubLink: proj.githubLink || proj.github_link || "",
-          })) || [],
+        languages: response.languages || [],
+        certifications: response.certifications || [],
+        projects: response.projects || [],
         additional: {
           interests: Array.isArray(response.additional?.interests)
             ? response.additional.interests
             : Array.isArray(response.additional)
-            ? response.additional
-            : [],
+              ? response.additional
+              : [],
         },
         createdAt: response.created_at || new Date().toISOString(),
         generatedPersona: newPersona.generatedPersona,
       };
 
       if (editingPersona) {
-        dispatch(
-          setPersonas(
-            personas.map((p) =>
-              p.id === editingPersona.id ? updatedPersona : p
-            )
-          )
-        );
+        setPersonas(personas.map(p => p.id === editingPersona.id ? updatedPersona : p));
       } else {
-        dispatch(setPersonas([updatedPersona, ...personas]));
+        setPersonas([updatedPersona, ...personas]);
       }
 
       setIsDialogOpen(false);
@@ -477,16 +392,7 @@ export function CreatePersonaPage() {
       setEditingPersona(null);
     } catch (error) {
       console.error("Error saving persona:", error);
-
-      // Provide more specific error messages
-      let errorMessage = "Unknown error occurred";
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === "string") {
-        errorMessage = error;
-      }
-
-      alert(`Failed to save persona: ${errorMessage}`);
+      alert(`Failed to save persona: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsLoading(false);
     }
@@ -518,7 +424,7 @@ export function CreatePersonaPage() {
     );
   });
 
-  if (loading && personas.length === 0) {
+  if (isLoading && personas.length === 0) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
@@ -714,32 +620,35 @@ export function CreatePersonaPage() {
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-1">
-                            <Button
+                            {/* <Button
+                              className="cursor-pointer"
                               variant="ghost"
                               size="sm"
                               onClick={() => handleView(persona)}
                             >
                               <Eye className="h-4 w-4" />
-                            </Button>
+                            </Button> */}
                             <Button
                               variant="ghost"
+                              className="cursor-pointer"
                               size="sm"
                               onClick={() => handleEdit(persona)}
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button
+                            {/* <Button
                               variant="ghost"
+                              className="cursor-pointer"
                               size="sm"
                               onClick={() => handleDownload(persona)}
                             >
                               <Download className="h-4 w-4" />
-                            </Button>
+                            </Button> */}
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleDelete(persona)}
-                              className="text-red-600 hover:text-red-700"
+                              className="text-red-600 hover:text-red-700 cursor-pointer"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>

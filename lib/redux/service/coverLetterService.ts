@@ -1,4 +1,4 @@
-import { api } from "./index"
+import { api } from "../../api"
 
 export interface CoverLetter {
   id: string
@@ -16,10 +16,11 @@ export interface CreateCoverLetterData {
   generated_letter: string
 }
 
-// 🟢 GET all cover letters
-export const getCoverLetters = async (): Promise<CoverLetter[]> => {
+export const getCoverLetters = async (userId: string): Promise<CoverLetter[]> => {
   try {
-    const response = await api.get("/cover-letters")
+    const response = await api.get(`/cover-letters?user_id=${userId}`, {
+      timeout: 10000
+    });
     return response.data
   } catch (error) {
     console.error("Error fetching cover letters:", error)
@@ -27,7 +28,6 @@ export const getCoverLetters = async (): Promise<CoverLetter[]> => {
   }
 }
 
-// 🟢 GET a single cover letter
 export const getCoverLetterById = async (id: string): Promise<CoverLetter> => {
   try {
     const response = await api.get(`/cover-letters/${id}`)
@@ -38,7 +38,6 @@ export const getCoverLetterById = async (id: string): Promise<CoverLetter> => {
   }
 }
 
-// 🟢 CREATE cover letter
 export const createCoverLetter = async (data: CreateCoverLetterData): Promise<CoverLetter> => {
   try {
     console.log("Sending cover letter data to API:", JSON.stringify(data, null, 2))
@@ -51,7 +50,6 @@ export const createCoverLetter = async (data: CreateCoverLetterData): Promise<Co
   }
 }
 
-// 🟡 UPDATE cover letter
 export const updateCoverLetter = async (id: string, data: Partial<CreateCoverLetterData>): Promise<CoverLetter> => {
   try {
     const response = await api.put(`/cover-letters/${id}`, data)
@@ -62,7 +60,6 @@ export const updateCoverLetter = async (id: string, data: Partial<CreateCoverLet
   }
 }
 
-// 🔴 DELETE cover letter
 export const deleteCoverLetter = async (id: string): Promise<void> => {
   try {
     await api.delete(`/cover-letters/${id}`)
