@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { FileText, Mail, CheckCircle, Settings, UserCircle, Sparkles, BarChart3, Crown, LogOut } from "lucide-react"
-
+import Link from "next/link"
 import {
   Sidebar as SidebarPrimitive,
   SidebarContent,
@@ -81,6 +81,7 @@ export function Sidebar({ activePage, setActivePage }: SidebarProps) {
       className={`border-r border-gray-200/60 bg-white ${!isMounted ? "invisible" : ""}`}
       aria-hidden={!isMounted}
     >
+      <Link href="/">
       <SidebarHeader className="p-6 pb-4">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-lg">
@@ -98,6 +99,7 @@ export function Sidebar({ activePage, setActivePage }: SidebarProps) {
           </div>
         )}
       </SidebarHeader>
+      </Link>
 
       <SidebarContent className="px-3">
         <SidebarMenu className="space-y-1">

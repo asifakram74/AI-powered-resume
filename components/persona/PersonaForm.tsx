@@ -347,6 +347,10 @@ export function PersonaForm({
         linkedin: formattedLinkedIn,
         github: formattedGitHub,
       },
+      // Ensure these fields are included explicitly to avoid empty arrays
+      education: formData.education || [],
+      certifications: formData.certifications || [],
+      projects: formData.projects || [],
     };
 
     // Simulate API call
@@ -886,6 +890,359 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                   </Badge>
                 ))}
               </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Education */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Education</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Degree</Label>
+              <Input
+                value={currentEducation.degree}
+                onChange={(e) =>
+                  setCurrentEducation((prev) => ({
+                    ...prev,
+                    degree: e.target.value,
+                  }))
+                }
+                placeholder="Bachelor of Science in Computer Science"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Institution Name</Label>
+              <Input
+                value={currentEducation.institutionName}
+                onChange={(e) =>
+                  setCurrentEducation((prev) => ({
+                    ...prev,
+                    institutionName: e.target.value,
+                  }))
+                }
+                placeholder="Stanford University"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label>Location</Label>
+              <Input
+                value={currentEducation.location}
+                onChange={(e) =>
+                  setCurrentEducation((prev) => ({
+                    ...prev,
+                    location: e.target.value,
+                  }))
+                }
+                placeholder="Stanford, CA"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Graduation Date</Label>
+              <Input
+                type="date"
+                value={currentEducation.graduationDate}
+                onChange={(e) =>
+                  setCurrentEducation((prev) => ({
+                    ...prev,
+                    graduationDate: e.target.value,
+                  }))
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>GPA</Label>
+              <Input
+                value={currentEducation.gpa}
+                onChange={(e) =>
+                  setCurrentEducation((prev) => ({
+                    ...prev,
+                    gpa: e.target.value,
+                  }))
+                }
+                placeholder="3.8"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Honors & Awards</Label>
+            <Input
+              value={currentEducation.honors}
+              onChange={(e) =>
+                setCurrentEducation((prev) => ({
+                  ...prev,
+                  honors: e.target.value,
+                }))
+              }
+              placeholder="Summa Cum Laude, Dean's List"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Additional Information</Label>
+            <Textarea
+              value={currentEducation.additionalInfo}
+              onChange={(e) =>
+                setCurrentEducation((prev) => ({
+                  ...prev,
+                  additionalInfo: e.target.value,
+                }))
+              }
+              placeholder="Relevant coursework, extracurricular activities, etc."
+              className="min-h-[80px]"
+            />
+          </div>
+
+          <Button onClick={addEducation} variant="outline" size="sm">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Education
+          </Button>
+
+          {formData.education.length > 0 && (
+            <div className="space-y-2">
+              <Label>Added Education:</Label>
+              {formData.education.map((edu) => (
+                <div key={edu.id} className="p-3 bg-gray-50 rounded-lg">
+                  <div className="font-medium">
+                    {edu.degree} - {edu.institutionName}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {edu.location} | {edu.graduationDate}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Certifications */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Certifications</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Certification Title</Label>
+              <Input
+                value={currentCertification.title}
+                onChange={(e) =>
+                  setCurrentCertification((prev) => ({
+                    ...prev,
+                    title: e.target.value,
+                  }))
+                }
+                placeholder="AWS Certified Solutions Architect"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Issuing Organization</Label>
+              <Input
+                value={currentCertification.issuingOrganization}
+                onChange={(e) =>
+                  setCurrentCertification((prev) => ({
+                    ...prev,
+                    issuingOrganization: e.target.value,
+                  }))
+                }
+                placeholder="Amazon Web Services"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Date Obtained</Label>
+              <Input
+                type="date"
+                value={currentCertification.dateObtained}
+                onChange={(e) =>
+                  setCurrentCertification((prev) => ({
+                    ...prev,
+                    dateObtained: e.target.value,
+                  }))
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Verification Link</Label>
+              <Input
+                value={currentCertification.verificationLink}
+                onChange={(e) =>
+                  setCurrentCertification((prev) => ({
+                    ...prev,
+                    verificationLink: e.target.value,
+                  }))
+                }
+                placeholder="https://verify.certification.com"
+                type="url"
+              />
+            </div>
+          </div>
+
+          <Button onClick={addCertification} variant="outline" size="sm">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Certification
+          </Button>
+
+          {formData.certifications.length > 0 && (
+            <div className="space-y-2">
+              <Label>Added Certifications:</Label>
+              {formData.certifications.map((cert) => (
+                <div key={cert.id} className="p-3 bg-gray-50 rounded-lg">
+                  <div className="font-medium">{cert.title}</div>
+                  <div className="text-sm text-gray-600">
+                    {cert.issuingOrganization} | {cert.dateObtained}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Projects */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Projects</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Project Name</Label>
+              <Input
+                value={currentProject.name}
+                onChange={(e) =>
+                  setCurrentProject((prev) => ({
+                    ...prev,
+                    name: e.target.value,
+                  }))
+                }
+                placeholder="E-commerce Platform"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Your Role</Label>
+              <Input
+                value={currentProject.role}
+                onChange={(e) =>
+                  setCurrentProject((prev) => ({
+                    ...prev,
+                    role: e.target.value,
+                  }))
+                }
+                placeholder="Full Stack Developer"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Project Description</Label>
+            <Textarea
+              value={currentProject.description}
+              onChange={(e) =>
+                setCurrentProject((prev) => ({
+                  ...prev,
+                  description: e.target.value,
+                }))
+              }
+              placeholder="Describe the project, its objectives, and your contributions..."
+              className="min-h-[100px]"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Technologies Used</Label>
+            {currentProject.technologies.map((tech, index) => (
+              <div key={index} className="flex gap-2">
+                <Input
+                  value={tech}
+                  onChange={(e) => {
+                    const newTech = [...currentProject.technologies];
+                    newTech[index] = e.target.value;
+                    setCurrentProject((prev) => ({
+                      ...prev,
+                      technologies: newTech,
+                    }));
+                  }}
+                  placeholder="React, Node.js, MongoDB..."
+                />
+                {index === currentProject.technologies.length - 1 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setCurrentProject((prev) => ({
+                        ...prev,
+                        technologies: [...prev.technologies, ""],
+                      }))
+                    }
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Live Demo Link</Label>
+              <Input
+                value={currentProject.liveDemoLink}
+                onChange={(e) =>
+                  setCurrentProject((prev) => ({
+                    ...prev,
+                    liveDemoLink: e.target.value,
+                  }))
+                }
+                placeholder="https://your-project-demo.com"
+                type="url"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>GitHub Link</Label>
+              <Input
+                value={currentProject.githubLink}
+                onChange={(e) =>
+                  setCurrentProject((prev) => ({
+                    ...prev,
+                    githubLink: e.target.value,
+                  }))
+                }
+                placeholder="https://github.com/username/project"
+                type="url"
+              />
+            </div>
+          </div>
+
+          <Button onClick={addProject} variant="outline" size="sm">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Project
+          </Button>
+
+          {formData.projects.length > 0 && (
+            <div className="space-y-2">
+              <Label>Added Projects:</Label>
+              {formData.projects.map((project) => (
+                <div key={project.id} className="p-3 bg-gray-50 rounded-lg">
+                  <div className="font-medium">{project.name}</div>
+                  <div className="text-sm text-gray-600">{project.role}</div>
+                  <div className="text-sm text-gray-500">
+                    {project.technologies.join(", ")}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </CardContent>
