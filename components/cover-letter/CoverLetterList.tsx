@@ -375,15 +375,15 @@ ${user?.name || "[Your Name]"}`
                         <TableCell>{new Date(letter.created_at).toLocaleDateString()}</TableCell>
                         <TableCell>
                           <div className="flex gap-1">
-                            <Button variant="ghost" size="sm" onClick={() => handleView(letter)}>
+                            {/* <Button variant="ghost" size="sm" onClick={() => handleView(letter)}>
                               <Eye className="h-4 w-4" />
-                            </Button>
+                            </Button> */}
                             <Button variant="ghost" size="sm" onClick={() => handleEdit(letter)}>
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleDownload(letter)}>
+                            {/* <Button variant="ghost" size="sm" onClick={() => handleDownload(letter)}>
                               <Download className="h-4 w-4" />
-                            </Button>
+                            </Button> */}
                             <Button
                               variant="ghost"
                               size="sm"
@@ -436,7 +436,7 @@ ${user?.name || "[Your Name]"}`
                       </div>
 
                       <div className="flex gap-2">
-                        <Button
+                        {/* <Button
                           variant="outline"
                           size="sm"
                           className="flex-1 bg-transparent"
@@ -444,7 +444,7 @@ ${user?.name || "[Your Name]"}`
                         >
                           <Eye className="h-4 w-4 mr-1" />
                           View
-                        </Button>
+                        </Button> */}
                         <Button
                           variant="outline"
                           size="sm"
@@ -457,7 +457,7 @@ ${user?.name || "[Your Name]"}`
                       </div>
 
                       <div className="flex gap-2">
-                        <Button
+                        {/* <Button
                           variant="outline"
                           size="sm"
                           className="flex-1 bg-transparent"
@@ -465,7 +465,7 @@ ${user?.name || "[Your Name]"}`
                         >
                           <Download className="h-4 w-4 mr-1" />
                           Download
-                        </Button>
+                        </Button> */}
                         <Button
                           variant="outline"
                           size="sm"

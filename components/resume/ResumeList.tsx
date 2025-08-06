@@ -341,15 +341,15 @@ export function ResumePage() {
                         <TableCell>{new Date(cv.updated_at).toLocaleDateString()}</TableCell>
                         <TableCell>
                           <div className="flex gap-1">
-                            <Button variant="ghost" size="sm" onClick={() => handleView(cv)}>
+                            {/* <Button variant="ghost" size="sm" onClick={() => handleView(cv)}>
                               <Eye className="h-4 w-4" />
-                            </Button>
+                            </Button> */}
                             <Button variant="ghost" size="sm" onClick={() => handleEdit(cv)}>
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleDownload(cv)}>
+                            {/* <Button variant="ghost" size="sm" onClick={() => handleDownload(cv)}>
                               <Download className="h-4 w-4" />
-                            </Button>
+                            </Button> */}
                             <Button
                               variant="ghost"
                               size="sm"
@@ -413,7 +413,7 @@ export function ResumePage() {
                       </div>
 
                       <div className="flex gap-2">
-                        <Button
+                        {/* <Button
                           variant="outline"
                           size="sm"
                           className="flex-1 bg-transparent"
@@ -421,7 +421,7 @@ export function ResumePage() {
                         >
                           <Eye className="h-4 w-4 mr-1" />
                           View
-                        </Button>
+                        </Button> */}
                         <Button
                           variant="outline"
                           size="sm"
@@ -434,7 +434,7 @@ export function ResumePage() {
                       </div>
 
                       <div className="flex gap-2">
-                        <Button
+                        {/* <Button
                           variant="outline"
                           size="sm"
                           className="flex-1 bg-transparent"
@@ -442,7 +442,7 @@ export function ResumePage() {
                         >
                           <Download className="h-4 w-4 mr-1" />
                           Export
-                        </Button>
+                        </Button> */}
                         <Button
                           variant="outline"
                           size="sm"
