@@ -187,7 +187,7 @@ export function ResumePage() {
               Create Resume
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
             <DialogHeader>
               <DialogTitle>{editingCV ? "Edit Resume" : "Create New Resume"}</DialogTitle>
               <DialogDescription>

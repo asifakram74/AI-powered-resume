@@ -15,6 +15,7 @@ import {
   TrendingUp,
   User,
   Briefcase,
+  
   Target,
 } from "lucide-react"
 import {
@@ -34,7 +35,6 @@ import type { CVData } from "@/types/cv-data"
 import { PersonaCreationOptions } from "@/components/persona/PersonaCreationOptions"
 import { PersonaForm } from "@/components/persona/PersonaForm"
 import {
-  getPersonas,
   getPersonaById,
   createPersona,
   updatePersona,
@@ -42,70 +42,30 @@ import {
   type PersonaData,
   type PersonaResponse,
 } from "@/lib/api"
-import { useAppSelector } from "@/lib/redux/hooks"
+import { useAppSelector, useAppDispatch } from "@/lib/redux/hooks"
+import { fetchPersonas, setPersonas } from "@/lib/redux/slices/personaSlice"
 
 export function CreatePersonaPage() {
-  const [personas, setPersonas] = useState<CVData[]>([])
+  const dispatch = useAppDispatch()
+  const personas = useAppSelector((state) => state.persona.personas)
+  const loading = useAppSelector((state) => state.persona.loading)
+  const error = useAppSelector((state) => state.persona.error)
   const [viewMode, setViewMode] = useState<"grid" | "table">("table")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [editingPersona, setEditingPersona] = useState<CVData | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [prefilledData, setPrefilledData] = useState<Partial<Omit<CVData, "id" | "createdAt">> | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const { user } = useAppSelector((state) => state.auth)
 
   useEffect(() => {
-    const fetchPersonas = async () => {
-      try {
-        if (!user?.id) {
-          console.log("No user ID available - user might not be logged in")
-          return
-        }
-        setIsLoading(true)
-        const data = await getPersonas()
-        console.log("Fetched personas:", data)
-
-        const formattedPersonas = data.map((persona: any) => ({
-          id: persona.id.toString(),
-          personalInfo: {
-            fullName: persona.full_name || "",
-            jobTitle: persona.job_title || "",
-            email: persona.email || "",
-            phone: persona.phone || "",
-            address: persona.address || "",
-            city: persona.city || "",
-            country: persona.country || "",
-            profilePicture: persona.profile_picture || "",
-            summary: persona.summary || "",
-            linkedin: persona.linkedin || "",
-            github: persona.github || "",
-          },
-          experience: persona.experience || [],
-          education: persona.education || [],
-          skills: {
-            technical: Array.isArray(persona.skills) ? persona.skills : [],
-            soft: [],
-          },
-          languages: persona.languages || [],
-          certifications: persona.certifications || [],
-          projects: persona.projects || [],
-          additional: {
-            interests: persona.additional || [],
-          },
-          createdAt: persona.created_at || new Date().toISOString(),
-          generatedPersona: "",
-        }))
-        setPersonas(formattedPersonas)
-      } catch (error) {
-        console.error("Error fetching personas:", error)
-      } finally {
-        setIsLoading(false)
-      }
+    if (!user?.id) {
+      console.log("No user ID available - user might not be logged in")
+      return
     }
-
-    fetchPersonas()
-  }, [user?.id])
+    dispatch(fetchPersonas())
+  }, [user?.id, dispatch])
 
   const handleOptionSelect = (
     option: "manual" | "pdf" | "linkedin",
@@ -117,7 +77,6 @@ export function CreatePersonaPage() {
 
   const handleEdit = async (persona: CVData) => {
     try {
-      setIsLoading(true)
       const data = await getPersonaById(Number.parseInt(persona.id))
       setEditingPersona({
         ...persona,
@@ -216,8 +175,6 @@ export function CreatePersonaPage() {
       setIsDialogOpen(true)
     } catch (error) {
       console.error("Error fetching persona:", error)
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -239,7 +196,7 @@ export function CreatePersonaPage() {
     if (confirm(`Are you sure you want to delete the persona for ${persona.personalInfo.fullName}?`)) {
       try {
         await deletePersona(Number.parseInt(persona.id))
-        setPersonas((prev) => prev.filter((p) => p.id !== persona.id))
+        dispatch(setPersonas(personas.filter((p) => p.id !== persona.id)))
       } catch (error) {
         console.error("Error deleting persona:", error)
         alert("Failed to delete persona")
@@ -426,9 +383,9 @@ export function CreatePersonaPage() {
       }
 
       if (editingPersona) {
-        setPersonas((prev) => prev.map((p) => (p.id === editingPersona.id ? updatedPersona : p)))
+        dispatch(setPersonas(personas.map((p) => (p.id === editingPersona.id ? updatedPersona : p))))
       } else {
-        setPersonas((prev) => [updatedPersona, ...prev])
+        dispatch(setPersonas([updatedPersona, ...personas]))
       }
 
       setIsDialogOpen(false)
@@ -448,7 +405,7 @@ export function CreatePersonaPage() {
 
       alert(`Failed to save persona: ${errorMessage}`)
     } finally {
-      setIsLoading(false)
+        setIsLoading(false)
     }
   }
 
@@ -472,7 +429,7 @@ export function CreatePersonaPage() {
     )
   })
 
-  if (isLoading && personas.length === 0) {
+  if (loading && personas.length === 0) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
@@ -489,7 +446,7 @@ export function CreatePersonaPage() {
             <Sparkles className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Create AI Persona</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Create Personas</h1>
             <p className="text-gray-600">Generate professional personas from complete CV information</p>
           </div>
         </div>
@@ -497,11 +454,10 @@ export function CreatePersonaPage() {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
               <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-                <Sparkles className="h-4 w-4 mr-2" />
-                {editingPersona ? "Update Persona" : "Create Persona"}
+                Create Persona
               </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
             <DialogHeader>
               <DialogTitle>{editingPersona ? "Edit CV Persona" : "Create Complete CV Persona"}</DialogTitle>
               <DialogDescription>Choose how you'd like to create your professional persona</DialogDescription>

@@ -233,7 +233,7 @@ ${user?.name || "[Your Name]"}`
               Generate Cover Letter
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
             <DialogHeader>
               <DialogTitle>{editingLetter ? "Edit Cover Letter" : "Generate New Cover Letter"}</DialogTitle>
               <DialogDescription>
