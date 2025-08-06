@@ -38,7 +38,7 @@ import {
   deleteATSResume,
   type ATSResume,
   type CreateATSResumeData,
-} from "@/lib/api/ats-resume"
+} from "@/lib/redux/service/atsResumeService"
 import { useAppSelector } from "@/lib/redux/hooks"
 
 interface ATSAnalysisResult {
@@ -433,7 +433,7 @@ export function ATSCheckerPage() {
         </Dialog>
       </div>
 
-      {/* Analysis History */}
+      {/* Analysis History 
       {atsResumes.length > 0 && (
         <Card>
           <CardHeader>
@@ -516,9 +516,9 @@ export function ATSCheckerPage() {
             </Table>
           </CardContent>
         </Card>
-      )}
+      )}*/}
 
-      {/* Empty State */}
+      {/* Empty State 
       {atsResumes.length === 0 && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
@@ -529,7 +529,7 @@ export function ATSCheckerPage() {
             <p className="text-gray-500 mb-4">Upload your first resume to get started with ATS optimization</p>
           </CardContent>
         </Card>
-      )}
+      )}*/}
 
       {/* Tips */}
       <Card>

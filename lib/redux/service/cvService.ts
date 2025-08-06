@@ -1,4 +1,4 @@
-import { api } from "./index"
+import { api } from "../../api"
 
 export interface CV {
   id: string
@@ -24,10 +24,11 @@ export interface CreateCVData {
   content: any
 }
 
-// 🟢 GET all CVs
-export const getCVs = async (): Promise<CV[]> => {
-  try {
-    const response = await api.get("/cvs")
+export const getCVs = async (userId: string): Promise<CV[]> => {
+    try {
+    const response = await api.get(`/cvs?user_id=${userId}`, {
+      timeout: 10000
+    });
     return response.data
   } catch (error) {
     console.error("Error fetching CVs:", error)
@@ -35,7 +36,6 @@ export const getCVs = async (): Promise<CV[]> => {
   }
 }
 
-// 🟢 GET a single CV
 export const getCVById = async (id: string): Promise<CV> => {
   try {
     const response = await api.get(`/cvs/${id}`)
@@ -46,7 +46,6 @@ export const getCVById = async (id: string): Promise<CV> => {
   }
 }
 
-// 🟢 CREATE CV
 export const createCV = async (cvData: CreateCVData): Promise<CV> => {
   try {
     console.log("Sending CV data to API:", JSON.stringify(cvData, null, 2))
@@ -59,7 +58,6 @@ export const createCV = async (cvData: CreateCVData): Promise<CV> => {
   }
 }
 
-// 🟡 UPDATE CV
 export const updateCV = async (id: string, cvData: Partial<CreateCVData>): Promise<CV> => {
   try {
     const response = await api.put(`/cvs/${id}`, cvData)
@@ -70,7 +68,6 @@ export const updateCV = async (id: string, cvData: Partial<CreateCVData>): Promi
   }
 }
 
-// 🔴 DELETE CV
 export const deleteCV = async (id: string): Promise<void> => {
   try {
     await api.delete(`/cvs/${id}`)
