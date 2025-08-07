@@ -44,7 +44,7 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import type { CVData } from "@/types/cv-data";
-import { PersonaCreationOptions } from "@/components/persona/CreatePersona";
+import { PersonaCreationOptions } from "@/components/persona/AddEditPersona";
 import { PersonaForm } from "@/components/persona/PersonaForm";
 import {
   getPersonas,

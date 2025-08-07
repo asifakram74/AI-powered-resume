@@ -1,16 +1,19 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Sparkles, FileText, Wand2 } from "lucide-react"
+import { useAppSelector } from "@/lib/redux/hooks"
+import { getCVs, type CV } from "@/lib/redux/service/cvService"
 
 interface CoverLetterGeneratorProps {
-  onGenerate: (jobDescription: string, tone: string) => void
+  onGenerate: (jobDescription: string, tone: string, cvId: string, userId: string) => void
   isGenerating: boolean
+  cvs: CV[]
 }
 
 const tones = [
@@ -45,17 +48,46 @@ const tones = [
     example: "Your company's innovative approach resonates with my creative vision...",
   },
 ]
-
 export function CoverLetterGenerator({ onGenerate, isGenerating }: CoverLetterGeneratorProps) {
   const [jobDescription, setJobDescription] = useState("")
   const [selectedTone, setSelectedTone] = useState("")
+  const [selectedCVId, setSelectedCVId] = useState<string>("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [cvs, setCVs] = useState<CV[]>([])
+  const { user } = useAppSelector((state) => state.auth)
+  const userId = user?.id
+  useEffect(() => {
+    const loadCVs = async () => {
+      if (!user?.id) return
+      setIsLoading(true)
+      try {
+        const data = await getCVs(user.id.toString())
+        console.log("Fetched CVs:", data)
+        setCVs(data)
+      } catch (error) {
+        console.error("Error loading CVs:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadCVs()
+  }, [user?.id])
 
   const handleGenerate = () => {
-    if (!jobDescription.trim() || !selectedTone) {
-      alert("Please fill in both the job description and select a tone.")
+    if (!jobDescription.trim() || !selectedTone || !selectedCVId || !userId) {
+      alert("Please fill in all required fields and select a CV")
       return
     }
-    onGenerate(jobDescription, selectedTone)
+    onGenerate(jobDescription, selectedTone, selectedCVId, userId.toString())
+  }
+
+  const handleCVChange = (value: string) => {
+    setSelectedCVId(value)
+    const selectedCVData = cvs.find(cv => cv.id.toString() === value)
+    if (selectedCVData?.job_description) {
+      setJobDescription(selectedCVData.job_description)
+    }
   }
 
   const selectedToneData = tones.find((tone) => tone.id === selectedTone)
@@ -73,6 +105,32 @@ export function CoverLetterGenerator({ onGenerate, isGenerating }: CoverLetterGe
           Paste the job description and select your preferred tone to generate a personalized cover letter
         </p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Select CV
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Label>Choose a CV to pre-fill job description *</Label>
+            <Select value={selectedCVId} onValueChange={handleCVChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a CV..." />
+              </SelectTrigger>
+              <SelectContent>
+                {cvs.map((cv) => (
+                  <SelectItem key={cv.id} value={cv.id.toString()}>
+                    {cv.title || `CV ${cv.id}`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -136,7 +194,7 @@ export function CoverLetterGenerator({ onGenerate, isGenerating }: CoverLetterGe
       <div className="flex justify-center">
         <Button
           onClick={handleGenerate}
-          disabled={!jobDescription.trim() || !selectedTone || isGenerating}
+          disabled={!jobDescription.trim() || !selectedTone || !selectedCVId || isGenerating}
           className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-8 py-3 text-lg"
           size="lg"
         >

@@ -2,30 +2,25 @@ import { api } from "../../api"
 
 export interface CV {
   id: string
-  user_id: number
+  user_id: string 
+  personas_id: string
   layout_id: string
   title: string
-  name: string
-  email: string
-  phone?: string
-  address?: string
-  content: any
+  job_description: string
   created_at: string
   updated_at: string
 }
 
 export interface CreateCVData {
+  user_id: string
+  personas_id: string
   layout_id: string
   title: string
-  name: string
-  email: string
-  phone?: string
-  address?: string
-  content: any
+  job_description: string
 }
 
 export const getCVs = async (userId: string): Promise<CV[]> => {
-    try {
+  try {
     const response = await api.get(`/cvs?user_id=${userId}`, {
       timeout: 10000
     });

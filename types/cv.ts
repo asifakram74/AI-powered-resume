@@ -1,13 +1,10 @@
 export interface CV {
   id: string
   user_id: number
+  personas_id: string
   layout_id: string
   title: string
-  name: string
-  email: string
-  phone?: string
-  address?: string
-  content: CVContent
+  job_description: string
   created_at: string
   updated_at: string
 }
@@ -80,11 +77,9 @@ export interface CVTemplate {
 }
 
 export interface CreateCVData {
+  ser_id: number
+  personas_id: string
   layout_id: string
   title: string
-  name: string
-  email: string
-  phone?: string
-  address?: string
-  content: CVContent
+  job_description: string
 }
