@@ -10,11 +10,13 @@ import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { getCVs, deleteCV, createCV, updateCV, type CV, CreateCVData } from "@/lib/redux/service/cvService"
+import { useRouter } from "next/navigation"
 import { useAppSelector } from "@/lib/redux/hooks"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import { CVWizard } from "./AddEditResume"
 
 export function ResumePage() {
+  const router = useRouter()
   const [cvs, setCVs] = useState<CV[]>([])
   const [viewMode, setViewMode] = useState<"grid" | "table">("table")
   const [searchTerm, setSearchTerm] = useState("")
@@ -51,6 +53,10 @@ export function ResumePage() {
         alert("Failed to delete CV")
       }
     }
+  }
+
+  const handleCreateAICV = (personaId: string) => {
+    router.push(`/create-cv?personaId=${personaId}`)
   }
 
   const handleSaveCV = async (cvData: CreateCVData) => {
@@ -228,6 +234,14 @@ export function ResumePage() {
                               className="text-red-600 hover:text-red-700"
                             >
                               <Trash2 className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleCreateAICV(cv.personas_id)}
+                              className="text-blue-600 hover:text-blue-700"
+                            >
+                              Create AI CV
                             </Button>
                           </div>
                         </TableCell>
