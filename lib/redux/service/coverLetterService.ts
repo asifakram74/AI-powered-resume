@@ -1,8 +1,9 @@
-import { api } from "./index"
+import { api } from "../../api"
 
 export interface CoverLetter {
   id: string
-  user_id: number
+  user_id: string
+  cv_id: string
   job_description: string
   tone: string
   generated_letter: string
@@ -11,15 +12,18 @@ export interface CoverLetter {
 }
 
 export interface CreateCoverLetterData {
+  user_id: string
+  cv_id: string
   job_description: string
   tone: string
   generated_letter: string
 }
 
-// 🟢 GET all cover letters
-export const getCoverLetters = async (): Promise<CoverLetter[]> => {
+export const getCoverLetters = async (userId: string): Promise<CoverLetter[]> => {
   try {
-    const response = await api.get("/cover-letters")
+    const response = await api.get(`/cover-letters?user_id=${userId}`, {
+      timeout: 10000
+    });
     return response.data
   } catch (error) {
     console.error("Error fetching cover letters:", error)
@@ -27,7 +31,6 @@ export const getCoverLetters = async (): Promise<CoverLetter[]> => {
   }
 }
 
-// 🟢 GET a single cover letter
 export const getCoverLetterById = async (id: string): Promise<CoverLetter> => {
   try {
     const response = await api.get(`/cover-letters/${id}`)
@@ -38,12 +41,15 @@ export const getCoverLetterById = async (id: string): Promise<CoverLetter> => {
   }
 }
 
-// 🟢 CREATE cover letter
 export const createCoverLetter = async (data: CreateCoverLetterData): Promise<CoverLetter> => {
   try {
-    console.log("Sending cover letter data to API:", JSON.stringify(data, null, 2))
-    const response = await api.post("/cover-letters", data)
-    console.log("Received cover letter response from API:", JSON.stringify(response.data, null, 2))
+    const response = await api.post("/cover-letters", {
+      user_id: data.user_id,
+      cv_id: data.cv_id,
+      job_description: data.job_description,
+      tone: data.tone,
+      generated_letter: data.generated_letter
+    })
     return response.data
   } catch (error) {
     console.error("Error creating cover letter:", error)
@@ -51,10 +57,12 @@ export const createCoverLetter = async (data: CreateCoverLetterData): Promise<Co
   }
 }
 
-// 🟡 UPDATE cover letter
 export const updateCoverLetter = async (id: string, data: Partial<CreateCoverLetterData>): Promise<CoverLetter> => {
   try {
-    const response = await api.put(`/cover-letters/${id}`, data)
+    const response = await api.put(`/cover-letters/${id}`, {
+      ...data,
+      cv_id: data.cv_id // Include cv_id in updates if provided
+    })
     return response.data
   } catch (error) {
     console.error(`Error updating cover letter ${id}:`, error)
@@ -62,7 +70,6 @@ export const updateCoverLetter = async (id: string, data: Partial<CreateCoverLet
   }
 }
 
-// 🔴 DELETE cover letter
 export const deleteCoverLetter = async (id: string): Promise<void> => {
   try {
     await api.delete(`/cover-letters/${id}`)

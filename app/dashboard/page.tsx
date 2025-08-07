@@ -3,12 +3,12 @@
 import { useState } from "react"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { Sidebar } from "@/components/dashboard/sidebar"
-import { CreatePersonaPage } from "@/components/persona/create-persona"
-import { ResumePage } from "@/components/resume/resume-page"
-import { CoverLetterPage } from "@/components/cover-letter/cover-letter-page"
+import { CreatePersonaPage } from "@/components/persona/PersonaList"
+import { ResumePage } from "@/components/resume/ResumeList"
+import { CoverLetterPage } from "@/components/cover-letter/CoverLetterList"
 import { ATSCheckerPage } from "@/components/ats/ats-checker-page"
 import { ProfilePage } from "@/components/profile/profile-page"
-import { SettingsPage } from "@/components/settings/settings-page"
+// import { SettingsPage } from "@/components/settings/settings-page"
 import ProtectedRoute from "@/components/auth/ProtectedRoute"
 
 export default function DashboardPage() {
@@ -26,8 +26,8 @@ export default function DashboardPage() {
         return <ATSCheckerPage />
       case "profile":
         return <ProfilePage />
-      case "settings":
-        return <SettingsPage />
+      // case "settings":
+      //   return <SettingsPage />
       default:
         return <CreatePersonaPage />
     }

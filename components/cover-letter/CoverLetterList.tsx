@@ -31,7 +31,7 @@ import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { CoverLetterGenerator } from "./cover-letter-generator"
+import { CoverLetterGenerator } from "./AddEditCoverLetter"
 import {
   getCoverLetters,
   createCoverLetter,
@@ -39,11 +39,14 @@ import {
   deleteCoverLetter,
   type CoverLetter,
   type CreateCoverLetterData,
-} from "@/lib/api/cover-letter"
+} from "@/lib/redux/service/coverLetterService"
 import { useAppSelector } from "@/lib/redux/hooks"
+import { getCVs, type CV } from "@/lib/redux/service/cvService"
 
 export function CoverLetterPage() {
+  const [cvs, setCVs] = useState<CV[]>([]);
   const [coverLetters, setCoverLetters] = useState<CoverLetter[]>([])
+  const [selectedCVId, setSelectedCVId] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "table">("table")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
@@ -54,7 +57,23 @@ export function CoverLetterPage() {
   const [currentJobDescription, setCurrentJobDescription] = useState("")
   const [currentTone, setCurrentTone] = useState("")
   const [isLoading, setIsLoading] = useState(true)
-  const { user } = useAppSelector((state) => state.auth)
+  const { user } = useAppSelector((state) => state.auth);
+  const userId = user?.id;
+
+  useEffect(() => {
+    const fetchCVs = async () => {
+      try {
+        const data = await getCVs(userId?.toString() || '');
+        setCVs(data);
+      } catch (error) {
+        console.error("Error fetching CVs:", error);
+      }
+    };
+
+    if (userId) {
+      fetchCVs();
+    }
+  }, [userId]);
 
   useEffect(() => {
     const fetchCoverLetters = async () => {
@@ -64,11 +83,13 @@ export function CoverLetterPage() {
           return
         }
         setIsLoading(true)
-        const data = await getCoverLetters()
+        const data = await getCoverLetters(userId?.toString() || '');
         console.log("Fetched cover letters:", data)
-        setCoverLetters(data)
+
+        setCoverLetters(Array.isArray(data) ? data : [])
       } catch (error) {
         console.error("Error fetching cover letters:", error)
+        setCoverLetters([])
       } finally {
         setIsLoading(false)
       }
@@ -77,61 +98,95 @@ export function CoverLetterPage() {
     fetchCoverLetters()
   }, [user?.id])
 
-  const handleGenerate = async (jobDescription: string, tone: string) => {
+ const handleGenerate = async (jobDescription: string, tone: string, cvId: string, userId: string) => {
     setIsGenerating(true)
     setCurrentJobDescription(jobDescription)
     setCurrentTone(tone)
+    setSelectedCVId(cvId)
 
-    // Simulate AI generation
-    setTimeout(() => {
-      const sampleLetter = `Dear Hiring Manager,
+    try {
+      const selectedCV = cvs.find(cv => cv.id.toString() === cvId)
+      if (!selectedCV) {
+        throw new Error("Selected CV not found")
+      }
 
-I am writing to express my strong interest in the position described in your job posting. After carefully reviewing the requirements and responsibilities, I am confident that my background and skills make me an ideal candidate for this role.
+      await new Promise(resolve => setTimeout(resolve, 2000))
 
-${
-  tone === "enthusiastic"
-    ? "I am thrilled about the opportunity to contribute to your team and bring my passion for excellence to this position."
-    : tone === "confident"
-      ? "With my proven track record and expertise in this field, I am well-positioned to make an immediate impact."
-      : tone === "creative"
-        ? "Your company's innovative approach and commitment to creativity align perfectly with my professional values and aspirations."
-        : "I believe my professional experience and dedication to quality work would be valuable assets to your organization."
-}
-
-Based on the job description, I understand you are looking for someone who can:
-• Deliver high-quality results in a fast-paced environment
-• Collaborate effectively with cross-functional teams
-• Demonstrate strong problem-solving and analytical skills
-• Adapt quickly to new technologies and methodologies
-
-Throughout my career, I have consistently demonstrated these capabilities. My experience includes:
-• Successfully managing complex projects from conception to completion
-• Building strong relationships with stakeholders at all levels
-• Implementing innovative solutions that drive business results
-• Mentoring team members and fostering collaborative work environments
-
-I am particularly drawn to this opportunity because it aligns with my career goals and offers the chance to work with a forward-thinking organization. I am excited about the possibility of contributing to your team's continued success.
-
-Thank you for considering my application. I would welcome the opportunity to discuss how my skills and experience can benefit your organization. I look forward to hearing from you soon.
-
-Sincerely,
-${user?.name || "[Your Name]"}`
-
-      setGeneratedLetter(sampleLetter)
+      const generatedContent = generateLetterContent(
+        jobDescription,
+        tone,
+        selectedCV,
+        user
+      )
+      
+      setGeneratedLetter(generatedContent)
       setShowGenerator(false)
+    } catch (error) {
+      console.error("Error generating cover letter:", error)
+      alert(`Failed to generate cover letter: ${error instanceof Error ? error.message : "Unknown error"}`)
+    } finally {
       setIsGenerating(false)
-    }, 3000)
+    }
   }
 
+
+// Helper function to generate letter content
+const generateLetterContent = (jobDesc: string, tone: string, cv: CV, user?: User) => {
+  const skills = cv.persona?.skills?.technical?.join(", ") || "relevant skills";
+  const experience = cv.persona?.experience?.length 
+    ? `With ${cv.persona.experience.length} years of experience in ${cv.persona.experience[0]?.title || "the field"}`
+    : "With my background in the field";
+
+  return `Dear Hiring Manager,
+
+I am writing to express my strong interest in the ${cv.title || 'position'} at your company. ${experience}, I am confident that my ${skills} make me an excellent candidate for this role.
+
+${getToneSpecificContent(tone)}
+
+Key qualifications I would bring to this role include:
+• ${skills}
+• ${cv.persona?.summary || "Strong problem-solving and analytical abilities"}
+• Experience with ${cv.persona?.experience?.[0]?.technologies || "relevant technologies"}
+
+Some highlights from my background include:
+• ${cv.persona?.experience?.[0]?.description || "Successfully delivered projects that drove measurable business results"}
+• ${cv.persona?.education?.[0] ? `Earned a ${cv.persona.education[0].degree} from ${cv.persona.education[0].institution}` : "Relevant educational background"}
+
+I would welcome the opportunity to discuss how my skills and experience can contribute to your team's success. Please find my contact information below:
+
+${cv.persona?.email || user?.email || "Email"}
+${cv.persona?.phone || "Phone"}
+
+Thank you for your time and consideration. I look forward to the possibility of speaking with you soon.
+
+Sincerely,
+${cv.persona?.full_name || user?.name || "[Your Name]"}`;
+};
+
+const getToneSpecificContent = (tone: string) => {
+  switch (tone) {
+    case "enthusiastic":
+      return "I am genuinely excited about the opportunity to join your team and contribute to your company's success.";
+    case "confident":
+      return "My track record of success in similar roles demonstrates my ability to deliver results for your organization.";
+    case "creative":
+      return "Your company's innovative approach resonates with my creative problem-solving skills and forward-thinking mindset.";
+    default:
+      return "I believe my qualifications and experience align well with the requirements for this position.";
+  }
+};
+
   const handleSaveLetter = async () => {
-    if (!generatedLetter.trim()) {
-      alert("No letter to save")
+    if (!generatedLetter.trim() || !selectedCVId || !userId) {
+      alert("No letter to save or missing required information")
       return
     }
 
     try {
       setIsLoading(true)
       const letterData: CreateCoverLetterData = {
+        user_id: userId.toString(),
+        cv_id: selectedCVId,
         job_description: currentJobDescription,
         tone: currentTone,
         generated_letter: generatedLetter,
@@ -140,10 +195,10 @@ ${user?.name || "[Your Name]"}`
       let response: CoverLetter
       if (editingLetter) {
         response = await updateCoverLetter(editingLetter.id, letterData)
-        setCoverLetters((prev) => prev.map((letter) => (letter.id === editingLetter.id ? response : letter)))
+        setCoverLetters(prev => prev.map(letter => letter.id === editingLetter.id ? response : letter))
       } else {
         response = await createCoverLetter(letterData)
-        setCoverLetters((prev) => [response, ...prev])
+        setCoverLetters(prev => [response, ...prev])
       }
 
       setIsDialogOpen(false)
@@ -244,7 +299,11 @@ ${user?.name || "[Your Name]"}`
             </DialogHeader>
 
             {showGenerator ? (
-              <CoverLetterGenerator onGenerate={handleGenerate} isGenerating={isGenerating} />
+              <CoverLetterGenerator
+                onGenerate={handleGenerate}
+                isGenerating={isGenerating}
+                cvs={cvs}
+              />
             ) : (
               <div className="space-y-6">
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -373,15 +432,15 @@ ${user?.name || "[Your Name]"}`
                         <TableCell>{new Date(letter.created_at).toLocaleDateString()}</TableCell>
                         <TableCell>
                           <div className="flex gap-1">
-                            <Button variant="ghost" size="sm" onClick={() => handleView(letter)}>
+                            {/* <Button variant="ghost" size="sm" onClick={() => handleView(letter)}>
                               <Eye className="h-4 w-4" />
-                            </Button>
+                            </Button> */}
                             <Button variant="ghost" size="sm" onClick={() => handleEdit(letter)}>
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleDownload(letter)}>
+                            {/* <Button variant="ghost" size="sm" onClick={() => handleDownload(letter)}>
                               <Download className="h-4 w-4" />
-                            </Button>
+                            </Button> */}
                             <Button
                               variant="ghost"
                               size="sm"
@@ -434,7 +493,7 @@ ${user?.name || "[Your Name]"}`
                       </div>
 
                       <div className="flex gap-2">
-                        <Button
+                        {/* <Button
                           variant="outline"
                           size="sm"
                           className="flex-1 bg-transparent"
@@ -442,7 +501,7 @@ ${user?.name || "[Your Name]"}`
                         >
                           <Eye className="h-4 w-4 mr-1" />
                           View
-                        </Button>
+                        </Button> */}
                         <Button
                           variant="outline"
                           size="sm"
@@ -455,7 +514,7 @@ ${user?.name || "[Your Name]"}`
                       </div>
 
                       <div className="flex gap-2">
-                        <Button
+                        {/* <Button
                           variant="outline"
                           size="sm"
                           className="flex-1 bg-transparent"
@@ -463,7 +522,7 @@ ${user?.name || "[Your Name]"}`
                         >
                           <Download className="h-4 w-4 mr-1" />
                           Download
-                        </Button>
+                        </Button> */}
                         <Button
                           variant="outline"
                           size="sm"

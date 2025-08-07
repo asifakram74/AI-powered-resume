@@ -264,10 +264,10 @@ const parseExtractedText = (text: string): Partial<Omit<CVData, "id" | "createdA
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
       <Card
         className={cn(
-          "border-2 border-dashed p-8 text-center transition-all duration-200 cursor-pointer",
+          "border-2 border-dashed p-6 text-center transition-all duration-200 cursor-pointer",
           isDragOver ? "border-primary bg-primary/5" : "border-muted-foreground/25",
           file ? "border-green-500 bg-green-50" : ""
         )}
@@ -284,23 +284,20 @@ const parseExtractedText = (text: string): Partial<Omit<CVData, "id" | "createdA
           className="hidden"
         />
 
-        <div className="flex flex-col items-center space-y-4">
+        <div className="flex flex-col items-center">
           {file ? (
             <>
-              <FileText className="h-12 w-12 text-green-600" />
-              <div className="space-y-2">
+              <FileText className="h-3 w-3 text-green-600" />
+              <div className="">
                 <p className="text-lg font-medium text-green-700">PDF Uploaded Successfully</p>
                 <p className="text-sm text-muted-foreground">{file.name}</p>
               </div>
             </>
           ) : (
             <>
-              <Upload className="h-12 w-12 text-muted-foreground" />
-              <div className="space-y-2">
-                <p className="text-lg font-medium">Upload your CV (PDF)</p>
-                <p className="text-sm text-muted-foreground">
-                  Drag and drop your PDF file here, or click to browse
-                </p>
+              <Upload className="h-4 w-4 text-muted-foreground" />
+              <div className="">
+                <p className="text-sm font-medium">Upload your CV (PDF)</p>
               </div>
             </>
           )}
