@@ -9,6 +9,9 @@ import { Separator } from "@/components/ui/separator"
 import { ArrowLeft, Download, Edit, Sparkles, TrendingUp, Award, Target, Users } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { getPersonaById, type PersonaResponse } from "@/lib/redux/service/pasonaService"
+import { CVTemplates } from "@/components/resume/ChooseResumeTemplte"
+import { CVPreview } from "@/components/resume/CVPreview"
+import type { CVData } from "@/types/cv-data"
 
 interface OptimizedCV {
   personalInfo: {
@@ -49,14 +52,33 @@ interface AIResponse {
   improvementScore: number
 }
 
+interface CVTemplate {
+  id: string
+  name: string
+  description: string
+  category: "modern" | "classic" | "creative" | "minimal"
+  isPremium: boolean
+}
+
 export default function CreateCVPage() {
   const [aiResponse, setAiResponse] = useState<AIResponse | null>(null)
   const [persona, setPersona] = useState<PersonaResponse | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [selectedTemplate, setSelectedTemplate] = useState<CVTemplate | null>(null)
+  const [showPreview, setShowPreview] = useState(false)
   const searchParams = useSearchParams()
   const router = useRouter()
   const personaId = searchParams.get("personaId")
+
+  // Default template
+  const defaultTemplate: CVTemplate = {
+    id: "modern",
+    name: "Modern Professional",
+    description: "Clean, modern design perfect for tech and business professionals",
+    category: "modern",
+    isPremium: false,
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -98,6 +120,7 @@ export default function CreateCVPage() {
 
         const aiData = await response.json()
         setAiResponse(aiData)
+        setSelectedTemplate(defaultTemplate)
       } catch (err: any) {
         console.error("Error:", err)
         setError(err.message || "Failed to create AI CV")
@@ -202,9 +225,77 @@ export default function CreateCVPage() {
     return text
   }
 
-  const handleDownload = () => {
-    // Implementation for downloading the CV
-    console.log("Download functionality to be implemented")
+  const convertToCVData = (aiResponse: AIResponse): CVData => {
+    return {
+      id: "generated-cv",
+      personalInfo: {
+        fullName: aiResponse.optimizedCV.personalInfo.name,
+        jobTitle: persona?.job_title || "",
+        email: aiResponse.optimizedCV.personalInfo.email,
+        phone: aiResponse.optimizedCV.personalInfo.phone,
+        address: aiResponse.optimizedCV.personalInfo.location,
+        city: "",
+        country: "",
+        profilePicture: "",
+        summary: aiResponse.optimizedCV.summary,
+        linkedin: aiResponse.optimizedCV.personalInfo.linkedin,
+        github: "",
+      },
+      experience: aiResponse.optimizedCV.workExperience.map((exp, index) => ({
+        id: `exp-${index}`,
+        jobTitle: exp.title,
+        companyName: exp.company,
+        location: "",
+        startDate: "",
+        endDate: "",
+        current: false,
+        responsibilities: [exp.description],
+      })),
+      education: aiResponse.optimizedCV.education.map((edu, index) => ({
+        id: `edu-${index}`,
+        degree: edu.degree,
+        institutionName: edu.institution,
+        location: "",
+        graduationDate: edu.year,
+        gpa: edu.gpa,
+        honors: "",
+        additionalInfo: "",
+      })),
+      skills: {
+        technical: aiResponse.optimizedCV.skills,
+        soft: [],
+      },
+      languages: aiResponse.optimizedCV.languages.map((lang, index) => ({
+        id: `lang-${index}`,
+        name: lang,
+        proficiency: "Intermediate" as const,
+      })),
+      certifications: aiResponse.optimizedCV.certifications.map((cert, index) => ({
+        id: `cert-${index}`,
+        title: cert,
+        issuingOrganization: "",
+        dateObtained: "",
+        verificationLink: "",
+      })),
+      projects: aiResponse.optimizedCV.projects.map((proj, index) => ({
+        id: `proj-${index}`,
+        name: proj.name,
+        role: "",
+        description: proj.description,
+        technologies: proj.technologies,
+        liveDemoLink: "",
+        githubLink: "",
+      })),
+      additional: {
+        interests: aiResponse.optimizedCV.interests,
+      },
+      createdAt: new Date().toISOString(),
+    }
+  }
+
+  const handleTemplateSelect = (template: CVTemplate) => {
+    setSelectedTemplate(template)
+    setShowPreview(true)
   }
 
   const handleEdit = () => {
@@ -263,6 +354,8 @@ export default function CreateCVPage() {
     )
   }
 
+  const cvData = convertToCVData(aiResponse)
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -288,19 +381,15 @@ export default function CreateCVPage() {
                 <Edit className="h-4 w-4 mr-2" />
                 Edit
               </Button>
-              <Button onClick={handleDownload}>
-                <Download className="h-4 w-4 mr-2" />
-                Download
-              </Button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main CV Content */}
-          <div className="lg:col-span-2 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {!showPreview ? (
+          // Template Selection View
+          <div className="space-y-8">
             {/* Improvement Score */}
             <Card>
               <CardContent className="p-6">
@@ -315,199 +404,22 @@ export default function CreateCVPage() {
                   <div>
                     <h3 className="text-lg font-semibold">Improvement Score</h3>
                     <p className="text-gray-600">
-                      Your CV has been enhanced with AI optimization
+                      Your CV has been enhanced with AI optimization. Now choose a template to preview your CV.
                     </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Personal Info */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Personal Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="font-semibold text-lg">{aiResponse.optimizedCV.personalInfo.name}</h4>
-                    <p className="text-gray-600">{aiResponse.optimizedCV.personalInfo.email}</p>
-                    <p className="text-gray-600">{aiResponse.optimizedCV.personalInfo.phone}</p>
-                    <p className="text-gray-600">{aiResponse.optimizedCV.personalInfo.location}</p>
-                  </div>
-                  <div className="space-y-2">
-                    {aiResponse.optimizedCV.personalInfo.linkedin && (
-                      <p className="text-blue-600">
-                        <a href={aiResponse.optimizedCV.personalInfo.linkedin} target="_blank" rel="noopener noreferrer">
-                          LinkedIn Profile
-                        </a>
-                      </p>
-                    )}
-                    {aiResponse.optimizedCV.personalInfo.website && (
-                      <p className="text-blue-600">
-                        <a href={aiResponse.optimizedCV.personalInfo.website} target="_blank" rel="noopener noreferrer">
-                          Personal Website
-                        </a>
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Template Selection */}
+            <CVTemplates
+              onTemplateSelect={handleTemplateSelect}
+              selectedTemplate={selectedTemplate?.id}
+              userPlan="free"
+            />
 
-            {/* Summary */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Professional Summary</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-700 leading-relaxed">{aiResponse.optimizedCV.summary}</p>
-              </CardContent>
-            </Card>
-
-            {/* Work Experience */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Work Experience</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {aiResponse.optimizedCV.workExperience.map((exp, index) => (
-                  <div key={index}>
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h4 className="font-semibold text-lg">{exp.title}</h4>
-                        <p className="text-blue-600">{exp.company}</p>
-                      </div>
-                      <span className="text-gray-600 text-sm">{exp.duration}</span>
-                    </div>
-                    <p className="text-gray-700">{exp.description}</p>
-                    {index < aiResponse.optimizedCV.workExperience.length - 1 && (
-                      <Separator className="mt-6" />
-                    )}
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            {/* Education */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Education</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {aiResponse.optimizedCV.education.map((edu, index) => (
-                  <div key={index} className="flex justify-between items-start">
-                    <div>
-                      <h4 className="font-semibold">{edu.degree}</h4>
-                      <p className="text-blue-600">{edu.institution}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-gray-600">{edu.year}</p>
-                      {edu.gpa && <p className="text-sm text-gray-500">GPA: {edu.gpa}</p>}
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            {/* Skills */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Skills</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {aiResponse.optimizedCV.skills.map((skill, index) => (
-                    <Badge key={index} variant="secondary">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Projects */}
-            {aiResponse.optimizedCV.projects.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Projects</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {aiResponse.optimizedCV.projects.map((project, index) => (
-                    <div key={index}>
-                      <h4 className="font-semibold">{project.name}</h4>
-                      <p className="text-gray-700 mb-2">{project.description}</p>
-                      <div className="flex flex-wrap gap-1">
-                        {project.technologies.map((tech, techIndex) => (
-                          <Badge key={techIndex} variant="outline" className="text-xs">
-                            {tech}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Certifications */}
-            {aiResponse.optimizedCV.certifications.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Certifications</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {aiResponse.optimizedCV.certifications.map((cert, index) => (
-                      <li key={index} className="text-gray-700">• {cert}</li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Languages */}
-            {aiResponse.optimizedCV.languages.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Languages</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {aiResponse.optimizedCV.languages.map((lang, index) => (
-                      <Badge key={index} variant="outline">
-                        {lang}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Interests */}
-            {aiResponse.optimizedCV.interests.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Interests</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {aiResponse.optimizedCV.interests.map((interest, index) => (
-                      <Badge key={index} variant="outline">
-                        {interest}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {/* Suggestions Sidebar */}
-          <div className="space-y-6">
+            {/* AI Suggestions */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -559,6 +471,30 @@ export default function CreateCVPage() {
             </Card>
           </div>
         </div>
+        ) : (
+          // CV Preview View
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">CV Preview</h2>
+                <p className="text-gray-600">Template: {selectedTemplate?.name}</p>
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => setShowPreview(false)}
+              >
+                Change Template
+              </Button>
+            </div>
+            
+            {selectedTemplate && (
+              <CVPreview
+                data={cvData}
+                template={selectedTemplate}
+              />
+            )}
+          </div>
+        )}
       </div>
     </div>
   )

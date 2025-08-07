@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { getCVs, deleteCV, createCV, updateCV, type CV, CreateCVData } from "@/lib/redux/service/cvService"
 import { useRouter } from "next/navigation"
 import { useAppSelector } from "@/lib/redux/hooks"
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog"
 import { CVWizard } from "./AddEditResume"
 
 export function ResumePage() {
@@ -120,6 +120,7 @@ export function ResumePage() {
             </Button>
           </DialogTrigger>
           <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
+            <DialogTitle className="sr-only">Create New Resume</DialogTitle>
             <CVWizard
               onSave={handleSaveCV}
               onCancel={() => setIsDialogOpen(false)}
@@ -129,7 +130,8 @@ export function ResumePage() {
       </div>
 
       <Dialog open={isEditing} onOpenChange={setIsEditing}>
-        <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
+        <DialogContent className="w-[95vw] !max-w-none max-h-[90vh] overflow-x-auto">
+          <DialogTitle className="sr-only">Edit Resume</DialogTitle>
           <CVWizard
             editingCV={selectedCV}
             onSave={handleUpdateCV}
