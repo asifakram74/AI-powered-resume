@@ -641,7 +641,7 @@ export function CreatePersonaPage() {
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button
+                            {/* <Button
                               variant="ghost"
                               className="cursor-pointer"
                               size="sm"
@@ -649,7 +649,7 @@ export function CreatePersonaPage() {
                               title="Create AI CV"
                             >
                               <Bot className="h-4 w-4" />
-                            </Button>
+                            </Button> */}
                             {/* <Button
                               variant="ghost"
                               className="cursor-pointer"
