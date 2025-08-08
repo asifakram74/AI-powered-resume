@@ -373,43 +373,28 @@ export default function CreateCVPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+      {/* Header - Simplified version without navigation buttons */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                onClick={() => router.back()}
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back
-              </Button>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  {step === "template" ? "Choose Template" : "AI-Enhanced CV"}
-                </h1>
-                <p className="text-gray-600">
-                  {step === "template" 
-                    ? "Select a template for your AI-generated CV" 
-                    : "Generated from your persona data"
-                  }
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              {step === "ai-response" && (
-                <>
-                  <Button variant="outline" onClick={handleBackToTemplate}>
-                    Change Template
-                  </Button>
-                  <Button variant="outline" onClick={handleEdit}>
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit
-                  </Button>
-                </>
-              )}
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              onClick={() => router.back()}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {step === "template" ? "Choose Template" : "AI-Enhanced CV"}
+              </h1>
+              <p className="text-gray-600">
+                {step === "template" 
+                  ? "Select a template for your AI-generated CV" 
+                  : "Generated from your persona data"
+                }
+              </p>
             </div>
           </div>
         </div>
@@ -499,6 +484,15 @@ export default function CreateCVPage() {
                     <div>
                       <h2 className="text-xl font-semibold">CV Preview</h2>
                       <p className="text-gray-600">Template: {selectedTemplate?.name}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" onClick={handleBackToTemplate}>
+                        Change Template
+                      </Button>
+                      <Button variant="outline" onClick={handleEdit}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit
+                      </Button>
                     </div>
                   </div>
                   

@@ -240,7 +240,7 @@ export function ResumePage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleCreateAICV(cv.personas_id)}
+                              onClick={() => router.push(`/create-cv?personaId=${cv.personas_id}&step=template`)}
                               className="text-blue-600 hover:text-blue-700"
                             >
                               Create AI CV
