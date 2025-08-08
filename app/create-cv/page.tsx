@@ -66,7 +66,7 @@ export default function CreateCVPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedTemplate, setSelectedTemplate] = useState<CVTemplate | null>(null)
-  const [showPreview, setShowPreview] = useState(false)
+  const [step, setStep] = useState<"template" | "ai-response">("template")
   const searchParams = useSearchParams()
   const router = useRouter()
   const personaId = searchParams.get("personaId")
@@ -99,32 +99,10 @@ export default function CreateCVPage() {
           return
         }
         setPersona(personaData)
-
-        // Convert persona data to text for AI processing
-        const personaText = convertPersonaToText(personaData)
-
-        // Call AI optimization API
-        const response = await fetch("/api/optimize-cv", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            extractedText: personaText,
-          }),
-        })
-
-        if (!response.ok) {
-          throw new Error("Failed to optimize CV")
-        }
-
-        const aiData = await response.json()
-        setAiResponse(aiData)
-        setSelectedTemplate(defaultTemplate)
+        setIsLoading(false)
       } catch (err: any) {
         console.error("Error:", err)
-        setError(err.message || "Failed to create AI CV")
-      } finally {
+        setError(err.message || "Failed to fetch persona data")
         setIsLoading(false)
       }
     }
@@ -293,9 +271,42 @@ export default function CreateCVPage() {
     }
   }
 
-  const handleTemplateSelect = (template: CVTemplate) => {
+  const handleTemplateSelect = async (template: CVTemplate) => {
     setSelectedTemplate(template)
-    setShowPreview(true)
+    setStep("ai-response")
+    
+    // Generate AI response after template selection
+    if (persona) {
+      try {
+        setIsLoading(true)
+        
+        // Convert persona data to text for AI processing
+        const personaText = convertPersonaToText(persona)
+
+        // Call AI optimization API
+        const response = await fetch("/api/optimize-cv", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            extractedText: personaText,
+          }),
+        })
+
+        if (!response.ok) {
+          throw new Error("Failed to optimize CV")
+        }
+
+        const aiData = await response.json()
+        setAiResponse(aiData)
+      } catch (err: any) {
+        console.error("Error:", err)
+        setError(err.message || "Failed to create AI CV")
+      } finally {
+        setIsLoading(false)
+      }
+    }
   }
 
   const handleEdit = () => {
@@ -303,18 +314,24 @@ export default function CreateCVPage() {
     router.push(`/dashboard?activePage=create-persona&editId=${personaId}`)
   }
 
-  if (isLoading) {
+  const handleBackToTemplate = () => {
+    setStep("template")
+    setAiResponse(null)
+    setError(null)
+  }
+
+  if (isLoading && step === "template") {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Creating your AI-enhanced CV...</p>
+          <p className="text-gray-600">Loading persona data...</p>
         </div>
       </div>
     )
   }
 
-  if (error) {
+  if (error && step === "template") {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="w-full max-w-md">
@@ -334,7 +351,7 @@ export default function CreateCVPage() {
     )
   }
 
-  if (!aiResponse) {
+  if (!persona && step === "template") {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="w-full max-w-md">
@@ -342,8 +359,8 @@ export default function CreateCVPage() {
             <div className="text-gray-500 mb-4">
               <Sparkles className="h-12 w-12 mx-auto" />
             </div>
-            <h2 className="text-xl font-semibold mb-2">No CV Data</h2>
-            <p className="text-gray-600 mb-4">Unable to generate AI CV</p>
+            <h2 className="text-xl font-semibold mb-2">No Persona Data</h2>
+            <p className="text-gray-600 mb-4">Unable to find persona data</p>
             <Button onClick={() => router.back()}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Go Back
@@ -353,8 +370,6 @@ export default function CreateCVPage() {
       </div>
     )
   }
-
-  const cvData = convertToCVData(aiResponse)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -372,40 +387,53 @@ export default function CreateCVPage() {
                 Back
               </Button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">AI-Enhanced CV</h1>
-                <p className="text-gray-600">Generated from your persona data</p>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  {step === "template" ? "Choose Template" : "AI-Enhanced CV"}
+                </h1>
+                <p className="text-gray-600">
+                  {step === "template" 
+                    ? "Select a template for your AI-generated CV" 
+                    : "Generated from your persona data"
+                  }
+                </p>
               </div>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={handleEdit}>
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
+              {step === "ai-response" && (
+                <>
+                  <Button variant="outline" onClick={handleBackToTemplate}>
+                    Change Template
+                  </Button>
+                  <Button variant="outline" onClick={handleEdit}>
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {!showPreview ? (
+        {step === "template" ? (
           // Template Selection View
           <div className="space-y-8">
-            {/* Improvement Score */}
+            {/* Persona Info */}
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
                   <div className="flex-shrink-0">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center">
                       <span className="text-white font-bold text-lg">
-                        {aiResponse.improvementScore}%
+                        {persona?.full_name?.charAt(0) || "P"}
                       </span>
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold">Improvement Score</h3>
-                    <p className="text-gray-600">
-                      Your CV has been enhanced with AI optimization. Now choose a template to preview your CV.
-                    </p>
+                    <h3 className="text-lg font-semibold">{persona?.full_name}</h3>
+                    <p className="text-gray-600">{persona?.job_title}</p>
+                    <p className="text-sm text-gray-500">Choose a template to generate your AI-enhanced CV</p>
                   </div>
                 </div>
               </CardContent>
@@ -417,82 +445,125 @@ export default function CreateCVPage() {
               selectedTemplate={selectedTemplate?.id}
               userPlan="free"
             />
-
-            {/* AI Suggestions */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="h-5 w-5" />
-                  AI Suggestions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {aiResponse.suggestions.map((suggestion, index) => (
-                    <div key={index} className="flex items-start gap-3">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                      <p className="text-sm text-gray-700">{suggestion}</p>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
-                  Tips for Success
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <p className="text-sm text-gray-700">
-                      Customize this CV for each job application
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <p className="text-sm text-gray-700">
-                      Add specific achievements and metrics
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <p className="text-sm text-gray-700">
-                      Keep it concise and ATS-friendly
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
-        </div>
         ) : (
-          // CV Preview View
+          // AI Response View
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-semibold">CV Preview</h2>
-                <p className="text-gray-600">Template: {selectedTemplate?.name}</p>
+            {isLoading ? (
+              <div className="flex justify-center items-center py-12">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600">Creating your AI-enhanced CV...</p>
+                </div>
               </div>
-              <Button
-                variant="outline"
-                onClick={() => setShowPreview(false)}
-              >
-                Change Template
-              </Button>
-            </div>
-            
-            {selectedTemplate && (
-              <CVPreview
-                data={cvData}
-                template={selectedTemplate}
-              />
-            )}
+            ) : error ? (
+              <Card className="w-full max-w-md mx-auto">
+                <CardContent className="text-center p-6">
+                  <div className="text-red-500 mb-4">
+                    <TrendingUp className="h-12 w-12 mx-auto" />
+                  </div>
+                  <h2 className="text-xl font-semibold mb-2">Error</h2>
+                  <p className="text-gray-600 mb-4">{error}</p>
+                  <Button onClick={handleBackToTemplate}>
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back to Template Selection
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : aiResponse ? (
+              <>
+                {/* Improvement Score */}
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-4">
+                      <div className="flex-shrink-0">
+                        <div className="w-16 h-16 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center">
+                          <span className="text-white font-bold text-lg">
+                            {aiResponse.improvementScore}%
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold">Improvement Score</h3>
+                        <p className="text-gray-600">
+                          Your CV has been enhanced with AI optimization using the {selectedTemplate?.name} template.
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* CV Preview */}
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-semibold">CV Preview</h2>
+                      <p className="text-gray-600">Template: {selectedTemplate?.name}</p>
+                    </div>
+                  </div>
+                  
+                  {selectedTemplate && (
+                    <CVPreview
+                      data={convertToCVData(aiResponse)}
+                      template={selectedTemplate}
+                    />
+                  )}
+                </div>
+
+                {/* AI Suggestions */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Award className="h-5 w-5" />
+                        AI Suggestions
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {aiResponse.suggestions.map((suggestion, index) => (
+                          <div key={index} className="flex items-start gap-3">
+                            <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <p className="text-sm text-gray-700">{suggestion}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Target className="h-5 w-5" />
+                        Tips for Success
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                          <p className="text-sm text-gray-700">
+                            Customize this CV for each job application
+                          </p>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                          <p className="text-sm text-gray-700">
+                            Add specific achievements and metrics
+                          </p>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                          <p className="text-sm text-gray-700">
+                            Keep it concise and ATS-friendly
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </>
+            ) : null}
           </div>
         )}
       </div>
