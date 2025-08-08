@@ -1,29 +1,13 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  CheckCircle,
-  Upload,
-  FileText,
-  Search,
-  TrendingUp,
-  AlertTriangle,
-  Target,
-  Award,
-  BarChart3,
-  Eye,
-  Trash2,
-} from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Progress } from "@/components/ui/progress"
-import { Badge } from "@/components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckCircle, Upload, FileText, Search, AlertTriangle, Target, BarChart3, TrendingUp, Award, Eye, Trash2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { PDFUploader } from "./PDFUploader";
 import {
   Dialog,
   DialogContent,
@@ -31,192 +15,91 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import {
-  getATSResumes,
-  createATSResume,
-  deleteATSResume,
-  type ATSResume,
-  type CreateATSResumeData,
-} from "@/lib/redux/service/atsResumeService"
-import { useAppSelector } from "@/lib/redux/hooks"
+} from "@/components/ui/dialog";
 
 interface ATSAnalysisResult {
-  score: number
-  strengths: string[]
-  weaknesses: string[]
-  suggestions: string[]
+  score: number;
+  strengths: string[];
+  weaknesses: string[];
+  suggestions: string[];
   keywords: {
-    matched: string[]
-    missing: string[]
-  }
+    matched: string[];
+    missing: string[];
+  };
   sections: {
     [key: string]: {
-      score: number
-      feedback: string
-    }
-  }
+      score: number;
+      feedback: string;
+    };
+  };
 }
 
-export function ATSCheckerPage() {
-  const [atsResumes, setATSResumes] = useState<ATSResume[]>([])
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [analysisResult, setAnalysisResult] = useState<ATSAnalysisResult | null>(null)
-  const [jobDescription, setJobDescription] = useState("")
-  const [resumeFile, setResumeFile] = useState<File | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const { user } = useAppSelector((state) => state.auth)
-
-  useEffect(() => {
-    const fetchATSResumes = async () => {
-      try {
-        if (!user?.id) {
-          console.log("No user ID available - user might not be logged in")
-          return
-        }
-        setIsLoading(true)
-        const data = await getATSResumes()
-        console.log("Fetched ATS resumes:", data)
-        setATSResumes(data)
-      } catch (error) {
-        console.error("Error fetching ATS resumes:", error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchATSResumes()
-  }, [user?.id])
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file && file.type === "application/pdf") {
-      setResumeFile(file)
-    } else {
-      alert("Please upload a PDF file")
-    }
-  }
+export default function ATSCheckerPage() {
+  const [jobDescription, setJobDescription] = useState("");
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [extractedText, setExtractedText] = useState("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<ATSAnalysisResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleAnalyze = async () => {
-    if (!resumeFile || !jobDescription.trim()) {
-      alert("Please upload a resume and provide a job description")
-      return
+    if (!extractedText || !jobDescription.trim()) {
+      setError("Please upload a resume and provide a job description");
+      return;
     }
 
-    setIsAnalyzing(true)
+    setIsAnalyzing(true);
+    setError(null);
 
-    // Simulate file upload and analysis
-    setTimeout(async () => {
-      const mockAnalysis: ATSAnalysisResult = {
-        score: Math.floor(Math.random() * 30) + 70, // Score between 70-100
-        strengths: [
-          "Strong technical skills section",
-          "Relevant work experience",
-          "Clear contact information",
-          "Professional formatting",
-          "Quantified achievements",
-        ],
-        weaknesses: [
-          "Missing some key industry keywords",
-          "Could improve skills section organization",
-          "Limited use of action verbs",
-        ],
-        suggestions: [
-          "Add more industry-specific keywords from the job description",
-          "Include metrics and numbers to quantify achievements",
-          "Use stronger action verbs like 'implemented', 'optimized', 'led'",
-          "Consider adding a professional summary section",
-          "Ensure consistent formatting throughout",
-        ],
-        keywords: {
-          matched: ["JavaScript", "React", "Node.js", "Python", "SQL", "Git"],
-          missing: ["TypeScript", "AWS", "Docker", "Kubernetes", "CI/CD", "Agile"],
+    try {
+      const response = await fetch("/api/ats-analysis", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-        sections: {
-          "Contact Information": { score: 95, feedback: "Complete and professional" },
-          "Professional Summary": { score: 80, feedback: "Good but could be more targeted" },
-          "Work Experience": { score: 85, feedback: "Relevant experience with good details" },
-          Skills: { score: 75, feedback: "Missing some key technologies" },
-          Education: { score: 90, feedback: "Well presented" },
-          Formatting: { score: 88, feedback: "Clean and ATS-friendly" },
-        },
+        body: JSON.stringify({
+          extractedText,
+          jobDescription,
+        }),
+      });
+
+      const data = await response.json().catch(() => {
+        throw new Error("Invalid JSON response from server");
+      });
+
+      if (!response.ok) {
+        throw new Error(data.error || "Analysis failed");
       }
 
-      setAnalysisResult(mockAnalysis)
-
-      // Save to backend
-      try {
-        const resumeData: CreateATSResumeData = {
-          resume_file_path: `uploads/${resumeFile.name}`,
-          job_description: jobDescription,
-          analysis_result: JSON.stringify(mockAnalysis),
-        }
-
-        const response = await createATSResume(resumeData)
-        setATSResumes((prev) => [response, ...prev])
-      } catch (error) {
-        console.error("Error saving ATS analysis:", error)
+      // Validate the response matches our expected format
+      if (!data || typeof data !== 'object' || !('score' in data)) {
+        throw new Error("Invalid response format from server");
       }
 
-      setIsAnalyzing(false)
-    }, 4000)
-  }
-
-  const handleDelete = async (atsResume: ATSResume) => {
-    if (confirm("Are you sure you want to delete this ATS analysis?")) {
-      try {
-        await deleteATSResume(atsResume.id)
-        setATSResumes((prev) => prev.filter((item) => item.id !== atsResume.id))
-      } catch (error) {
-        console.error("Error deleting ATS resume:", error)
-        alert("Failed to delete ATS analysis")
-      }
+      setAnalysisResult(data);
+    } catch (err: any) {
+      console.error("ATS Analysis Error:", err);
+      setError(err.message || "Failed to analyze resume. Please try again later.");
+    } finally {
+      setIsAnalyzing(false);
     }
-  }
-
-  const handleView = (atsResume: ATSResume) => {
-    if (atsResume.analysis_result) {
-      try {
-        const analysis = JSON.parse(atsResume.analysis_result)
-        setAnalysisResult(analysis)
-      } catch (error) {
-        console.error("Error parsing analysis result:", error)
-      }
-    }
-  }
-
-  const filteredResumes = atsResumes.filter((resume) => {
-    const searchLower = searchTerm.toLowerCase()
-    return (
-      resume.job_description.toLowerCase().includes(searchLower) ||
-      resume.resume_file_path.toLowerCase().includes(searchLower)
-    )
-  })
+  };
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-600"
-    if (score >= 60) return "text-yellow-600"
-    return "text-red-600"
-  }
+    if (score >= 80) return "text-green-600";
+    if (score >= 60) return "text-yellow-600";
+    return "text-red-600";
+  };
 
   const getScoreBadgeVariant = (score: number) => {
-    if (score >= 80) return "default"
-    if (score >= 60) return "secondary"
-    return "destructive"
-  }
-
-  if (isLoading && atsResumes.length === 0) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-      </div>
-    )
-  }
+    if (score >= 80) return "default";
+    if (score >= 60) return "secondary";
+    return "destructive";
+  };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-6 p-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -249,20 +132,20 @@ export function ATSCheckerPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Upload className="h-5 w-5" />
+                      <FileText className="h-5 w-5" />
                       Upload Resume
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <Label>Resume File (PDF only) *</Label>
-                        <Input type="file" accept=".pdf" onChange={handleFileUpload} className="mt-2" />
-                        {resumeFile && (
-                          <p className="text-sm text-green-600 mt-2">✓ {resumeFile.name} uploaded successfully</p>
-                        )}
+                    <PDFUploader 
+                      onExtractedText={setExtractedText}
+                      onFileUploaded={setResumeFile}
+                    />
+                    {extractedText && (
+                      <div className="mt-4 p-3 bg-gray-50 rounded text-sm text-gray-600">
+                        <p>Text extracted from resume ({extractedText.length} characters)</p>
                       </div>
-                    </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -274,22 +157,25 @@ export function ATSCheckerPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-2">
-                      <Label>Paste the job description here *</Label>
-                      <Textarea
-                        value={jobDescription}
-                        onChange={(e) => setJobDescription(e.target.value)}
-                        placeholder="Paste the complete job description including requirements, responsibilities, and qualifications..."
-                        className="min-h-[200px]"
-                      />
-                    </div>
+                    <Textarea
+                      value={jobDescription}
+                      onChange={(e) => setJobDescription(e.target.value)}
+                      placeholder="Paste the job description here..."
+                      className="min-h-[200px]"
+                    />
                   </CardContent>
                 </Card>
+
+                {error && (
+                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                    {error}
+                  </div>
+                )}
 
                 <div className="flex justify-center">
                   <Button
                     onClick={handleAnalyze}
-                    disabled={!resumeFile || !jobDescription.trim() || isAnalyzing}
+                    disabled={!extractedText || !jobDescription.trim() || isAnalyzing}
                     className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 px-8 py-3"
                     size="lg"
                   >
@@ -418,10 +304,11 @@ export function ATSCheckerPage() {
                 <div className="flex justify-end">
                   <Button
                     onClick={() => {
-                      setAnalysisResult(null)
-                      setResumeFile(null)
-                      setJobDescription("")
-                      setIsDialogOpen(false)
+                      setAnalysisResult(null);
+                      setResumeFile(null);
+                      setJobDescription("");
+                      setExtractedText("");
+                      setIsDialogOpen(false);
                     }}
                   >
                     Close Analysis
@@ -432,104 +319,6 @@ export function ATSCheckerPage() {
           </DialogContent>
         </Dialog>
       </div>
-
-      {/* Analysis History 
-      {atsResumes.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Analysis History ({filteredResumes.length})</span>
-              <div className="relative w-80">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Search analyses..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Resume File</TableHead>
-                  <TableHead>Job Description</TableHead>
-                  <TableHead>Score</TableHead>
-                  <TableHead>Analyzed</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredResumes.map((resume) => {
-                  let score = 0
-                  try {
-                    if (resume.analysis_result) {
-                      const analysis = JSON.parse(resume.analysis_result)
-                      score = analysis.score
-                    }
-                  } catch (error) {
-                    console.error("Error parsing analysis result:", error)
-                  }
-
-                  return (
-                    <TableRow key={resume.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-gray-500" />
-                          <span className="font-medium">{resume.resume_file_path.split("/").pop() || "Resume"}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="max-w-xs">
-                          <p className="text-sm truncate">{resume.job_description.substring(0, 100)}...</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {score > 0 && (
-                          <Badge variant={getScoreBadgeVariant(score)} className="font-bold">
-                            {score}/100
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>{new Date(resume.created_at).toLocaleDateString()}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-1">
-                          <Button variant="ghost" size="sm" onClick={() => handleView(resume)}>
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(resume)}
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}*/}
-
-      {/* Empty State 
-      {atsResumes.length === 0 && (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="rounded-full bg-gray-100 p-6 mb-4">
-              <CheckCircle className="h-8 w-8 text-gray-400" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No ATS analyses yet</h3>
-            <p className="text-gray-500 mb-4">Upload your first resume to get started with ATS optimization</p>
-          </CardContent>
-        </Card>
-      )}*/}
 
       {/* Tips */}
       <Card>
@@ -572,5 +361,5 @@ export function ATSCheckerPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

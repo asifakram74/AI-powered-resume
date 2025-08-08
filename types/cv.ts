@@ -73,7 +73,6 @@ export interface CVTemplate {
   description: string
   preview: string
   category: "modern" | "classic" | "creative" | "minimal"
-  isPremium: boolean
 }
 
 export interface CreateCVData {
