@@ -22,6 +22,7 @@ import {
   User,
   Briefcase,
   Target,
+  Bot,
 } from "lucide-react";
 import {
   Dialog,
@@ -291,6 +292,10 @@ export function CreatePersonaPage() {
       }
     }
   };
+
+  const handleCreateAICV = (persona: CVData) => {
+    window.open(`/create-cv?personaId=${persona.id}`, '_blank')
+  }
 
   const handlePersonaGenerated = async (newPersona: CVData) => {
     setIsLoading(true);
@@ -636,6 +641,15 @@ export function CreatePersonaPage() {
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
+                            <Button
+                              variant="ghost"
+                              className="cursor-pointer"
+                              size="sm"
+                              onClick={() => handleCreateAICV(persona)}
+                              title="Create AI CV"
+                            >
+                              <Bot className="h-4 w-4" />
+                            </Button>
                             {/* <Button
                               variant="ghost"
                               className="cursor-pointer"
@@ -773,11 +787,23 @@ export function CreatePersonaPage() {
                           variant="outline"
                           size="sm"
                           className="flex-1 bg-transparent"
+                          onClick={() => handleCreateAICV(persona)}
+                        >
+                          <Bot className="h-4 w-4 mr-1" />
+                          AI CV
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 bg-transparent"
                           onClick={() => handleDownload(persona)}
                         >
                           <Download className="h-4 w-4 mr-1" />
                           Export
                         </Button>
+                      </div>
+
+                      <div className="flex gap-2">
                         <Button
                           variant="outline"
                           size="sm"
