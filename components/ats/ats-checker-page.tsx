@@ -1,12 +1,20 @@
+
+
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Upload, FileText, Search, AlertTriangle, Target, BarChart3, TrendingUp, Award, Eye, Trash2 } from "lucide-react";
+import { CheckCircle, Upload, FileText, Search, AlertTriangle, Target, BarChart3, TrendingUp, Award, Eye, Trash2, Download } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem
+} from "@/components/ui/dropdown-menu";
 import { PDFUploader } from "./PDFUploader";
 import {
   Dialog,
@@ -16,6 +24,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import * as htmlToImage from 'html-to-image';
+import { jsPDF } from 'jspdf';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 
 interface ATSAnalysisResult {
   score: number;
@@ -42,6 +53,7 @@ export default function ATSCheckerPage() {
   const [analysisResult, setAnalysisResult] = useState<ATSAnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const analysisRef = useRef<HTMLDivElement>(null);
 
   const handleAnalyze = async () => {
     if (!extractedText || !jobDescription.trim()) {
@@ -96,6 +108,123 @@ export default function ATSCheckerPage() {
     if (score >= 80) return "default";
     if (score >= 60) return "secondary";
     return "destructive";
+  };
+
+  const exportAsPDF = async () => {
+    if (!analysisRef.current) return;
+
+    try {
+      const dataUrl = await htmlToImage.toPng(analysisRef.current);
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgProps = pdf.getImageProperties(dataUrl);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      
+      pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save('ats-analysis-report.pdf');
+    } catch (error) {
+      console.error('Error exporting as PDF:', error);
+    }
+  };
+
+  const exportAsDOCX = async () => {
+    if (!analysisResult) return;
+
+    try {
+      const children = [
+        new Paragraph({
+          text: "ATS Resume Analysis Report",
+          heading: HeadingLevel.HEADING_1,
+          spacing: { after: 200 },
+        }),
+        new Paragraph({
+          text: `Overall ATS Compatibility Score: ${analysisResult.score}/100`,
+          heading: HeadingLevel.HEADING_2,
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: analysisResult.score >= 80
+                ? "Excellent! Your resume is well-optimized for ATS systems."
+                : analysisResult.score >= 60
+                  ? "Good! Your resume has room for improvement."
+                  : "Needs work. Consider implementing the suggestions below.",
+              bold: true,
+            }),
+          ],
+          spacing: { after: 200 },
+        }),
+        new Paragraph({
+          text: "Section Analysis",
+          heading: HeadingLevel.HEADING_2,
+          spacing: { after: 100 },
+        }),
+        ...Object.entries(analysisResult.sections).flatMap(([section, data]) => [
+          new Paragraph({
+            text: section,
+            heading: HeadingLevel.HEADING_3,
+          }),
+          new Paragraph({
+            text: `Score: ${data.score}/100`,
+          }),
+          new Paragraph({
+            text: data.feedback,
+            spacing: { after: 100 },
+          }),
+        ]),
+        new Paragraph({
+          text: "Keywords Analysis",
+          heading: HeadingLevel.HEADING_2,
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "Matched Keywords:",
+          heading: HeadingLevel.HEADING_3,
+        }),
+        new Paragraph({
+          text: analysisResult.keywords.matched.join(", "),
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "Missing Keywords:",
+          heading: HeadingLevel.HEADING_3,
+        }),
+        new Paragraph({
+          text: analysisResult.keywords.missing.join(", "),
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "Improvement Suggestions",
+          heading: HeadingLevel.HEADING_2,
+          spacing: { after: 100 },
+        }),
+        ...analysisResult.suggestions.map(suggestion => 
+          new Paragraph({
+            text: suggestion,
+            bullet: { level: 0 },
+          })
+        ),
+      ];
+
+      const doc = new Document({
+        sections: [{
+          properties: {},
+          children: children,
+        }],
+      });
+
+      Packer.toBlob(doc).then(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'ats-analysis-report.docx';
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    } catch (error) {
+      console.error('Error exporting as DOCX:', error);
+    }
   };
 
   return (
@@ -194,126 +323,150 @@ export default function ATSCheckerPage() {
                 </div>
               </div>
             ) : (
-              <div className="space-y-6">
-                {/* Overall Score */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span className="flex items-center gap-2">
-                        <BarChart3 className="h-5 w-5" />
-                        ATS Compatibility Score
-                      </span>
-                      <Badge variant={getScoreBadgeVariant(analysisResult.score)} className="text-lg px-3 py-1">
-                        {analysisResult.score}/100
-                      </Badge>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Progress value={analysisResult.score} className="h-3" />
-                    <p className="text-sm text-gray-600 mt-2">
-                      {analysisResult.score >= 80
-                        ? "Excellent! Your resume is well-optimized for ATS systems."
-                        : analysisResult.score >= 60
-                          ? "Good! Your resume has room for improvement."
-                          : "Needs work. Consider implementing the suggestions below."}
-                    </p>
-                  </CardContent>
-                </Card>
+              <div>
+                <div ref={analysisRef} className="space-y-6">
+                  {/* Overall Score */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center justify-between">
+                        <span className="flex items-center gap-2">
+                          <BarChart3 className="h-5 w-5" />
+                          ATS Compatibility Score
+                        </span>
+                        <Badge variant={getScoreBadgeVariant(analysisResult.score)} className="text-lg px-3 py-1">
+                          {analysisResult.score}/100
+                        </Badge>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Progress value={analysisResult.score} className="h-3" />
+                      <p className="text-sm text-gray-600 mt-2">
+                        {analysisResult.score >= 80
+                          ? "Excellent! Your resume is well-optimized for ATS systems."
+                          : analysisResult.score >= 60
+                            ? "Good! Your resume has room for improvement."
+                            : "Needs work. Consider implementing the suggestions below."}
+                      </p>
+                    </CardContent>
+                  </Card>
 
-                {/* Section Scores */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Section Analysis</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {Object.entries(analysisResult.sections).map(([section, data]) => (
-                        <div key={section} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div>
-                            <h4 className="font-medium">{section}</h4>
-                            <p className="text-sm text-gray-600">{data.feedback}</p>
+                  {/* Section Scores */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Section Analysis</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {Object.entries(analysisResult.sections).map(([section, data]) => (
+                          <div key={section} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div>
+                              <h4 className="font-medium">{section}</h4>
+                              <p className="text-sm text-gray-600">{data.feedback}</p>
+                            </div>
+                            <div className="text-right">
+                              <span className={`font-bold ${getScoreColor(data.score)}`}>{data.score}/100</span>
+                            </div>
                           </div>
-                          <div className="text-right">
-                            <span className={`font-bold ${getScoreColor(data.score)}`}>{data.score}/100</span>
-                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Keywords Analysis */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-green-600">
+                          <CheckCircle className="h-5 w-5" />
+                          Matched Keywords
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex flex-wrap gap-2">
+                          {analysisResult.keywords.matched.map((keyword) => (
+                            <Badge key={keyword} variant="default" className="bg-green-100 text-green-800">
+                              {keyword}
+                            </Badge>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                      </CardContent>
+                    </Card>
 
-                {/* Keywords Analysis */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertTriangle className="h-5 w-5" />
+                          Missing Keywords
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex flex-wrap gap-2">
+                          {analysisResult.keywords.missing.map((keyword) => (
+                            <Badge key={keyword} variant="destructive" className="bg-red-100 text-red-800">
+                              {keyword}
+                            </Badge>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Suggestions */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-green-600">
-                        <CheckCircle className="h-5 w-5" />
-                        Matched Keywords
+                      <CardTitle className="flex items-center gap-2">
+                        <Target className="h-5 w-5" />
+                        Improvement Suggestions
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex flex-wrap gap-2">
-                        {analysisResult.keywords.matched.map((keyword) => (
-                          <Badge key={keyword} variant="default" className="bg-green-100 text-green-800">
-                            {keyword}
-                          </Badge>
+                      <ul className="space-y-2">
+                        {analysisResult.suggestions.map((suggestion, index) => (
+                          <li key={index} className="flex items-start gap-2">
+                            <span className="text-blue-600 mt-1">•</span>
+                            <span className="text-sm">{suggestion}</span>
+                          </li>
                         ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-red-600">
-                        <AlertTriangle className="h-5 w-5" />
-                        Missing Keywords
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-wrap gap-2">
-                        {analysisResult.keywords.missing.map((keyword) => (
-                          <Badge key={keyword} variant="destructive" className="bg-red-100 text-red-800">
-                            {keyword}
-                          </Badge>
-                        ))}
-                      </div>
+                      </ul>
                     </CardContent>
                   </Card>
                 </div>
 
-                {/* Suggestions */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Target className="h-5 w-5" />
-                      Improvement Suggestions
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2">
-                      {analysisResult.suggestions.map((suggestion, index) => (
-                        <li key={index} className="flex items-start gap-2">
-                          <span className="text-blue-600 mt-1">•</span>
-                          <span className="text-sm">{suggestion}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
+  
 
-                <div className="flex justify-end">
-                  <Button
-                    onClick={() => {
-                      setAnalysisResult(null);
-                      setResumeFile(null);
-                      setJobDescription("");
-                      setExtractedText("");
-                      setIsDialogOpen(false);
-                    }}
-                  >
-                    Close Analysis
-                  </Button>
-                </div>
+<div className="flex justify-end gap-2 mt-4">
+  {/* Export Dropdown */}
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <Button variant="outline" className="flex items-center gap-2">
+        <Download className="h-4 w-4" />
+        Export
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent>
+      <DropdownMenuItem onClick={exportAsPDF}>
+        Export as PDF
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={exportAsDOCX}>
+        Export as DOCX
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
+
+  {/* Close Analysis Button */}
+  <Button
+    onClick={() => {
+      setAnalysisResult(null);
+      setResumeFile(null);
+      setJobDescription("");
+      setExtractedText("");
+      setIsDialogOpen(false);
+    }}
+  >
+    Close Analysis
+  </Button>
+</div>
+
               </div>
             )}
           </DialogContent>
