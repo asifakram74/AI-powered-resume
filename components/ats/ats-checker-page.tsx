@@ -1,11 +1,22 @@
-
-
 "use client";
 
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Upload, FileText, Search, AlertTriangle, Target, BarChart3, TrendingUp, Award, Eye, Trash2, Download } from "lucide-react";
+import {
+  CheckCircle,
+  Upload,
+  FileText,
+  Search,
+  AlertTriangle,
+  Target,
+  BarChart3,
+  TrendingUp,
+  Award,
+  Eye,
+  Trash2,
+  Download,
+} from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +24,7 @@ import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
-  DropdownMenuItem
+  DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { PDFUploader } from "./PDFUploader";
 import {
@@ -24,9 +35,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import * as htmlToImage from 'html-to-image';
-import { jsPDF } from 'jspdf';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
+import * as htmlToImage from "html-to-image";
+import { jsPDF } from "jspdf";
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
 
 interface ATSAnalysisResult {
   score: number;
@@ -50,7 +61,8 @@ export default function ATSCheckerPage() {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [extractedText, setExtractedText] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<ATSAnalysisResult | null>(null);
+  const [analysisResult, setAnalysisResult] =
+    useState<ATSAnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const analysisRef = useRef<HTMLDivElement>(null);
@@ -85,14 +97,16 @@ export default function ATSCheckerPage() {
       }
 
       // Validate the response matches our expected format
-      if (!data || typeof data !== 'object' || !('score' in data)) {
+      if (!data || typeof data !== "object" || !("score" in data)) {
         throw new Error("Invalid response format from server");
       }
 
       setAnalysisResult(data);
     } catch (err: any) {
       console.error("ATS Analysis Error:", err);
-      setError(err.message || "Failed to analyze resume. Please try again later.");
+      setError(
+        err.message || "Failed to analyze resume. Please try again later."
+      );
     } finally {
       setIsAnalyzing(false);
     }
@@ -115,15 +129,15 @@ export default function ATSCheckerPage() {
 
     try {
       const dataUrl = await htmlToImage.toPng(analysisRef.current);
-      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdf = new jsPDF("p", "mm", "a4");
       const imgProps = pdf.getImageProperties(dataUrl);
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      
-      pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save('ats-analysis-report.pdf');
+
+      pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save("ats-analysis-report.pdf");
     } catch (error) {
-      console.error('Error exporting as PDF:', error);
+      console.error("Error exporting as PDF:", error);
     }
   };
 
@@ -145,9 +159,10 @@ export default function ATSCheckerPage() {
         new Paragraph({
           children: [
             new TextRun({
-              text: analysisResult.score >= 80
-                ? "Excellent! Your resume is well-optimized for ATS systems."
-                : analysisResult.score >= 60
+              text:
+                analysisResult.score >= 80
+                  ? "Excellent! Your resume is well-optimized for ATS systems."
+                  : analysisResult.score >= 60
                   ? "Good! Your resume has room for improvement."
                   : "Needs work. Consider implementing the suggestions below.",
               bold: true,
@@ -160,19 +175,21 @@ export default function ATSCheckerPage() {
           heading: HeadingLevel.HEADING_2,
           spacing: { after: 100 },
         }),
-        ...Object.entries(analysisResult.sections).flatMap(([section, data]) => [
-          new Paragraph({
-            text: section,
-            heading: HeadingLevel.HEADING_3,
-          }),
-          new Paragraph({
-            text: `Score: ${data.score}/100`,
-          }),
-          new Paragraph({
-            text: data.feedback,
-            spacing: { after: 100 },
-          }),
-        ]),
+        ...Object.entries(analysisResult.sections).flatMap(
+          ([section, data]) => [
+            new Paragraph({
+              text: section,
+              heading: HeadingLevel.HEADING_3,
+            }),
+            new Paragraph({
+              text: `Score: ${data.score}/100`,
+            }),
+            new Paragraph({
+              text: data.feedback,
+              spacing: { after: 100 },
+            }),
+          ]
+        ),
         new Paragraph({
           text: "Keywords Analysis",
           heading: HeadingLevel.HEADING_2,
@@ -199,31 +216,34 @@ export default function ATSCheckerPage() {
           heading: HeadingLevel.HEADING_2,
           spacing: { after: 100 },
         }),
-        ...analysisResult.suggestions.map(suggestion => 
-          new Paragraph({
-            text: suggestion,
-            bullet: { level: 0 },
-          })
+        ...analysisResult.suggestions.map(
+          (suggestion) =>
+            new Paragraph({
+              text: suggestion,
+              bullet: { level: 0 },
+            })
         ),
       ];
 
       const doc = new Document({
-        sections: [{
-          properties: {},
-          children: children,
-        }],
+        sections: [
+          {
+            properties: {},
+            children: children,
+          },
+        ],
       });
 
-      Packer.toBlob(doc).then(blob => {
+      Packer.toBlob(doc).then((blob) => {
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
-        a.download = 'ats-analysis-report.docx';
+        a.download = "ats-analysis-report.docx";
         a.click();
         URL.revokeObjectURL(url);
       });
     } catch (error) {
-      console.error('Error exporting as DOCX:', error);
+      console.error("Error exporting as DOCX:", error);
     }
   };
 
@@ -236,8 +256,12 @@ export default function ATSCheckerPage() {
             <CheckCircle className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">ATS Resume Checker</h1>
-            <p className="text-gray-600">Optimize your resume for Applicant Tracking Systems</p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              ATS Resume Checker
+            </h1>
+            <p className="text-gray-600">
+              Optimize your resume for Applicant Tracking Systems
+            </p>
           </div>
         </div>
 
@@ -252,7 +276,8 @@ export default function ATSCheckerPage() {
             <DialogHeader>
               <DialogTitle>ATS Resume Analysis</DialogTitle>
               <DialogDescription>
-                Upload your resume and job description for ATS optimization analysis
+                Upload your resume and job description for ATS optimization
+                analysis
               </DialogDescription>
             </DialogHeader>
 
@@ -266,13 +291,16 @@ export default function ATSCheckerPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <PDFUploader 
+                    <PDFUploader
                       onExtractedText={setExtractedText}
                       onFileUploaded={setResumeFile}
                     />
                     {extractedText && (
                       <div className="mt-4 p-3 bg-gray-50 rounded text-sm text-gray-600">
-                        <p>Text extracted from resume ({extractedText.length} characters)</p>
+                        <p>
+                          Text extracted from resume ({extractedText.length}{" "}
+                          characters)
+                        </p>
                       </div>
                     )}
                   </CardContent>
@@ -304,7 +332,9 @@ export default function ATSCheckerPage() {
                 <div className="flex justify-center">
                   <Button
                     onClick={handleAnalyze}
-                    disabled={!extractedText || !jobDescription.trim() || isAnalyzing}
+                    disabled={
+                      !extractedText || !jobDescription.trim() || isAnalyzing
+                    }
                     className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 px-8 py-3"
                     size="lg"
                   >
@@ -333,7 +363,10 @@ export default function ATSCheckerPage() {
                           <BarChart3 className="h-5 w-5" />
                           ATS Compatibility Score
                         </span>
-                        <Badge variant={getScoreBadgeVariant(analysisResult.score)} className="text-lg px-3 py-1">
+                        <Badge
+                          variant={getScoreBadgeVariant(analysisResult.score)}
+                          className="text-lg px-3 py-1"
+                        >
                           {analysisResult.score}/100
                         </Badge>
                       </CardTitle>
@@ -344,8 +377,8 @@ export default function ATSCheckerPage() {
                         {analysisResult.score >= 80
                           ? "Excellent! Your resume is well-optimized for ATS systems."
                           : analysisResult.score >= 60
-                            ? "Good! Your resume has room for improvement."
-                            : "Needs work. Consider implementing the suggestions below."}
+                          ? "Good! Your resume has room for improvement."
+                          : "Needs work. Consider implementing the suggestions below."}
                       </p>
                     </CardContent>
                   </Card>
@@ -357,17 +390,30 @@ export default function ATSCheckerPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        {Object.entries(analysisResult.sections).map(([section, data]) => (
-                          <div key={section} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div>
-                              <h4 className="font-medium">{section}</h4>
-                              <p className="text-sm text-gray-600">{data.feedback}</p>
+                        {Object.entries(analysisResult.sections).map(
+                          ([section, data]) => (
+                            <div
+                              key={section}
+                              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                            >
+                              <div>
+                                <h4 className="font-medium">{section}</h4>
+                                <p className="text-sm text-gray-600">
+                                  {data.feedback}
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <span
+                                  className={`font-bold ${getScoreColor(
+                                    data.score
+                                  )}`}
+                                >
+                                  {data.score}/100
+                                </span>
+                              </div>
                             </div>
-                            <div className="text-right">
-                              <span className={`font-bold ${getScoreColor(data.score)}`}>{data.score}/100</span>
-                            </div>
-                          </div>
-                        ))}
+                          )
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -384,7 +430,11 @@ export default function ATSCheckerPage() {
                       <CardContent>
                         <div className="flex flex-wrap gap-2">
                           {analysisResult.keywords.matched.map((keyword) => (
-                            <Badge key={keyword} variant="default" className="bg-green-100 text-green-800">
+                            <Badge
+                              key={keyword}
+                              variant="default"
+                              className="bg-green-100 text-green-800"
+                            >
                               {keyword}
                             </Badge>
                           ))}
@@ -402,7 +452,11 @@ export default function ATSCheckerPage() {
                       <CardContent>
                         <div className="flex flex-wrap gap-2">
                           {analysisResult.keywords.missing.map((keyword) => (
-                            <Badge key={keyword} variant="destructive" className="bg-red-100 text-red-800">
+                            <Badge
+                              key={keyword}
+                              variant="destructive"
+                              className="bg-red-100 text-red-800"
+                            >
                               {keyword}
                             </Badge>
                           ))}
@@ -432,41 +486,41 @@ export default function ATSCheckerPage() {
                   </Card>
                 </div>
 
-  
+                <div className="flex justify-end gap-2 mt-4">
+                  {/* Export Dropdown */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="flex items-center gap-2"
+                      >
+                        <Download className="h-4 w-4" />
+                        Export
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem onClick={exportAsPDF}>
+                        Export as PDF
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={exportAsDOCX}>
+                        Export as DOCX
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
 
-<div className="flex justify-end gap-2 mt-4">
-  {/* Export Dropdown */}
-  <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button variant="outline" className="flex items-center gap-2">
-        <Download className="h-4 w-4" />
-        Export
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent>
-      <DropdownMenuItem onClick={exportAsPDF}>
-        Export as PDF
-      </DropdownMenuItem>
-      <DropdownMenuItem onClick={exportAsDOCX}>
-        Export as DOCX
-      </DropdownMenuItem>
-    </DropdownMenuContent>
-  </DropdownMenu>
-
-  {/* Close Analysis Button */}
-  <Button
-    onClick={() => {
-      setAnalysisResult(null);
-      setResumeFile(null);
-      setJobDescription("");
-      setExtractedText("");
-      setIsDialogOpen(false);
-    }}
-  >
-    Close Analysis
-  </Button>
-</div>
-
+                  {/* Close Analysis Button */}
+                  <Button
+                    onClick={() => {
+                      setAnalysisResult(null);
+                      setResumeFile(null);
+                      setJobDescription("");
+                      setExtractedText("");
+                      setIsDialogOpen(false);
+                    }}
+                  >
+                    Close Analysis
+                  </Button>
+                </div>
               </div>
             )}
           </DialogContent>
@@ -489,7 +543,9 @@ export default function ATSCheckerPage() {
               </div>
               <div>
                 <h4 className="font-medium text-gray-900">Use Keywords</h4>
-                <p className="text-sm text-gray-600">Include relevant keywords from the job description</p>
+                <p className="text-sm text-gray-600">
+                  Include relevant keywords from the job description
+                </p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -498,7 +554,9 @@ export default function ATSCheckerPage() {
               </div>
               <div>
                 <h4 className="font-medium text-gray-900">Simple Formatting</h4>
-                <p className="text-sm text-gray-600">Use clean, simple formatting that ATS can parse</p>
+                <p className="text-sm text-gray-600">
+                  Use clean, simple formatting that ATS can parse
+                </p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -507,7 +565,9 @@ export default function ATSCheckerPage() {
               </div>
               <div>
                 <h4 className="font-medium text-gray-900">Quantify Results</h4>
-                <p className="text-sm text-gray-600">Include numbers and metrics to show impact</p>
+                <p className="text-sm text-gray-600">
+                  Include numbers and metrics to show impact
+                </p>
               </div>
             </div>
           </div>
