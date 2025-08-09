@@ -38,7 +38,7 @@ export default function ResumeTemplate({
     transform: `scale(${scale})`,
     transformOrigin: 'top left',
     width: scale !== 0.3 ? `${50 / scale}%` : '100%',
-    height: scale !== 1.8 ? `${100 / scale}%` : 'auto',
+    height: scale !== 1.0 ? `${100 / scale}%` : 'auto',
   }
 
   return (

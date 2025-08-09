@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -21,10 +21,22 @@ import {
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
 import { logoutUser } from "@/lib/redux/slices/authSlice"
 import { Crown } from "lucide-react"
-import ProtectedRoute from "@/components/auth/ProtectedRoute"
-import { SidebarProvider } from "@/components/ui/sidebar"
-import { Sidebar } from "@/components/dashboard/sidebar"
+import * as htmlToImage from "html-to-image"
+import { jsPDF } from "jspdf"
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx"
 
+
+import { SidebarProvider } from "@/components/ui/sidebar"
+import { Sidebar } from "./sidebar"
+import { CreatePersonaPage } from "@/components/persona/PersonaList"
+import { ResumePage } from "@/components/resume/ResumeList"
+import { CoverLetterPage } from "@/components/cover-letter/CoverLetterList"
+import  ATSCheckerPage  from "@/components/ats/ats-checker-page"
+import { ProfilePage } from "@/components/profile/profile-page"
+// import { SettingsPage } from "@/components/settings/settings-page"
+import ProtectedRoute from "@/components/auth/ProtectedRoute"
+
+ 
 interface OptimizedCV {
   personalInfo: {
     name: string
@@ -84,6 +96,24 @@ export default function CreateCVPage() {
   const personaId = searchParams.get("personaId")
   const dispatch = useAppDispatch()
   const { user } = useAppSelector((state) => state.auth)
+  const cvPreviewRef = useRef<HTMLDivElement>(null)
+
+  const renderActivePage = () => {
+    switch (activePage) {
+      case "create-persona":
+        return <CreatePersonaPage />
+      case "resumes":
+        return <ResumePage />
+      case "cover-letter":
+        return <CoverLetterPage />
+      case "ats-checker":
+        return <ATSCheckerPage />
+      case "profile":
+        return <ProfilePage />
+      default:
+        return <CreatePersonaPage />
+    }
+  }
 
   const handleLogout = async () => {
     await dispatch(logoutUser())
@@ -378,7 +408,7 @@ export default function CreateCVPage() {
                   ${styles}
                   body { 
                     margin: 0; 
-                    padding: 20px; 
+                    padding: 2px; 
                     font-family: Arial, sans-serif;
                     background: white;
                   }
@@ -436,8 +466,187 @@ export default function CreateCVPage() {
     }
   }
 
+  const exportAsPDF = async () => {
+    if (!cvPreviewRef.current) return;
+
+    try {
+      const dataUrl = await htmlToImage.toPng(cvPreviewRef.current);
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgProps = pdf.getImageProperties(dataUrl);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`${persona?.full_name || 'resume'}-cv.pdf`);
+    } catch (error) {
+      console.error("Error exporting as PDF:", error);
+      alert('PDF export failed. Please try again.');
+    }
+  };
+
+  const exportAsDOCX = async () => {
+    if (!aiResponse || !persona) return;
+
+    try {
+      const children = [
+        new Paragraph({
+          text: `${persona.full_name || 'Resume'}`,
+          heading: HeadingLevel.HEADING_1,
+          spacing: { after: 200 },
+        }),
+        new Paragraph({
+          text: `Job Title: ${persona.job_title || ''}`,
+          heading: HeadingLevel.HEADING_2,
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: `Email: ${persona.email || ''}`,
+        }),
+        new Paragraph({
+          text: `Phone: ${persona.phone || ''}`,
+        }),
+        new Paragraph({
+          text: `Location: ${persona.city || ''}, ${persona.country || ''}`,
+          spacing: { after: 200 },
+        }),
+      ];
+
+      // Add summary
+      if (persona.summary) {
+        children.push(
+          new Paragraph({
+            text: "Summary",
+            heading: HeadingLevel.HEADING_2,
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            text: persona.summary,
+            spacing: { after: 200 },
+          })
+        );
+      }
+
+      // Add experience
+      if (persona.experience && Array.isArray(persona.experience)) {
+        children.push(
+          new Paragraph({
+            text: "Work Experience",
+            heading: HeadingLevel.HEADING_2,
+            spacing: { after: 100 },
+          })
+        );
+        
+        persona.experience.forEach((exp: any) => {
+          children.push(
+            new Paragraph({
+              text: `${exp.jobTitle || ""} at ${exp.companyName || ""}`,
+              heading: HeadingLevel.HEADING_3,
+            }),
+            new Paragraph({
+              text: `${exp.startDate || ""} - ${exp.endDate || ""}`,
+            }),
+            new Paragraph({
+              text: `Location: ${exp.location || ""}`,
+              spacing: { after: 100 },
+            })
+          );
+          
+          if (exp.responsibilities && Array.isArray(exp.responsibilities)) {
+            exp.responsibilities.forEach((resp: string) => {
+              children.push(
+                new Paragraph({
+                  text: resp,
+                  bullet: { level: 0 },
+                })
+              );
+            });
+          }
+          children.push(new Paragraph({ spacing: { after: 200 } }));
+        });
+      }
+
+      // Add education
+      if (persona.education && Array.isArray(persona.education)) {
+        children.push(
+          new Paragraph({
+            text: "Education",
+            heading: HeadingLevel.HEADING_2,
+            spacing: { after: 100 },
+          })
+        );
+        
+        persona.education.forEach((edu: any) => {
+          children.push(
+            new Paragraph({
+              text: `${edu.degree || ""} from ${edu.institutionName || ""}`,
+              heading: HeadingLevel.HEADING_3,
+            }),
+            new Paragraph({
+              text: `Graduation: ${edu.graduationDate || ""}`,
+            }),
+            new Paragraph({
+              text: `GPA: ${edu.gpa || ""}`,
+              spacing: { after: 200 },
+            })
+          );
+        });
+      }
+
+      // Add skills
+      if (persona.skills) {
+        children.push(
+          new Paragraph({
+            text: "Skills",
+            heading: HeadingLevel.HEADING_2,
+            spacing: { after: 100 },
+          })
+        );
+        
+        if (Array.isArray(persona.skills.technical)) {
+          children.push(
+            new Paragraph({
+              text: `Technical Skills: ${persona.skills.technical.join(", ")}`,
+            })
+          );
+        }
+        
+        if (Array.isArray(persona.skills.soft)) {
+          children.push(
+            new Paragraph({
+              text: `Soft Skills: ${persona.skills.soft.join(", ")}`,
+              spacing: { after: 200 },
+            })
+          );
+        }
+      }
+
+      const doc = new Document({
+        sections: [
+          {
+            properties: {},
+            children: children,
+          },
+        ],
+      });
+
+      Packer.toBlob(doc).then((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${persona.full_name || 'resume'}-cv.docx`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    } catch (error) {
+      console.error("Error exporting as DOCX:", error);
+      alert('DOCX export failed. Please try again.');
+    }
+  };
+
   if (isLoading && step === "template") {
+
     return (
+
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -449,6 +658,7 @@ export default function CreateCVPage() {
 
   if (error && step === "template") {
     return (
+
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardContent className="text-center p-6">
@@ -469,21 +679,23 @@ export default function CreateCVPage() {
 
   if (!persona && step === "template") {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardContent className="text-center p-6">
-            <div className="text-gray-500 mb-4">
-              <Sparkles className="h-12 w-12 mx-auto" />
-            </div>
-            <h2 className="text-xl font-semibold mb-2">No Persona Data</h2>
-            <p className="text-gray-600 mb-4">Unable to find persona data</p>
-            <Button onClick={() => router.back()}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Go Back
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      <ProtectedRoute>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <Card className="w-full max-w-md">
+            <CardContent className="text-center p-6">
+              <div className="text-gray-500 mb-4">
+                <Sparkles className="h-12 w-12 mx-auto" />
+              </div>
+              <h2 className="text-xl font-semibold mb-2">No Persona Data</h2>
+              <p className="text-gray-600 mb-4">Unable to find persona data</p>
+              <Button onClick={() => router.back()}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Go Back
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </ProtectedRoute>
     )
   }
 
@@ -491,7 +703,13 @@ export default function CreateCVPage() {
     <ProtectedRoute>
       <SidebarProvider>
         <div className="flex min-h-screen">
-          <Sidebar activePage={activePage} setActivePage={setActivePage} />
+          <Sidebar 
+        activePage={activePage} 
+        setActivePage={setActivePage}
+        onExportPDF={exportAsPDF}
+        onExportDOCX={exportAsDOCX}
+        onExportPNG={() => handleExport('png')}
+      />
           <main className="flex-1 p-6 bg-gray-50">
             {step === "template" ? (
               // Template Selection View
@@ -508,8 +726,8 @@ export default function CreateCVPage() {
                         </div>
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold">{persona?.full_name}</h3>
-                        <p className="text-gray-600">{persona?.job_title}</p>
+                        <h3 className="text-lg font-semibold">{persona?.full_name || 'Your Name'}</h3>
+                        <p className="text-gray-600">{persona?.job_title || 'Your Job Title'}</p>
                         <p className="text-sm text-gray-500">Choose a template to generate your AI-enhanced CV</p>
                       </div>
                     </div>
@@ -525,87 +743,7 @@ export default function CreateCVPage() {
             ) : (
               // AI Response View
               <div className="flex flex-col lg:flex-row gap-6">
-                {/* Left sidebar - Resume controls */}
-                <div className="w-full lg:w-64 flex-shrink-0">
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 space-y-4">
-                    <h3 className="font-semibold text-lg text-gray-900 mb-2">Resume Controls</h3>
-                    
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="w-full justify-start gap-2">
-                          <Download className="h-4 w-4" />
-                          Export Resume
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-56">
-                        <DropdownMenuItem 
-                          className="gap-2 cursor-pointer"
-                          onClick={() => handleExport('pdf')}
-                        >
-                          <FileText className="h-4 w-4" />
-                          PDF
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          className="gap-2 cursor-pointer"
-                          onClick={() => handleExport('docx')}
-                        >
-                          <FileOutput className="h-4 w-4" />
-                          DOCX
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          className="gap-2 cursor-pointer"
-                          onClick={() => handleExport('png')}
-                        >
-                          <FileInput className="h-4 w-4" />
-                          PNG
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-
-                    <Button variant="outline" className="w-full justify-start gap-2">
-                      <FilePlus2 className="h-4 w-4" />
-                      New Section
-                    </Button>
-
-                    <Button variant="outline" className="w-full justify-start gap-2">
-                      <LayoutTemplate className="h-4 w-4" />
-                      Change Template
-                    </Button>
-
-                    <Button variant="outline" className="w-full justify-start gap-2">
-                      <Palette className="h-4 w-4" />
-                      Customize Colors
-                    </Button>
-
-                    <Button variant="outline" className="w-full justify-start gap-2">
-                      <Settings className="h-4 w-4" />
-                      Layout Options
-                    </Button>
-                  </div>
-
-                  {/* AI Suggestions */}
-                  {aiResponse && (
-                    <Card className="mt-6">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Award className="h-5 w-5" />
-                          AI Suggestions
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          {aiResponse.suggestions.map((suggestion, index) => (
-                            <div key={index} className="flex items-start gap-3">
-                              <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                              <p className="text-sm text-gray-700">{suggestion}</p>
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-
+                {/* Left sidebar - Resume controls */} 
                 {/* Main content area */}
                 <div className="flex-1">
                   {isLoading ? (
@@ -631,26 +769,7 @@ export default function CreateCVPage() {
                     </Card>
                   ) : aiResponse ? (
                     <>
-                      {/* Improvement Score */}
-                      <Card className="mb-6">
-                        <CardContent className="p-6">
-                          <div className="flex items-center gap-4">
-                            <div className="flex-shrink-0">
-                              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center">
-                                <span className="text-white font-bold text-lg">
-                                  {aiResponse.improvementScore}%
-                                </span>
-                              </div>
-                            </div>
-                            <div>
-                              <h3 className="text-lg font-semibold">Improvement Score</h3>
-                              <p className="text-gray-600">
-                                Your CV has been enhanced with AI optimization using the {selectedTemplate?.name} template.
-                              </p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                     
 
                       {/* CV Preview */}
                       <div className="space-y-6">
@@ -677,6 +796,26 @@ export default function CreateCVPage() {
                           />
                         )}
                       </div>
+                       {/* Improvement Score */}
+                       <Card className="mb-6">
+                        <CardContent className="p-6">
+                          <div className="flex items-center gap-4">
+                            <div className="flex-shrink-0">
+                              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center">
+                                <span className="text-white font-bold text-lg">
+                                  {aiResponse.improvementScore}%
+                                </span>
+                              </div>
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-semibold">Improvement Score</h3>
+                              <p className="text-gray-600">
+                                Your CV has been enhanced with AI optimization using the {selectedTemplate?.name} template.
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
                     </>
                   ) : null}
                 </div>
