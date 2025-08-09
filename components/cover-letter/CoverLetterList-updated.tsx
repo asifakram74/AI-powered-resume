@@ -141,7 +141,9 @@ export function CoverLetterPage() {
       console.error("Error generating cover letter:", error)
       alert(`Failed to generate cover letter: ${error instanceof Error ? error.message : "Unknown error"}`)
       
-      // Fallback to basic generatio
+      // Fallback to basic generation
+      const fallbackLetter = generateFallbackCoverLetter(jobDescription, tone, cvs.find(cv => cv.id.toString() === cvId)!)
+      setGeneratedLetter(fallbackLetter)
       setShowGenerator(false)
     } finally {
       setIsGenerating(false)
@@ -245,6 +247,26 @@ export function CoverLetterPage() {
     )
   })
 
+  const generateFallbackCoverLetter = (jobDesc: string, tone: string, cv: CV) => {
+    const tones = {
+      professional: "I am writing to express my strong interest in this position...",
+      enthusiastic: "I am thrilled to apply for this exciting opportunity...",
+      confident: "With my proven track record, I am confident...",
+      friendly: "I would love the opportunity to contribute...",
+      creative: "Your company's innovative approach resonates..."
+    }
+
+    const opening = tones[tone as keyof typeof tones] || tones.professional
+    
+    return `${opening}
+
+Based on the job description: ${jobDesc.substring(0, 100)}...
+
+My experience with ${cv.title} makes me an excellent candidate for this role.
+
+Sincerely,
+[Your Name]`
+  }
 
   if (isLoading && coverLetters.length === 0) {
     return (
