@@ -130,10 +130,10 @@ export function Sidebar({
               isActive={activePage === "new-section"}
               className="w-full justify-start gap-3 px-4 py-3 text-left rounded-xl transition-all duration-200 hover:bg-gray-50 hover:shadow-sm data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-50 data-[active=true]:to-purple-50 data-[active=true]:text-blue-700 data-[active=true]:shadow-sm data-[active=true]:border data-[active=true]:border-blue-100 group"
             >
-              <div className="flex items-center gap-3 flex-1">
+              <button className="flex items-center gap-3 flex-1" onClick={() => router.push(`/dashboard?page=resumes`) }>
                 <PlusCircle className="h-5 w-5 text-gray-600 group-data-[active=true]:text-blue-600" />
                 <span className="font-medium text-gray-700 group-data-[active=true]:text-blue-700">New Section</span>
-              </div>
+              </button>
             </SidebarMenuButton>
           </SidebarMenuItem>
 
@@ -142,11 +142,13 @@ export function Sidebar({
               onClick={() => setActivePage("change-template")}
               isActive={activePage === "change-template"}
               className="w-full justify-start gap-3 px-4 py-3 text-left rounded-xl transition-all duration-200 hover:bg-gray-50 hover:shadow-sm data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-50 data-[active=true]:to-purple-50 data-[active=true]:text-blue-700 data-[active=true]:shadow-sm data-[active=true]:border data-[active=true]:border-blue-100 group"
-            >
-              <div className="flex items-center gap-3 flex-1">
+            > 
+               
+              <button onClick={() => setActivePage("change-template")} className="flex items-center gap-3 flex-1">
+
                 <Layout className="h-5 w-5 text-gray-600 group-data-[active=true]:text-blue-600" />
                 <span className="font-medium text-gray-700 group-data-[active=true]:text-blue-700">Change Template</span>
-              </div>
+              </button>
             </SidebarMenuButton>
           </SidebarMenuItem>
 
@@ -183,7 +185,7 @@ export function Sidebar({
           <LogOut className="h-4 w-4 mr-2" />
           Logout
         </Button>
-        <Link href="/">
+        <Link href="/dashboard">
           <Button variant="secondary" className="w-full">
             <Home className="h-4 w-4 mr-2" />
             Back to Home

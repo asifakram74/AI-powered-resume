@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -84,6 +84,25 @@ interface CVTemplate {
 }
 
 export default function CreateCVPage() {
+  return (
+    <Suspense fallback={<CreateCVPageLoading />}>
+      <CreateCVPageContent />
+    </Suspense>
+  )
+}
+
+function CreateCVPageLoading() {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Loading...</p>
+      </div>
+    </div>
+  )
+}
+
+function CreateCVPageContent() {
   const [aiResponse, setAiResponse] = useState<AIResponse | null>(null)
   const [persona, setPersona] = useState<PersonaResponse | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -742,10 +761,9 @@ export default function CreateCVPage() {
               </div>
             ) : (
               // AI Response View
-              <div className="flex flex-col lg:flex-row gap-6">
-                {/* Left sidebar - Resume controls */} 
+              <div className="flex ">
                 {/* Main content area */}
-                <div className="flex-1">
+                <div className="">
                   {isLoading ? (
                     <div className="flex justify-center items-center py-12">
                       <div className="text-center">
@@ -780,8 +798,10 @@ export default function CreateCVPage() {
                           </div>
                           <div className="flex gap-2">
                             <Button variant="outline" onClick={handleBackToTemplate}>
-                              Change Template
+                              <ArrowLeft className="h-4 w-4 mr-2" />
+                              Change Template                        
                             </Button>
+                           
                             <Button variant="outline" onClick={handleEdit}>
                               <Edit className="h-4 w-4 mr-2" />
                               Edit

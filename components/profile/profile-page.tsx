@@ -11,13 +11,18 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2 } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
 import { fetchProfile, updateProfile } from "@/lib/redux/slices/authSlice"
+import { getPersonas } from "@/lib/redux/service/pasonaService"
+import { getCVs } from "@/lib/redux/service/cvService"
+import { getCoverLetters } from "@/lib/redux/service/coverLetterService"
+import { getATSResumes } from "@/lib/redux/service/atsResumeService"
+import Link from "next/link"
 
-const recentActivity = [
-  { action: "Created new resume", item: "Software Engineer Resume", time: "2 hours ago", type: "resume" },
-  { action: "Generated cover letter", item: "Frontend Developer Position", time: "1 day ago", type: "cover-letter" },
-  { action: "ATS check completed", item: "Full Stack Developer CV", time: "2 days ago", type: "ats" },
-  { action: "Created persona", item: "Senior Developer Persona", time: "3 days ago", type: "persona" },
-]
+interface ContentItem {
+  id: string
+  title: string
+  type: "persona" | "cv" | "cover-letter" | "ats"
+  createdAt: string
+}
 
 export function ProfilePage() {
   const dispatch = useAppDispatch()
@@ -29,6 +34,8 @@ export function ProfilePage() {
   })
   const [isEditing, setIsEditing] = useState(false)
   const [success, setSuccess] = useState<string | null>(null)
+  const [contentItems, setContentItems] = useState<ContentItem[]>([])
+  const [loadingContent, setLoadingContent] = useState(false)
 
   useEffect(() => {
     if (!profile) {
@@ -46,6 +53,69 @@ export function ProfilePage() {
     }
   }, [profile])
 
+  useEffect(() => {
+    const fetchUserContent = async () => {
+      if (!user?.id) return
+      
+      try {
+        setLoadingContent(true)
+        
+        // Fetch all content in parallel
+        const [personas, cvs, coverLetters, atsResumes] = await Promise.all([
+          getPersonas(user.id.toString()),
+          getCVs(user.id.toString()),
+          getCoverLetters(user.id.toString()),
+          getATSResumes()
+        ])
+
+        // Transform all content into a unified format with unique keys
+        const allContent: ContentItem[] = [
+          ...personas.map(p => ({
+            id: `persona-${p.id}`,
+            title: p.full_name || `Persona ${p.id}`,
+            type: "persona" as const,
+            createdAt: p.created_at,
+            originalId: p.id
+          })),
+          ...cvs.map(cv => ({
+            id: `cv-${cv.id}`,
+            title: cv.title || `CV ${cv.id}`,
+            type: "cv" as const,
+            createdAt: cv.created_at,
+            originalId: cv.id
+          })),
+          ...coverLetters.map(cl => ({
+            id: `cover-letter-${cl.id}`,
+            title: `Cover Letter for ${cl.job_description?.substring(0, 30) || 'Untitled'}...`,
+            type: "cover-letter" as const,
+            createdAt: cl.created_at,
+            originalId: cl.id
+          })),
+          ...atsResumes.map(ats => ({
+            id: `ats-${ats.id}`,
+            title: `ATS Check for ${ats.job_description?.substring(0, 30) || 'Untitled'}...`,
+            type: "ats" as const,
+            createdAt: ats.created_at,
+            originalId: ats.id
+          }))
+        ]
+
+        // Sort by creation date (newest first)
+        allContent.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        
+        setContentItems(allContent)
+      } catch (err) {
+        console.error("Failed to fetch user content:", err)
+      } finally {
+        setLoadingContent(false)
+      }
+    }
+
+    if (user?.id) {
+      fetchUserContent()
+    }
+  }, [user?.id])
+
   const handleSave = async () => {
     try {
       setSuccess(null)
@@ -58,6 +128,7 @@ export function ProfilePage() {
       setSuccess("Profile updated successfully")
       setIsEditing(false)
     } catch (err) {
+      console.error(err)
     }
   }
 
@@ -70,6 +141,36 @@ export function ProfilePage() {
       })
     }
     setIsEditing(false)
+  }
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffInHours = Math.abs(now.getTime() - date.getTime()) / (1000 * 60 * 60)
+    
+    if (diffInHours < 24) {
+      return `${Math.floor(diffInHours)} hours ago`
+    } else {
+      return date.toLocaleDateString()
+    }
+  }
+
+  const getContentLink = (item: ContentItem) => {
+    // Extract the original ID by removing the prefix
+    const originalId = item.id.includes('-') ? item.id.split('-').slice(1).join('-') : item.id
+    
+    switch (item.type) {
+      case "persona":
+        return `/dashboard/personas/${originalId}`
+      case "cv":
+        return `/dashboard/cv/${originalId}`
+      case "cover-letter":
+        return `/dashboard/cover-letters/${originalId}`
+      case "ats":
+        return `/dashboard/ats/${originalId}`
+      default:
+        return "#"
+    }
   }
 
   if (!profile && loading) {
@@ -88,11 +189,31 @@ export function ProfilePage() {
     )
   }
 
-
   const stats = [
-    { label: "Resumes Created", value: profile.cvs_count, icon: FileText, color: "text-blue-600" },
-    { label: "Cover Letters", value: profile.cover_letters_count, icon: Mail, color: "text-green-600" },
-    { label: "ATS Checks", value: profile.ats_resumes_count, icon: Target, color: "text-orange-600" },
+    { 
+      label: "Resumes Created", 
+      value: profile?.cvs_count || contentItems.filter(i => i.type === "cv").length, 
+      icon: FileText, 
+      color: "text-blue-600" 
+    },
+    { 
+      label: "Cover Letters", 
+      value: profile?.cover_letters_count || contentItems.filter(i => i.type === "cover-letter").length, 
+      icon: Mail, 
+      color: "text-green-600" 
+    },
+    { 
+      label: "ATS Checks", 
+      value: profile?.ats_resumes_count || contentItems.filter(i => i.type === "ats").length, 
+      icon: Target, 
+      color: "text-orange-600" 
+    },
+    { 
+      label: "Personas Generated", 
+      value: contentItems.filter(i => i.type === "persona").length, 
+      icon: UserCircle, 
+      color: "text-purple-600" 
+    },
   ]
 
   return (
@@ -140,7 +261,7 @@ export function ProfilePage() {
                 </Avatar>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">{profile.name}</h3>
-                  <p className="text-gray-600">{profile.email}</p>
+                  <p className="text-gray-600 text-xs">{profile.email}</p>
                   <Badge variant="secondary" className="mt-1">
                     {profile.plan_type || "Free Member"}
                   </Badge>
@@ -196,12 +317,6 @@ export function ProfilePage() {
                       <Label className="text-sm font-medium text-gray-700">Email</Label>
                       <p className="text-sm text-gray-600">{profile.email}</p>
                     </div>
-                    {/* <div>
-                      <Label className="text-sm font-medium text-gray-700">Member Since</Label>
-                      <p className="text-sm text-gray-600">
-                        {user.created_at ? new Date(user.created_at).toLocaleDateString() : "Recently"}
-                      </p>
-                    </div> */}
                     <div>
                       <Label className="text-sm font-medium text-gray-700">Plan Type</Label>
                       <p className="text-sm text-gray-600">{profile.plan_type}</p>
@@ -226,26 +341,13 @@ export function ProfilePage() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-3 bg-gray-50 rounded-lg">
-                  <FileText className="h-6 w-6 mx-auto mb-2 text-blue-600" />
-                  <div className="text-2xl font-bold text-gray-900">{profile.cvs_count}</div>
-                  <div className="text-xs text-gray-600">Resumes Created</div>
-                </div>
-                <div className="text-center p-3 bg-gray-50 rounded-lg">
-                  <Mail className="h-6 w-6 mx-auto mb-2 text-green-600" />
-                  <div className="text-2xl font-bold text-gray-900">{profile.cover_letters_count}</div>
-                  <div className="text-xs text-gray-600">Cover Letters</div>
-                </div>
-                <div className="text-center p-3 bg-gray-50 rounded-lg">
-                  <Target className="h-6 w-6 mx-auto mb-2 text-orange-600" />
-                  <div className="text-2xl font-bold text-gray-900">{profile.ats_resumes_count}</div>
-                  <div className="text-xs text-gray-600">ATS Checks</div>
-                </div>
-                <div className="text-center p-3 bg-gray-50 rounded-lg">
-                  <UserCircle className="h-6 w-6 mx-auto mb-2 text-purple-600" />
-                  <div className="text-2xl font-bold text-gray-900">5</div>
-                  <div className="text-xs text-gray-600">Personas Generated</div>
-                </div>
+                {stats.map((stat, index) => (
+                  <div key={index} className="text-center p-3 bg-gray-50 rounded-lg">
+                    <stat.icon className={`h-6 w-6 mx-auto mb-2 ${stat.color}`} />
+                    <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
+                    <div className="text-xs text-gray-600">{stat.label}</div>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -257,28 +359,49 @@ export function ProfilePage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                Recent Activity
+                Your Generated Content
               </CardTitle>
-              <CardDescription>Your recent actions and generated content</CardDescription>
+              <CardDescription>All your created personas, CVs, cover letters, and ATS checks</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
-                    <div className="rounded-full bg-white p-2">
-                      {activity.type === "resume" && <FileText className="h-4 w-4 text-blue-600" />}
-                      {activity.type === "cover-letter" && <Mail className="h-4 w-4 text-green-600" />}
-                      {activity.type === "ats" && <Target className="h-4 w-4 text-orange-600" />}
-                      {activity.type === "persona" && <UserCircle className="h-4 w-4 text-purple-600" />}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">{activity.action}</p>
-                      <p className="text-sm text-gray-600">{activity.item}</p>
-                      <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {loadingContent ? (
+                <div className="flex justify-center items-center py-8">
+                  <Loader2 className="animate-spin h-8 w-8 text-gray-500" />
+                </div>
+              ) : contentItems.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  You haven't created any content yet.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {contentItems.map((item) => (
+                    <Link 
+                      key={item.id} 
+                      href={getContentLink(item)}
+                      className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                    >
+                      <div className="rounded-full bg-white p-2">
+                        {item.type === "cv" && <FileText className="h-4 w-4 text-blue-600" />}
+                        {item.type === "cover-letter" && <Mail className="h-4 w-4 text-green-600" />}
+                        {item.type === "ats" && <Target className="h-4 w-4 text-orange-600" />}
+                        {item.type === "persona" && <UserCircle className="h-4 w-4 text-purple-600" />}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">
+                          {item.type === "cv" && "CV: "}
+                          {item.type === "cover-letter" && "Cover Letter: "}
+                          {item.type === "ats" && "ATS Check: "}
+                          {item.type === "persona" && "Persona: "}
+                          {item.title}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Created {formatDate(item.createdAt)}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -290,22 +413,30 @@ export function ProfilePage() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Button variant="outline" className="h-20 flex-col gap-2 bg-transparent">
-                  <FileText className="h-6 w-6" />
-                  <span className="text-xs">New Resume</span>
-                </Button>
-                <Button variant="outline" className="h-20 flex-col gap-2 bg-transparent">
-                  <Mail className="h-6 w-6" />
-                  <span className="text-xs">Cover Letter</span>
-                </Button>
-                <Button variant="outline" className="h-20 flex-col gap-2 bg-transparent">
-                  <Target className="h-6 w-6" />
-                  <span className="text-xs">ATS Check</span>
-                </Button>
-                <Button variant="outline" className="h-20 flex-col gap-2 bg-transparent">
-                  <UserCircle className="h-6 w-6" />
-                  <span className="text-xs">New Persona</span>
-                </Button>
+                <Link href="/dashboard?page=create-cv">
+                  <Button variant="outline" className="h-20 w-full flex-col gap-2 bg-transparent">
+                    <FileText className="h-6 w-6" />
+                    <span className="text-xs">New Resume</span>
+                  </Button>
+                </Link>
+                <Link href="/dashboard?page=create-cover-letter">
+                  <Button variant="outline" className="h-20 w-full flex-col gap-2 bg-transparent">
+                    <Mail className="h-6 w-6" />
+                    <span className="text-xs">Cover Letter</span>
+                  </Button>
+                </Link>
+                <Link href="/dashboard?page=create-ats">
+                  <Button variant="outline" className="h-20 w-full flex-col gap-2 bg-transparent">
+                    <Target className="h-6 w-6" />
+                    <span className="text-xs">ATS Check</span>
+                  </Button>
+                </Link>
+                <Link href="/dashboard?page=create-persona">
+                  <Button variant="outline" className="h-20 w-full flex-col gap-2 bg-transparent">
+                    <UserCircle className="h-6 w-6" />
+                    <span className="text-xs">New Persona</span>
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
