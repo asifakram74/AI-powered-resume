@@ -125,31 +125,30 @@ export function Sidebar({
 
           {/* Other menu items */}
           <SidebarMenuItem>
-            <SidebarMenuButton
-              onClick={() => setActivePage("new-section")}
-              isActive={activePage === "new-section"}
-              className="w-full justify-start gap-3 px-4 py-3 text-left rounded-xl transition-all duration-200 hover:bg-gray-50 hover:shadow-sm data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-50 data-[active=true]:to-purple-50 data-[active=true]:text-blue-700 data-[active=true]:shadow-sm data-[active=true]:border data-[active=true]:border-blue-100 group"
+            <div
+              onClick={() => {
+                setActivePage("new-section");
+                router.push(`/dashboard?page=resumes`);
+              }}
+              role="button"
+              className="w-full justify-start gap-3 px-4 py-3 text-left rounded-xl transition-all duration-200 hover:bg-gray-50 hover:shadow-sm data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-50 data-[active=true]:to-purple-50 data-[active=true]:text-blue-700 data-[active=true]:shadow-sm data-[active=true]:border data-[active=true]:border-blue-100 group flex items-center cursor-pointer"
+              data-active={activePage === "new-section"}
             >
-              <button className="flex items-center gap-3 flex-1" onClick={() => router.push(`/dashboard?page=resumes`) }>
-                <PlusCircle className="h-5 w-5 text-gray-600 group-data-[active=true]:text-blue-600" />
-                <span className="font-medium text-gray-700 group-data-[active=true]:text-blue-700">New Section</span>
-              </button>
-            </SidebarMenuButton>
+              <PlusCircle className="h-5 w-5 text-gray-600 group-data-[active=true]:text-blue-600" />
+              <span className="font-medium text-gray-700 group-data-[active=true]:text-blue-700">New Section</span>
+            </div>
           </SidebarMenuItem>
 
           <SidebarMenuItem>
-            <SidebarMenuButton
+            <div
               onClick={() => setActivePage("change-template")}
-              isActive={activePage === "change-template"}
-              className="w-full justify-start gap-3 px-4 py-3 text-left rounded-xl transition-all duration-200 hover:bg-gray-50 hover:shadow-sm data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-50 data-[active=true]:to-purple-50 data-[active=true]:text-blue-700 data-[active=true]:shadow-sm data-[active=true]:border data-[active=true]:border-blue-100 group"
-            > 
-               
-              <button onClick={() => setActivePage("change-template")} className="flex items-center gap-3 flex-1">
-
-                <Layout className="h-5 w-5 text-gray-600 group-data-[active=true]:text-blue-600" />
-                <span className="font-medium text-gray-700 group-data-[active=true]:text-blue-700">Change Template</span>
-              </button>
-            </SidebarMenuButton>
+              role="button"
+              className="w-full justify-start gap-3 px-4 py-3 text-left rounded-xl transition-all duration-200 hover:bg-gray-50 hover:shadow-sm data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-50 data-[active=true]:to-purple-50 data-[active=true]:text-blue-700 data-[active=true]:shadow-sm data-[active=true]:border data-[active=true]:border-blue-100 group flex items-center cursor-pointer"
+              data-active={activePage === "change-template"}
+            >
+              <Layout className="h-5 w-5 text-gray-600 group-data-[active=true]:text-blue-600" />
+              <span className="font-medium text-gray-700 group-data-[active=true]:text-blue-700">Change Template</span>
+            </div>
           </SidebarMenuItem>
 
           <SidebarMenuItem>
