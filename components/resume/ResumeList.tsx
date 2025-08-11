@@ -237,14 +237,14 @@ export function ResumePage() {
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
-                            <Button
+                            {/* <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => router.push(`/create-cv?personaId=${cv.personas_id}&step=template`)}
                               className="text-blue-600 hover:text-blue-700"
                             >
                               Create AI CV
-                            </Button>
+                            </Button> */}
                           </div>
                         </TableCell>
                       </TableRow>

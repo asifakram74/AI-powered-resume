@@ -1,24 +1,13 @@
 "use client"
-
 import { useState } from "react"
-import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Check, Crown, Sparkles, FileText, Target, CheckCircle, Star, ArrowRight, Zap, Shield, Mail, Globe, Menu, X, UserCircle, Settings } from "lucide-react"
+import { Check, Sparkles, FileText, CheckCircle, UserCircle, Settings } from 'lucide-react'
 import ResumeTemplate from "./ResumeTemplate"
 import { sampleCVData } from "@/lib/sample-cv-data"
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
 import { logoutUser } from "@/lib/redux/slices/authSlice"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 interface CVTemplate {
   id: string
@@ -71,7 +60,7 @@ const dashboardMenuItems = [
   {
     id: "cover-letter",
     label: "Cover Letters",
-    icon: Mail,
+    icon: FileText, // Changed from Mail to FileText for consistency with other items
     href: "/dashboard?page=cover-letter",
   },
   {
@@ -102,7 +91,6 @@ interface CVTemplatesProps {
 
 export function CVTemplates({ onTemplateSelect, selectedTemplate }: CVTemplatesProps) {
   const [filter, setFilter] = useState<"all" | "modern" | "classic" | "creative" | "minimal">("all")
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const dispatch = useAppDispatch()
   const { user } = useAppSelector((state) => state.auth)
 
@@ -118,8 +106,6 @@ export function CVTemplates({ onTemplateSelect, selectedTemplate }: CVTemplatesP
 
   return (
     <div className="min-h-screen bg-white rounded-lg shadow-lg">
-      {/* Navigation - Matches home page */}
-      
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
@@ -128,13 +114,15 @@ export function CVTemplates({ onTemplateSelect, selectedTemplate }: CVTemplatesP
             Professional Templates
           </Badge>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Choose Your Perfect <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Resume Template</span>
+            Choose Your Perfect{" "}
+            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Resume Template
+            </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Select from our professionally designed templates that pass ATS systems and impress recruiters
           </p>
         </div>
-
         {/* Template Selection */}
         <div className="space-y-6">
           {/* Filter Buttons */}
@@ -151,12 +139,10 @@ export function CVTemplates({ onTemplateSelect, selectedTemplate }: CVTemplatesP
               </Button>
             ))}
           </div>
-
           {/* Templates Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-6 w-full">
             {filteredTemplates.map((template) => {
               const isSelected = selectedTemplate === template.id
-
               return (
                 <Card
                   key={template.id}

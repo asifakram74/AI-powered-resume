@@ -1,9 +1,11 @@
-"use client"
 
+
+
+"use client"
 import { useState, useEffect } from "react"
-import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useRouter } from "next/navigation"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
@@ -13,6 +15,9 @@ import { Save } from "lucide-react"
 import type { CreateCVData, CV } from "@/lib/redux/service/cvService"
 import { useAppSelector } from "@/lib/redux/hooks"
 import { getPersonas, type PersonaResponse } from "@/lib/redux/service/pasonaService"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { CVTemplates } from "./ChooseResumeTemplte"
+import { useForm } from "react-hook-form"
 
 interface CVWizardProps {
   editingCV?: CV | null
@@ -22,21 +27,30 @@ interface CVWizardProps {
 }
 
 export function CVWizard({ editingCV, onSave, onCancel, personaId }: CVWizardProps) {
-  const { user } = useAppSelector(state => state.auth)
-  const [selectedTemplate, setSelectedTemplate] = useState(editingCV?.layout_id || "modern")
+  const router = useRouter()
+  const { user } = useAppSelector((state) => state.auth)
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false)
+  const [formData, setFormData] = useState<CreateCVData | null>(null)
   const [personas, setPersonas] = useState<PersonaResponse[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [apiError, setApiError] = useState<string | null>(null)
   const [selectedPersonaId, setSelectedPersonaId] = useState<string>(personaId || editingCV?.personas_id || "")
+  const [selectedTemplate, setSelectedTemplate] = useState(editingCV?.layout_id || "")
 
-  const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<CreateCVData>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+  } = useForm<CreateCVData>({
     defaultValues: {
-      user_id: user?.id?.toString() || '',
+      user_id: user?.id?.toString() || "",
       layout_id: selectedTemplate,
-      personas_id: personaId || editingCV?.personas_id || '',
-      title: editingCV?.title || '',
-      job_description: editingCV?.job_description || ''
-    }
+      personas_id: personaId || editingCV?.personas_id || "",
+      title: editingCV?.title || "",
+      job_description: editingCV?.job_description || "",
+    },
   })
 
   const currentPersonaId = watch("personas_id")
@@ -50,9 +64,9 @@ export function CVWizard({ editingCV, onSave, onCancel, personaId }: CVWizardPro
         console.log("Fetched personas:", data)
         setPersonas(data)
         setApiError(null)
-        
+
         if (personaId || editingCV?.personas_id) {
-          const personaExists = data.some(p => p.id.toString() === (personaId || editingCV?.personas_id))
+          const personaExists = data.some((p) => p.id.toString() === (personaId || editingCV?.personas_id))
           if (!personaExists) {
             console.warn("Specified persona not found in fetched list")
           }
@@ -64,18 +78,21 @@ export function CVWizard({ editingCV, onSave, onCancel, personaId }: CVWizardPro
         setIsLoading(false)
       }
     }
-
     loadPersonas()
   }, [user?.id, personaId, editingCV?.personas_id])
 
-  const onSubmit = async (data: CreateCVData) => {
+  const handleTemplateSelect = (template: any) => {
+    setSelectedTemplate(template.id)
+  }
+
+  const handleFinalSubmit = async (data: CreateCVData, templateId: string) => {
     setIsLoading(true)
     try {
       await onSave({
         ...data,
-        user_id: user?.id?.toString() || '',
-        layout_id: selectedTemplate,
-        personas_id: selectedPersonaId || data.personas_id
+        user_id: user?.id?.toString() || "",
+        layout_id: templateId,
+        personas_id: selectedPersonaId || data.personas_id,
       })
     } catch (error) {
       console.error("Error saving CV:", error)
@@ -85,16 +102,66 @@ export function CVWizard({ editingCV, onSave, onCancel, personaId }: CVWizardPro
     }
   }
 
-  const selectedPersona = personas.find(p => p.id.toString() === (currentPersonaId || selectedPersonaId))
+  const onSubmit = (data: CreateCVData) => {
+    if (editingCV) {
+      handleFinalSubmit(data, selectedTemplate)
+    } else {
+      setFormData(data)
+      setShowTemplateSelector(true)
+    }
+  }
+
+  const selectedPersona = personas.find((p) => p.id.toString() === (currentPersonaId || selectedPersonaId))
 
   return (
-    <div className="space-y-6 max-h-[70vh] overflow-y-auto">
-      {apiError && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          {apiError}
-        </div>
-      )}
+    <div className="space-y-6 overflow-x-auto">
+      <Dialog open={showTemplateSelector} onOpenChange={setShowTemplateSelector}>
+        <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto w-[70vw] ">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold mb-4">Choose a Template</DialogTitle>
+            <p className="text-sm text-gray-500 mb-6">
+              Select a template for your CV. You can preview each template before making your selection.
+            </p>
+          </DialogHeader>
+          <CVTemplates onTemplateSelect={handleTemplateSelect} selectedTemplate={selectedTemplate} />
+          <div className="flex justify-between items-center mt-4">
+  <Button variant="outline" onClick={() => setShowTemplateSelector(false)}>
+    Cancel
+  </Button>
 
+  <div className="flex gap-2">
+    {selectedTemplate && selectedPersonaId && (
+      <Button
+        onClick={async () => {
+          if (formData) {
+            try {
+              // 1. Save CV
+              await onSave({
+                ...formData,
+                user_id: user?.id?.toString() || "",
+                layout_id: selectedTemplate,
+                personas_id: selectedPersonaId || formData.personas_id,
+              })
+
+              // 2. Redirect to Create AI CV
+              router.push(`/create-cv?personaId=${selectedPersonaId}&step=template`)
+            } catch (error) {
+              console.error("Error creating AI CV:", error)
+              setApiError("Failed to create AI CV. Please try again.")
+            }
+          }
+        }}
+        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+      >
+        Create AI CV
+      </Button>
+    )}
+  </div>
+</div>
+
+        </DialogContent>
+      </Dialog>
+      {apiError && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">{apiError}</div>}
       <form onSubmit={handleSubmit(onSubmit)}>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
@@ -114,11 +181,8 @@ export function CVWizard({ editingCV, onSave, onCancel, personaId }: CVWizardPro
                   {...register("title", { required: "CV title is required" })}
                   placeholder="e.g., Software Engineer Resume"
                 />
-                {errors.title && (
-                  <p className="text-sm text-red-600">{errors.title.message}</p>
-                )}
+                {errors.title && <p className="text-sm text-red-600">{errors.title.message}</p>}
               </div>
-
               <div className="space-y-2 flex-1">
                 <Label>Select Persona</Label>
                 <Select
@@ -136,11 +200,13 @@ export function CVWizard({ editingCV, onSave, onCancel, personaId }: CVWizardPro
                     {isLoading ? (
                       <div className="p-2 text-center text-sm text-gray-500">Loading...</div>
                     ) : personas.length > 0 ? (
-                      personas.map(persona => (
+                      personas.map((persona) => (
                         <SelectItem key={persona.id} value={persona.id.toString()}>
                           <div className="flex items-center gap-2">
                             {persona.full_name}
-                            <Badge variant="outline" className="text-xs">{persona.job_title}</Badge>
+                            <Badge variant="outline" className="text-xs">
+                              {persona.job_title}
+                            </Badge>
                           </div>
                         </SelectItem>
                       ))
@@ -149,12 +215,9 @@ export function CVWizard({ editingCV, onSave, onCancel, personaId }: CVWizardPro
                     )}
                   </SelectContent>
                 </Select>
-                {errors.personas_id && (
-                  <p className="text-sm text-red-600">{errors.personas_id.message}</p>
-                )}
+                {errors.personas_id && <p className="text-sm text-red-600">{errors.personas_id.message}</p>}
               </div>
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="job_description">Job Description</Label>
               <Textarea
@@ -167,7 +230,6 @@ export function CVWizard({ editingCV, onSave, onCancel, personaId }: CVWizardPro
             </div>
           </CardContent>
         </Card>
-
         <div className="flex justify-end gap-2 pt-4 border-t">
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
@@ -194,3 +256,7 @@ export function CVWizard({ editingCV, onSave, onCancel, personaId }: CVWizardPro
     </div>
   )
 }
+
+
+
+

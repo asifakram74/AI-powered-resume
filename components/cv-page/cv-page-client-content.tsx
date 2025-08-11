@@ -1,13 +1,11 @@
 "use client"
-
-import { useEffect, useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowLeft, Edit, Sparkles, TrendingUp } from "lucide-react"
+import { ArrowLeft, Edit, Sparkles, TrendingUp, Save } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { getPersonaById, type PersonaResponse } from "@/lib/redux/service/pasonaService"
-import { CVTemplates } from "@/components/resume/ChooseResumeTemplte"
 import { CVPreview } from "@/components/resume/CVPreview"
 import type { CVData } from "@/types/cv-data"
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
@@ -15,15 +13,15 @@ import { logoutUser } from "@/lib/redux/slices/authSlice"
 import * as htmlToImage from "html-to-image"
 import { jsPDF } from "jspdf"
 import { Document, Packer, Paragraph, HeadingLevel } from "docx"
-
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { Sidebar } from "@/app/create-cv/sidebar" // Adjusted import path
 import { CreatePersonaPage } from "@/components/persona/PersonaList"
 import { ResumePage } from "@/components/resume/ResumeList"
 import { CoverLetterPage } from "@/components/cover-letter/CoverLetterList"
-import ATSCheckerPage from "@/components/ats/ats-checker-page"
+import { ATSCheckerPage } from "@/components/ats/ats-checker-page"
 import { ProfilePage } from "@/components/profile/profile-page"
 import ProtectedRoute from "@/components/auth/ProtectedRoute"
+import { createCV, type CreateCVData } from "@/lib/redux/service/cvService" // Import createCV and CreateCVData
 
 interface OptimizedCV {
   personalInfo: {
@@ -71,6 +69,34 @@ interface CVTemplate {
   category: "modern" | "classic" | "creative" | "minimal"
 }
 
+// Define templates locally as CVTemplates component is not rendered here
+const templates: CVTemplate[] = [
+  {
+    id: "modern",
+    name: "Modern Professional",
+    description: "Clean, modern design perfect for tech and business professionals",
+    category: "modern",
+  },
+  {
+    id: "classic",
+    name: "Classic Traditional",
+    description: "Traditional format ideal for conservative industries",
+    category: "classic",
+  },
+  {
+    id: "creative",
+    name: "Creative Designer",
+    description: "Eye-catching design for creative professionals",
+    category: "creative",
+  },
+  {
+    id: "minimal",
+    name: "Minimal Clean",
+    description: "Simple, clean layout focusing on content",
+    category: "minimal",
+  },
+]
+
 export function CVPageLoading() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -88,11 +114,13 @@ export function CVPageClientContent() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedTemplate, setSelectedTemplate] = useState<CVTemplate | null>(null)
-  const [step, setStep] = useState<"template" | "ai-response">("template")
-  const [activePage, setActivePage] = useState("create-persona")
+  const [activePage, setActivePage] = useState("create-persona") // Default active page for sidebar
+
   const searchParams = useSearchParams()
   const router = useRouter()
   const personaId = searchParams.get("personaId")
+  const templateIdFromUrl = searchParams.get("templateId") // Get templateId from URL
+
   const dispatch = useAppDispatch()
   const { user } = useAppSelector((state) => state.auth)
   const cvPreviewRef = useRef<HTMLDivElement>(null)
@@ -119,7 +147,7 @@ export function CVPageClientContent() {
     router.push("/")
   }
 
-  // Default template
+  // Default template if none is provided via URL
   const defaultTemplate: CVTemplate = {
     id: "modern",
     name: "Modern Professional",
@@ -128,17 +156,18 @@ export function CVPageClientContent() {
   }
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchDataAndGenerateCV = async () => {
       if (!personaId) {
         setError("No persona ID provided")
         setIsLoading(false)
         return
       }
 
-      try {
-        setIsLoading(true)
+      setIsLoading(true)
+      setError(null) // Clear previous errors
 
-        // Fetch persona data
+      try {
+        // 1. Fetch persona data
         const personaData = await getPersonaById(Number.parseInt(personaId))
         if (!personaData) {
           setError("Persona not found.")
@@ -146,16 +175,34 @@ export function CVPageClientContent() {
           return
         }
         setPersona(personaData)
-        setIsLoading(false)
+
+        // 2. Determine selected template
+        const foundTemplate = templates.find((t) => t.id === templateIdFromUrl) || defaultTemplate
+        setSelectedTemplate(foundTemplate)
+
+        // 3. Generate AI response
+        const personaText = convertPersonaToText(personaData)
+        const response = await fetch("/api/optimize-cv", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ extractedText: personaText }),
+        })
+
+        if (!response.ok) {
+          throw new Error("Failed to optimize CV")
+        }
+        const aiData = await response.json()
+        setAiResponse(aiData)
       } catch (err: any) {
         console.error("Error:", err)
-        setError(err.message || "Failed to fetch persona data")
+        setError(err.message || "Failed to create AI CV")
+      } finally {
         setIsLoading(false)
       }
     }
 
-    fetchData()
-  }, [personaId])
+    fetchDataAndGenerateCV()
+  }, [personaId, templateIdFromUrl]) // Depend on both personaId and templateIdFromUrl
 
   const convertPersonaToText = (personaData: PersonaResponse) => {
     let text = ""
@@ -244,7 +291,6 @@ export function CVPageClientContent() {
         text += `GitHub: ${proj.githubLink || ""}\n\n`
       })
     }
-
     return text
   }
 
@@ -316,53 +362,9 @@ export function CVPageClientContent() {
     }
   }
 
-  const handleTemplateSelect = async (template: CVTemplate) => {
-    setSelectedTemplate(template)
-    setStep("ai-response")
-
-    // Generate AI response after template selection
-    if (persona) {
-      try {
-        setIsLoading(true)
-
-        // Convert persona data to text for AI processing
-        const personaText = convertPersonaToText(persona)
-
-        // Call AI optimization API
-        const response = await fetch("/api/optimize-cv", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            extractedText: personaText,
-          }),
-        })
-
-        if (!response.ok) {
-          throw new Error("Failed to optimize CV")
-        }
-
-        const aiData = await response.json()
-        setAiResponse(aiData)
-      } catch (err: any) {
-        console.error("Error:", err)
-        setError(err.message || "Failed to create AI CV")
-      } finally {
-        setIsLoading(false)
-      }
-    }
-  }
-
   const handleEdit = () => {
     // Navigate back to persona edit page
     router.push(`/dashboard?activePage=create-persona&editId=${personaId}`)
-  }
-
-  const handleBackToTemplate = () => {
-    setStep("template")
-    setAiResponse(null)
-    setError(null)
   }
 
   const handleExport = async (format: "pdf" | "docx" | "png") => {
@@ -382,7 +384,6 @@ export function CVPageClientContent() {
             alert("Please allow popups for PDF export")
             return
           }
-
           // Clone content and styles
           const clonedContent = cvElement.cloneNode(true) as HTMLElement
           const styles = Array.from(document.styleSheets)
@@ -396,7 +397,6 @@ export function CVPageClientContent() {
               }
             })
             .join("\n")
-
           const htmlContent = `
             <!DOCTYPE html>
             <html>
@@ -405,16 +405,16 @@ export function CVPageClientContent() {
                 <title>CV Export</title>
                 <style>
                   ${styles}
-                  body { 
-                    margin: 0; 
-                    padding: 2px; 
-                    font-family: Arial, sans-serif;
+                  body {
+                     margin: 0;
+                     padding: 2px;
+                     font-family: Arial, sans-serif;
                     background: white;
                   }
                   @media print {
-                    body { 
-                      margin: 0; 
-                      -webkit-print-color-adjust: exact;
+                    body {
+                       margin: 0;
+                       -webkit-print-color-adjust: exact;
                       print-color-adjust: exact;
                     }
                   }
@@ -425,16 +425,13 @@ export function CVPageClientContent() {
               </body>
             </html>
           `
-
           printWindow.document.write(htmlContent)
           printWindow.document.close()
-
           setTimeout(() => {
             printWindow.print()
             printWindow.close()
           }, 500)
           break
-
         case "docx":
           // Use the existing DOCX export API
           const cvHTML = cvElement.outerHTML
@@ -445,16 +442,13 @@ export function CVPageClientContent() {
             },
             body: JSON.stringify({ html: cvHTML }),
           })
-
           const result = await response.json()
-
           if (result.error) {
             alert("DOCX export is not yet implemented. This feature will be available soon.")
           } else {
             alert("DOCX export completed successfully!")
           }
           break
-
         case "png":
           alert("PNG export requires additional setup. This feature will be available soon.")
           break
@@ -467,14 +461,12 @@ export function CVPageClientContent() {
 
   const exportAsPDF = async () => {
     if (!cvPreviewRef.current) return
-
     try {
       const dataUrl = await htmlToImage.toPng(cvPreviewRef.current)
       const pdf = new jsPDF("p", "mm", "a4")
       const imgProps = pdf.getImageProperties(dataUrl)
       const pdfWidth = pdf.internal.pageSize.getWidth()
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width
-
       pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight)
       pdf.save(`${persona?.full_name || "resume"}-cv.pdf`)
     } catch (error) {
@@ -485,7 +477,6 @@ export function CVPageClientContent() {
 
   const exportAsDOCX = async () => {
     if (!aiResponse || !persona) return
-
     try {
       const children = [
         new Paragraph({
@@ -509,7 +500,6 @@ export function CVPageClientContent() {
           spacing: { after: 200 },
         }),
       ]
-
       // Add summary
       if (persona.summary) {
         children.push(
@@ -524,7 +514,6 @@ export function CVPageClientContent() {
           }),
         )
       }
-
       // Add experience
       if (persona.experience && Array.isArray(persona.experience)) {
         children.push(
@@ -534,7 +523,6 @@ export function CVPageClientContent() {
             spacing: { after: 100 },
           }),
         )
-
         persona.experience.forEach((exp: any) => {
           children.push(
             new Paragraph({
@@ -549,7 +537,6 @@ export function CVPageClientContent() {
               spacing: { after: 100 },
             }),
           )
-
           if (exp.responsibilities && Array.isArray(exp.responsibilities)) {
             exp.responsibilities.forEach((resp: string) => {
               children.push(
@@ -563,7 +550,6 @@ export function CVPageClientContent() {
           children.push(new Paragraph({ spacing: { after: 200 } }))
         })
       }
-
       // Add education
       if (persona.education && Array.isArray(persona.education)) {
         children.push(
@@ -573,7 +559,6 @@ export function CVPageClientContent() {
             spacing: { after: 100 },
           }),
         )
-
         persona.education.forEach((edu: any) => {
           children.push(
             new Paragraph({
@@ -590,7 +575,6 @@ export function CVPageClientContent() {
           )
         })
       }
-
       // Add skills
       if (persona.skills) {
         children.push(
@@ -600,7 +584,6 @@ export function CVPageClientContent() {
             spacing: { after: 100 },
           }),
         )
-
         if (Array.isArray(persona.skills.technical)) {
           children.push(
             new Paragraph({
@@ -608,7 +591,6 @@ export function CVPageClientContent() {
             }),
           )
         }
-
         if (Array.isArray(persona.skills.soft)) {
           children.push(
             new Paragraph({
@@ -618,7 +600,6 @@ export function CVPageClientContent() {
           )
         }
       }
-
       const doc = new Document({
         sections: [
           {
@@ -627,7 +608,6 @@ export function CVPageClientContent() {
           },
         ],
       })
-
       Packer.toBlob(doc).then((blob) => {
         const url = URL.createObjectURL(blob)
         const a = document.createElement("a")
@@ -642,18 +622,46 @@ export function CVPageClientContent() {
     }
   }
 
-  if (isLoading && step === "template") {
+  const handleSaveCV = async () => {
+    if (!aiResponse || !selectedTemplate || !persona || !user?.id) {
+      alert("Cannot save CV: Missing AI response, template, persona, or user info.")
+      return
+    }
+
+    setIsLoading(true) // Indicate saving process
+    try {
+      // IMPORTANT: Assuming CreateCVData in "@/lib/redux/service/cvService"
+      // has a 'generated_content?: string' field to store the AI-generated CV data.
+      const cvDataToSave: CreateCVData = {
+        user_id: user.id.toString(),
+        layout_id: selectedTemplate.id,
+        personas_id: persona.id.toString(),
+        title: `${persona.full_name}'s AI CV - ${selectedTemplate.name}`, // Generate a default title
+        job_description: "", // Job description is not directly input on this page
+        generated_content: JSON.stringify(aiResponse.optimizedCV), // Save the AI-generated content
+      }
+      await createCV(cvDataToSave)
+      alert("CV saved successfully!")
+    } catch (saveError: any) {
+      console.error("Error saving CV:", saveError)
+      alert(`Failed to save CV: ${saveError.message || "Unknown error"}`)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading persona data...</p>
+          <p className="text-gray-600">Creating your AI-enhanced CV...</p>
         </div>
       </div>
     )
   }
 
-  if (error && step === "template") {
+  if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="w-full max-w-md">
@@ -673,7 +681,7 @@ export function CVPageClientContent() {
     )
   }
 
-  if (!persona && step === "template") {
+  if (!persona || !aiResponse || !selectedTemplate) {
     return (
       <ProtectedRoute>
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -682,8 +690,8 @@ export function CVPageClientContent() {
               <div className="text-gray-500 mb-4">
                 <Sparkles className="h-12 w-12 mx-auto" />
               </div>
-              <h2 className="text-xl font-semibold mb-2">No Persona Data</h2>
-              <p className="text-gray-600 mb-4">Unable to find persona data</p>
+              <h2 className="text-xl font-semibold mb-2">No CV Data Available</h2>
+              <p className="text-gray-600 mb-4">Please ensure a persona and template are selected to generate a CV.</p>
               <Button onClick={() => router.back()}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Go Back
@@ -707,106 +715,47 @@ export function CVPageClientContent() {
             onExportPNG={() => handleExport("png")}
           />
           <main className="flex-1 p-6 bg-gray-50">
-            {step === "template" ? (
-              // Template Selection View
-              <div className="space-y-8">
-                {/* Persona Info */}
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-4">
-                      <div className="flex-shrink-0">
-                        <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center">
-                          <span className="text-white font-bold text-lg">{persona?.full_name?.charAt(0) || "P"}</span>
-                        </div>
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold">{persona?.full_name || "Your Name"}</h3>
-                        <p className="text-gray-600">{persona?.job_title || "Your Job Title"}</p>
-                        <p className="text-sm text-gray-500">Choose a template to generate your AI-enhanced CV</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Template Selection */}
-                <CVTemplates onTemplateSelect={handleTemplateSelect} selectedTemplate={selectedTemplate?.id} />
-              </div>
-            ) : (
-              // AI Response View
-              <div className="flex ">
-                {/* Main content area */}
-                <div className="">
-                  {isLoading ? (
-                    <div className="flex justify-center items-center py-12">
-                      <div className="text-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                        <p className="text-gray-600">Creating your AI-enhanced CV...</p>
-                      </div>
-                    </div>
-                  ) : error ? (
-                    <Card className="w-full max-w-md mx-auto">
-                      <CardContent className="text-center p-6">
-                        <div className="text-red-500 mb-4">
-                          <TrendingUp className="h-12 w-12 mx-auto" />
-                        </div>
-                        <h2 className="text-xl font-semibold mb-2">Error</h2>
-                        <p className="text-gray-600 mb-4">{error}</p>
-                        <Button onClick={handleBackToTemplate}>
-                          <ArrowLeft className="h-4 w-4 mr-2" />
-                          Back to Template Selection
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ) : aiResponse ? (
-                    <>
-                      {/* CV Preview */}
-                      <div className="space-y-6">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h2 className="text-xl font-semibold">CV Preview</h2>
-                            <p className="text-gray-600">Template: {selectedTemplate?.name}</p>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button variant="outline" onClick={handleBackToTemplate}>
-                              <ArrowLeft className="h-4 w-4 mr-2" />
-                              Change Template
-                            </Button>
-
-                            <Button variant="outline" onClick={handleEdit}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Edit
-                            </Button>
-                          </div>
-                        </div>
-
-                        {selectedTemplate && (
-                          <CVPreview data={convertToCVData(aiResponse)} template={selectedTemplate} />
-                        )}
-                      </div>
-                      {/* Improvement Score */}
-                      <Card className="mb-6">
-                        <CardContent className="p-6">
-                          <div className="flex items-center gap-4">
-                            <div className="flex-shrink-0">
-                              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center">
-                                <span className="text-white font-bold text-lg">{aiResponse.improvementScore}%</span>
-                              </div>
-                            </div>
-                            <div>
-                              <h3 className="text-lg font-semibold">Improvement Score</h3>
-                              <p className="text-gray-600">
-                                Your CV has been enhanced with AI optimization using the {selectedTemplate?.name}{" "}
-                                template.
-                              </p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </>
-                  ) : null}
+            {/* AI Response View - Always show this view */}
+            <div className="flex flex-col gap-6">
+              {/* CV Preview */}
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold">CV Preview</h2>
+                    <p className="text-gray-600">Template: {selectedTemplate?.name}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={handleEdit}>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit Persona
+                    </Button>
+                    <Button onClick={handleSaveCV} disabled={isLoading}>
+                      <Save className="h-4 w-4 mr-2" />
+                      Save CV
+                    </Button>
+                  </div>
                 </div>
+                {selectedTemplate && <CVPreview data={convertToCVData(aiResponse)} template={selectedTemplate} />}
               </div>
-            )}
+              {/* Improvement Score */}
+              <Card className="mb-6">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="flex-shrink-0">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center">
+                        <span className="text-white font-bold text-lg">{aiResponse.improvementScore}%</span>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold">Improvement Score</h3>
+                      <p className="text-gray-600">
+                        Your CV has been enhanced with AI optimization using the {selectedTemplate?.name} template.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </main>
         </div>
       </SidebarProvider>
