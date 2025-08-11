@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -226,14 +227,25 @@ export default function HomePage() {
                   {/* User Dropdown */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                      <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
                         <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
-                          <AvatarImage src="/placeholder.svg?height=40&width=40" alt="User" />
-                          <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white font-semibold">
-                            {user?.name?.charAt(0) || "U"}
+                          <AvatarFallback 
+                            className={`bg-gradient-to-br ${
+                              user?.role === 'admin' 
+                                ? 'from-red-500 to-pink-500' 
+                                : 'from-blue-600 to-purple-600'
+                            } text-white font-semibold`}
+                          >
+                            {user?.role === 'admin' ? (
+                              <Crown className="h-5 w-5" />
+                            ) : user?.name ? (
+                              user.name.charAt(0).toUpperCase()
+                            ) : (
+                              <UserCircle className="h-5 w-5" />
+                            )}
                           </AvatarFallback>
                         </Avatar>
-                      </Button>
+                   </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-64 p-2" align="end" forceMount>
                       <DropdownMenuLabel className="font-normal">
