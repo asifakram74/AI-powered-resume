@@ -173,7 +173,7 @@ export function CVEditPopup({ cvData, onSave, isOpen, onClose, isLoading = false
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+      <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto w-[70vw]">
         <DialogHeader>
           <DialogTitle>Edit CV Details</DialogTitle>
         </DialogHeader>
