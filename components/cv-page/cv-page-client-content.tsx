@@ -18,7 +18,7 @@ import { Sidebar } from "@/app/create-cv/sidebar" // Adjusted import path
 import { CreatePersonaPage } from "@/components/persona/PersonaList"
 import { ResumePage } from "@/components/resume/ResumeList"
 import { CoverLetterPage } from "@/components/cover-letter/CoverLetterList"
-import { ATSCheckerPage } from "@/components/ats/ats-checker-page"
+import ATSCheckerPage from "@/components/ats/ats-checker-page"
 import { ProfilePage } from "@/components/profile/profile-page"
 import ProtectedRoute from "@/components/auth/ProtectedRoute"
 import { createCV, type CreateCVData } from "@/lib/redux/service/cvService" // Import createCV and CreateCVData
@@ -624,31 +624,29 @@ export function CVPageClientContent() {
 
   const handleSaveCV = async () => {
     if (!aiResponse || !selectedTemplate || !persona || !user?.id) {
-      alert("Cannot save CV: Missing AI response, template, persona, or user info.")
-      return
+      alert("Cannot save CV: Missing AI response, template, persona, or user info.");
+      return;
     }
-
-    setIsLoading(true) // Indicate saving process
+  
+    setIsLoading(true);
     try {
-      // IMPORTANT: Assuming CreateCVData in "@/lib/redux/service/cvService"
-      // has a 'generated_content?: string' field to store the AI-generated CV data.
       const cvDataToSave: CreateCVData = {
         user_id: user.id.toString(),
         layout_id: selectedTemplate.id,
         personas_id: persona.id.toString(),
-        title: `${persona.full_name}'s AI CV - ${selectedTemplate.name}`, // Generate a default title
-        job_description: "", // Job description is not directly input on this page
-        generated_content: JSON.stringify(aiResponse.optimizedCV), // Save the AI-generated content
-      }
-      await createCV(cvDataToSave)
-      alert("CV saved successfully!")
+        title: `${persona.full_name}'s AI CV - ${selectedTemplate.name}`,
+        job_description: "AI-generated CV based on persona", // Add a default job description
+        generated_content: JSON.stringify(aiResponse.optimizedCV),
+      };
+      await createCV(cvDataToSave);
+      alert("CV saved successfully!");
     } catch (saveError: any) {
-      console.error("Error saving CV:", saveError)
-      alert(`Failed to save CV: ${saveError.message || "Unknown error"}`)
+      console.error("Error saving CV:", saveError);
+      alert(`Failed to save CV: ${saveError.message || "Unknown error"}`);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   if (isLoading) {
     return (

@@ -104,12 +104,18 @@ export function CVWizard({ editingCV, onSave, onCancel, personaId }: CVWizardPro
 
   const onSubmit = (data: CreateCVData) => {
     if (editingCV) {
-      handleFinalSubmit(data, selectedTemplate)
+      handleFinalSubmit({
+        ...data,
+        job_description: data.job_description || "", // Ensure job_description is always defined
+      }, selectedTemplate);
     } else {
-      setFormData(data)
-      setShowTemplateSelector(true)
+      setFormData({
+        ...data,
+        job_description: data.job_description || "", // Ensure job_description is always defined
+      });
+      setShowTemplateSelector(true);
     }
-  }
+  };
 
   const selectedPersona = personas.find((p) => p.id.toString() === (currentPersonaId || selectedPersonaId))
 
@@ -130,33 +136,22 @@ export function CVWizard({ editingCV, onSave, onCancel, personaId }: CVWizardPro
   </Button>
 
   <div className="flex gap-2">
-    {selectedTemplate && selectedPersonaId && (
-      <Button
-        onClick={async () => {
-          if (formData) {
-            try {
-              // 1. Save CV
-              await onSave({
-                ...formData,
-                user_id: user?.id?.toString() || "",
-                layout_id: selectedTemplate,
-                personas_id: selectedPersonaId || formData.personas_id,
-              })
+  {selectedTemplate && selectedPersonaId && (
+    <Button
+      onClick={() => {
+        if (formData) {
+          router.push(
+            `/create-cv?personaId=${selectedPersonaId}&step=template`
+          )
+        }
+      }}
+      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+    >
+      Create AI CV
+    </Button>
+  )}
+</div>
 
-              // 2. Redirect to Create AI CV
-              router.push(`/create-cv?personaId=${selectedPersonaId}&step=template`)
-            } catch (error) {
-              console.error("Error creating AI CV:", error)
-              setApiError("Failed to create AI CV. Please try again.")
-            }
-          }
-        }}
-        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-      >
-        Create AI CV
-      </Button>
-    )}
-  </div>
 </div>
 
         </DialogContent>

@@ -17,6 +17,7 @@ export interface CreateCVData {
   layout_id: string
   title: string
   job_description: string
+  generated_content?: string
 }
 
 export const getCVs = async (userId: string): Promise<CV[]> => {
