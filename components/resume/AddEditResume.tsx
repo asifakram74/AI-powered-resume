@@ -53,11 +53,9 @@ export function CVWizard({
   const [selectedPersonaId, setSelectedPersonaId] = useState<string>(
     personaId || editingCV?.personas_id || ""
   );
-  // Track template as string for form submission
   const [selectedTemplateId, setSelectedTemplateId] = useState(
     editingCV?.layout_id || ""
   );
-  // Track template object for UI
   const [selectedTemplate, setSelectedTemplate] = useState<{
     id: string;
     name: string;
@@ -118,14 +116,8 @@ export function CVWizard({
     setSelectedTemplate(template);
     setSelectedTemplateId(template.id);
     setValue("layout_id", template.id);
-
-    // Navigate to the CV creation page with both personaId and templateId
-    if (selectedPersonaId) {
-      router.push(
-        `/create-cv?personaId=${selectedPersonaId}&templateId=${template.id}`
-      );
-    }
   };
+
   const handleFinalSubmit = async (templateId: string) => {
     setIsLoading(true);
     try {
@@ -147,12 +139,15 @@ export function CVWizard({
 
   const onSubmit = () => {
     if (editingCV) {
-      handleFinalSubmit(selectedTemplateId);
+      // Redirect to the CV client page with personaId and templateId
+      router.push(
+        `/create-cv?personaId=${editingCV.personas_id}&templateId=${editingCV.layout_id}`
+      );
     } else {
       const formData = getValues();
       setFormData({
         ...formData,
-        job_description: formData.job_description || "", // Ensure job_description is always defined
+        job_description: formData.job_description || "",
       });
       setShowTemplateSelector(true);
     }
@@ -315,7 +310,7 @@ export function CVWizard({
             ) : (
               <>
                 <Save className="h-4 w-4 mr-2" />
-                {editingCV ? "Update CV" : "Create CV"}
+                {editingCV ? "Edit CV" : "Create CV"}
               </>
             )}
           </Button>

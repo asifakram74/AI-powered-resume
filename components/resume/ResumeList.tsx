@@ -81,8 +81,8 @@ export function ResumePage() {
   }
 
   const handleEdit = (cv: CV) => {
-    setSelectedCV(cv)
-    setIsEditing(true)
+    // Navigate directly to the CV client page with personaId and templateId
+    router.push(`/create-cv?personaId=${cv.personas_id}&templateId=${cv.layout_id}`)
   }
 
   // Filter CVs based on search term
