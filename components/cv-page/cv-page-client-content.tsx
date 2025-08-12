@@ -1,72 +1,75 @@
-"use client"
-import { useState, useRef, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { ArrowLeft, Edit, Sparkles, TrendingUp, Save } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { getPersonaById, type PersonaResponse } from "@/lib/redux/service/pasonaService"
-import { CVPreview } from "@/components/resume/CVPreview"
-import type { CVData } from "@/types/cv-data"
-import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
-import { logoutUser } from "@/lib/redux/slices/authSlice"
-import * as htmlToImage from "html-to-image"
-import { jsPDF } from "jspdf"
-import { Document, Packer, Paragraph, HeadingLevel } from "docx"
-import { SidebarProvider } from "@/components/ui/sidebar"
-import { Sidebar } from "@/app/create-cv/sidebar" // Adjusted import path
-import { CreatePersonaPage } from "@/components/persona/PersonaList"
-import { ResumePage } from "@/components/resume/ResumeList"
-import { CoverLetterPage } from "@/components/cover-letter/CoverLetterList"
-import ATSCheckerPage from "@/components/ats/ats-checker-page"
-import { ProfilePage } from "@/components/profile/profile-page"
-import ProtectedRoute from "@/components/auth/ProtectedRoute"
-import { createCV, type CreateCVData } from "@/lib/redux/service/cvService" // Import createCV and CreateCVData
+"use client";
+import { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowLeft, Edit, Sparkles, TrendingUp, Save } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  getPersonaById,
+  type PersonaResponse,
+} from "@/lib/redux/service/pasonaService";
+import { CVPreview } from "@/components/resume/CVPreview";
+import type { CVData } from "@/types/cv-data";
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
+import { logoutUser } from "@/lib/redux/slices/authSlice";
+import * as htmlToImage from "html-to-image";
+import { jsPDF } from "jspdf";
+import { Document, Packer, Paragraph, HeadingLevel } from "docx";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { Sidebar } from "@/app/create-cv/sidebar"; // Adjusted import path
+import { CreatePersonaPage } from "@/components/persona/PersonaList";
+import { ResumePage } from "@/components/resume/ResumeList";
+import { CoverLetterPage } from "@/components/cover-letter/CoverLetterList";
+import ATSCheckerPage from "@/components/ats/ats-checker-page";
+import { ProfilePage } from "@/components/profile/profile-page";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { createCV, type CreateCVData } from "@/lib/redux/service/cvService"; // Import createCV and CreateCVData
 
 interface OptimizedCV {
   personalInfo: {
-    name: string
-    email: string
-    phone: string
-    location: string
-    linkedin: string
-    website: string
-  }
-  summary: string
+    name: string;
+    email: string;
+    phone: string;
+    location: string;
+    linkedin: string;
+    website: string;
+  };
+  summary: string;
   workExperience: Array<{
-    title: string
-    company: string
-    duration: string
-    description: string
-  }>
+    title: string;
+    company: string;
+    duration: string;
+    description: string;
+  }>;
   education: Array<{
-    degree: string
-    institution: string
-    year: string
-    gpa: string
-  }>
-  skills: string[]
+    degree: string;
+    institution: string;
+    year: string;
+    gpa: string;
+  }>;
+  skills: string[];
   projects: Array<{
-    name: string
-    description: string
-    technologies: string[]
-  }>
-  certifications: string[]
-  languages: string[]
-  interests: string[]
+    name: string;
+    description: string;
+    technologies: string[];
+  }>;
+  certifications: string[];
+  languages: string[];
+  interests: string[];
 }
 
 interface AIResponse {
-  optimizedCV: OptimizedCV
-  suggestions: string[]
-  improvementScore: number
+  optimizedCV: OptimizedCV;
+  suggestions: string[];
+  improvementScore: number;
 }
 
 interface CVTemplate {
-  id: string
-  name: string
-  description: string
-  category: "modern" | "classic" | "creative" | "minimal"
+  id: string;
+  name: string;
+  description: string;
+  category: "modern" | "classic" | "creative" | "minimal";
 }
 
 // Define templates locally as CVTemplates component is not rendered here
@@ -74,7 +77,8 @@ const templates: CVTemplate[] = [
   {
     id: "modern",
     name: "Modern Professional",
-    description: "Clean, modern design perfect for tech and business professionals",
+    description:
+      "Clean, modern design perfect for tech and business professionals",
     category: "modern",
   },
   {
@@ -95,7 +99,7 @@ const templates: CVTemplate[] = [
     description: "Simple, clean layout focusing on content",
     category: "minimal",
   },
-]
+];
 
 export function CVPageLoading() {
   return (
@@ -105,194 +109,224 @@ export function CVPageLoading() {
         <p className="text-gray-600">Loading...</p>
       </div>
     </div>
-  )
+  );
 }
 
 export function CVPageClientContent() {
-  const [aiResponse, setAiResponse] = useState<AIResponse | null>(null)
-  const [persona, setPersona] = useState<PersonaResponse | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [selectedTemplate, setSelectedTemplate] = useState<CVTemplate | null>(null)
-  const [activePage, setActivePage] = useState("create-persona") // Default active page for sidebar
+  const [aiResponse, setAiResponse] = useState<AIResponse | null>(null);
+  const [persona, setPersona] = useState<PersonaResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<CVTemplate | null>(
+    null
+  );
+  const [activePage, setActivePage] = useState("create-persona"); // Default active page for sidebar
 
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const personaId = searchParams.get("personaId")
-  const templateIdFromUrl = searchParams.get("templateId") // Get templateId from URL
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const personaId = searchParams.get("personaId");
+  const templateIdFromUrl = searchParams.get("templateId"); // Get templateId from URL
 
-  const dispatch = useAppDispatch()
-  const { user } = useAppSelector((state) => state.auth)
-  const cvPreviewRef = useRef<HTMLDivElement>(null)
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
+  const cvPreviewRef = useRef<HTMLDivElement>(null);
 
   const renderActivePage = () => {
     switch (activePage) {
       case "create-persona":
-        return <CreatePersonaPage />
+        return <CreatePersonaPage />;
       case "resumes":
-        return <ResumePage />
+        return <ResumePage />;
       case "cover-letter":
-        return <CoverLetterPage />
+        return <CoverLetterPage />;
       case "ats-checker":
-        return <ATSCheckerPage />
+        return <ATSCheckerPage />;
       case "profile":
-        return <ProfilePage />
+        return <ProfilePage />;
       default:
-        return <CreatePersonaPage />
+        return <CreatePersonaPage />;
     }
-  }
+  };
 
   const handleLogout = async () => {
-    await dispatch(logoutUser())
-    router.push("/")
-  }
+    await dispatch(logoutUser());
+    router.push("/");
+  };
+
+  const handleTemplateSelect = (template: CVTemplate) => {
+    setSelectedTemplate(template);
+    // Update the URL with the new templateId
+    const url = new URL(window.location.href);
+    url.searchParams.set("templateId", template.id);
+    router.replace(url.toString());
+  };
 
   // Default template if none is provided via URL
   const defaultTemplate: CVTemplate = {
     id: "modern",
     name: "Modern Professional",
-    description: "Clean, modern design perfect for tech and business professionals",
+    description:
+      "Clean, modern design perfect for tech and business professionals",
     category: "modern",
-  }
+  };
+
+  // Handle template changes from URL
+  useEffect(() => {
+    if (templateIdFromUrl) {
+      const foundTemplate =
+        templates.find((t) => t.id === templateIdFromUrl) || defaultTemplate;
+      setSelectedTemplate(foundTemplate);
+    } else if (!selectedTemplate) {
+      setSelectedTemplate(defaultTemplate);
+    }
+  }, [templateIdFromUrl, selectedTemplate]);
 
   useEffect(() => {
     const fetchDataAndGenerateCV = async () => {
       if (!personaId) {
-        setError("No persona ID provided")
-        setIsLoading(false)
-        return
+        setError("No persona ID provided");
+        setIsLoading(false);
+        return;
       }
 
-      setIsLoading(true)
-      setError(null) // Clear previous errors
+      setIsLoading(true);
+      setError(null); // Clear previous errors
 
       try {
         // 1. Fetch persona data
-        const personaData = await getPersonaById(Number.parseInt(personaId))
+        const personaData = await getPersonaById(Number.parseInt(personaId));
         if (!personaData) {
-          setError("Persona not found.")
-          setIsLoading(false)
-          return
+          setError("Persona not found.");
+          setIsLoading(false);
+          return;
         }
-        setPersona(personaData)
+        setPersona(personaData);
 
-        // 2. Determine selected template
-        const foundTemplate = templates.find((t) => t.id === templateIdFromUrl) || defaultTemplate
-        setSelectedTemplate(foundTemplate)
+        // 2. Set default template if none is selected
+        if (!selectedTemplate) {
+          const templateToUse = templateIdFromUrl
+            ? templates.find((t) => t.id === templateIdFromUrl) ||
+              defaultTemplate
+            : defaultTemplate;
+          setSelectedTemplate(templateToUse);
+        }
 
         // 3. Generate AI response
-        const personaText = convertPersonaToText(personaData)
+        const personaText = convertPersonaToText(personaData);
         const response = await fetch("/api/optimize-cv", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ extractedText: personaText }),
-        })
+        });
 
         if (!response.ok) {
-          throw new Error("Failed to optimize CV")
+          throw new Error("Failed to optimize CV");
         }
-        const aiData = await response.json()
-        setAiResponse(aiData)
+        const aiData = await response.json();
+        setAiResponse(aiData);
       } catch (err: any) {
-        console.error("Error:", err)
-        setError(err.message || "Failed to create AI CV")
+        console.error("Error:", err);
+        setError(err.message || "Failed to create AI CV");
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchDataAndGenerateCV()
-  }, [personaId, templateIdFromUrl]) // Depend on both personaId and templateIdFromUrl
+    fetchDataAndGenerateCV();
+  }, [personaId]); // Only depend on personaId to avoid unnecessary re-renders
 
   const convertPersonaToText = (personaData: PersonaResponse) => {
-    let text = ""
-    text += `Name: ${personaData.full_name || ""}\n`
-    text += `Job Title: ${personaData.job_title || ""}\n`
-    text += `Email: ${personaData.email || ""}\n`
-    text += `Phone: ${personaData.phone || ""}\n`
-    text += `Address: ${personaData.address || ""}\n`
-    text += `City: ${personaData.city || ""}\n`
-    text += `Country: ${personaData.country || ""}\n`
-    text += `Summary: ${personaData.summary || ""}\n`
-    text += `LinkedIn: ${personaData.linkedin || ""}\n`
-    text += `GitHub: ${personaData.github || ""}\n\n`
+    let text = "";
+    text += `Name: ${personaData.full_name || ""}\n`;
+    text += `Job Title: ${personaData.job_title || ""}\n`;
+    text += `Email: ${personaData.email || ""}\n`;
+    text += `Phone: ${personaData.phone || ""}\n`;
+    text += `Address: ${personaData.address || ""}\n`;
+    text += `City: ${personaData.city || ""}\n`;
+    text += `Country: ${personaData.country || ""}\n`;
+    text += `Summary: ${personaData.summary || ""}\n`;
+    text += `LinkedIn: ${personaData.linkedin || ""}\n`;
+    text += `GitHub: ${personaData.github || ""}\n\n`;
 
     // Experience
     if (personaData.experience && Array.isArray(personaData.experience)) {
-      text += "Work Experience:\n"
+      text += "Work Experience:\n";
       personaData.experience.forEach((exp: any) => {
-        text += `${exp.jobTitle || ""} at ${exp.companyName || ""}\n`
-        text += `${exp.startDate || ""} - ${exp.endDate || ""}\n`
-        text += `Location: ${exp.location || ""}\n`
+        text += `${exp.jobTitle || ""} at ${exp.companyName || ""}\n`;
+        text += `${exp.startDate || ""} - ${exp.endDate || ""}\n`;
+        text += `Location: ${exp.location || ""}\n`;
         if (exp.responsibilities && Array.isArray(exp.responsibilities)) {
           exp.responsibilities.forEach((resp: string) => {
-            text += `- ${resp}\n`
-          })
+            text += `- ${resp}\n`;
+          });
         }
-        text += "\n"
-      })
+        text += "\n";
+      });
     }
 
     // Education
     if (personaData.education && Array.isArray(personaData.education)) {
-      text += "Education:\n"
+      text += "Education:\n";
       personaData.education.forEach((edu: any) => {
-        text += `${edu.degree || ""} from ${edu.institutionName || ""}\n`
-        text += `Graduation: ${edu.graduationDate || ""}\n`
-        text += `GPA: ${edu.gpa || ""}\n`
-        text += `Honors: ${edu.honors || ""}\n`
-        text += `Additional Info: ${edu.additionalInfo || ""}\n\n`
-      })
+        text += `${edu.degree || ""} from ${edu.institutionName || ""}\n`;
+        text += `Graduation: ${edu.graduationDate || ""}\n`;
+        text += `GPA: ${edu.gpa || ""}\n`;
+        text += `Honors: ${edu.honors || ""}\n`;
+        text += `Additional Info: ${edu.additionalInfo || ""}\n\n`;
+      });
     }
 
     // Skills
     if (personaData.skills) {
-      text += "Skills:\n"
+      text += "Skills:\n";
       if (Array.isArray(personaData.skills.technical)) {
-        text += `Technical: ${personaData.skills.technical.join(", ")}\n`
+        text += `Technical: ${personaData.skills.technical.join(", ")}\n`;
       }
       if (Array.isArray(personaData.skills.soft)) {
-        text += `Soft Skills: ${personaData.skills.soft.join(", ")}\n`
+        text += `Soft Skills: ${personaData.skills.soft.join(", ")}\n`;
       }
-      text += "\n"
+      text += "\n";
     }
 
     // Languages
     if (personaData.languages && Array.isArray(personaData.languages)) {
-      text += "Languages:\n"
+      text += "Languages:\n";
       personaData.languages.forEach((lang: any) => {
         if (lang) {
-          text += `${lang.name || ""} - ${lang.proficiency || ""}\n`
+          text += `${lang.name || ""} - ${lang.proficiency || ""}\n`;
         }
-      })
-      text += "\n"
+      });
+      text += "\n";
     }
 
     // Certifications
-    if (personaData.certifications && Array.isArray(personaData.certifications)) {
-      text += "Certifications:\n"
+    if (
+      personaData.certifications &&
+      Array.isArray(personaData.certifications)
+    ) {
+      text += "Certifications:\n";
       personaData.certifications.forEach((cert: any) => {
-        text += `${cert.title || ""} from ${cert.issuingOrganization || ""}\n`
-        text += `Date: ${cert.dateObtained || ""}\n\n`
-      })
+        text += `${cert.title || ""} from ${cert.issuingOrganization || ""}\n`;
+        text += `Date: ${cert.dateObtained || ""}\n\n`;
+      });
     }
 
     // Projects
     if (personaData.projects && Array.isArray(personaData.projects)) {
-      text += "Projects:\n"
+      text += "Projects:\n";
       personaData.projects.forEach((proj: any) => {
-        text += `${proj.name || ""}\n`
-        text += `Role: ${proj.role || ""}\n`
-        text += `Description: ${proj.description || ""}\n`
+        text += `${proj.name || ""}\n`;
+        text += `Role: ${proj.role || ""}\n`;
+        text += `Description: ${proj.description || ""}\n`;
         if (proj.technologies && Array.isArray(proj.technologies)) {
-          text += `Technologies: ${proj.technologies.join(", ")}\n`
+          text += `Technologies: ${proj.technologies.join(", ")}\n`;
         }
-        text += `Live Demo: ${proj.liveDemoLink || ""}\n`
-        text += `GitHub: ${proj.githubLink || ""}\n\n`
-      })
+        text += `Live Demo: ${proj.liveDemoLink || ""}\n`;
+        text += `GitHub: ${proj.githubLink || ""}\n\n`;
+      });
     }
-    return text
-  }
+    return text;
+  };
 
   const convertToCVData = (aiResponse: AIResponse): CVData => {
     return {
@@ -339,13 +373,15 @@ export function CVPageClientContent() {
         name: lang,
         proficiency: "Intermediate" as const,
       })),
-      certifications: aiResponse.optimizedCV.certifications.map((cert, index) => ({
-        id: `cert-${index}`,
-        title: cert,
-        issuingOrganization: "",
-        dateObtained: "",
-        verificationLink: "",
-      })),
+      certifications: aiResponse.optimizedCV.certifications.map(
+        (cert, index) => ({
+          id: `cert-${index}`,
+          title: cert,
+          issuingOrganization: "",
+          dateObtained: "",
+          verificationLink: "",
+        })
+      ),
       projects: aiResponse.optimizedCV.projects.map((proj, index) => ({
         id: `proj-${index}`,
         name: proj.name,
@@ -359,44 +395,44 @@ export function CVPageClientContent() {
         interests: aiResponse.optimizedCV.interests,
       },
       createdAt: new Date().toISOString(),
-    }
-  }
+    };
+  };
 
   const handleEdit = () => {
     // Navigate back to persona edit page
-    router.push(`/dashboard?activePage=create-persona&editId=${personaId}`)
-  }
+    router.push(`/dashboard?activePage=create-persona&editId=${personaId}`);
+  };
 
   const handleExport = async (format: "pdf" | "docx" | "png") => {
     try {
       // Get the CV preview element
-      const cvElement = document.getElementById("cv-preview-content")
+      const cvElement = document.getElementById("cv-preview-content");
       if (!cvElement) {
-        alert("CV preview not found. Please try again.")
-        return
+        alert("CV preview not found. Please try again.");
+        return;
       }
 
       switch (format) {
         case "pdf":
           // Use browser's print functionality for PDF
-          const printWindow = window.open("", "_blank")
+          const printWindow = window.open("", "_blank");
           if (!printWindow) {
-            alert("Please allow popups for PDF export")
-            return
+            alert("Please allow popups for PDF export");
+            return;
           }
           // Clone content and styles
-          const clonedContent = cvElement.cloneNode(true) as HTMLElement
+          const clonedContent = cvElement.cloneNode(true) as HTMLElement;
           const styles = Array.from(document.styleSheets)
             .map((sheet) => {
               try {
                 return Array.from(sheet.cssRules)
                   .map((rule) => rule.cssText)
-                  .join("\n")
+                  .join("\n");
               } catch (e) {
-                return ""
+                return "";
               }
             })
-            .join("\n")
+            .join("\n");
           const htmlContent = `
             <!DOCTYPE html>
             <html>
@@ -424,59 +460,63 @@ export function CVPageClientContent() {
                 ${clonedContent.innerHTML}
               </body>
             </html>
-          `
-          printWindow.document.write(htmlContent)
-          printWindow.document.close()
+          `;
+          printWindow.document.write(htmlContent);
+          printWindow.document.close();
           setTimeout(() => {
-            printWindow.print()
-            printWindow.close()
-          }, 500)
-          break
+            printWindow.print();
+            printWindow.close();
+          }, 500);
+          break;
         case "docx":
           // Use the existing DOCX export API
-          const cvHTML = cvElement.outerHTML
+          const cvHTML = cvElement.outerHTML;
           const response = await fetch("/api/export-docx", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({ html: cvHTML }),
-          })
-          const result = await response.json()
+          });
+          const result = await response.json();
           if (result.error) {
-            alert("DOCX export is not yet implemented. This feature will be available soon.")
+            alert(
+              "DOCX export is not yet implemented. This feature will be available soon."
+            );
           } else {
-            alert("DOCX export completed successfully!")
+            alert("DOCX export completed successfully!");
           }
-          break
+          break;
         case "png":
-          alert("PNG export requires additional setup. This feature will be available soon.")
-          break
+          alert(
+            "PNG export requires additional setup. This feature will be available soon."
+          );
+          break;
       }
     } catch (error) {
-      console.error("Export error:", error)
-      alert("Export failed. Please try again.")
+      console.error("Export error:", error);
+      alert("Export failed. Please try again.");
     }
-  }
+  };
 
   const exportAsPDF = async () => {
-    if (!cvPreviewRef.current) return
+    if (!cvPreviewRef.current) return;
     try {
-      const dataUrl = await htmlToImage.toPng(cvPreviewRef.current)
-      const pdf = new jsPDF("p", "mm", "a4")
-      const imgProps = pdf.getImageProperties(dataUrl)
-      const pdfWidth = pdf.internal.pageSize.getWidth()
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width
-      pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight)
-      pdf.save(`${persona?.full_name || "resume"}-cv.pdf`)
+      const dataUrl = await htmlToImage.toPng(cvPreviewRef.current);
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgProps = pdf.getImageProperties(dataUrl);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`${persona?.full_name || "resume"}-cv.pdf`);
     } catch (error) {
-      console.error("Error exporting as PDF:", error)
-      alert("PDF export failed. Please try again.")
+      console.error("Error exporting as PDF:", error);
+      alert("PDF export failed. Please try again.");
     }
-  }
+  };
 
   const exportAsDOCX = async () => {
-    if (!aiResponse || !persona) return
+    if (!aiResponse || !persona) return;
     try {
       const children = [
         new Paragraph({
@@ -499,7 +539,7 @@ export function CVPageClientContent() {
           text: `Location: ${persona.city || ""}, ${persona.country || ""}`,
           spacing: { after: 200 },
         }),
-      ]
+      ];
       // Add summary
       if (persona.summary) {
         children.push(
@@ -511,8 +551,8 @@ export function CVPageClientContent() {
           new Paragraph({
             text: persona.summary,
             spacing: { after: 200 },
-          }),
-        )
+          })
+        );
       }
       // Add experience
       if (persona.experience && Array.isArray(persona.experience)) {
@@ -521,8 +561,8 @@ export function CVPageClientContent() {
             text: "Work Experience",
             heading: HeadingLevel.HEADING_2,
             spacing: { after: 100 },
-          }),
-        )
+          })
+        );
         persona.experience.forEach((exp: any) => {
           children.push(
             new Paragraph({
@@ -535,20 +575,20 @@ export function CVPageClientContent() {
             new Paragraph({
               text: `Location: ${exp.location || ""}`,
               spacing: { after: 100 },
-            }),
-          )
+            })
+          );
           if (exp.responsibilities && Array.isArray(exp.responsibilities)) {
             exp.responsibilities.forEach((resp: string) => {
               children.push(
                 new Paragraph({
                   text: resp,
                   bullet: { level: 0 },
-                }),
-              )
-            })
+                })
+              );
+            });
           }
-          children.push(new Paragraph({ spacing: { after: 200 } }))
-        })
+          children.push(new Paragraph({ spacing: { after: 200 } }));
+        });
       }
       // Add education
       if (persona.education && Array.isArray(persona.education)) {
@@ -557,8 +597,8 @@ export function CVPageClientContent() {
             text: "Education",
             heading: HeadingLevel.HEADING_2,
             spacing: { after: 100 },
-          }),
-        )
+          })
+        );
         persona.education.forEach((edu: any) => {
           children.push(
             new Paragraph({
@@ -571,9 +611,9 @@ export function CVPageClientContent() {
             new Paragraph({
               text: `GPA: ${edu.gpa || ""}`,
               spacing: { after: 200 },
-            }),
-          )
-        })
+            })
+          );
+        });
       }
       // Add skills
       if (persona.skills) {
@@ -582,22 +622,22 @@ export function CVPageClientContent() {
             text: "Skills",
             heading: HeadingLevel.HEADING_2,
             spacing: { after: 100 },
-          }),
-        )
+          })
+        );
         if (Array.isArray(persona.skills.technical)) {
           children.push(
             new Paragraph({
               text: `Technical Skills: ${persona.skills.technical.join(", ")}`,
-            }),
-          )
+            })
+          );
         }
         if (Array.isArray(persona.skills.soft)) {
           children.push(
             new Paragraph({
               text: `Soft Skills: ${persona.skills.soft.join(", ")}`,
               spacing: { after: 200 },
-            }),
-          )
+            })
+          );
         }
       }
       const doc = new Document({
@@ -607,27 +647,29 @@ export function CVPageClientContent() {
             children: children,
           },
         ],
-      })
+      });
       Packer.toBlob(doc).then((blob) => {
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement("a")
-        a.href = url
-        a.download = `${persona.full_name || "resume"}-cv.docx`
-        a.click()
-        URL.revokeObjectURL(url)
-      })
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${persona.full_name || "resume"}-cv.docx`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
     } catch (error) {
-      console.error("Error exporting as DOCX:", error)
-      alert("DOCX export failed. Please try again.")
+      console.error("Error exporting as DOCX:", error);
+      alert("DOCX export failed. Please try again.");
     }
-  }
+  };
 
   const handleSaveCV = async () => {
     if (!aiResponse || !selectedTemplate || !persona || !user?.id) {
-      alert("Cannot save CV: Missing AI response, template, persona, or user info.");
+      alert(
+        "Cannot save CV: Missing AI response, template, persona, or user info."
+      );
       return;
     }
-  
+
     setIsLoading(true);
     try {
       const cvDataToSave: CreateCVData = {
@@ -656,7 +698,7 @@ export function CVPageClientContent() {
           <p className="text-gray-600">Creating your AI-enhanced CV...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -676,7 +718,7 @@ export function CVPageClientContent() {
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   if (!persona || !aiResponse || !selectedTemplate) {
@@ -688,8 +730,13 @@ export function CVPageClientContent() {
               <div className="text-gray-500 mb-4">
                 <Sparkles className="h-12 w-12 mx-auto" />
               </div>
-              <h2 className="text-xl font-semibold mb-2">No CV Data Available</h2>
-              <p className="text-gray-600 mb-4">Please ensure a persona and template are selected to generate a CV.</p>
+              <h2 className="text-xl font-semibold mb-2">
+                No CV Data Available
+              </h2>
+              <p className="text-gray-600 mb-4">
+                Please ensure a persona and template are selected to generate a
+                CV.
+              </p>
               <Button onClick={() => router.back()}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Go Back
@@ -698,7 +745,7 @@ export function CVPageClientContent() {
           </Card>
         </div>
       </ProtectedRoute>
-    )
+    );
   }
 
   return (
@@ -720,20 +767,28 @@ export function CVPageClientContent() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-xl font-semibold">CV Preview</h2>
-                    <p className="text-gray-600">Template: {selectedTemplate?.name}</p>
+                    <p className="text-gray-600">
+                      Template: {selectedTemplate?.name}
+                    </p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" onClick={handleEdit}>
+                    {/* <Button variant="outline" onClick={handleEdit}>
                       <Edit className="h-4 w-4 mr-2" />
                       Edit Persona
-                    </Button>
+                    </Button> */}
                     <Button onClick={handleSaveCV} disabled={isLoading}>
                       <Save className="h-4 w-4 mr-2" />
                       Save CV
                     </Button>
                   </div>
                 </div>
-                {selectedTemplate && <CVPreview data={convertToCVData(aiResponse)} template={selectedTemplate} />}
+                {selectedTemplate && (
+                  <CVPreview
+                    key={selectedTemplate.id} // This forces re-render when template changes
+                    data={convertToCVData(aiResponse)}
+                    template={selectedTemplate}
+                  />
+                )}
               </div>
               {/* Improvement Score */}
               <Card className="mb-6">
@@ -741,13 +796,18 @@ export function CVPageClientContent() {
                   <div className="flex items-center gap-4">
                     <div className="flex-shrink-0">
                       <div className="w-16 h-16 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center">
-                        <span className="text-white font-bold text-lg">{aiResponse.improvementScore}%</span>
+                        <span className="text-white font-bold text-lg">
+                          {aiResponse.improvementScore}%
+                        </span>
                       </div>
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold">Improvement Score</h3>
+                      <h3 className="text-lg font-semibold">
+                        Improvement Score
+                      </h3>
                       <p className="text-gray-600">
-                        Your CV has been enhanced with AI optimization using the {selectedTemplate?.name} template.
+                        Your CV has been enhanced with AI optimization using the{" "}
+                        {selectedTemplate?.name} template.
                       </p>
                     </div>
                   </div>
@@ -758,5 +818,5 @@ export function CVPageClientContent() {
         </div>
       </SidebarProvider>
     </ProtectedRoute>
-  )
+  );
 }

@@ -1,26 +1,40 @@
-"use client"
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Check, Sparkles, FileText, CheckCircle, UserCircle, Settings } from 'lucide-react'
-import ResumeTemplate from "./ResumeTemplate"
-import { sampleCVData } from "@/lib/sample-cv-data"
-import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
-import { logoutUser } from "@/lib/redux/slices/authSlice"
+"use client";
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Check,
+  Sparkles,
+  FileText,
+  CheckCircle,
+  UserCircle,
+  Settings,
+} from "lucide-react";
+import ResumeTemplate from "./ResumeTemplate";
+import { sampleCVData } from "@/lib/sample-cv-data";
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
+import { logoutUser } from "@/lib/redux/slices/authSlice";
 
 interface CVTemplate {
-  id: string
-  name: string
-  description: string
-  category: "modern" | "classic" | "creative" | "minimal"
+  id: string;
+  name: string;
+  description: string;
+  category: "modern" | "classic" | "creative" | "minimal";
 }
 
 const templates: CVTemplate[] = [
   {
     id: "modern",
     name: "Modern Professional",
-    description: "Clean, modern design perfect for tech and business professionals",
+    description:
+      "Clean, modern design perfect for tech and business professionals",
     category: "modern",
   },
   {
@@ -41,7 +55,7 @@ const templates: CVTemplate[] = [
     description: "Simple, clean layout focusing on content",
     category: "minimal",
   },
-]
+];
 
 const dashboardMenuItems = [
   {
@@ -82,27 +96,32 @@ const dashboardMenuItems = [
     icon: Settings,
     href: "/dashboard?page=settings",
   },
-]
+];
 
 interface CVTemplatesProps {
-  onTemplateSelect: (template: CVTemplate) => void
-  selectedTemplate?: string
+  onTemplateSelect: (template: CVTemplate) => void;
+  selectedTemplate?: string;
 }
 
-export function CVTemplates({ onTemplateSelect, selectedTemplate }: CVTemplatesProps) {
-  const [filter, setFilter] = useState<"all" | "modern" | "classic" | "creative" | "minimal">("all")
-  const dispatch = useAppDispatch()
-  const { user } = useAppSelector((state) => state.auth)
+export function CVTemplates({
+  onTemplateSelect,
+  selectedTemplate,
+}: CVTemplatesProps) {
+  const [filter, setFilter] = useState<
+    "all" | "modern" | "classic" | "creative" | "minimal"
+  >("all");
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
 
   const filteredTemplates = templates.filter((template) => {
-    if (filter === "all") return true
-    return template.category === filter
-  })
+    if (filter === "all") return true;
+    return template.category === filter;
+  });
 
   const handleLogout = async () => {
-    await dispatch(logoutUser())
-    window.location.href = "/"
-  }
+    await dispatch(logoutUser());
+    window.location.href = "/";
+  };
 
   return (
     <div className="min-h-screen bg-white rounded-lg shadow-lg">
@@ -120,29 +139,32 @@ export function CVTemplates({ onTemplateSelect, selectedTemplate }: CVTemplatesP
             </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Select from our professionally designed templates that pass ATS systems and impress recruiters
+            Select from our professionally designed templates that pass ATS
+            systems and impress recruiters
           </p>
         </div>
         {/* Template Selection */}
         <div className="space-y-6">
           {/* Filter Buttons */}
           <div className="flex flex-wrap justify-center gap-2">
-            {["all", "modern", "classic", "creative", "minimal"].map((category) => (
-              <Button
-                key={category}
-                variant={filter === category ? "default" : "outline"}
-                size="sm"
-                onClick={() => setFilter(category as any)}
-                className="capitalize"
-              >
-                {category}
-              </Button>
-            ))}
+            {["all", "modern", "classic", "creative", "minimal"].map(
+              (category) => (
+                <Button
+                  key={category}
+                  variant={filter === category ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setFilter(category as any)}
+                  className="capitalize"
+                >
+                  {category}
+                </Button>
+              )
+            )}
           </div>
           {/* Templates Grid */}
           <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-6 w-full">
             {filteredTemplates.map((template) => {
-              const isSelected = selectedTemplate === template.id
+              const isSelected = selectedTemplate === template.id;
               return (
                 <Card
                   key={template.id}
@@ -176,8 +198,12 @@ export function CVTemplates({ onTemplateSelect, selectedTemplate }: CVTemplatesP
                     </div>
                   </CardHeader>
                   <CardContent className="p-4 pt-0">
-                    <CardTitle className="text-base mb-1">{template.name}</CardTitle>
-                    <CardDescription className="text-sm mb-3">{template.description}</CardDescription>
+                    <CardTitle className="text-base mb-1">
+                      {template.name}
+                    </CardTitle>
+                    <CardDescription className="text-sm mb-3">
+                      {template.description}
+                    </CardDescription>
                     <div className="flex items-center justify-between">
                       <Badge variant="secondary" className="capitalize">
                         {template.category}
@@ -185,11 +211,11 @@ export function CVTemplates({ onTemplateSelect, selectedTemplate }: CVTemplatesP
                     </div>
                   </CardContent>
                 </Card>
-              )
+              );
             })}
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
