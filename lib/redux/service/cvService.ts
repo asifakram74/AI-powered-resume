@@ -9,6 +9,7 @@ export interface CV {
   job_description: string
   created_at: string
   updated_at: string
+  generated_content?: string
 }
 
 export interface CreateCVData {
@@ -34,14 +35,23 @@ export const getCVs = async (userId: string): Promise<CV[]> => {
 
 export const getCVById = async (id: string): Promise<CV> => {
   try {
-    const response = await api.get(`/cvs/${id}`)
-    return response.data
+    const response = await api.get(`/cvs/${id}`);
+    return response.data;
   } catch (error) {
-    console.error(`Error fetching CV ${id}:`, error)
-    throw error
+    console.error(`Error fetching CV ${id}:`, error);
+    throw error;
   }
-}
+};
 
+export const updateCV = async (id: string, cvData: Partial<CreateCVData>): Promise<CV> => {
+  try {
+    const response = await api.put(`/cvs/${id}`, cvData);
+    return response.data;
+  } catch (error) {
+    console.error(`Error updating CV ${id}:`, error);
+    throw error;
+  }
+};
 export const createCV = async (cvData: CreateCVData): Promise<CV> => {
   try {
     console.log("Sending CV data to API:", JSON.stringify(cvData, null, 2))
@@ -54,15 +64,15 @@ export const createCV = async (cvData: CreateCVData): Promise<CV> => {
   }
 }
 
-export const updateCV = async (id: string, cvData: Partial<CreateCVData>): Promise<CV> => {
-  try {
-    const response = await api.put(`/cvs/${id}`, cvData)
-    return response.data
-  } catch (error) {
-    console.error(`Error updating CV ${id}:`, error)
-    throw error
-  }
-}
+// export const updateCV = async (id: string, cvData: Partial<CreateCVData>): Promise<CV> => {
+//   try {
+//     const response = await api.put(`/cvs/${id}`, cvData)
+//     return response.data
+//   } catch (error) {
+//     console.error(`Error updating CV ${id}:`, error)
+//     throw error
+//   }
+// }
 
 export const deleteCV = async (id: string): Promise<void> => {
   try {

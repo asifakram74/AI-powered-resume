@@ -80,10 +80,10 @@ export function ResumePage() {
     }
   }
 
-  const handleEdit = (cv: CV) => {
-    // Navigate directly to the CV client page with personaId and templateId
-    router.push(`/create-cv?personaId=${cv.personas_id}&templateId=${cv.layout_id}`)
-  }
+ // In ResumeList.tsx
+const handleEdit = (cv: CV) => {
+  router.push(`/create-cv?cvId=${cv.id}`);
+};
 
   // Filter CVs based on search term
   const filteredCVs = cvs.filter(cv =>
