@@ -94,7 +94,7 @@ const handleEdit = (cv: CV) => {
 
   if (isLoading && cvs.length === 0) {
     return (
-      <div className="flex justify-center items-center h-screen w-full">
+      <div className="fixed inset-0 flex justify-center items-center bg-white">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
       </div>
     )
