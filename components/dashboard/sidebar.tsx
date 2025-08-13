@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { FileText, Mail, CheckCircle, Settings, UserCircle, Sparkles, BarChart3, Crown, LogOut } from "lucide-react"
+import { FileText, Mail, CheckCircle, Settings, UserCircle, Sparkles, BarChart3, Crown, LogOut, ChevronDown } from "lucide-react"
 import Link from "next/link"
 import {
   Sidebar as SidebarPrimitive,
@@ -15,6 +15,12 @@ import {
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
 import { logoutUser } from "@/lib/redux/slices/authSlice"
 import { useRouter } from "next/navigation"
@@ -22,6 +28,10 @@ import { useRouter } from "next/navigation"
 interface SidebarProps {
   activePage: string
   setActivePage: (page: string) => void
+  onExportPDF?: () => Promise<void>
+  onExportDOCX?: () => Promise<void>
+  onExportPNG?: () => Promise<void>
+  exportMode?: boolean
 }
 
 const menuItems = [
@@ -29,12 +39,12 @@ const menuItems = [
     id: "create-persona",
     label: "Persona",
     icon: Sparkles,
-    badge: "AI",
-    badgeColor: "bg-gradient-to-r from-blue-500 to-purple-500 text-white",
   },
   {
     id: "resumes",
     label: "Resumes",
+    badge: "AI",
+    badgeColor: "bg-gradient-to-r from-blue-500 to-purple-500 text-white",
     icon: FileText,
   },
   {
@@ -54,14 +64,16 @@ const menuItems = [
     label: "Profile",
     icon: UserCircle,
   },
-  // {
-  //   id: "settings",
-  //   label: "Settings",
-  //   icon: Settings,
-  // },
 ]
 
-export function Sidebar({ activePage, setActivePage }: SidebarProps) {
+export function Sidebar({ 
+  activePage, 
+  setActivePage, 
+  onExportPDF, 
+  onExportDOCX, 
+  onExportPNG, 
+  exportMode = false 
+}: SidebarProps) {
   const [isMounted, setIsMounted] = useState(false)
   const dispatch = useAppDispatch()
   const router = useRouter()
@@ -133,27 +145,52 @@ export function Sidebar({ activePage, setActivePage }: SidebarProps) {
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 mt-auto">
-        <div className="p-4 rounded-xl bg-gradient-to-br from-gray-50 to-blue-50 border border-gray-100 mb-4">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg bg-blue-100">
-              <BarChart3 className="h-4 w-4 text-blue-600" />
+      <SidebarFooter className="p-4 mt-auto space-y-3">
+        {exportMode ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="w-full justify-between">
+                <span>Export</span>
+                <ChevronDown className="h-4 w-4 ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuItem onClick={onExportPDF}>
+                <FileText className="mr-2 h-4 w-4" />
+                <span>PDF</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onExportDOCX}>
+                <FileText className="mr-2 h-4 w-4" />
+                <span>DOCX</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onExportPNG}>
+                <FileText className="mr-2 h-4 w-4" />
+                <span>PNG</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <div className="p-4 rounded-xl bg-gradient-to-br from-gray-50 to-blue-50 border border-gray-100 mb-4">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-lg bg-blue-100">
+                <BarChart3 className="h-4 w-4 text-blue-600" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-gray-900">Usage Stats</p>
+              </div>
             </div>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-gray-900">Usage Stats</p>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-600">Personas created</span>
+              <span className="text-sm font-bold text-blue-600">3/10</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+              <div
+                className="bg-gradient-to-r from-blue-500 to-purple-500 h-1.5 rounded-full"
+                style={{ width: "30%" }}
+              ></div>
             </div>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-600">Personas created</span>
-            <span className="text-sm font-bold text-blue-600">3/10</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2">
-            <div
-              className="bg-gradient-to-r from-blue-500 to-purple-500 h-1.5 rounded-full"
-              style={{ width: "30%" }}
-            ></div>
-          </div>
-        </div>
+        )}
 
         <Button variant="outline" className="w-full bg-transparent" onClick={handleLogout}>
           <LogOut className="h-4 w-4 mr-2" />

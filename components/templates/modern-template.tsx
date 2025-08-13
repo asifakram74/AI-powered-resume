@@ -1,3 +1,5 @@
+"use client"
+
 import { Mail, Phone, MapPin, ExternalLink, Github } from "lucide-react"
 import type { CVData } from "@/types/cv-data"
 
@@ -15,13 +17,31 @@ export function ModernTemplate({ data, isPreview = false }: ModernTemplateProps)
   }
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex min-h-screen bg-white print:min-h-0 print:shadow-none">
+      <style jsx global>{`
+        @media print {
+          @page {
+            size: A4;
+            margin: 0.5in;
+          }
+          .print\\:break-inside-avoid {
+            break-inside: avoid;
+          }
+          .print\\:break-before-page {
+            break-before: page;
+          }
+          .print\\:break-after-avoid {
+            break-after: avoid;
+          }
+        }
+      `}</style>
+
       {/* Sidebar */}
-      <div className="w-1/3 bg-slate-800 text-white p-8">
+      <div className="w-1/3 bg-slate-800 text-white p-8 print:break-inside-avoid">
         <div className="space-y-8">
           {/* Profile Picture */}
           {data.personalInfo.profilePicture && (
-            <div className="text-center">
+            <div className="text-center print:break-inside-avoid">
               <img
                 src={data.personalInfo.profilePicture || "/placeholder.svg"}
                 alt={data.personalInfo.fullName}
@@ -31,7 +51,7 @@ export function ModernTemplate({ data, isPreview = false }: ModernTemplateProps)
           )}
 
           {/* Contact Info */}
-          <div>
+          <div className="print:break-inside-avoid">
             <h2 className="text-xl font-bold mb-4 text-blue-300">Contact</h2>
             <div className="space-y-3 text-sm">
               <div className="flex items-center space-x-3">
@@ -45,10 +65,10 @@ export function ModernTemplate({ data, isPreview = false }: ModernTemplateProps)
               <div className="flex items-center space-x-3">
                 <MapPin className="w-4 h-4 text-blue-300" />
                 <span>
-                  {data.personalInfo.city}, {data.personalInfo.country}
+                  {data.personalInfo.city} {data.personalInfo.country}
                   {data.personalInfo.address && (
                     <>
-                      <br />
+                      {/* <br /> */}
                       {data.personalInfo.address}
                     </>
                   )}
@@ -58,7 +78,7 @@ export function ModernTemplate({ data, isPreview = false }: ModernTemplateProps)
           </div>
 
           {/* Skills */}
-          <div>
+          <div className="print:break-inside-avoid">
             <h2 className="text-xl font-bold mb-4 text-blue-300">Skills</h2>
             <div className="space-y-4">
               {data.skills.technical.length > 0 && (
@@ -90,7 +110,7 @@ export function ModernTemplate({ data, isPreview = false }: ModernTemplateProps)
 
           {/* Languages */}
           {data.languages.length > 0 && (
-            <div>
+            <div className="print:break-inside-avoid">
               <h2 className="text-xl font-bold mb-4 text-blue-300">Languages</h2>
               <div className="space-y-2">
                 {data.languages.map((lang) => (
@@ -104,11 +124,11 @@ export function ModernTemplate({ data, isPreview = false }: ModernTemplateProps)
           )}
 
           {/* Education */}
-          <div>
+          <div className="print:break-inside-avoid">
             <h2 className="text-xl font-bold mb-4 text-blue-300">Education</h2>
             <div className="space-y-4">
               {data.education.map((edu) => (
-                <div key={edu.id} className="text-sm">
+                <div key={edu.id} className="text-sm print:break-inside-avoid">
                   <h3 className="font-semibold">{edu.degree}</h3>
                   <p className="text-blue-200">{edu.institutionName}</p>
                   {edu.location && <p className="text-gray-300">{edu.location}</p>}
@@ -122,7 +142,7 @@ export function ModernTemplate({ data, isPreview = false }: ModernTemplateProps)
 
           {/* Interests */}
           {data.additional.interests.length > 0 && (
-            <div>
+            <div className="print:break-inside-avoid">
               <h2 className="text-xl font-bold mb-4 text-blue-300">Interests</h2>
               <div className="flex flex-wrap gap-2">
                 {data.additional.interests.map((interest, index) => (
@@ -140,18 +160,18 @@ export function ModernTemplate({ data, isPreview = false }: ModernTemplateProps)
       <div className="flex-1 p-8">
         <div className="space-y-8">
           {/* Header */}
-          <div className="border-b border-gray-200 pb-6">
+          <div className="border-b border-gray-200 pb-6 mb-8 print:break-inside-avoid">
             <h1 className="text-4xl font-bold text-gray-900 mb-2">{data.personalInfo.fullName}</h1>
             <h2 className="text-xl text-blue-600 font-medium mb-4">{data.personalInfo.jobTitle}</h2>
             <p className="text-gray-600 leading-relaxed">{data.personalInfo.summary}</p>
           </div>
 
           {/* Experience */}
-          <div>
+          <div className="print:break-inside-avoid">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Experience</h2>
             <div className="space-y-6">
-              {data.experience.map((exp) => (
-                <div key={exp.id} className="border-l-4 border-blue-500 pl-6">
+              {data.experience.map((exp, index) => (
+                <div key={exp.id} className="border-l-4 border-blue-500 pl-6 print:break-inside-avoid">
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <h3 className="text-xl font-semibold text-gray-900">{exp.jobTitle}</h3>
@@ -177,11 +197,11 @@ export function ModernTemplate({ data, isPreview = false }: ModernTemplateProps)
 
           {/* Projects */}
           {data.projects.length > 0 && (
-            <div>
+            <div className="print:break-inside-avoid">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Projects</h2>
               <div className="space-y-6">
                 {data.projects.map((project) => (
-                  <div key={project.id} className="border rounded-lg p-4">
+                  <div key={project.id} className="border rounded-lg p-4 print:break-inside-avoid">
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900">{project.name}</h3>
@@ -226,11 +246,11 @@ export function ModernTemplate({ data, isPreview = false }: ModernTemplateProps)
 
           {/* Certifications */}
           {data.certifications.length > 0 && (
-            <div>
+            <div className="print:break-inside-avoid">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Certifications & Awards</h2>
               <div className="space-y-3">
                 {data.certifications.map((cert) => (
-                  <div key={cert.id} className="flex justify-between items-center">
+                  <div key={cert.id} className="flex justify-between items-center print:break-inside-avoid">
                     <div>
                       <h3 className="font-semibold text-gray-900">{cert.title}</h3>
                       <p className="text-gray-600">{cert.issuingOrganization}</p>

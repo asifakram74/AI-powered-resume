@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowLeft, Sparkles, TrendingUp, Save, RefreshCw, Edit } from "lucide-react"
+import { ArrowLeft, Sparkles, TrendingUp, Save, RefreshCw, Edit, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { getPersonaById, type PersonaResponse } from "@/lib/redux/service/pasonaService"
 import { CVPreview } from "@/components/resume/CVPreview"
@@ -14,7 +14,7 @@ import * as htmlToImage from "html-to-image"
 import { jsPDF } from "jspdf"
 import { Document, Packer, Paragraph, HeadingLevel } from "docx"
 import { SidebarProvider } from "@/components/ui/sidebar"
-import { Sidebar } from "@/app/create-cv/sidebar"
+import { Sidebar } from "@/components/dashboard/sidebar"
 import { CreatePersonaPage } from "@/components/persona/PersonaList"
 import { ResumePage } from "@/components/resume/ResumeList"
 import { CoverLetterPage } from "@/components/cover-letter/CoverLetterList"
@@ -113,13 +113,13 @@ export function CVPageClientContent() {
   const [persona, setPersona] = useState<PersonaResponse | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
-  const [isUpdating, setIsUpdating] = useState(false)
+  const [isRegenerating, setIsRegenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [selectedTemplate, setSelectedTemplate] = useState<CVTemplate | null>(null)
   const [activePage, setActivePage] = useState("create-persona")
   const [existingCV, setExistingCV] = useState<CV | null>(null)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
-  const [isEditPopupOpen, setIsEditPopupOpen] = useState(false)
+  const [showEditPopup, setShowEditPopup] = useState(false)
 
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -423,7 +423,7 @@ export function CVPageClientContent() {
       return
     }
 
-    setIsUpdating(true)
+    setIsRegenerating(true)
     try {
       const personaText = convertPersonaToText(persona)
       const response = await fetch("/api/optimize-cv", {
@@ -444,7 +444,7 @@ export function CVPageClientContent() {
       console.error("Error regenerating CV:", error)
       alert(`Failed to regenerate CV: ${error.message || "Unknown error"}`)
     } finally {
-      setIsUpdating(false)
+      setIsRegenerating(false)
     }
   }
 
@@ -537,60 +537,121 @@ export function CVPageClientContent() {
   }
 
   const exportAsPDF = async () => {
-    if (!cvPreviewRef.current) return
     try {
-      const dataUrl = await htmlToImage.toPng(cvPreviewRef.current)
+      const cvElement = document.getElementById("cv-preview-content")
+      if (!cvElement) {
+        alert("CV preview not found. Please try again.")
+        return
+      }
+
+      // Use html-to-image approach for better quality
+      const dataUrl = await htmlToImage.toPng(cvElement, {
+        quality: 1.0,
+        pixelRatio: 2,
+        backgroundColor: "#ffffff",
+      })
+
       const pdf = new jsPDF("p", "mm", "a4")
       const imgProps = pdf.getImageProperties(dataUrl)
       const pdfWidth = pdf.internal.pageSize.getWidth()
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width
-      pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight)
+
+      // Handle multiple pages if content is too long
+      if (pdfHeight > pdf.internal.pageSize.getHeight()) {
+        const pageHeight = pdf.internal.pageSize.getHeight()
+        let position = 0
+
+        while (position < pdfHeight) {
+          pdf.addImage(dataUrl, "PNG", 0, -position, pdfWidth, pdfHeight)
+          position += pageHeight
+          if (position < pdfHeight) {
+            pdf.addPage()
+          }
+        }
+      } else {
+        pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight)
+      }
+
       pdf.save(`${persona?.full_name || "resume"}-cv.pdf`)
     } catch (error) {
       console.error("Error exporting as PDF:", error)
-      alert("PDF export failed. Please try again.")
+      // Fallback to print method
+      handleExport("pdf")
+    }
+  }
+
+  const exportAsPNG = async () => {
+    try {
+      const cvElement = document.getElementById("cv-preview-content")
+      if (!cvElement) {
+        alert("CV preview not found. Please try again.")
+        return
+      }
+
+      const dataUrl = await htmlToImage.toPng(cvElement, {
+        quality: 1.0,
+        pixelRatio: 2,
+        backgroundColor: "#ffffff",
+      })
+
+      // Create download link
+      const link = document.createElement("a")
+      link.download = `${persona?.full_name || "resume"}-cv.png`
+      link.href = dataUrl
+      link.click()
+    } catch (error) {
+      console.error("Error exporting as PNG:", error)
+      alert("PNG export failed. Please try again.")
     }
   }
 
   const exportAsDOCX = async () => {
-    if (!aiResponse || !persona) return
+    if (!aiResponse || !persona) {
+      alert("No CV data available for export.")
+      return
+    }
+
     try {
       const children = [
         new Paragraph({
-          text: `${persona.full_name || "Resume"}`,
+          text: aiResponse.optimizedCV.personalInfo.name || persona.full_name || "Resume",
           heading: HeadingLevel.HEADING_1,
           spacing: { after: 200 },
         }),
         new Paragraph({
-          text: `Job Title: ${persona.job_title || ""}`,
+          text: persona.job_title || "",
           heading: HeadingLevel.HEADING_2,
           spacing: { after: 100 },
         }),
         new Paragraph({
-          text: `Email: ${persona.email || ""}`,
+          text: `Email: ${aiResponse.optimizedCV.personalInfo.email || persona.email || ""}`,
         }),
         new Paragraph({
-          text: `Phone: ${persona.phone || ""}`,
+          text: `Phone: ${aiResponse.optimizedCV.personalInfo.phone || persona.phone || ""}`,
         }),
         new Paragraph({
-          text: `Location: ${persona.city || ""}, ${persona.country || ""}`,
+          text: `Location: ${aiResponse.optimizedCV.personalInfo.location || `${persona.city || ""}, ${persona.country || ""}`}`,
           spacing: { after: 200 },
         }),
       ]
-      if (persona.summary) {
+
+      // Add summary
+      if (aiResponse.optimizedCV.summary) {
         children.push(
           new Paragraph({
-            text: "Summary",
+            text: "Professional Summary",
             heading: HeadingLevel.HEADING_2,
             spacing: { after: 100 },
           }),
           new Paragraph({
-            text: persona.summary,
+            text: aiResponse.optimizedCV.summary,
             spacing: { after: 200 },
           }),
         )
       }
-      if (persona.experience && Array.isArray(persona.experience)) {
+
+      // Add work experience
+      if (aiResponse.optimizedCV.workExperience && aiResponse.optimizedCV.workExperience.length > 0) {
         children.push(
           new Paragraph({
             text: "Work Experience",
@@ -598,34 +659,26 @@ export function CVPageClientContent() {
             spacing: { after: 100 },
           }),
         )
-        persona.experience.forEach((exp: any) => {
+
+        aiResponse.optimizedCV.workExperience.forEach((exp) => {
           children.push(
             new Paragraph({
-              text: `${exp.jobTitle || ""} at ${exp.companyName || ""}`,
+              text: `${exp.title} at ${exp.company}`,
               heading: HeadingLevel.HEADING_3,
             }),
             new Paragraph({
-              text: `${exp.startDate || ""} - ${exp.endDate || ""}`,
+              text: exp.duration,
             }),
             new Paragraph({
-              text: `Location: ${exp.location || ""}`,
-              spacing: { after: 100 },
+              text: exp.description,
+              spacing: { after: 200 },
             }),
           )
-          if (exp.responsibilities && Array.isArray(exp.responsibilities)) {
-            exp.responsibilities.forEach((resp: string) => {
-              children.push(
-                new Paragraph({
-                  text: resp,
-                  bullet: { level: 0 },
-                }),
-              )
-            })
-          }
-          children.push(new Paragraph({ spacing: { after: 200 } }))
         })
       }
-      if (persona.education && Array.isArray(persona.education)) {
+
+      // Add education
+      if (aiResponse.optimizedCV.education && aiResponse.optimizedCV.education.length > 0) {
         children.push(
           new Paragraph({
             text: "Education",
@@ -633,46 +686,66 @@ export function CVPageClientContent() {
             spacing: { after: 100 },
           }),
         )
-        persona.education.forEach((edu: any) => {
+
+        aiResponse.optimizedCV.education.forEach((edu) => {
           children.push(
             new Paragraph({
-              text: `${edu.degree || ""} from ${edu.institutionName || ""}`,
+              text: `${edu.degree} from ${edu.institution}`,
               heading: HeadingLevel.HEADING_3,
             }),
             new Paragraph({
-              text: `Graduation: ${edu.graduationDate || ""}`,
+              text: `Year: ${edu.year}`,
             }),
             new Paragraph({
-              text: `GPA: ${edu.gpa || ""}`,
+              text: edu.gpa ? `GPA: ${edu.gpa}` : "",
               spacing: { after: 200 },
             }),
           )
         })
       }
-      if (persona.skills) {
+
+      // Add skills
+      if (aiResponse.optimizedCV.skills && aiResponse.optimizedCV.skills.length > 0) {
         children.push(
           new Paragraph({
             text: "Skills",
             heading: HeadingLevel.HEADING_2,
             spacing: { after: 100 },
           }),
+          new Paragraph({
+            text: aiResponse.optimizedCV.skills.join(", "),
+            spacing: { after: 200 },
+          }),
         )
-        if (Array.isArray(persona.skills.technical)) {
+      }
+
+      // Add projects
+      if (aiResponse.optimizedCV.projects && aiResponse.optimizedCV.projects.length > 0) {
+        children.push(
+          new Paragraph({
+            text: "Projects",
+            heading: HeadingLevel.HEADING_2,
+            spacing: { after: 100 },
+          }),
+        )
+
+        aiResponse.optimizedCV.projects.forEach((proj) => {
           children.push(
             new Paragraph({
-              text: `Technical Skills: ${persona.skills.technical.join(", ")}`,
+              text: proj.name,
+              heading: HeadingLevel.HEADING_3,
             }),
-          )
-        }
-        if (Array.isArray(persona.skills.soft)) {
-          children.push(
             new Paragraph({
-              text: `Soft Skills: ${persona.skills.soft.join(", ")}`,
+              text: proj.description,
+            }),
+            new Paragraph({
+              text: `Technologies: ${proj.technologies.join(", ")}`,
               spacing: { after: 200 },
             }),
           )
-        }
+        })
       }
+
       const doc = new Document({
         sections: [
           {
@@ -681,11 +754,12 @@ export function CVPageClientContent() {
           },
         ],
       })
+
       Packer.toBlob(doc).then((blob) => {
         const url = URL.createObjectURL(blob)
         const a = document.createElement("a")
         a.href = url
-        a.download = `${persona.full_name || "resume"}-cv.docx`
+        a.download = `${aiResponse.optimizedCV.personalInfo.name || persona.full_name || "resume"}-cv.docx`
         a.click()
         URL.revokeObjectURL(url)
       })
@@ -758,7 +832,7 @@ export function CVPageClientContent() {
   const handleCVDataUpdate = async (updatedData: OptimizedCV) => {
     setAiResponse((prev) => (prev ? { ...prev, optimizedCV: updatedData } : null))
     setHasUnsavedChanges(true)
-    setIsEditPopupOpen(false)
+    setShowEditPopup(false)
     alert("CV data updated! Don't forget to save your changes.")
   }
 
@@ -786,7 +860,7 @@ export function CVPageClientContent() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardContent className="text-center p-6">
-            <div className="text-red-500 mb-4">
+            <div className="text-gray-500 mb-4">
               <TrendingUp className="h-12 w-12 mx-auto" />
             </div>
             <h2 className="text-xl font-semibold mb-2">Error</h2>
@@ -828,11 +902,22 @@ export function CVPageClientContent() {
       <SidebarProvider>
         <div className="flex min-h-screen">
           <Sidebar
-            activePage={activePage}
-            setActivePage={setActivePage}
+            activePage="cv-export"
+            setActivePage={(page) => {
+              if (page === 'create-persona') {
+                router.push('/dashboard?page=create-persona');
+              } else if (page === 'resumes') {
+                router.push('/dashboard?page=resumes');
+              } else if (page === 'cover-letter') {
+                router.push('/dashboard?page=cover-letter');
+              } else if (page === 'profile') {
+                router.push('/dashboard?page=profile');
+              }
+            }}
             onExportPDF={exportAsPDF}
             onExportDOCX={exportAsDOCX}
-            onExportPNG={() => handleExport("png")}
+            onExportPNG={exportAsPNG}
+            exportMode={true}
           />
           <main className="flex-1 p-6 bg-gray-50">
             <div className="flex flex-col gap-6">
@@ -844,39 +929,58 @@ export function CVPageClientContent() {
                         <input
                           type="text"
                           value={existingCV.title}
-                          onChange={(e) => setExistingCV({ ...existingCV, title: e.target.value })}
-                          onBlur={(e) => handleUpdateTitle(e.target.value)}
-                          className="text-xl font-semibold bg-transparent border-none outline-none focus:bg-white focus:border focus:border-gray-300 focus:rounded px-2 py-1"
-                          disabled={isSaving}
+                          onChange={(e) => handleUpdateTitle(e.target.value)}
+                          className="text-2xl font-bold bg-transparent border-none outline-none focus:bg-white focus:border focus:border-gray-300 focus:rounded px-2 py-1"
+                          onBlur={() => setHasUnsavedChanges(false)}
                         />
                       ) : (
-                        <h2 className="text-xl font-semibold">CV Preview</h2>
+                        <h1 className="text-2xl font-bold text-gray-900">Create Your CV</h1>
                       )}
                       {hasUnsavedChanges && (
-                        <span className="text-sm text-orange-600 font-medium">(Unsaved changes)</span>
+                        <span className="text-sm text-orange-600 bg-orange-100 px-2 py-1 rounded">Unsaved changes</span>
                       )}
                     </div>
-                    <p className="text-gray-600">Template: {selectedTemplate?.name}</p>
+                    <p className="text-gray-600">
+                      {existingCV
+                        ? "Edit your CV details and export when ready"
+                        : "Generate a professional CV from your persona data"}
+                    </p>
                   </div>
-                  <div className="flex gap-2">
+
+                  <div className="flex items-center gap-3">
                     {aiResponse && (
-                      <Button
-                        onClick={() => setIsEditPopupOpen(true)}
-                        variant="outline"
-                        disabled={isSaving || isUpdating}
-                      >
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit Details
-                      </Button>
+                      <>
+                        <Button
+                          onClick={() => setShowEditPopup(true)}
+                          variant="outline"
+                          className="flex items-center gap-2"
+                        >
+                          <Edit className="h-4 w-4" />
+                          Edit Details
+                        </Button>
+
+                        <Button
+                          onClick={handleRegenerateCV}
+                          disabled={isRegenerating}
+                          variant="outline"
+                          className="flex items-center gap-2 bg-transparent"
+                        >
+                          {isRegenerating ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <RefreshCw className="h-4 w-4" />
+                          )}
+                          {isRegenerating ? "Regenerating..." : "Regenerate"}
+                        </Button>
+                      </>
                     )}
-                    {existingCV && (
-                      <Button onClick={handleRegenerateCV} disabled={isUpdating || isSaving} variant="outline">
-                        <RefreshCw className={`h-4 w-4 mr-2 ${isUpdating ? "animate-spin" : ""}`} />
-                        {isUpdating ? "Regenerating..." : "Regenerate CV"}
-                      </Button>
-                    )}
-                    <Button onClick={handleSaveCV} disabled={isSaving || isUpdating}>
-                      <Save className="h-4 w-4 mr-2" />
+
+                    <Button
+                      onClick={handleSaveCV}
+                      disabled={isSaving || !aiResponse}
+                      className="flex items-center gap-2"
+                    >
+                      {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                       {isSaving ? "Saving..." : existingCV ? "Update CV" : "Save CV"}
                     </Button>
                   </div>
@@ -934,8 +1038,8 @@ export function CVPageClientContent() {
 
             {aiResponse && (
               <CVEditPopup
-                isOpen={isEditPopupOpen}
-                onClose={() => setIsEditPopupOpen(false)}
+                isOpen={showEditPopup}
+                onClose={() => setShowEditPopup(false)}
                 cvData={aiResponse.optimizedCV}
                 onSave={handleCVDataUpdate}
                 isLoading={isSaving}

@@ -124,7 +124,7 @@ export function Sidebar({
           </SidebarMenuItem>
 
           {/* Other menu items */}
-          <SidebarMenuItem>
+          {/* <SidebarMenuItem>
             <div
               onClick={() => {
                 setActivePage("new-section");
@@ -137,9 +137,9 @@ export function Sidebar({
               <PlusCircle className="h-5 w-5 text-gray-600 group-data-[active=true]:text-blue-600" />
               <span className="font-medium text-gray-700 group-data-[active=true]:text-blue-700">New Section</span>
             </div>
-          </SidebarMenuItem>
+          </SidebarMenuItem> */}
 
-          <SidebarMenuItem>
+          {/* <SidebarMenuItem>
             <div
               onClick={() => setActivePage("change-template")}
               role="button"
@@ -175,7 +175,7 @@ export function Sidebar({
                 <span className="font-medium text-gray-700 group-data-[active=true]:text-blue-700">Layout Options</span>
               </div>
             </SidebarMenuButton>
-          </SidebarMenuItem>
+          </SidebarMenuItem> */}
         </SidebarMenu>
       </SidebarContent>
 

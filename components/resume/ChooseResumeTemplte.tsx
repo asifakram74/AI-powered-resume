@@ -17,7 +17,7 @@ import {
   UserCircle,
   Settings,
 } from "lucide-react";
-import ResumeTemplate from "./ResumeTemplate";
+import Image from "next/image";
 import { sampleCVData } from "@/lib/sample-cv-data";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { logoutUser } from "@/lib/redux/slices/authSlice";
@@ -177,14 +177,16 @@ export function CVTemplates({
                     <div className="relative">
                       <div className="w-full overflow-hidden rounded-lg">
                         <div className="flex items-center justify-center">
-                          <div className="h-32">
-                            <ResumeTemplate
-                              className="w-12 h-32"
-                              scale={0.2}
-                              data={sampleCVData}
-                              templateId={template.id}
-                              isPreview={true}
-                            />
+                          <div className="h-64 w-full">
+                            <div className="relative w-full h-full flex items-center justify-center p-2">
+                              <Image
+                                src={`/templates/${template.id}-preview.png`}
+                                alt={`${template.name} Template Preview`}
+                                width={300}
+                                height={450}
+                                className="object-contain w-full h-full shadow-md"
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>

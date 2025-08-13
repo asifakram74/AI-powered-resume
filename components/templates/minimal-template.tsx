@@ -1,4 +1,4 @@
-import type { CVData } from "@/types/cv"
+import type { CVData } from "@/types/cv-data"
 
 interface MinimalTemplateProps {
   data: CVData
@@ -13,7 +13,7 @@ export function MinimalTemplate({ data, isPreview = false }: MinimalTemplateProp
   }
 
   return (
-    <div className="max-w-3xl mx-auto bg-white p-16 min-h-screen">
+    <div className="max-w-4xl mx-auto bg-white p-4 min-h-screen">
       {/* Header */}
       <div className="mb-16">
         <h1 className="text-5xl font-light text-gray-900 mb-2">{data.personalInfo.fullName}</h1>
