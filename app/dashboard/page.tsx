@@ -8,7 +8,6 @@ import { ResumePage } from "@/components/resume/ResumeList"
 import { CoverLetterPage } from "@/components/cover-letter/CoverLetterList"
 import ATSCheckerPage from "@/components/ats/ats-checker-page"
 import { ProfilePage } from "@/components/profile/profile-page"
-import { UserList } from "@/components/UsersManagement/UserList"
 // import { SettingsPage } from "@/components/settings/settings-page"
 import ProtectedRoute from "@/components/auth/ProtectedRoute"
 
@@ -27,8 +26,6 @@ export default function DashboardPage() {
         return <ATSCheckerPage />
       case "profile":
         return <ProfilePage />
-      case "users":
-        return <UserList />
       // case "settings":
       //   return <SettingsPage />
       default:
