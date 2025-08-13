@@ -15,6 +15,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { changePassword, type ChangePasswordData } from "@/lib/api/settings"
+import { showSuccessToast, showErrorToast } from "@/components/ui/toast"
 
 interface ChangePasswordProps {
   open: boolean
@@ -61,11 +62,15 @@ export function ChangePassword({
         new_password: "",
         new_password_confirmation: "",
       })
-      onSuccess?.()
-    } catch (error) {
-      console.error("Error changing password:", error)
-      setError("Failed to change password. Please check your current password.")
-    } finally {
+      showSuccessToast("Password changed successfully")
+    } catch (err: any) {
+      const errorMessage =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Failed to change password. Please try again."
+      showErrorToast("Failed to change password", errorMessage)
+    }
+    finally {
       setIsLoading(false)
     }
   }

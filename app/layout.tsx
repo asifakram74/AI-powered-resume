@@ -24,7 +24,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <ReduxProvider>
           <HydrateAuth />
-          <Toaster />
+          <Toaster position="top-right" richColors />
           {children}
         </ReduxProvider>
       </body>

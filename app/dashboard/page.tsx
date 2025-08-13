@@ -6,8 +6,9 @@ import { Sidebar } from "@/components/dashboard/sidebar"
 import { CreatePersonaPage } from "@/components/persona/PersonaList"
 import { ResumePage } from "@/components/resume/ResumeList"
 import { CoverLetterPage } from "@/components/cover-letter/CoverLetterList"
-import  ATSCheckerPage  from "@/components/ats/ats-checker-page"
+import ATSCheckerPage from "@/components/ats/ats-checker-page"
 import { ProfilePage } from "@/components/profile/profile-page"
+import { UserList } from "@/components/UsersManagement/UserList"
 // import { SettingsPage } from "@/components/settings/settings-page"
 import ProtectedRoute from "@/components/auth/ProtectedRoute"
 
@@ -26,6 +27,8 @@ export default function DashboardPage() {
         return <ATSCheckerPage />
       case "profile":
         return <ProfilePage />
+      case "users":
+        return <UserList />
       // case "settings":
       //   return <SettingsPage />
       default:
@@ -38,7 +41,7 @@ export default function DashboardPage() {
       <SidebarProvider>
         <div className="flex min-h-screen">
           <Sidebar activePage={activePage} setActivePage={setActivePage} />
-          <main className="flex-1 p-6 bg-gray-50">{renderActivePage()}</main>
+          <main className="flex-1 p-6 bg-gray-50 relative">{renderActivePage()}</main>
         </div>
       </SidebarProvider>
     </ProtectedRoute>

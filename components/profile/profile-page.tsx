@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { UserCircle, Edit, Shield, Mail, Star, BadgeCheck } from "lucide-react"
+import { Edit, Shield, Mail, Star, BadgeCheck, FileText, Target, UserCircle, TrendingUp } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -11,71 +11,130 @@ import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
 import { fetchProfile, updateProfile } from "@/lib/redux/slices/authSlice"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { ChangePassword } from "./ChangePassword"
-import { StatsCard } from "./StatsCard"
+import { getPersonas } from "@/lib/redux/service/pasonaService"
+import { getCVs } from "@/lib/redux/service/cvService"
+import { getCoverLetters } from "@/lib/redux/service/coverLetterService"
+import { getATSResumes } from "@/lib/redux/service/atsResumeService"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import { showSuccessToast, showErrorToast } from "@/components/ui/toast"
+
+interface StatItem {
+  label: string
+  value: number
+  icon: React.ComponentType<{ className?: string }>
+  color: string
+}
 
 export function ProfilePage() {
   const dispatch = useAppDispatch()
-  const { profile, loading, error } = useAppSelector((state) => state.auth)
+  const { profile, loading: authLoading, error, user } = useAppSelector((state) => state.auth)
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     plan_type: "",
     status: ""
   })
-  const [success, setSuccess] = useState<string | null>(null)
+  const [stats, setStats] = useState<StatItem[]>([])
   const [showEditModal, setShowEditModal] = useState(false)
   const [showPasswordDialog, setShowPasswordDialog] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadingError, setLoadingError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!profile) {
-      dispatch(fetchProfile())
-    }
-  }, [dispatch, profile])
+    const fetchEverything = async () => {
+      try {
+        setIsLoading(true)
+        setLoadingError(null)
+        
+        const profileData = await dispatch(fetchProfile()).unwrap()
+        
+        setFormData({
+          name: profileData.name,
+          email: profileData.email,
+          plan_type: profileData.plan_type || "",
+          status: profileData.status || "",
+        })
 
-  useEffect(() => {
-    if (profile) {
-      setFormData({
-        name: profile.name,
-        email: profile.email,
-        plan_type: profile.plan_type || "",
-        status: profile.status || "",
-      })
+        if (user?.id) {
+          const [personas, cvs, coverLetters, atsResumes] = await Promise.all([
+            getPersonas(user.id.toString()),
+            getCVs(user.id.toString()),
+            getCoverLetters(user.id.toString()),
+            getATSResumes(),
+          ])
+
+          setStats([
+            {
+              label: "Resumes Created",
+              value: profileData?.cvs_count || cvs.length,
+              icon: FileText,
+              color: "text-blue-600",
+            },
+            {
+              label: "Cover Letters",
+              value: profileData?.cover_letters_count || coverLetters.length,
+              icon: Mail,
+              color: "text-green-600",
+            },
+            {
+              label: "ATS Checks",
+              value: profileData?.ats_resumes_count || atsResumes.length,
+              icon: Target,
+              color: "text-orange-600",
+            },
+            {
+              label: "Personas Generated",
+              value: personas.length,
+              icon: UserCircle,
+              color: "text-purple-600",
+            },
+          ])
+        }
+      } catch (err) {
+        console.error("Error fetching data:", err)
+        setLoadingError("Failed to load profile data. Please try again.")
+      } finally {
+        setIsLoading(false)
+      }
     }
-  }, [profile])
+
+    fetchEverything()
+  }, [dispatch, user?.id])
 
   const handleSave = async () => {
     try {
-      setSuccess(null)
       await dispatch(updateProfile({
         name: formData.name,
         email: formData.email,
         plan_type: formData.plan_type,
         status: formData.status,
       })).unwrap()
-
-      setSuccess("Profile updated successfully")
+      await dispatch(fetchProfile()).unwrap()
+      showSuccessToast("Profile updated successfully")
       setShowEditModal(false)
     } catch (err) {
-      console.error(err)
+      showErrorToast("Failed to update profile", error || "Failed to update profile. Please try again.")
     }
   }
 
-  if (!profile && loading) {
+  if (isLoading) {
     return (
-      <div className="fixed inset-0 flex justify-center items-center bg-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      <div className="fixed inset-0 flex justify-center items-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+          <p className="text-gray-600">Loading your profile...</p>
+        </div>
       </div>
     )
   }
 
-  if (!profile) {
+  if (loadingError || !profile) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Alert variant="destructive" className="w-auto">
           <AlertTitle>Error</AlertTitle>
-          <AlertDescription>Failed to load profile data</AlertDescription>
+          <AlertDescription>{loadingError || "Failed to load profile data"}</AlertDescription>
         </Alert>
       </div>
     )
@@ -103,12 +162,11 @@ export function ProfilePage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                {/* Premium/Free Member Badge */}
                 <Badge
                   variant={profile.plan_type === 'Premium' ? 'default' : 'secondary'}
                   className={`flex items-center gap-1.5 px-3 py-1 rounded-full ${profile.plan_type === 'Premium'
-                      ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
-                      : "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200"
+                    ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
+                    : "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200"
                     }`}
                 >
                   {profile.plan_type === 'Premium' ? (
@@ -121,7 +179,6 @@ export function ProfilePage() {
                   )}
                 </Badge>
 
-                {/* Verified Badge */}
                 {profile.status === 'verified' && (
                   <Badge
                     className="flex items-center gap-1.5 px-3 py-1 rounded-full 
@@ -139,11 +196,11 @@ export function ProfilePage() {
           </div>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" onClick={() => setShowEditModal(true)}>
+          <Button variant="outline" className="w-50" onClick={() => setShowEditModal(true)}>
             <Edit className="h-4 w-4 mr-2" />
             Edit Profile
           </Button>
-          <Button onClick={() => setShowPasswordDialog(true)}>
+          <Button className="w-50" onClick={() => setShowPasswordDialog(true)}>
             <Shield className="h-4 w-4 mr-2" />
             Change Password
           </Button>
@@ -160,18 +217,6 @@ export function ProfilePage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {error && (
-                <Alert variant="destructive" className="mb-6">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-
-              {success && (
-                <Alert className="mb-6">
-                  <AlertDescription>{success}</AlertDescription>
-                </Alert>
-              )}
-
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
@@ -200,7 +245,25 @@ export function ProfilePage() {
         </div>
 
         <div className="lg:col-span-1">
-          <StatsCard />
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Usage Statistics
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                {stats.map((stat, index) => (
+                  <div key={index} className="text-center p-3 bg-gray-50 rounded-lg">
+                    <stat.icon className={`h-6 w-6 mx-auto mb-2 ${stat.color}`} />
+                    <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
+                    <div className="text-xs text-gray-600">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
@@ -254,8 +317,8 @@ export function ProfilePage() {
               <Button variant="outline" onClick={() => setShowEditModal(false)} className="cursor-pointer">
                 Cancel
               </Button>
-              <Button onClick={handleSave} disabled={loading} className="cursor-pointer">
-                {loading ? (
+              <Button onClick={handleSave} disabled={authLoading} className="cursor-pointer">
+                {authLoading ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Saving...
@@ -272,10 +335,6 @@ export function ProfilePage() {
       <ChangePassword
         open={showPasswordDialog}
         onOpenChange={setShowPasswordDialog}
-        onSuccess={() => {
-          setSuccess("Password changed successfully")
-          setTimeout(() => setSuccess(null), 3000)
-        }}
       />
     </div>
   )
