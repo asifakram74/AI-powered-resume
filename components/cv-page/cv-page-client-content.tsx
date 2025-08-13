@@ -4,7 +4,19 @@ import { useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowLeft, Sparkles, TrendingUp, Save, RefreshCw, Edit, Loader2 } from "lucide-react"
+import {
+  ArrowLeft,
+  Sparkles,
+  TrendingUp,
+  Save,
+  RefreshCw,
+  Edit,
+  Loader2,
+  Brain,
+  CheckCircle,
+  AlertCircle,
+  FileText,
+} from "lucide-react"
 import { useRouter } from "next/navigation"
 import { getPersonaById, type PersonaResponse } from "@/lib/redux/service/pasonaService"
 import { CVPreview } from "@/components/resume/CVPreview"
@@ -13,7 +25,6 @@ import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
 import { logoutUser } from "@/lib/redux/slices/authSlice"
 import * as htmlToImage from "html-to-image"
 import { jsPDF } from "jspdf"
-import { Document, Packer, Paragraph, HeadingLevel } from "docx"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { Sidebar } from "@/components/dashboard/sidebar"
 import { CreatePersonaPage } from "@/components/persona/PersonaList"
@@ -24,7 +35,7 @@ import { ProfilePage } from "@/components/profile/profile-page"
 import ProtectedRoute from "@/components/auth/ProtectedRoute"
 import { createCV, getCVById, updateCV, type CreateCVData, type CV } from "@/lib/redux/service/cvService"
 import { CVEditPopup } from "./cv-edit-popup"
-import { Toaster } from "sonner";
+
 
 interface OptimizedCV {
   personalInfo: {
@@ -99,17 +110,191 @@ const templates: CVTemplate[] = [
   },
 ]
 
-export function CVPageLoading() {
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <p className="text-gray-600">Loading...</p>
-      </div>
-    </div>
-  )
+const showSuccessToast = (message: string, description?: string) => {
+  toast.success(message, {
+    description,
+    duration: 4000,
+    icon: <CheckCircle className="h-5 w-5 text-green-500" />,
+    style: {
+      background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+      color: "white",
+      border: "none",
+      borderRadius: "12px",
+      padding: "16px",
+      fontSize: "14px",
+      fontWeight: "500",
+    },
+  })
 }
 
+const showErrorToast = (message: string, description?: string) => {
+  toast.error(message, {
+    description,
+    duration: 5000,
+    icon: <AlertCircle className="h-5 w-5 text-red-500" />,
+    style: {
+      background: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+      color: "white",
+      border: "none",
+      borderRadius: "12px",
+      padding: "16px",
+      fontSize: "14px",
+      fontWeight: "500",
+    },
+  })
+}
+
+const showInfoToast = (message: string, description?: string) => {
+  toast.info(message, {
+    description,
+    duration: 4000,
+    icon: <Brain className="h-5 w-5 text-blue-500" />,
+    style: {
+      background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+      color: "white",
+      border: "none",
+      borderRadius: "12px",
+      padding: "16px",
+      fontSize: "14px",
+      fontWeight: "500",
+    },
+  })
+}
+
+const showLoadingToast = (message: string, description?: string) => {
+  return toast.loading(message, {
+    description,
+    icon: <Loader2 className="h-5 w-5 animate-spin text-blue-500" />,
+    style: {
+      background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
+      color: "#1e293b",
+      border: "1px solid #cbd5e1",
+      borderRadius: "12px",
+      padding: "16px",
+      fontSize: "14px",
+      fontWeight: "500",
+    },
+  })
+}
+
+export function CVPageLoading({ isEditMode = false }) {
+  if (isEditMode) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-6">
+          {/* Animated Icon */}
+          <div className="relative mb-8">
+            <div className="w-20 h-20 mx-auto relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full animate-pulse"></div>
+              <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center">
+                <FileText className="w-8 h-8 text-blue-600 animate-bounce" />
+              </div>
+            </div>
+            {/* Floating particles */}
+            <div className="absolute -top-2 -left-2 w-3 h-3 bg-blue-400 rounded-full animate-ping"></div>
+            <div className="absolute -top-1 -right-3 w-2 h-2 bg-purple-400 rounded-full animate-ping animation-delay-300"></div>
+            <div className="absolute -bottom-2 -left-1 w-2 h-2 bg-indigo-400 rounded-full animate-ping animation-delay-700"></div>
+          </div>
+
+          {/* Loading Text */}
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold text-gray-800 flex items-center justify-center gap-2">
+              <Sparkles className="w-6 h-6 text-yellow-500 animate-pulse" />
+              Loading Your CV
+            </h2>
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gray-100">
+              <p className="text-lg font-semibold text-blue-700 mb-2">
+                Preparing your CV for editing...
+              </p>
+              <p className="text-sm text-gray-600">
+                We’re getting everything ready so you can edit with ease.
+              </p>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full animate-pulse"></div>
+            </div>
+
+            <p className="text-xs text-gray-500 mt-4">This usually takes just a moment</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const [loadingMessage, setLoadingMessage] = useState("Initializing AI analysis...")
+  const [dots, setDots] = useState("")
+
+  useEffect(() => {
+    const messages = [
+      "Initializing AI analysis...",
+      "Analyzing your professional profile...",
+      "Optimizing content structure...",
+      "Enhancing keyword relevance...",
+      "Crafting your perfect CV...",
+      "Finalizing AI recommendations...",
+    ]
+
+    let messageIndex = 0
+    const messageInterval = setInterval(() => {
+      messageIndex = (messageIndex + 1) % messages.length
+      setLoadingMessage(messages[messageIndex])
+    }, 2000)
+
+    const dotsInterval = setInterval(() => {
+      setDots((prev) => (prev.length >= 3 ? "" : prev + "."))
+    }, 500)
+
+    return () => {
+      clearInterval(messageInterval)
+      clearInterval(dotsInterval)
+    }
+  }, [])
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+    <div className="text-center max-w-md mx-auto px-6">
+      {/* AI Brain Animation */}
+      <div className="relative mb-8">
+        <div className="w-20 h-20 mx-auto relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full animate-pulse"></div>
+          <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center">
+            <Brain className="w-8 h-8 text-blue-600 animate-bounce" />
+          </div>
+        </div>
+        {/* Floating particles */}
+        <div className="absolute -top-2 -left-2 w-3 h-3 bg-blue-400 rounded-full animate-ping"></div>
+        <div className="absolute -top-1 -right-3 w-2 h-2 bg-purple-400 rounded-full animate-ping animation-delay-300"></div>
+        <div className="absolute -bottom-2 -left-1 w-2 h-2 bg-indigo-400 rounded-full animate-ping animation-delay-700"></div>
+      </div>
+
+      {/* Loading Text */}
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold text-gray-800 flex items-center justify-center gap-2">
+          <Sparkles className="w-6 h-6 text-yellow-500 animate-pulse" />
+          AI is Crafting Your CV
+        </h2>
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gray-100">
+          <p className="text-lg font-semibold text-blue-700 mb-2">
+            Analyzing your details...
+          </p>
+          <p className="text-sm text-gray-600">
+            Our AI is carefully building a personalized, career-ready CV just for you.
+          </p>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full animate-pulse"></div>
+        </div>
+
+        <p className="text-xs text-gray-500 mt-4">This usually takes 15–20 seconds</p>
+      </div>
+    </div>
+  </div>
+);
+}
 export function CVPageClientContent() {
   const [aiResponse, setAiResponse] = useState<AIResponse | null>(null)
   const [persona, setPersona] = useState<PersonaResponse | null>(null)
@@ -421,11 +606,16 @@ export function CVPageClientContent() {
 
   const handleRegenerateCV = async () => {
     if (!persona) {
-      toast("No persona data available for regeneration.")
+      showErrorToast("Regeneration Failed", "No persona data available for regeneration.")
       return
     }
 
     setIsRegenerating(true)
+    const loadingToastId = showLoadingToast(
+      "AI is regenerating your CV...",
+      "Analyzing your profile and creating fresh content",
+    )
+
     try {
       const personaText = convertPersonaToText(persona)
       const response = await fetch("/api/optimize-cv", {
@@ -441,10 +631,16 @@ export function CVPageClientContent() {
       const aiData = await response.json()
       setAiResponse(aiData)
       setHasUnsavedChanges(true)
-      toast("CV regenerated successfully! Don't forget to save your changes.")
+
+      toast.dismiss(loadingToastId)
+      showSuccessToast(
+        "CV Regenerated Successfully! ✨",
+        "Your CV has been refreshed with new AI insights. Don't forget to save your changes.",
+      )
     } catch (error: any) {
       console.error("Error regenerating CV:", error)
-      toast(`Failed to regenerate CV: ${error.message || "Unknown error"}`)
+      // toast.dismiss(loadingToastId)
+      showErrorToast("Regeneration Failed", error.message || "Unable to regenerate CV. Please try again.")
     } finally {
       setIsRegenerating(false)
     }
@@ -454,15 +650,21 @@ export function CVPageClientContent() {
     try {
       const cvElement = document.getElementById("cv-preview-content")
       if (!cvElement) {
-        toast("CV preview not found. Please try again.")
+        showErrorToast("Export Failed", "CV preview not found. Please refresh and try again.")
         return
       }
+
+      const loadingToastId = showLoadingToast(
+        `Preparing ${format.toUpperCase()} export...`,
+        "Processing your CV for download",
+      )
 
       switch (format) {
         case "pdf":
           const printWindow = window.open("", "_blank")
           if (!printWindow) {
-            toast("Please allow popups for PDF export")
+            toast.dismiss(loadingToastId)
+            showErrorToast("Export Blocked", "Please allow popups for PDF export")
             return
           }
           const clonedContent = cvElement.cloneNode(true) as HTMLElement
@@ -471,70 +673,58 @@ export function CVPageClientContent() {
               try {
                 return Array.from(sheet.cssRules)
                   .map((rule) => rule.cssText)
-                  .join("\n")
+                  .join("")
               } catch (e) {
                 return ""
               }
             })
-            .join("\n")
-          const htmlContent = `
+            .join("")
+
+          printWindow.document.write(`
             <!DOCTYPE html>
             <html>
               <head>
-                <meta charset="utf-8">
                 <title>CV Export</title>
+                <style>${styles}</style>
                 <style>
-                  ${styles}
-                  body {
-                     margin: 0;
-                     padding: 2px;
-                     font-family: Arial, sans-serif;
-                    background: white;
-                  }
-                  @media print {
-                    body {
-                       margin: 0;
-                       -webkit-print-color-adjust: exact;
-                      print-color-adjust: exact;
-                    }
-                  }
+                  body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+                  @media print { body { margin: 0; padding: 0; } }
                 </style>
               </head>
-              <body>
-                ${clonedContent.innerHTML}
-              </body>
+              <body>${clonedContent.outerHTML}</body>
             </html>
-          `
-          printWindow.document.write(htmlContent)
+          `)
           printWindow.document.close()
-          setTimeout(() => {
-            printWindow.print()
-            printWindow.close()
-          }, 500)
+          printWindow.print()
+
+          toast.dismiss(loadingToastId)
+          showSuccessToast("PDF Ready! 📄", "Your CV is ready for printing or saving")
           break
-        case "docx":
-          const cvHTML = cvElement.outerHTML
-          const response = await fetch("/api/export-docx", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ html: cvHTML }),
-          })
-          const result = await response.json()
-          if (result.error) {
-            toast("DOCX export is not yet implemented. This feature will be available soon.")
-          } else {
-            toast("DOCX export completed successfully!")
-          }
-          break
+
         case "png":
-          toast("PNG export requires additional setup. This feature will be available soon.")
+          const dataUrl = await htmlToImage.toPng(cvElement, {
+            quality: 1,
+            pixelRatio: 2,
+            backgroundColor: "#ffffff",
+          })
+          const link = document.createElement("a")
+          link.download = `${persona?.full_name || "CV"}_${new Date().toISOString().split("T")[0]}.png`
+          link.href = dataUrl
+          link.click()
+
+          toast.dismiss(loadingToastId)
+          showSuccessToast("PNG Downloaded! 🖼️", "Your CV image has been saved to downloads")
+          break
+
+        case "docx":
+          await handleDocxExport()
+          toast.dismiss(loadingToastId)
+          showSuccessToast("DOCX Downloaded! 📝", "Your editable CV document is ready")
           break
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Export error:", error)
-      toast("Export failed. Please try again.")
+      showErrorToast("Export Failed", `Unable to export as ${format.toUpperCase()}. Please try again.`)
     }
   }
 
@@ -542,7 +732,7 @@ export function CVPageClientContent() {
     try {
       const cvElement = document.getElementById("cv-preview-content")
       if (!cvElement) {
-        toast("CV preview not found. Please try again.")
+        showErrorToast("Export Failed", "CV preview not found. Please refresh and try again.")
         return
       }
 
@@ -586,7 +776,7 @@ export function CVPageClientContent() {
     try {
       const cvElement = document.getElementById("cv-preview-content")
       if (!cvElement) {
-        toast("CV preview not found. Please try again.")
+        showErrorToast("Export Failed", "CV preview not found. Please refresh and try again.")
         return
       }
 
@@ -603,181 +793,58 @@ export function CVPageClientContent() {
       link.click()
     } catch (error) {
       console.error("Error exporting as PNG:", error)
-      toast("PNG export failed. Please try again.")
+      showErrorToast("Export Failed", "PNG export failed. Please try again.")
     }
   }
 
-  const exportAsDOCX = async () => {
+  const handleDocxExport = async () => {
     if (!aiResponse || !persona) {
-      toast("No CV data available for export.")
+      showErrorToast("Export Failed", "No CV data available for export.")
       return
     }
 
     try {
-      const children = [
-        new Paragraph({
-          text: aiResponse.optimizedCV.personalInfo.name || persona.full_name || "Resume",
-          heading: HeadingLevel.HEADING_1,
-          spacing: { after: 200 },
-        }),
-        new Paragraph({
-          text: persona.job_title || "",
-          heading: HeadingLevel.HEADING_2,
-          spacing: { after: 100 },
-        }),
-        new Paragraph({
-          text: `Email: ${aiResponse.optimizedCV.personalInfo.email || persona.email || ""}`,
-        }),
-        new Paragraph({
-          text: `Phone: ${aiResponse.optimizedCV.personalInfo.phone || persona.phone || ""}`,
-        }),
-        new Paragraph({
-          text: `Location: ${aiResponse.optimizedCV.personalInfo.location || `${persona.city || ""}, ${persona.country || ""}`}`,
-          spacing: { after: 200 },
-        }),
-      ]
-
-      // Add summary
-      if (aiResponse.optimizedCV.summary) {
-        children.push(
-          new Paragraph({
-            text: "Professional Summary",
-            heading: HeadingLevel.HEADING_2,
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            text: aiResponse.optimizedCV.summary,
-            spacing: { after: 200 },
-          }),
-        )
-      }
-
-      // Add work experience
-      if (aiResponse.optimizedCV.workExperience && aiResponse.optimizedCV.workExperience.length > 0) {
-        children.push(
-          new Paragraph({
-            text: "Work Experience",
-            heading: HeadingLevel.HEADING_2,
-            spacing: { after: 100 },
-          }),
-        )
-
-        aiResponse.optimizedCV.workExperience.forEach((exp) => {
-          children.push(
-            new Paragraph({
-              text: `${exp.title} at ${exp.company}`,
-              heading: HeadingLevel.HEADING_3,
-            }),
-            new Paragraph({
-              text: exp.duration,
-            }),
-            new Paragraph({
-              text: exp.description,
-              spacing: { after: 200 },
-            }),
-          )
-        })
-      }
-
-      // Add education
-      if (aiResponse.optimizedCV.education && aiResponse.optimizedCV.education.length > 0) {
-        children.push(
-          new Paragraph({
-            text: "Education",
-            heading: HeadingLevel.HEADING_2,
-            spacing: { after: 100 },
-          }),
-        )
-
-        aiResponse.optimizedCV.education.forEach((edu) => {
-          children.push(
-            new Paragraph({
-              text: `${edu.degree} from ${edu.institution}`,
-              heading: HeadingLevel.HEADING_3,
-            }),
-            new Paragraph({
-              text: `Year: ${edu.year}`,
-            }),
-            new Paragraph({
-              text: edu.gpa ? `GPA: ${edu.gpa}` : "",
-              spacing: { after: 200 },
-            }),
-          )
-        })
-      }
-
-      // Add skills
-      if (aiResponse.optimizedCV.skills && aiResponse.optimizedCV.skills.length > 0) {
-        children.push(
-          new Paragraph({
-            text: "Skills",
-            heading: HeadingLevel.HEADING_2,
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            text: aiResponse.optimizedCV.skills.join(", "),
-            spacing: { after: 200 },
-          }),
-        )
-      }
-
-      // Add projects
-      if (aiResponse.optimizedCV.projects && aiResponse.optimizedCV.projects.length > 0) {
-        children.push(
-          new Paragraph({
-            text: "Projects",
-            heading: HeadingLevel.HEADING_2,
-            spacing: { after: 100 },
-          }),
-        )
-
-        aiResponse.optimizedCV.projects.forEach((proj) => {
-          children.push(
-            new Paragraph({
-              text: proj.name,
-              heading: HeadingLevel.HEADING_3,
-            }),
-            new Paragraph({
-              text: proj.description,
-            }),
-            new Paragraph({
-              text: `Technologies: ${proj.technologies.join(", ")}`,
-              spacing: { after: 200 },
-            }),
-          )
-        })
-      }
-
-      const doc = new Document({
-        sections: [
-          {
-            properties: {},
-            children: children,
-          },
-        ],
+      const cvHTML = document.getElementById("cv-preview-content")?.outerHTML || ""
+      const response = await fetch("/api/export-docx", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ html: cvHTML }),
       })
-
-      Packer.toBlob(doc).then((blob) => {
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement("a")
-        a.href = url
-        a.download = `${aiResponse.optimizedCV.personalInfo.name || persona.full_name || "resume"}-cv.docx`
-        a.click()
-        URL.revokeObjectURL(url)
-      })
+      const result = await response.json()
+      if (result.error) {
+        showErrorToast("Export Failed", "DOCX export is not yet implemented. This feature will be available soon.")
+      } else {
+        const url = window.URL.createObjectURL(
+          new Blob([result.docx], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" }),
+        )
+        const link = document.createElement("a")
+        link.href = url
+        link.download = `${persona?.full_name || "resume"}-cv.docx`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      }
     } catch (error) {
       console.error("Error exporting as DOCX:", error)
-      toast("DOCX export failed. Please try again.")
+      showErrorToast("Export Failed", "Unable to export as DOCX. Please try again.")
     }
   }
 
   const handleSaveCV = async () => {
     if (!aiResponse || !selectedTemplate || !persona || !user?.id) {
-      toast("Cannot save CV: Missing AI response, template, persona, or user info.")
+      showErrorToast("Save Failed", "Missing required data. Please regenerate your CV and try again.")
       return
     }
 
     setIsSaving(true)
+    const loadingToastId = showLoadingToast(
+      existingCV ? "Updating your CV..." : "Saving your CV...",
+      "Securing your professional profile",
+    )
+
     try {
       const cvDataToSave: CreateCVData = {
         user_id: user.id.toString(),
@@ -793,7 +860,9 @@ export function CVPageClientContent() {
         const updatedCV = await updateCV(existingCV.id, cvDataToSave)
         setExistingCV(updatedCV)
         setHasUnsavedChanges(false)
-        toast("CV updated successfully!")
+
+        toast.dismiss(loadingToastId)
+        showSuccessToast("CV Updated Successfully! 🎉", "Your changes have been saved and are ready to use")
       } else {
         // Create new CV
         const newCV = await createCV(cvDataToSave)
@@ -805,11 +874,16 @@ export function CVPageClientContent() {
         url.searchParams.set("cvId", newCV.id)
         router.replace(url.toString())
 
-        toast("CV saved successfully!")
+        toast.dismiss(loadingToastId)
+        showSuccessToast(
+          "CV Created Successfully! 🚀",
+          "Your professional CV is now saved and ready to impress employers",
+        )
       }
     } catch (saveError: any) {
       console.error("Error saving CV:", saveError)
-      toast(`Failed to save CV: ${saveError.message || "Unknown error"}`)
+      toast.dismiss(loadingToastId)
+      showErrorToast("Save Failed", saveError.message || "Unable to save CV. Please try again.")
     } finally {
       setIsSaving(false)
     }
@@ -819,13 +893,18 @@ export function CVPageClientContent() {
     if (!existingCV || !newTitle.trim()) return
 
     setIsSaving(true)
+    const loadingToastId = showLoadingToast("Updating title...", "Saving your changes")
+
     try {
       const updatedCV = await updateCV(existingCV.id, { title: newTitle.trim() })
       setExistingCV(updatedCV)
-      toast("CV title updated successfully!")
+
+      toast.dismiss(loadingToastId)
+      showSuccessToast("Title Updated! ✏️", "Your CV title has been successfully changed")
     } catch (error: any) {
       console.error("Error updating CV title:", error)
-      toast(`Failed to update title: ${error.message || "Unknown error"}`)
+      toast.dismiss(loadingToastId)
+      showErrorToast("Update Failed", error.message || "Unable to update title. Please try again.")
     } finally {
       setIsSaving(false)
     }
@@ -835,26 +914,11 @@ export function CVPageClientContent() {
     setAiResponse((prev) => (prev ? { ...prev, optimizedCV: updatedData } : null))
     setHasUnsavedChanges(true)
     setShowEditPopup(false)
-    toast("CV data updated! Don't forget to save your changes.")
+    showInfoToast("CV Updated! 📝", "Your changes look great! Remember to save to keep them permanent.")
   }
 
   if (isLoading) {
-    const isAIGeneration = searchParams.get("ai") === "true"
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <div className="space-y-2">
-            <p className="text-lg font-medium text-gray-700">
-              {isAIGeneration ? "Crafting your professional CV..." : "Loading your CV..."}
-            </p>
-            {isAIGeneration && (
-              <p className="text-sm text-gray-500">This may take a moment as we optimize your content</p>
-            )}
-          </div>
-        </div>
-      </div>
-    )
+    return <CVPageLoading isEditMode={!!cvId} />
   }
 
   if (error) {
@@ -906,18 +970,18 @@ export function CVPageClientContent() {
           <Sidebar
             activePage="cv-export"
             setActivePage={(page) => {
-              if (page === 'create-persona') {
-                router.push('/dashboard?page=create-persona');
-              } else if (page === 'resumes') {
-                router.push('/dashboard?page=resumes');
-              } else if (page === 'cover-letter') {
-                router.push('/dashboard?page=cover-letter');
-              } else if (page === 'profile') {
-                router.push('/dashboard?page=profile');
+              if (page === "create-persona") {
+                router.push("/dashboard?page=create-persona")
+              } else if (page === "resumes") {
+                router.push("/dashboard?page=resumes")
+              } else if (page === "cover-letter") {
+                router.push("/dashboard?page=cover-letter")
+              } else if (page === "profile") {
+                router.push("/dashboard?page=profile")
               }
             }}
             onExportPDF={exportAsPDF}
-            onExportDOCX={exportAsDOCX}
+            onExportDOCX={handleDocxExport}
             onExportPNG={exportAsPNG}
             exportMode={true}
           />
