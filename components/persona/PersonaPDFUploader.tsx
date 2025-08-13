@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Upload, FileText, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CVData } from "@/types/cv-data";
+import { toast } from "sonner"
 
 interface PDFUploaderProps {
   onDataExtracted: (data: Partial<Omit<CVData, "id" | "createdAt">>) => void;
@@ -32,7 +33,7 @@ const PDFUploader = ({ onDataExtracted }: PDFUploaderProps) => {
     if (selectedFile.type === "application/pdf") {
       setFile(selectedFile);
     } else {
-      alert("Please select a PDF file");
+      toast("Please select a PDF file");
     }
   };
 
@@ -257,7 +258,7 @@ const parseExtractedText = (text: string): Partial<Omit<CVData, "id" | "createdA
       onDataExtracted(parsedData);
     } catch (error) {
       console.error("Error extracting data from PDF:", error);
-      alert("Error extracting data from PDF. Please try again.");
+      toast("Error extracting data from PDF. Please try again.");
     } finally {
       setIsExtracting(false);
     }

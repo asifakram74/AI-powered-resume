@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Upload, FileText, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner"
 
 interface PDFUploaderProps {
   onExtractedText: (text: string) => void;
@@ -39,7 +40,7 @@ export const PDFUploader = ({
       setFile(selectedFile);
       onFileUploaded(selectedFile);
     } else {
-      alert("Please select a PDF file");
+      toast("Please select a PDF file");
     }
   };
 
@@ -88,7 +89,7 @@ export const PDFUploader = ({
       onExtractedText(fullText);
     } catch (error) {
       console.error("Error extracting text from PDF:", error);
-      alert("Error extracting text from PDF. Please try again.");
+      toast("Error extracting text from PDF. Please try again.");
     } finally {
       setIsExtracting(false);
     }

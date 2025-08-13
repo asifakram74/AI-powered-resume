@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation"
 import { useAppSelector } from "@/lib/redux/hooks"
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog"
 import { CVWizard } from "./AddEditResume"
+import { toast } from "sonner"
 
 export function ResumePage() {
   const router = useRouter()
@@ -50,7 +51,7 @@ export function ResumePage() {
         setCVs((prev) => prev.filter((c) => c.id !== cv.id))
       } catch (error) {
         console.error("Error deleting CV:", error)
-        alert("Failed to delete CV")
+        toast("Failed to delete CV")
       }
     }
   }

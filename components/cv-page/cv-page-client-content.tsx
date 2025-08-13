@@ -1,6 +1,7 @@
 "use client"
 import { useState, useRef, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft, Sparkles, TrendingUp, Save, RefreshCw, Edit, Loader2 } from "lucide-react"
@@ -23,6 +24,7 @@ import { ProfilePage } from "@/components/profile/profile-page"
 import ProtectedRoute from "@/components/auth/ProtectedRoute"
 import { createCV, getCVById, updateCV, type CreateCVData, type CV } from "@/lib/redux/service/cvService"
 import { CVEditPopup } from "./cv-edit-popup"
+import { Toaster } from "sonner";
 
 interface OptimizedCV {
   personalInfo: {
@@ -419,7 +421,7 @@ export function CVPageClientContent() {
 
   const handleRegenerateCV = async () => {
     if (!persona) {
-      alert("No persona data available for regeneration.")
+      toast("No persona data available for regeneration.")
       return
     }
 
@@ -439,10 +441,10 @@ export function CVPageClientContent() {
       const aiData = await response.json()
       setAiResponse(aiData)
       setHasUnsavedChanges(true)
-      alert("CV regenerated successfully! Don't forget to save your changes.")
+      toast("CV regenerated successfully! Don't forget to save your changes.")
     } catch (error: any) {
       console.error("Error regenerating CV:", error)
-      alert(`Failed to regenerate CV: ${error.message || "Unknown error"}`)
+      toast(`Failed to regenerate CV: ${error.message || "Unknown error"}`)
     } finally {
       setIsRegenerating(false)
     }
@@ -452,7 +454,7 @@ export function CVPageClientContent() {
     try {
       const cvElement = document.getElementById("cv-preview-content")
       if (!cvElement) {
-        alert("CV preview not found. Please try again.")
+        toast("CV preview not found. Please try again.")
         return
       }
 
@@ -460,7 +462,7 @@ export function CVPageClientContent() {
         case "pdf":
           const printWindow = window.open("", "_blank")
           if (!printWindow) {
-            alert("Please allow popups for PDF export")
+            toast("Please allow popups for PDF export")
             return
           }
           const clonedContent = cvElement.cloneNode(true) as HTMLElement
@@ -521,18 +523,18 @@ export function CVPageClientContent() {
           })
           const result = await response.json()
           if (result.error) {
-            alert("DOCX export is not yet implemented. This feature will be available soon.")
+            toast("DOCX export is not yet implemented. This feature will be available soon.")
           } else {
-            alert("DOCX export completed successfully!")
+            toast("DOCX export completed successfully!")
           }
           break
         case "png":
-          alert("PNG export requires additional setup. This feature will be available soon.")
+          toast("PNG export requires additional setup. This feature will be available soon.")
           break
       }
     } catch (error) {
       console.error("Export error:", error)
-      alert("Export failed. Please try again.")
+      toast("Export failed. Please try again.")
     }
   }
 
@@ -540,7 +542,7 @@ export function CVPageClientContent() {
     try {
       const cvElement = document.getElementById("cv-preview-content")
       if (!cvElement) {
-        alert("CV preview not found. Please try again.")
+        toast("CV preview not found. Please try again.")
         return
       }
 
@@ -584,7 +586,7 @@ export function CVPageClientContent() {
     try {
       const cvElement = document.getElementById("cv-preview-content")
       if (!cvElement) {
-        alert("CV preview not found. Please try again.")
+        toast("CV preview not found. Please try again.")
         return
       }
 
@@ -601,13 +603,13 @@ export function CVPageClientContent() {
       link.click()
     } catch (error) {
       console.error("Error exporting as PNG:", error)
-      alert("PNG export failed. Please try again.")
+      toast("PNG export failed. Please try again.")
     }
   }
 
   const exportAsDOCX = async () => {
     if (!aiResponse || !persona) {
-      alert("No CV data available for export.")
+      toast("No CV data available for export.")
       return
     }
 
@@ -765,13 +767,13 @@ export function CVPageClientContent() {
       })
     } catch (error) {
       console.error("Error exporting as DOCX:", error)
-      alert("DOCX export failed. Please try again.")
+      toast("DOCX export failed. Please try again.")
     }
   }
 
   const handleSaveCV = async () => {
     if (!aiResponse || !selectedTemplate || !persona || !user?.id) {
-      alert("Cannot save CV: Missing AI response, template, persona, or user info.")
+      toast("Cannot save CV: Missing AI response, template, persona, or user info.")
       return
     }
 
@@ -791,7 +793,7 @@ export function CVPageClientContent() {
         const updatedCV = await updateCV(existingCV.id, cvDataToSave)
         setExistingCV(updatedCV)
         setHasUnsavedChanges(false)
-        alert("CV updated successfully!")
+        toast("CV updated successfully!")
       } else {
         // Create new CV
         const newCV = await createCV(cvDataToSave)
@@ -803,11 +805,11 @@ export function CVPageClientContent() {
         url.searchParams.set("cvId", newCV.id)
         router.replace(url.toString())
 
-        alert("CV saved successfully!")
+        toast("CV saved successfully!")
       }
     } catch (saveError: any) {
       console.error("Error saving CV:", saveError)
-      alert(`Failed to save CV: ${saveError.message || "Unknown error"}`)
+      toast(`Failed to save CV: ${saveError.message || "Unknown error"}`)
     } finally {
       setIsSaving(false)
     }
@@ -820,10 +822,10 @@ export function CVPageClientContent() {
     try {
       const updatedCV = await updateCV(existingCV.id, { title: newTitle.trim() })
       setExistingCV(updatedCV)
-      alert("CV title updated successfully!")
+      toast("CV title updated successfully!")
     } catch (error: any) {
       console.error("Error updating CV title:", error)
-      alert(`Failed to update title: ${error.message || "Unknown error"}`)
+      toast(`Failed to update title: ${error.message || "Unknown error"}`)
     } finally {
       setIsSaving(false)
     }
@@ -833,7 +835,7 @@ export function CVPageClientContent() {
     setAiResponse((prev) => (prev ? { ...prev, optimizedCV: updatedData } : null))
     setHasUnsavedChanges(true)
     setShowEditPopup(false)
-    alert("CV data updated! Don't forget to save your changes.")
+    toast("CV data updated! Don't forget to save your changes.")
   }
 
   if (isLoading) {

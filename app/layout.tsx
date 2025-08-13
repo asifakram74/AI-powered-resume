@@ -4,6 +4,8 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { ReduxProvider } from "@/lib/redux/provider"
 import HydrateAuth from "@/components/auth/HydrateAuth"
+import { Toaster } from "sonner";
+
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -22,6 +24,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <ReduxProvider>
           <HydrateAuth />
+          <Toaster />
           {children}
         </ReduxProvider>
       </body>

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner"
 import {
   Select,
   SelectContent,
@@ -328,13 +329,13 @@ export function PersonaForm({
 
     // Validate URLs
     if (formData.personalInfo.linkedin && !isValidUrl(formattedLinkedIn)) {
-      alert("Please enter a valid LinkedIn URL or leave it empty");
+    toast("Please enter a valid LinkedIn URL or leave it empty");
       setIsGenerating(false);
       return;
     }
 
     if (formData.personalInfo.github && !isValidUrl(formattedGitHub)) {
-      alert("Please enter a valid GitHub URL or leave it empty");
+      toast("Please enter a valid GitHub URL or leave it empty");
       setIsGenerating(false);
       return;
     }

@@ -57,6 +57,7 @@ import {
   type PersonaResponse,
 } from "@/lib/redux/service/pasonaService";
 import { useAppSelector, useAppDispatch } from "@/lib/redux/hooks";
+import { toast } from "sonner"
 
 export function CreatePersonaPage() {
   const [personas, setPersonas] = useState<CVData[]>([])
@@ -276,7 +277,7 @@ export function CreatePersonaPage() {
   };
 
   const handleView = (persona: CVData) => {
-    alert(
+    toast(
       `Viewing persona for ${persona.personalInfo.fullName}\n\nGenerated Persona:\n${persona.generatedPersona}`
     );
   };
@@ -397,7 +398,7 @@ export function CreatePersonaPage() {
       setEditingPersona(null);
     } catch (error) {
       console.error("Error saving persona:", error);
-      alert(`Failed to save persona: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast(`Failed to save persona: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsLoading(false);
     }
