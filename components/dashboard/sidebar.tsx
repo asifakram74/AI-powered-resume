@@ -50,6 +50,8 @@ const menuItems = [
   {
     id: "cover-letter",
     label: "Cover Letters",
+    badge: "AI",
+    badgeColor: "bg-gradient-to-r from-blue-500 to-purple-500 text-white",
     icon: Mail,
   },
   {
@@ -125,7 +127,7 @@ export function Sidebar({
                   hover:bg-gray-50 hover:shadow-sm
                   data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-50 data-[active=true]:to-purple-50 
                   data-[active=true]:text-blue-700 data-[active=true]:shadow-sm data-[active=true]:border data-[active=true]:border-blue-100
-                  group
+                  group cursor-pointer
                 `}
               >
                 <div className="flex items-center gap-3 flex-1">

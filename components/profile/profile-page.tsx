@@ -1,22 +1,23 @@
 "use client"
+
 import { useState, useEffect } from "react"
+import { useForm } from "react-hook-form"
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
+import { updateProfile, fetchProfile } from "@/lib/redux/slices/authSlice"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Edit, Shield, Mail, Star, BadgeCheck, FileText, Target, UserCircle, TrendingUp } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Loader2 } from "lucide-react"
-import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
-import { fetchProfile, updateProfile } from "@/lib/redux/slices/authSlice"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Loader2, Edit, Shield, Mail, Star, BadgeCheck, FileText, Target, UserCircle, TrendingUp } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 import { ChangePassword } from "./ChangePassword"
 import { getPersonas } from "@/lib/redux/service/pasonaService"
 import { getCVs } from "@/lib/redux/service/cvService"
 import { getCoverLetters } from "@/lib/redux/service/coverLetterService"
 import { getATSResumes } from "@/lib/redux/service/atsResumeService"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { showSuccessToast, showErrorToast } from "@/components/ui/toast"
 
 interface StatItem {
@@ -26,35 +27,42 @@ interface StatItem {
   color: string
 }
 
+interface ProfileFormData {
+  name: string
+  email: string
+  plan_type?: string
+  status?: string
+}
+
 export function ProfilePage() {
   const dispatch = useAppDispatch()
-  const { profile, loading: authLoading, error, user } = useAppSelector((state) => state.auth)
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    plan_type: "",
-    status: ""
-  })
+  const { profile, loading: authLoading, user } = useAppSelector((state) => state.auth)
   const [stats, setStats] = useState<StatItem[]>([])
   const [showEditModal, setShowEditModal] = useState(false)
   const [showPasswordDialog, setShowPasswordDialog] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [loadingError, setLoadingError] = useState<string | null>(null)
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isDirty },
+    reset,
+    watch,
+  } = useForm<ProfileFormData>({
+    defaultValues: {
+      name: profile?.name || '',
+      email: profile?.email || '',
+      plan_type: profile?.plan_type || 'Free',
+      status: profile?.status || 'active',
+    }
+  })
+
   useEffect(() => {
-    const fetchEverything = async () => {
+    const loadData = async () => {
       try {
         setIsLoading(true)
-        setLoadingError(null)
-        
-        const profileData = await dispatch(fetchProfile()).unwrap()
-        
-        setFormData({
-          name: profileData.name,
-          email: profileData.email,
-          plan_type: profileData.plan_type || "",
-          status: profileData.status || "",
-        })
+        await dispatch(fetchProfile()).unwrap()
 
         if (user?.id) {
           const [personas, cvs, coverLetters, atsResumes] = await Promise.all([
@@ -67,19 +75,19 @@ export function ProfilePage() {
           setStats([
             {
               label: "Resumes Created",
-              value: profileData?.cvs_count || cvs.length,
+              value: cvs.length,
               icon: FileText,
               color: "text-blue-600",
             },
             {
               label: "Cover Letters",
-              value: profileData?.cover_letters_count || coverLetters.length,
+              value: coverLetters.length,
               icon: Mail,
               color: "text-green-600",
             },
             {
               label: "ATS Checks",
-              value: profileData?.ats_resumes_count || atsResumes.length,
+              value: atsResumes.length,
               icon: Target,
               color: "text-orange-600",
             },
@@ -91,29 +99,37 @@ export function ProfilePage() {
             },
           ])
         }
-      } catch (err) {
-        console.error("Error fetching data:", err)
+      } catch (error) {
         setLoadingError("Failed to load profile data. Please try again.")
       } finally {
         setIsLoading(false)
       }
     }
 
-    fetchEverything()
+    loadData()
   }, [dispatch, user?.id])
 
-  const handleSave = async () => {
+  useEffect(() => {
+    if (profile) {
+      reset({
+        name: profile.name,
+        email: profile.email,
+        plan_type: profile.plan_type,
+        status: profile.status,
+      })
+    }
+  }, [profile, reset])
+
+  const onSubmit = async (data: ProfileFormData) => {
     try {
       await dispatch(updateProfile({
-        name: formData.name,
-        email: formData.email,
-        plan_type: formData.plan_type,
-        status: formData.status,
+        name: data.name,
+        email: data.email,
       })).unwrap()
       await dispatch(fetchProfile()).unwrap()
       showSuccessToast("Profile updated successfully")
       setShowEditModal(false)
-    } catch (err) {
+    } catch (error: any) {
       showErrorToast("Failed to update profile", error || "Failed to update profile. Please try again.")
     }
   }
@@ -129,12 +145,12 @@ export function ProfilePage() {
     )
   }
 
-  if (loadingError || !profile) {
+  if (isLoading || !profile) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Alert variant="destructive" className="w-auto">
           <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{loadingError || "Failed to load profile data"}</AlertDescription>
+          <AlertDescription>{isLoading || "Failed to load profile data"}</AlertDescription>
         </Alert>
       </div>
     )
@@ -158,9 +174,8 @@ export function ProfilePage() {
           <div>
             <div className="flex gap-2 item-center">
               <div className="flex items-center gap-4">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{profile?.name}</h1>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{profile.name}</h1>
               </div>
-
               <div className="flex flex-wrap items-center gap-2">
                 <Badge
                   variant={profile.plan_type === 'Premium' ? 'default' : 'secondary'}
@@ -210,34 +225,32 @@ export function ProfilePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <Card className="border-0 shadow-sm">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-xl">Personal Information</CardTitle>
+            <CardHeader  className="pb-3">
+              <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">Personal Information</CardTitle>
               <CardDescription>
                 Your personal details and account information
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-500">Full Name</Label>
-                    <p className="text-sm font-medium">{profile.name}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label className="text-sm font-mediumfont-bold text-gray-900 dark:text-white">Full Name</Label>
+                  <p className="text-sm font-medium text-gray-500">{profile.name}</p>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-mediumfont-bold text-gray-900 dark:text-white">Email Address</Label>
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-gray-400" />
+                    <p className="text-sm font-medium text-gray-500">{profile.email}</p>
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-500">Email Address</Label>
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-gray-400" />
-                      <p className="text-sm font-medium">{profile.email}</p>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-500">Account Type</Label>
-                    <p className="text-sm font-medium capitalize">{profile.plan_type || 'Free'}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-500">Account Status</Label>
-                    <p className="text-sm font-medium capitalize">{profile.status}</p>
-                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-mediumfont-bold text-gray-900 dark:text-white">Account Type</Label>
+                  <p  className="text-sm font-medium capitalize text-gray-500">{profile.plan_type || 'Free'}</p>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-mediumfont-bold text-gray-900 dark:text-white">Account Status</Label>
+                  <p  className="text-sm font-medium capitalize text-gray-500">{profile.status}</p>
                 </div>
               </div>
             </CardContent>
@@ -248,7 +261,7 @@ export function ProfilePage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5" />
+                <TrendingUp className="h-5 w-5 font-bold text-gray-900 dark:text-white" />
                 Usage Statistics
               </CardTitle>
             </CardHeader>
@@ -257,8 +270,8 @@ export function ProfilePage() {
                 {stats.map((stat, index) => (
                   <div key={index} className="text-center p-3 bg-gray-50 rounded-lg">
                     <stat.icon className={`h-6 w-6 mx-auto mb-2 ${stat.color}`} />
-                    <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
-                    <div className="text-xs text-gray-600">{stat.label}</div>
+                    <h3 className="text-2xl font-bold font-bold text-gray-900 dark:text-white">{stat.value}</h3>
+                    <p className="text-sm font-bold text-gray-500">{stat.label}</p>
                   </div>
                 ))}
               </div>
@@ -267,68 +280,99 @@ export function ProfilePage() {
         </div>
       </div>
 
-      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-        <DialogContent className="sm:max-w-[600px] rounded-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Edit className="h-5 w-5" />
-              Edit Profile
-            </DialogTitle>
-            <DialogDescription>
-              Update your personal information and preferences
-            </DialogDescription>
-          </DialogHeader>
+      <Dialog open={showEditModal} onOpenChange={(open) => {
+        if (!open) {
+          reset({
+            name: profile?.name || '',
+            email: profile?.email || '',
+            plan_type: profile?.plan_type || 'Free',
+            status: profile?.status || 'active',
+          });
+        }
+        setShowEditModal(open);
+      }}>
+        <DialogContent>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <DialogHeader>
+              <DialogTitle>Edit Profile</DialogTitle>
+            </DialogHeader>
 
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Full Name</Label>
-              <Input
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Enter your full name"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Email Address</Label>
-              <Input
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="Enter your email address"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Account Type</Label>
-              <Input
-                value={formData.plan_type}
-                onChange={(e) => setFormData({ ...formData, plan_type: e.target.value })}
-                disabled
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Account Status</Label>
-              <Input
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                disabled
-              />
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name *</Label>
+                <Input
+                  id="name"
+                  {...register("name", {
+                    required: "Name is required",
+                    minLength: {
+                      value: 2,
+                      message: "Name must be at least 2 characters"
+                    }
+                  })}
+                />
+                {errors.name && (
+                  <p className="text-sm text-red-600">{errors.name.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email">Email *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  {...register("email", {
+                    required: "Email is required",
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "Invalid email address"
+                    }
+                  })}
+                />
+                {errors.email && (
+                  <p className="text-sm text-red-600">{errors.email.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Account Type</Label>
+                <Input value={profile?.plan_type || 'Free'} disabled />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Account Status</Label>
+                <Input value={profile?.status || 'active'} disabled />
+              </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => setShowEditModal(false)} className="cursor-pointer">
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  reset({
+                    name: profile?.name || '',
+                    email: profile?.email || '',
+                    plan_type: profile?.plan_type || 'Free',
+                    status: profile?.status || 'active',
+                  });
+                  setShowEditModal(false);
+                }}
+              >
                 Cancel
               </Button>
-              <Button onClick={handleSave} disabled={authLoading} className="cursor-pointer">
+              <Button
+                type="submit"
+                disabled={authLoading || !isDirty}
+              >
                 {authLoading ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Saving...
                   </>
-                ) : (
-                  'Save Changes'
-                )}
+                ) : 'Save Changes'}
               </Button>
-            </div>
-          </div>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 

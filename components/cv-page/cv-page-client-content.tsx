@@ -992,13 +992,14 @@ export function CVPageClientContent() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       {existingCV ? (
-                        <input
-                          type="text"
-                          value={existingCV.title}
-                          onChange={(e) => handleUpdateTitle(e.target.value)}
-                          className="text-2xl font-bold bg-transparent border-none outline-none focus:bg-white focus:border focus:border-gray-300 focus:rounded px-2 py-1"
-                          onBlur={() => setHasUnsavedChanges(false)}
-                        />
+                        // <input
+                        //   type="text"
+                        //   value={existingCV.title}
+                        //   onChange={(e) => handleUpdateTitle(e.target.value)}
+                        //   className="text-2xl font-bold bg-transparent border-none outline-none focus:bg-white focus:border focus:border-gray-300 focus:rounded px-2 py-1"
+                        //   onBlur={() => setHasUnsavedChanges(false)}
+                        // />
+                        <h1 className="text-2xl font-bold text-gray-900">Update Your CV</h1>
                       ) : (
                         <h1 className="text-2xl font-bold text-gray-900">Create Your CV</h1>
                       )}

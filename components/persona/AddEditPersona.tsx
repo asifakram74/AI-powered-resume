@@ -32,7 +32,8 @@ export function PersonaCreationOptions({
 }: PersonaCreationOptionsProps) {
   const [isConnectingLinkedIn, setIsConnectingLinkedIn] = useState(false);
   const [linkedInConnected, setLinkedInConnected] = useState(false);
-  const [selectedOption, setSelectedOption] = useState<"manual" | "pdf" | "linkedin" | null>(null); // Add this state
+  // const [selectedOption, setSelectedOption] = useState<"manual" | "pdf" | "linkedin" | null>(null); // Add this state
+  const [selectedOption, setSelectedOption] = useState<"manual" | "pdf" | "linkedin">("manual");
   const [extractedData, setExtractedData] = useState<Partial<Omit<CVData, "id" | "createdAt">> | null>(null); // Add this state
 
   const handleLinkedInConnect = async () => {
@@ -53,21 +54,21 @@ export function PersonaCreationOptions({
       onOptionSelect("pdf", extractedData);
     }
   };
+    console.log(extractedData)
+
 
   return (
     <div className="space-y-6">
       <div className="text-center">
         <h3 className="text-lg font-semibold mb-2">
-          Choose Your Preferred Method
+          Create Your CV Persona
         </h3>
         <p className="text-sm text-gray-600">
-          Select how you'd like to create your persona. All methods will show
-          the complete form for final review.
+          Build a professional profile that showcases your skills and achievements. Choose your preferred method and review your complete persona before finalizing.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Manual Entry Option */}
         <Card 
           className={`cursor-pointer hover:shadow-lg transition-shadow border-2 ${
             selectedOption === "manual" 
@@ -89,7 +90,6 @@ export function PersonaCreationOptions({
             <Button 
               className="w-full" 
               onClick={() => onOptionSelect("manual")}
-              disabled={selectedOption !== "manual"}
             >
               Start Manual Entry
             </Button>
@@ -147,7 +147,7 @@ export function PersonaCreationOptions({
         {/* LinkedIn Import Option - Upcoming Feature */}
         <Card className="cursor-not-allowed relative overflow-hidden">
           {/* Blur overlay */}
-          <div className="absolute inset-0 bg-white/80 backdrop-blur-[1px] z-10"></div>
+          {/* <div className="absolute inset-0 bg-white/80 backdrop-blur-[1px] z-10"></div> */}
           
           {/* Upcoming badge */}
           <div className="absolute top-4 right-4 z-20">
