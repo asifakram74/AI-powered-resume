@@ -327,6 +327,7 @@ export function ProfilePage() {
                       message: "Invalid email address"
                     }
                   })}
+                  disabled
                 />
                 {errors.email && (
                   <p className="text-sm text-red-600">{errors.email.message}</p>
