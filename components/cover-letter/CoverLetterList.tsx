@@ -44,6 +44,7 @@ import {
 } from "@/lib/redux/service/coverLetterService"
 import { useAppSelector } from "@/lib/redux/hooks"
 import { getCVs, type CV } from "@/lib/redux/service/cvService"
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
 
 export function CoverLetterPage() {
   const [cvs, setCVs] = useState<CV[]>([])
@@ -284,19 +285,13 @@ export function CoverLetterPage() {
   }
 
   const handleDelete = async (letter: CoverLetter) => {
-    if (confirm("Are you sure you want to delete this cover letter?")) {
-      try {
-        await deleteCoverLetter(letter.id)
-        setCoverLetters((prev) => prev.filter((l) => l.id !== letter.id))
-        toast.success("Cover letter deleted successfully!", {
-          description: "The cover letter has been permanently removed.",
-        })
-      } catch (error) {
-        console.error("Error deleting cover letter:", error)
-        toast.error("Failed to delete cover letter", {
-          description: "Please try again or contact support if the issue persists.",
-        })
-      }
+    try {
+      await deleteCoverLetter(letter.id)
+      setCoverLetters((prev) => prev.filter((l) => l.id !== letter.id))
+      toast.success("Cover letter deleted successfully!")
+    } catch (error) {
+      console.error("Error deleting cover letter:", error)
+      toast.error("Failed to delete cover letter")
     }
   }
 
@@ -422,11 +417,18 @@ export function CoverLetterPage() {
                           <SelectValue placeholder="Select tone" />
                         </SelectTrigger>
                         <SelectContent>
-                          {tones.map((tone: { id: string; name: string; description: string; example: string }) => (
-                            <SelectItem key={tone.id} value={tone.id}>
-                              {tone.name}
-                            </SelectItem>
-                          ))}
+                          {tones.map(
+                            (tone: {
+                              id: string
+                              name: string
+                              description: string
+                              example: string
+                            }) => (
+                              <SelectItem key={tone.id} value={tone.id}>
+                                {tone.name}
+                              </SelectItem>
+                            ),
+                          )}
                         </SelectContent>
                       </Select>
                     )}
@@ -443,30 +445,50 @@ export function CoverLetterPage() {
                   </div>
                 </div>
 
-                <div className="flex justify-end items-center">
-                  {/* <Button
-                    variant="outline"
-                    onClick={() => {
-                      if (isViewMode) {
-                        setIsDialogOpen(false)
-                        setViewingLetter(null)
-                        setIsViewMode(false)
-                      } else {
-                        setShowGenerator(true)
-                        setGeneratedLetter("")
-                        setAnalysisResult(null)
-                        setEditingLetter(null)
-                      }
-                    }}
-                  >
-                    {isViewMode ? "Close" : "Back to Generator"}
-                  </Button> */}
+                <div className="flex justify-end items-center space-x-1">
+                  {(!editingLetter || isViewMode) && (
+                  <Button
+                  variant="outline"
+                  onClick={() => {
+                    if (isViewMode) {
+                      setIsDialogOpen(false)
+                      setViewingLetter(null)
+                      setIsViewMode(false)
+                    } else {
+                      setShowGenerator(true)
+                      setGeneratedLetter("")
+                      setAnalysisResult(null)
+                      setEditingLetter(null)
+                    }
+                  }}
+                >
+                  {isViewMode ? "Close" : "Back to Generator"}
+                </Button>
+                
+                  )}
 
                   {!isViewMode && (
-                    <Button onClick={handleSaveLetter} className="bg-gradient-to-r from-purple-600 to-pink-600">
-                      <FileText className="h-4 w-4 mr-2" />
-                      {editingLetter ? "Update Cover Letter" : "Save Cover Letter"}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          const tempLetter = {
+                            ...(editingLetter || {}),
+                            generated_letter: generatedLetter,
+                            job_description: currentJobDescription,
+                            tone: currentTone,
+                          } as CoverLetter
+                          handleDownload(tempLetter)
+                        }}
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Download
+                      </Button>
+                      <Button onClick={handleSaveLetter} className="bg-gradient-to-r from-purple-600 to-pink-600">
+                        <FileText className="h-4 w-4 mr-2" />
+                        {editingLetter ? "Update Cover Letter" : "Save Cover Letter"}
+                      </Button>
+                    </div>
                   )}
 
                   {isViewMode && viewingLetter && (
@@ -605,18 +627,23 @@ export function CoverLetterPage() {
                             >
                               <Download className="h-4 w-4" />
                             </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleDelete(letter)
-                              }}
-                              className="text-red-600 hover:text-red-700"
-                              title="Delete"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <ConfirmDialog
+                              title="Delete Cover Letter"
+                              description={`Are you sure you want to delete this cover letter? This action cannot be undone.`}
+                              confirmText="Delete"
+                              cancelText="Cancel"
+                              onConfirm={() => handleDelete(letter)}
+                              trigger={
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-red-600 hover:text-red-700 cursor-pointer"
+                                  title="Delete"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              }
+                            />
                           </div>
                         </TableCell>
                       </TableRow>
@@ -688,18 +715,23 @@ export function CoverLetterPage() {
                           <Edit className="h-4 w-4 mr-1" />
                           Edit
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 bg-transparent text-red-600 hover:text-red-700 hover:bg-red-50"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleDelete(letter)
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Delete
-                        </Button>
+                        <ConfirmDialog
+                          title="Delete Cover Letter"
+                          description={`Are you sure you want to delete this cover letter? This action cannot be undone.`}
+                          confirmText="Delete"
+                          cancelText="Cancel"
+                          onConfirm={() => handleDelete(letter)}
+                          trigger={
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 bg-transparent text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer"
+                            >
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              Delete
+                            </Button>
+                          }
+                        />
                         <Button
                           variant="outline"
                           size="sm"

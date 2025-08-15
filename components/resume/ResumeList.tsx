@@ -16,6 +16,8 @@ import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/
 import { CVWizard } from "./AddEditResume"
 import { toast } from "sonner"
 
+import  {ConfirmDialog } from "@/components/ui/ConfirmDialog";
+
 export function ResumePage() {
   const router = useRouter()
   const [cvs, setCVs] = useState<CV[]>([])
@@ -24,8 +26,8 @@ export function ResumePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
-  const [selectedCV, setSelectedCV] = useState<CV | null>(null)
-  const { user } = useAppSelector((state) => state.auth)
+  const [selectedCV, setSelectedCV] = useState<CV | null>(null);
+  const { user } = useAppSelector((state) => state.auth);
   const userId = user?.id;
 
   useEffect(() => {
@@ -44,17 +46,7 @@ export function ResumePage() {
     fetchCVs()
   }, [userId])
 
-  const handleDelete = async (cv: CV) => {
-    if (confirm(`Are you sure you want to delete "${cv.title}"?`)) {
-      try {
-        await deleteCV(cv.id)
-        setCVs((prev) => prev.filter((c) => c.id !== cv.id))
-      } catch (error) {
-        console.error("Error deleting CV:", error)
-        toast("Failed to delete CV")
-      }
-    }
-  }
+  // Delete functionality is now handled directly in the ConfirmDialog component
 
   const handleCreateAICV = (personaId: string) => {
     router.push(`/create-cv?personaId=${personaId}`)
@@ -144,6 +136,8 @@ const handleEdit = (cv: CV) => {
         </DialogContent>
       </Dialog>
 
+      {/* Delete confirmation is now handled inline with each delete button */}
+
       {cvs.length > 0 && (
         <>
           <Card>
@@ -230,14 +224,31 @@ const handleEdit = (cv: CV) => {
                             <Button variant="ghost" size="sm" onClick={() => handleEdit(cv)}>
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDelete(cv)}
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <ConfirmDialog
+                              title={`Delete "${cv.title}"`}
+                              description="Are you sure you want to delete this resume? This action cannot be undone."
+                              confirmText="Delete"
+                              cancelText="Cancel"
+                              onConfirm={async () => {
+                                try {
+                                  await deleteCV(cv.id);
+                                  setCVs(prev => prev.filter(c => c.id !== cv.id));
+                                  toast.success("Resume deleted successfully");
+                                } catch (error) {
+                                  console.error("Error deleting resume:", error);
+                                  toast.error("Failed to delete resume");
+                                }
+                              }}
+                              trigger={
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              }
+                            />
                             {/* <Button
                               variant="ghost"
                               size="sm"
@@ -300,14 +311,31 @@ const handleEdit = (cv: CV) => {
                           <Edit className="h-4 w-4 mr-1" />
                           Edit
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDelete(cv)}
-                          className="text-red-600 hover:text-red-700 bg-transparent"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <ConfirmDialog
+                          title={`Delete "${cv.title}"`}
+                          description="Are you sure you want to delete this resume? This action cannot be undone."
+                          confirmText="Delete"
+                          cancelText="Cancel"
+                          onConfirm={async () => {
+                            try {
+                              await deleteCV(cv.id);
+                              setCVs(prev => prev.filter(c => c.id !== cv.id));
+                              toast.success("Resume deleted successfully");
+                            } catch (error) {
+                              console.error("Error deleting resume:", error);
+                              toast.error("Failed to delete resume");
+                            }
+                          }}
+                          trigger={
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-red-600 hover:text-red-700 bg-transparent"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
                       </div>
                     </div>
                   </CardContent>
