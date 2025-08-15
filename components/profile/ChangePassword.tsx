@@ -12,194 +12,242 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
+  DialogFooter
 } from "@/components/ui/dialog"
 import { changePassword, type ChangePasswordData } from "@/lib/api/settings"
+import { toast } from "sonner"
+import { useForm } from "react-hook-form"
 
 interface ChangePasswordProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSuccess?: () => void
+  onCancel?: () => void  // Made optional
 }
 
 export function ChangePassword({
   open,
   onOpenChange,
-  onSuccess,
+  onCancel = () => { },  // Default empty function
 }: ChangePasswordProps) {
-  const [passwordForm, setPasswordForm] = useState<ChangePasswordData>({
-    current_password: "",
-    new_password: "",
-    new_password_confirmation: "",
-  })
   const [showPasswords, setShowPasswords] = useState({
     current: false,
     new: false,
     confirm: false,
   })
-  const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  const handlePasswordChange = async () => {
-    if (passwordForm.new_password !== passwordForm.new_password_confirmation) {
-      setError("New passwords do not match")
-      return
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    watch,
+    setError,
+    clearErrors,
+  } = useForm<ChangePasswordData>({
+    defaultValues: {
+      current_password: "",
+      new_password: "",
+      new_password_confirmation: "",
     }
+  })
 
-    if (passwordForm.new_password.length < 8) {
-      setError("New password must be at least 8 characters long")
-      return
+  const newPassword = watch("new_password")
+  const confirmPassword = watch("new_password_confirmation")
+
+  const resetForm = () => {
+    reset()
+    setShowPasswords({
+      current: false,
+      new: false,
+      confirm: false,
+    })
+    clearErrors()
+  }
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      resetForm()
     }
+    onOpenChange(open)
+  }
+const handleCancel = () => {
+    resetForm()
+    onOpenChange(false) // This will close the dialog
+    onCancel?.() // Optional callback if provided
+  }
 
-    try {
-      setIsLoading(true)
-      setError(null)
-      await changePassword(passwordForm)
-      onOpenChange(false)
-      setPasswordForm({
-        current_password: "",
-        new_password: "",
-        new_password_confirmation: "",
+  const onSubmit = async (data: ChangePasswordData) => {
+    if (data.new_password !== data.new_password_confirmation) {
+      setError("new_password_confirmation", {
+        type: "manual",
+        message: "New passwords do not match"
       })
-      onSuccess?.()
-    } catch (error) {
-      console.error("Error changing password:", error)
-      setError("Failed to change password. Please check your current password.")
+      return
+    }
+
+    if (data.new_password.length < 8) {
+      setError("new_password", {
+        type: "manual",
+        message: "Password must be at least 8 characters long"
+      })
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      await changePassword(data)
+      handleOpenChange(false)
+      toast.success("Password changed successfully")
+    } catch (err: any) {
+      const errorMessage = err?.response?.data?.message ||
+        err?.message ||
+        "Failed to change password. Please try again."
+      toast.error("Failed to change password", {
+        description: errorMessage
+      })
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
-            Change Password
-          </DialogTitle>
-          <DialogDescription>
-            Enter your current password and set a new one
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>Current Password</Label>
-            <div className="relative">
-              <Input
-                type={showPasswords.current ? "text" : "password"}
-                value={passwordForm.current_password}
-                onChange={(e) =>
-                  setPasswordForm({
-                    ...passwordForm,
-                    current_password: e.target.value,
-                  })
-                }
-              />
-              <button
-                type="button"
-                className="absolute right-2 top-2.5"
-                onClick={() =>
-                  setShowPasswords({
-                    ...showPasswords,
-                    current: !showPasswords.current,
-                  })
-                }
-              >
-                {showPasswords.current ? (
-                  <EyeOff className="h-4 w-4 text-gray-500" />
-                ) : (
-                  <Eye className="h-4 w-4 text-gray-500" />
-                )}
-              </button>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Change Password
+            </DialogTitle>
+            <DialogDescription>
+              Enter your current password and set a new one
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="current_password">Current Password *</Label>
+              <div className="relative">
+                <Input
+                  id="current_password"
+                  type={showPasswords.current ? "text" : "password"}
+                  {...register("current_password", {
+                    required: "Current password is required"
+                  })}
+                />
+                <button
+                  type="button"
+                  className="absolute right-2 top-2.5"
+                  onClick={() => setShowPasswords(prev => ({
+                    ...prev,
+                    current: !prev.current
+                  }))}
+                >
+                  {showPasswords.current ? (
+                    <EyeOff className="h-4 w-4 text-gray-500" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-gray-500" />
+                  )}
+                </button>
+              </div>
+              {errors.current_password && (
+                <p className="text-sm text-red-600">
+                  {errors.current_password.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="new_password">New Password *</Label>
+              <div className="relative">
+                <Input
+                  id="new_password"
+                  type={showPasswords.new ? "text" : "password"}
+                  {...register("new_password", {
+                    required: "New password is required",
+                    minLength: {
+                      value: 8,
+                      message: "Password must be at least 8 characters"
+                    }
+                  })}
+                />
+                <button
+                  type="button"
+                  className="absolute right-2 top-2.5"
+                  onClick={() => setShowPasswords(prev => ({
+                    ...prev,
+                    new: !prev.new
+                  }))}
+                >
+                  {showPasswords.new ? (
+                    <EyeOff className="h-4 w-4 text-gray-500" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-gray-500" />
+                  )}
+                </button>
+              </div>
+              {errors.new_password && (
+                <p className="text-sm text-red-600">
+                  {errors.new_password.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="new_password_confirmation">Confirm New Password *</Label>
+              <div className="relative">
+                <Input
+                  id="new_password_confirmation"
+                  type={showPasswords.confirm ? "text" : "password"}
+                  {...register("new_password_confirmation", {
+                    required: "Please confirm your new password",
+                    validate: value =>
+                      value === newPassword || "Passwords do not match"
+                  })}
+                />
+                <button
+                  type="button"
+                  className="absolute right-2 top-2.5"
+                  onClick={() => setShowPasswords(prev => ({
+                    ...prev,
+                    confirm: !prev.confirm
+                  }))}
+                >
+                  {showPasswords.confirm ? (
+                    <EyeOff className="h-4 w-4 text-gray-500" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-gray-500" />
+                  )}
+                </button>
+              </div>
+              {errors.new_password_confirmation && (
+                <p className="text-sm text-red-600">
+                  {errors.new_password_confirmation.message}
+                </p>
+              )}
             </div>
           </div>
-          <div className="space-y-2">
-            <Label>New Password</Label>
-            <div className="relative">
-              <Input
-                type={showPasswords.new ? "text" : "password"}
-                value={passwordForm.new_password}
-                onChange={(e) =>
-                  setPasswordForm({
-                    ...passwordForm,
-                    new_password: e.target.value,
-                  })
-                }
-              />
-              <button
-                type="button"
-                className="absolute right-2 top-2.5"
-                onClick={() =>
-                  setShowPasswords({
-                    ...showPasswords,
-                    new: !showPasswords.new,
-                  })
-                }
-              >
-                {showPasswords.new ? (
-                  <EyeOff className="h-4 w-4 text-gray-500" />
-                ) : (
-                  <Eye className="h-4 w-4 text-gray-500" />
-                )}
-              </button>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label>Confirm New Password</Label>
-            <div className="relative">
-              <Input
-                type={showPasswords.confirm ? "text" : "password"}
-                value={passwordForm.new_password_confirmation}
-                onChange={(e) =>
-                  setPasswordForm({
-                    ...passwordForm,
-                    new_password_confirmation: e.target.value,
-                  })
-                }
-              />
-              <button
-                type="button"
-                className="absolute right-2 top-2.5"
-                onClick={() =>
-                  setShowPasswords({
-                    ...showPasswords,
-                    confirm: !showPasswords.confirm,
-                  })
-                }
-              >
-                {showPasswords.confirm ? (
-                  <EyeOff className="h-4 w-4 text-gray-500" />
-                ) : (
-                  <Eye className="h-4 w-4 text-gray-500" />
-                )}
-              </button>
-            </div>
-          </div>
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-        </div>
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-          >
-            Cancel
-          </Button>
-          <Button onClick={handlePasswordChange} disabled={isLoading}>
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              "Change Password"
-            )}
-          </Button>
-        </DialogFooter>
+          <DialogFooter className="mt-6">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCancel}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Changing...
+                </>
+              ) : (
+                "Change Password"
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   )

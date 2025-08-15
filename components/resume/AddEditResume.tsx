@@ -7,14 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner"
-
 import {
-  Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Select from 'react-select';
 import { Badge } from "@/components/ui/badge";
 import { Save } from "lucide-react";
 import type { CreateCVData, CV } from "@/lib/redux/service/cvService";
@@ -141,7 +140,6 @@ export function CVWizard({
 
   const onSubmit = () => {
     if (editingCV) {
-      // Redirect to the CV client page with personaId and templateId
       router.push(
         `/create-cv?personaId=${editingCV.personas_id}&templateId=${editingCV.layout_id}`
       );
@@ -213,12 +211,12 @@ export function CVWizard({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg">CV Details</CardTitle>
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <Badge variant="secondary" className="capitalize">
                 Template:{" "}
                 {selectedTemplate?.name || selectedTemplateId || "Not selected"}
               </Badge>
-            </div>
+            </div> */}
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-col md:flex-row gap-4">
@@ -235,47 +233,61 @@ export function CVWizard({
               </div>
               <div className="space-y-2 flex-1">
                 <Label>Select Persona</Label>
+
                 <Select
-                  value={currentPersonaId || selectedPersonaId}
-                  onValueChange={(value) => {
-                    setSelectedPersonaId(value);
-                    setValue("personas_id", value);
+                  options={personas.map((p) => ({
+                    value: p.id.toString(),
+                    label: `${p.full_name} (${p.job_title})`,
+                  }))}
+                  value={
+                    personas
+                      .map((p) => ({
+                        value: p.id.toString(),
+                        label: `${p.full_name} (${p.job_title})`,
+                      }))
+                      .find(
+                        (option) =>
+                          option.value === (currentPersonaId || selectedPersonaId)
+                      ) || null
+                  }
+                  onChange={(option) => {
+                    if (option) {
+                      setSelectedPersonaId(option.value);
+                      setValue("personas_id", option.value);
+                    }
                   }}
-                  disabled={!!personaId}
-                >
-                  <SelectTrigger>
-                    <SelectValue
-                      placeholder={
-                        selectedPersona?.full_name || "Select a persona"
-                      }
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {isLoading ? (
-                      <div className="p-2 text-center text-sm text-gray-500">
-                        Loading...
-                      </div>
-                    ) : personas.length > 0 ? (
-                      personas.map((persona) => (
-                        <SelectItem
-                          key={persona.id}
-                          value={persona.id.toString()}
-                        >
-                          <div className="flex items-center gap-2">
-                            {persona.full_name}
-                            <Badge variant="outline" className="text-xs">
-                              {persona.job_title}
-                            </Badge>
-                          </div>
-                        </SelectItem>
-                      ))
-                    ) : (
-                      <div className="p-2 text-center text-sm text-gray-500">
-                        No personas found
-                      </div>
-                    )}
-                  </SelectContent>
-                </Select>
+                  isDisabled={!!personaId}
+                  isLoading={isLoading}
+                  isSearchable
+                  placeholder="Search or select persona..."
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                      minHeight: 40,
+                      borderRadius: 6,
+                      borderColor: "#d1d5db",
+                      paddingLeft: 4,
+                      paddingRight: 4,
+                    }),
+                    menu: (base) => ({
+                      ...base,
+                      borderRadius: 6,
+                      marginTop: 4,
+                      border: "1px solid #e5e7eb",
+                      boxShadow: "0 4px 8px rgba(0,0,0,0.05)",
+                    }),
+                    option: (base, state) => ({
+                      ...base,
+                      backgroundColor: state.isSelected
+                        ? "#eff6ff"
+                        : state.isFocused
+                          ? "#f3f4f6"
+                          : "white",
+                      color: "#1f2937",
+                    }),
+                  }}
+                />
+
                 {errors.personas_id && (
                   <p className="text-sm text-red-600">
                     {errors.personas_id.message}

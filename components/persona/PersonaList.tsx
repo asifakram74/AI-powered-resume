@@ -471,17 +471,6 @@ export function CreatePersonaPage() {
             </Button>
           </DialogTrigger>
           <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
-            <DialogHeader>
-              <DialogTitle>
-                {editingPersona
-                  ? "Edit CV Persona"
-                  : "Create Complete CV Persona"}
-              </DialogTitle>
-              <DialogDescription>
-                Choose how you'd like to create your professional persona
-              </DialogDescription>
-            </DialogHeader>
-
             {!showForm ? (
               <PersonaCreationOptions onOptionSelect={handleOptionSelect} />
             ) : (
@@ -501,7 +490,6 @@ export function CreatePersonaPage() {
         </Dialog>
       </div>
 
-      {/* View Toggle and Personas Display */}
       {personas.length > 0 && (
         <>
           <Card>
@@ -762,7 +750,7 @@ export function CreatePersonaPage() {
                         {new Date(persona.createdAt).toLocaleDateString()}
                       </div>
 
-                      <div className="flex gap-2">
+                      {/* <div className="flex gap-2">
                         <Button
                           variant="outline"
                           size="sm"
@@ -771,7 +759,7 @@ export function CreatePersonaPage() {
                         >
                           <Eye className="h-4 w-4 mr-1" />
                           View
-                        </Button>
+                        </Button> 
                         <Button
                           variant="outline"
                           size="sm"
@@ -781,9 +769,9 @@ export function CreatePersonaPage() {
                           <Edit className="h-4 w-4 mr-1" />
                           Edit
                         </Button>
-                      </div>
+                      </div>*/}
 
-                      <div className="flex gap-2">
+                      {/* <div className="flex gap-2">
                         <Button
                           variant="outline"
                           size="sm"
@@ -802,16 +790,24 @@ export function CreatePersonaPage() {
                           <Download className="h-4 w-4 mr-1" />
                           Export
                         </Button>
-                      </div>
+                      </div> */}
 
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 items-center">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleDelete(persona)}
-                          className="text-red-600 hover:text-red-700 bg-transparent"
+                          className="text-red-600 hover:text-red-700 bg-transparent p-2"
                         >
                           <Trash2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(persona)}
+                          className="bg-transparent p-2"
+                        >
+                          <Edit className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>

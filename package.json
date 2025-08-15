@@ -61,6 +61,7 @@
     "react-hook-form": "^7.60.0",
     "react-redux": "latest",
     "react-resizable-panels": "^2.1.7",
+    "react-select": "^5.10.2",
     "recharts": "2.15.4",
     "redux": "latest",
     "sonner": "^1.7.4",

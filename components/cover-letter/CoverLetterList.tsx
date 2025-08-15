@@ -542,7 +542,6 @@ export function CoverLetterPage() {
                     <TableRow>
                       <TableHead>Job Description</TableHead>
                       <TableHead>Tone</TableHead>
-                      <TableHead>AI Score</TableHead>
                       <TableHead>Preview</TableHead>
                       <TableHead>Created</TableHead>
                       <TableHead>Actions</TableHead>
@@ -562,9 +561,6 @@ export function CoverLetterPage() {
                           <Badge variant="secondary" className="capitalize">
                             {letter.tone}
                           </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="default">AI</Badge>
                         </TableCell>
                         <TableCell>
                           <div className="max-w-xs">

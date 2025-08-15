@@ -1,81 +1,156 @@
 "use client"
+
 import { useState, useEffect } from "react"
+import { useForm } from "react-hook-form"
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
+import { updateProfile, fetchProfile } from "@/lib/redux/slices/authSlice"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { UserCircle, Edit, Shield, Mail, Star, BadgeCheck } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Loader2 } from "lucide-react"
-import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
-import { fetchProfile, updateProfile } from "@/lib/redux/slices/authSlice"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { ChangePassword } from "./ChangePassword"
-import { StatsCard } from "./StatsCard"
+import { Loader2, Edit, Shield, Mail, Star, BadgeCheck, FileText, Target, UserCircle, TrendingUp } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import { ChangePassword } from "./ChangePassword"
+import { getPersonas } from "@/lib/redux/service/pasonaService"
+import { getCVs } from "@/lib/redux/service/cvService"
+import { getCoverLetters } from "@/lib/redux/service/coverLetterService"
+import { getATSResumes } from "@/lib/redux/service/atsResumeService"
+import { showSuccessToast, showErrorToast } from "@/components/ui/toast"
+
+interface StatItem {
+  label: string
+  value: number
+  icon: React.ComponentType<{ className?: string }>
+  color: string
+}
+
+interface ProfileFormData {
+  name: string
+  email: string
+  plan_type?: string
+  status?: string
+}
 
 export function ProfilePage() {
   const dispatch = useAppDispatch()
-  const { profile, loading, error } = useAppSelector((state) => state.auth)
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    plan_type: "",
-    status: ""
-  })
-  const [success, setSuccess] = useState<string | null>(null)
+  const { profile, loading: authLoading, user } = useAppSelector((state) => state.auth)
+  const [stats, setStats] = useState<StatItem[]>([])
   const [showEditModal, setShowEditModal] = useState(false)
   const [showPasswordDialog, setShowPasswordDialog] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadingError, setLoadingError] = useState<string | null>(null)
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isDirty },
+    reset,
+    watch,
+  } = useForm<ProfileFormData>({
+    defaultValues: {
+      name: profile?.name || '',
+      email: profile?.email || '',
+      plan_type: profile?.plan_type || 'Free',
+      status: profile?.status || 'active',
+    }
+  })
 
   useEffect(() => {
-    if (!profile) {
-      dispatch(fetchProfile())
+    const loadData = async () => {
+      try {
+        setIsLoading(true)
+        await dispatch(fetchProfile()).unwrap()
+
+        if (user?.id) {
+          const [personas, cvs, coverLetters, atsResumes] = await Promise.all([
+            getPersonas(user.id.toString()),
+            getCVs(user.id.toString()),
+            getCoverLetters(user.id.toString()),
+            getATSResumes(),
+          ])
+
+          setStats([
+            {
+              label: "Resumes Created",
+              value: cvs.length,
+              icon: FileText,
+              color: "text-blue-600",
+            },
+            {
+              label: "Cover Letters",
+              value: coverLetters.length,
+              icon: Mail,
+              color: "text-green-600",
+            },
+            {
+              label: "ATS Checks",
+              value: atsResumes.length,
+              icon: Target,
+              color: "text-orange-600",
+            },
+            {
+              label: "Personas Generated",
+              value: personas.length,
+              icon: UserCircle,
+              color: "text-purple-600",
+            },
+          ])
+        }
+      } catch (error) {
+        setLoadingError("Failed to load profile data. Please try again.")
+      } finally {
+        setIsLoading(false)
+      }
     }
-  }, [dispatch, profile])
+
+    loadData()
+  }, [dispatch, user?.id])
 
   useEffect(() => {
     if (profile) {
-      setFormData({
+      reset({
         name: profile.name,
         email: profile.email,
-        plan_type: profile.plan_type || "",
-        status: profile.status || "",
+        plan_type: profile.plan_type,
+        status: profile.status,
       })
     }
-  }, [profile])
+  }, [profile, reset])
 
-  const handleSave = async () => {
+  const onSubmit = async (data: ProfileFormData) => {
     try {
-      setSuccess(null)
       await dispatch(updateProfile({
-        name: formData.name,
-        email: formData.email,
-        plan_type: formData.plan_type,
-        status: formData.status,
+        name: data.name,
+        email: data.email,
       })).unwrap()
-
-      setSuccess("Profile updated successfully")
+      await dispatch(fetchProfile()).unwrap()
+      showSuccessToast("Profile updated successfully")
       setShowEditModal(false)
-    } catch (err) {
-      console.error(err)
+    } catch (error: any) {
+      showErrorToast("Failed to update profile", error || "Failed to update profile. Please try again.")
     }
   }
 
-  if (!profile && loading) {
+  if (isLoading) {
     return (
-      <div className="fixed inset-0 flex justify-center items-center bg-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      <div className="fixed inset-0 flex justify-center items-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+          <p className="text-gray-600">Loading your profile...</p>
+        </div>
       </div>
     )
   }
 
-  if (!profile) {
+  if (isLoading || !profile) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Alert variant="destructive" className="w-auto">
           <AlertTitle>Error</AlertTitle>
-          <AlertDescription>Failed to load profile data</AlertDescription>
+          <AlertDescription>{isLoading || "Failed to load profile data"}</AlertDescription>
         </Alert>
       </div>
     )
@@ -99,16 +174,14 @@ export function ProfilePage() {
           <div>
             <div className="flex gap-2 item-center">
               <div className="flex items-center gap-4">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{profile?.name}</h1>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{profile.name}</h1>
               </div>
-
               <div className="flex flex-wrap items-center gap-2">
-                {/* Premium/Free Member Badge */}
                 <Badge
                   variant={profile.plan_type === 'Premium' ? 'default' : 'secondary'}
                   className={`flex items-center gap-1.5 px-3 py-1 rounded-full ${profile.plan_type === 'Premium'
-                      ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
-                      : "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200"
+                    ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
+                    : "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200"
                     }`}
                 >
                   {profile.plan_type === 'Premium' ? (
@@ -121,7 +194,6 @@ export function ProfilePage() {
                   )}
                 </Badge>
 
-                {/* Verified Badge */}
                 {profile.status === 'verified' && (
                   <Badge
                     className="flex items-center gap-1.5 px-3 py-1 rounded-full 
@@ -139,11 +211,11 @@ export function ProfilePage() {
           </div>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" onClick={() => setShowEditModal(true)}>
+          <Button variant="outline" className="w-50" onClick={() => setShowEditModal(true)}>
             <Edit className="h-4 w-4 mr-2" />
             Edit Profile
           </Button>
-          <Button onClick={() => setShowPasswordDialog(true)}>
+          <Button className="w-50" onClick={() => setShowPasswordDialog(true)}>
             <Shield className="h-4 w-4 mr-2" />
             Change Password
           </Button>
@@ -153,46 +225,32 @@ export function ProfilePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <Card className="border-0 shadow-sm">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-xl">Personal Information</CardTitle>
+            <CardHeader  className="pb-3">
+              <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">Personal Information</CardTitle>
               <CardDescription>
                 Your personal details and account information
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {error && (
-                <Alert variant="destructive" className="mb-6">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-
-              {success && (
-                <Alert className="mb-6">
-                  <AlertDescription>{success}</AlertDescription>
-                </Alert>
-              )}
-
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-500">Full Name</Label>
-                    <p className="text-sm font-medium">{profile.name}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label className="text-sm font-mediumfont-bold text-gray-900 dark:text-white">Full Name</Label>
+                  <p className="text-sm font-medium text-gray-500">{profile.name}</p>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-mediumfont-bold text-gray-900 dark:text-white">Email Address</Label>
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-gray-400" />
+                    <p className="text-sm font-medium text-gray-500">{profile.email}</p>
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-500">Email Address</Label>
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-gray-400" />
-                      <p className="text-sm font-medium">{profile.email}</p>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-500">Account Type</Label>
-                    <p className="text-sm font-medium capitalize">{profile.plan_type || 'Free'}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-500">Account Status</Label>
-                    <p className="text-sm font-medium capitalize">{profile.status}</p>
-                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-mediumfont-bold text-gray-900 dark:text-white">Account Type</Label>
+                  <p  className="text-sm font-medium capitalize text-gray-500">{profile.plan_type || 'Free'}</p>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-mediumfont-bold text-gray-900 dark:text-white">Account Status</Label>
+                  <p  className="text-sm font-medium capitalize text-gray-500">{profile.status}</p>
                 </div>
               </div>
             </CardContent>
@@ -200,82 +258,127 @@ export function ProfilePage() {
         </div>
 
         <div className="lg:col-span-1">
-          <StatsCard />
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 font-bold text-gray-900 dark:text-white" />
+                Usage Statistics
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                {stats.map((stat, index) => (
+                  <div key={index} className="text-center p-3 bg-gray-50 rounded-lg">
+                    <stat.icon className={`h-6 w-6 mx-auto mb-2 ${stat.color}`} />
+                    <h3 className="text-2xl font-bold font-bold text-gray-900 dark:text-white">{stat.value}</h3>
+                    <p className="text-sm font-bold text-gray-500">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
-      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-        <DialogContent className="sm:max-w-[600px] rounded-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Edit className="h-5 w-5" />
-              Edit Profile
-            </DialogTitle>
-            <DialogDescription>
-              Update your personal information and preferences
-            </DialogDescription>
-          </DialogHeader>
+      <Dialog open={showEditModal} onOpenChange={(open) => {
+        if (!open) {
+          reset({
+            name: profile?.name || '',
+            email: profile?.email || '',
+            plan_type: profile?.plan_type || 'Free',
+            status: profile?.status || 'active',
+          });
+        }
+        setShowEditModal(open);
+      }}>
+        <DialogContent>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <DialogHeader>
+              <DialogTitle>Edit Profile</DialogTitle>
+            </DialogHeader>
 
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Full Name</Label>
-              <Input
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Enter your full name"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Email Address</Label>
-              <Input
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="Enter your email address"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Account Type</Label>
-              <Input
-                value={formData.plan_type}
-                onChange={(e) => setFormData({ ...formData, plan_type: e.target.value })}
-                disabled
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Account Status</Label>
-              <Input
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                disabled
-              />
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name *</Label>
+                <Input
+                  id="name"
+                  {...register("name", {
+                    required: "Name is required",
+                    minLength: {
+                      value: 2,
+                      message: "Name must be at least 2 characters"
+                    }
+                  })}
+                />
+                {errors.name && (
+                  <p className="text-sm text-red-600">{errors.name.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email">Email *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  {...register("email", {
+                    required: "Email is required",
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "Invalid email address"
+                    }
+                  })}
+                />
+                {errors.email && (
+                  <p className="text-sm text-red-600">{errors.email.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Account Type</Label>
+                <Input value={profile?.plan_type || 'Free'} disabled />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Account Status</Label>
+                <Input value={profile?.status || 'active'} disabled />
+              </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => setShowEditModal(false)} className="cursor-pointer">
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  reset({
+                    name: profile?.name || '',
+                    email: profile?.email || '',
+                    plan_type: profile?.plan_type || 'Free',
+                    status: profile?.status || 'active',
+                  });
+                  setShowEditModal(false);
+                }}
+              >
                 Cancel
               </Button>
-              <Button onClick={handleSave} disabled={loading} className="cursor-pointer">
-                {loading ? (
+              <Button
+                type="submit"
+                disabled={authLoading || !isDirty}
+              >
+                {authLoading ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Saving...
                   </>
-                ) : (
-                  'Save Changes'
-                )}
+                ) : 'Save Changes'}
               </Button>
-            </div>
-          </div>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 
       <ChangePassword
         open={showPasswordDialog}
         onOpenChange={setShowPasswordDialog}
-        onSuccess={() => {
-          setSuccess("Password changed successfully")
-          setTimeout(() => setSuccess(null), 3000)
-        }}
       />
     </div>
   )
