@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Sparkles, FileText, Wand2 } from "lucide-react"
 import { useAppSelector } from "@/lib/redux/hooks"
 import { getCVs, type CV } from "@/lib/redux/service/cvService"
+import Select from 'react-select'
 
 interface CoverLetterGeneratorProps {
   onGenerate: (jobDescription: string, tone: string, cvId: string, userId: string) => void
@@ -84,11 +84,13 @@ export function CoverLetterGenerator({ onGenerate, isGenerating }: CoverLetterGe
     onGenerate(jobDescription, selectedTone, selectedCVId, userId.toString())
   }
 
-  const handleCVChange = (value: string) => {
-    setSelectedCVId(value)
-    const selectedCVData = cvs.find((cv) => cv.id.toString() === value)
-    if (selectedCVData?.job_description) {
-      setJobDescription(selectedCVData.job_description)
+  const handleCVChange = (option: { value: string; label: string } | null) => {
+    if (option) {
+      setSelectedCVId(option.value)
+      const selectedCVData = cvs.find((cv) => cv.id.toString() === option.value)
+      if (selectedCVData?.job_description) {
+        setJobDescription(selectedCVData.job_description)
+      }
     }
   }
 
@@ -119,18 +121,50 @@ export function CoverLetterGenerator({ onGenerate, isGenerating }: CoverLetterGe
         <CardContent>
           <div className="space-y-2">
             <Label>Choose a CV to pre-fill job description *</Label>
-            <Select value={selectedCVId} onValueChange={handleCVChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a CV..." />
-              </SelectTrigger>
-              <SelectContent>
-                {cvs.map((cv) => (
-                  <SelectItem key={cv.id} value={cv.id.toString()}>
-                    {cv.title || `CV ${cv.id}`}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Select
+              options={cvs.map((cv) => ({
+                value: cv.id.toString(),
+                label: cv.title || `CV ${cv.id}`,
+              }))}
+              value={
+                cvs
+                  .map((cv) => ({
+                    value: cv.id.toString(),
+                    label: cv.title || `CV ${cv.id}`,
+                  }))
+                  .find((option) => option.value === selectedCVId) || null
+              }
+              onChange={handleCVChange}
+              isLoading={isLoading}
+              isSearchable
+              placeholder="Search or select CV..."
+              styles={{
+                control: (base) => ({
+                  ...base,
+                  minHeight: 40,
+                  borderRadius: 6,
+                  borderColor: "#d1d5db",
+                  paddingLeft: 4,
+                  paddingRight: 4,
+                }),
+                menu: (base) => ({
+                  ...base,
+                  borderRadius: 6,
+                  marginTop: 4,
+                  border: "1px solid #e5e7eb",
+                  boxShadow: "0 4px 8px rgba(0,0,0,0.05)",
+                }),
+                option: (base, state) => ({
+                  ...base,
+                  backgroundColor: state.isSelected
+                    ? "#eff6ff"
+                    : state.isFocused
+                      ? "#f3f4f6"
+                      : "white",
+                  color: "#1f2937",
+                }),
+              }}
+            />
           </div>
         </CardContent>
       </Card>
@@ -167,21 +201,57 @@ export function CoverLetterGenerator({ onGenerate, isGenerating }: CoverLetterGe
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Select your preferred tone *</Label>
-              <Select value={selectedTone} onValueChange={setSelectedTone}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a writing tone..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {tones.map((tone) => (
-                    <SelectItem key={tone.id} value={tone.id}>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{tone.name}</span>
-                        <span className="text-sm text-gray-500">{tone.description}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Select
+                options={tones.map((tone) => ({
+                  value: tone.id,
+                  label: tone.name,
+                  description: tone.description,
+                }))}
+                value={
+                  tones
+                    .map((tone) => ({
+                      value: tone.id,
+                      label: tone.name,
+                      description: tone.description,
+                    }))
+                    .find((option) => option.value === selectedTone) || null
+                }
+                onChange={(option) => option && setSelectedTone(option.value)}
+                isSearchable
+                placeholder="Search or select tone..."
+                formatOptionLabel={(option) => (
+                  <div className="flex flex-col">
+                    <span className="font-medium">{option.label}</span>
+                    <span className="text-sm text-gray-500">{option.description}</span>
+                  </div>
+                )}
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    minHeight: 40,
+                    borderRadius: 6,
+                    borderColor: "#d1d5db",
+                    paddingLeft: 4,
+                    paddingRight: 4,
+                  }),
+                  menu: (base) => ({
+                    ...base,
+                    borderRadius: 6,
+                    marginTop: 4,
+                    border: "1px solid #e5e7eb",
+                    boxShadow: "0 4px 8px rgba(0,0,0,0.05)",
+                  }),
+                  option: (base, state) => ({
+                    ...base,
+                    backgroundColor: state.isSelected
+                      ? "#eff6ff"
+                      : state.isFocused
+                        ? "#f3f4f6"
+                        : "white",
+                    color: "#1f2937",
+                  }),
+                }}
+              />
             </div>
 
             {selectedToneData && (

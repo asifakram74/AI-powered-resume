@@ -57,7 +57,8 @@ import {
   type PersonaResponse,
 } from "@/lib/redux/service/pasonaService";
 import { useAppSelector, useAppDispatch } from "@/lib/redux/hooks";
-import { toast } from "sonner"
+import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 export function CreatePersonaPage() {
   const [personas, setPersonas] = useState<CVData[]>([])
@@ -283,14 +284,13 @@ export function CreatePersonaPage() {
   };
 
   const handleDelete = async (persona: CVData) => {
-    if (confirm(`Are you sure you want to delete the persona for ${persona.personalInfo.fullName}?`)) {
-      try {
-        await deletePersona(Number.parseInt(persona.id));
-        setPersonas(personas.filter((p) => p.id !== persona.id));
-      } catch (error) {
-        console.error("Error deleting persona:", error);
-        alert("Failed to delete persona");
-      }
+    try {
+      await deletePersona(Number.parseInt(persona.id));
+      setPersonas(personas.filter((p) => p.id !== persona.id));
+      toast.success("Persona deleted successfully");
+    } catch (error) {
+      console.error("Error deleting persona:", error);
+      toast.error("Failed to delete persona");
     }
   };
 
@@ -647,14 +647,22 @@ export function CreatePersonaPage() {
                             >
                               <Download className="h-4 w-4" />
                             </Button> */}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDelete(persona)}
-                              className="text-red-600 hover:text-red-700 cursor-pointer"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <ConfirmDialog
+                              title={`Delete "${persona.personalInfo.fullName}"`}
+                              description={`Are you sure you want to delete the persona for ${persona.personalInfo.fullName}?`}
+                              confirmText="Delete"
+                              cancelText="Cancel"
+                              onConfirm={() => handleDelete(persona)}
+                              trigger={
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-red-600 hover:text-red-700 cursor-pointer"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              }
+                            />
                           </div>
                         </TableCell>
                       </TableRow>
@@ -793,14 +801,22 @@ export function CreatePersonaPage() {
                       </div> */}
 
                       <div className="flex gap-2 items-center">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDelete(persona)}
-                          className="text-red-600 hover:text-red-700 bg-transparent p-2"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <ConfirmDialog
+                          title={`Delete "${persona.personalInfo.fullName}"`}
+                          description={`Are you sure you want to delete the persona for ${persona.personalInfo.fullName}?`}
+                          confirmText="Delete"
+                          cancelText="Cancel"
+                          onConfirm={() => handleDelete(persona)}
+                          trigger={
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-red-600 hover:text-red-700 bg-transparent"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
                         <Button
                           variant="outline"
                           size="sm"
