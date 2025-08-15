@@ -443,8 +443,8 @@ export function CoverLetterPage() {
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center">
-                  <Button
+                <div className="flex justify-end items-center">
+                  {/* <Button
                     variant="outline"
                     onClick={() => {
                       if (isViewMode) {
@@ -460,7 +460,7 @@ export function CoverLetterPage() {
                     }}
                   >
                     {isViewMode ? "Close" : "Back to Generator"}
-                  </Button>
+                  </Button> */}
 
                   {!isViewMode && (
                     <Button onClick={handleSaveLetter} className="bg-gradient-to-r from-purple-600 to-pink-600">
