@@ -327,6 +327,7 @@ export function ProfilePage() {
                       message: "Invalid email address"
                     }
                   })}
+                  disabled
                 />
                 {errors.email && (
                   <p className="text-sm text-red-600">{errors.email.message}</p>
@@ -338,10 +339,10 @@ export function ProfilePage() {
                 <Input value={profile?.plan_type || 'Free'} disabled />
               </div>
 
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label>Account Status</Label>
                 <Input value={profile?.status || 'active'} disabled />
-              </div>
+              </div> */}
             </div>
 
             <DialogFooter>
