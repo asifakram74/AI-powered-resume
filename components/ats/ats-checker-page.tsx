@@ -165,8 +165,8 @@ export default function ATSCheckerPage() {
                 analysisResult.score >= 80
                   ? "Excellent! Your resume is well-optimized for ATS systems."
                   : analysisResult.score >= 60
-                  ? "Good! Your resume has room for improvement."
-                  : "Needs work. Consider implementing the suggestions below.",
+                    ? "Good! Your resume has room for improvement."
+                    : "Needs work. Consider implementing the suggestions below.",
               bold: true,
             }),
           ],
@@ -250,7 +250,7 @@ export default function ATSCheckerPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 p-6">=
+    <div className="max-w-7xl mx-auto space-y-8 p-6">
       <div className="bg-gradient-to-r from-green-50 to-teal-50 rounded-2xl p-8 text-center">
         <div className="max-w-3xl mx-auto">
           <div className="inline-flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 mb-4 shadow-sm">
@@ -266,12 +266,12 @@ export default function ATSCheckerPage() {
             Get past applicant tracking systems and land more interviews with our
             AI-powered resume analyzer
           </p>
-          
+
           <div className="flex justify-center">
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 shadow-lg hover:shadow-teal-500/20 transition-all duration-300"
                 >
                   <FileCheck className="h-5 w-5 mr-2" />
@@ -383,8 +383,8 @@ export default function ATSCheckerPage() {
                             {analysisResult.score >= 80
                               ? "Excellent! Your resume is well-optimized for ATS systems."
                               : analysisResult.score >= 60
-                              ? "Good! Your resume has room for improvement."
-                              : "Needs work. Consider implementing the suggestions below."}
+                                ? "Good! Your resume has room for improvement."
+                                : "Needs work. Consider implementing the suggestions below."}
                           </p>
                         </CardContent>
                       </Card>
@@ -587,84 +587,6 @@ export default function ATSCheckerPage() {
             </p>
           </CardContent>
         </Card>
-      </div>
-
-      {/* Tips Section */}
-      <Card className="border-0 shadow-lg">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-2xl">
-            <TrendingUp className="h-6 w-6 text-teal-600" />
-            ATS Optimization Tips
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
-              <div className="rounded-full bg-green-100 p-3 flex-shrink-0">
-                <Target className="h-5 w-5 text-green-600" />
-              </div>
-              <div>
-                <h4 className="font-medium text-lg text-gray-900 mb-2">
-                  Keyword Optimization
-                </h4>
-                <p className="text-gray-600">
-                  Include relevant keywords from the job description throughout
-                  your resume, especially in skills and experience sections.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
-              <div className="rounded-full bg-teal-100 p-3 flex-shrink-0">
-                <Award className="h-5 w-5 text-teal-600" />
-              </div>
-              <div>
-                <h4 className="font-medium text-lg text-gray-900 mb-2">
-                  Simple Formatting
-                </h4>
-                <p className="text-gray-600">
-                  Use clean, simple formatting with standard fonts (Arial, Calibri,
-                  Times New Roman) and avoid tables, columns, and graphics.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
-              <div className="rounded-full bg-blue-100 p-3 flex-shrink-0">
-                <BarChart3 className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <h4 className="font-medium text-lg text-gray-900 mb-2">
-                  Quantify Achievements
-                </h4>
-                <p className="text-gray-600">
-                  Include numbers and metrics to show impact (e.g., "Increased
-                  sales by 30%" instead of "Increased sales").
-                </p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* CTA Section */}
-      <div className="text-center py-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">
-          Ready to Optimize Your Resume?
-        </h2>
-        <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-          Get past applicant tracking systems and increase your chances of landing
-          interviews with our comprehensive analysis.
-        </p>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button
-              size="lg"
-              className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 px-8 py-6 text-lg shadow-lg hover:shadow-teal-500/30"
-            >
-              <FileCheck className="h-5 w-5 mr-2" />
-              Check My Resume Now
-            </Button>
-          </DialogTrigger>
-        </Dialog>
       </div>
     </div>
   );

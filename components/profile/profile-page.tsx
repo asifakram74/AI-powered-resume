@@ -338,10 +338,10 @@ export function ProfilePage() {
                 <Input value={profile?.plan_type || 'Free'} disabled />
               </div>
 
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label>Account Status</Label>
                 <Input value={profile?.status || 'active'} disabled />
-              </div>
+              </div> */}
             </div>
 
             <DialogFooter>
