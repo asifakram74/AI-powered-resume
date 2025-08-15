@@ -48,6 +48,7 @@ const tones = [
     example: "Your company's innovative approach resonates with my creative vision...",
   },
 ]
+
 export function CoverLetterGenerator({ onGenerate, isGenerating }: CoverLetterGeneratorProps) {
   const [jobDescription, setJobDescription] = useState("")
   const [selectedTone, setSelectedTone] = useState("")
@@ -56,6 +57,7 @@ export function CoverLetterGenerator({ onGenerate, isGenerating }: CoverLetterGe
   const [cvs, setCVs] = useState<CV[]>([])
   const { user } = useAppSelector((state) => state.auth)
   const userId = user?.id
+
   useEffect(() => {
     const loadCVs = async () => {
       if (!user?.id) return
@@ -84,13 +86,14 @@ export function CoverLetterGenerator({ onGenerate, isGenerating }: CoverLetterGe
 
   const handleCVChange = (value: string) => {
     setSelectedCVId(value)
-    const selectedCVData = cvs.find(cv => cv.id.toString() === value)
+    const selectedCVData = cvs.find((cv) => cv.id.toString() === value)
     if (selectedCVData?.job_description) {
       setJobDescription(selectedCVData.job_description)
     }
   }
 
   const selectedToneData = tones.find((tone) => tone.id === selectedTone)
+  const selectedCVData = cvs.find((cv) => cv.id.toString() === selectedCVId)
 
   return (
     <div className="space-y-6">

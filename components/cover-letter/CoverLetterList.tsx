@@ -3,6 +3,12 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
+import { toast } from "sonner"
 import {
   Mail,
   Grid,
@@ -27,10 +33,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { CoverLetterGenerator } from "./AddEditCoverLetter"
 import {
   getCoverLetters,
@@ -44,13 +46,14 @@ import { useAppSelector } from "@/lib/redux/hooks"
 import { getCVs, type CV } from "@/lib/redux/service/cvService"
 
 export function CoverLetterPage() {
-  const [cvs, setCVs] = useState<CV[]>([]);
+  const [cvs, setCVs] = useState<CV[]>([])
   const [coverLetters, setCoverLetters] = useState<CoverLetter[]>([])
-  const [selectedCVId, setSelectedCVId] = useState("");
+  const [selectedCVId, setSelectedCVId] = useState("")
   const [viewMode, setViewMode] = useState<"grid" | "table">("table")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [editingLetter, setEditingLetter] = useState<CoverLetter | null>(null)
+  const [viewingLetter, setViewingLetter] = useState<CoverLetter | null>(null)
   const [showGenerator, setShowGenerator] = useState(true)
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedLetter, setGeneratedLetter] = useState("")
@@ -58,23 +61,57 @@ export function CoverLetterPage() {
   const [currentTone, setCurrentTone] = useState("")
   const [isLoading, setIsLoading] = useState(true)
   const [analysisResult, setAnalysisResult] = useState<any>(null)
-  const { user } = useAppSelector((state) => state.auth);
-  const userId = user?.id;
+  const [isViewMode, setIsViewMode] = useState(false)
+  const { user } = useAppSelector((state) => state.auth)
+  const userId = user?.id
+
+  const tones = [
+    {
+      id: "professional",
+      name: "Professional",
+      description: "Formal and business-appropriate tone",
+      example: "I am writing to express my strong interest in the position...",
+    },
+    {
+      id: "enthusiastic",
+      name: "Enthusiastic",
+      description: "Energetic and passionate tone",
+      example: "I am thrilled to apply for this exciting opportunity...",
+    },
+    {
+      id: "confident",
+      name: "Confident",
+      description: "Assertive and self-assured tone",
+      example: "With my proven track record and expertise...",
+    },
+    {
+      id: "friendly",
+      name: "Friendly",
+      description: "Warm and approachable tone",
+      example: "I would love the opportunity to contribute to your team...",
+    },
+    {
+      id: "creative",
+      name: "Creative",
+      description: "Innovative and unique tone",
+      example: "Your company's innovative approach resonates with my creative vision...",
+    },
+  ]
 
   useEffect(() => {
     const fetchCVs = async () => {
       try {
-        const data = await getCVs(userId?.toString() || '');
-        setCVs(data);
+        const data = await getCVs(userId?.toString() || "")
+        setCVs(data)
       } catch (error) {
-        console.error("Error fetching CVs:", error);
+        console.error("Error fetching CVs:", error)
       }
-    };
+    }
 
     if (userId) {
-      fetchCVs();
+      fetchCVs()
     }
-  }, [userId]);
+  }, [userId])
 
   useEffect(() => {
     const fetchCoverLetters = async () => {
@@ -84,7 +121,7 @@ export function CoverLetterPage() {
           return
         }
         setIsLoading(true)
-        const data = await getCoverLetters(userId?.toString() || '');
+        const data = await getCoverLetters(userId?.toString() || "")
         console.log("Fetched cover letters:", data)
 
         setCoverLetters(Array.isArray(data) ? data : [])
@@ -106,14 +143,14 @@ export function CoverLetterPage() {
     setSelectedCVId(cvId)
 
     try {
-      const selectedCV = cvs.find(cv => cv.id.toString() === cvId)
+      const selectedCV = cvs.find((cv) => cv.id.toString() === cvId)
       if (!selectedCV) {
         throw new Error("Selected CV not found")
       }
 
       // Get CV content for AI analysis
       const cvContent = await getCVContentForAI(selectedCV)
-      
+
       // Call DeepSeek AI for cover letter generation
       const response = await fetch("/api/cover-letter-generation", {
         method: "POST",
@@ -129,7 +166,7 @@ export function CoverLetterPage() {
       })
 
       const data = await response.json()
-      
+
       if (!response.ok) {
         throw new Error(data.error || "Generation failed")
       }
@@ -140,7 +177,7 @@ export function CoverLetterPage() {
     } catch (error) {
       console.error("Error generating cover letter:", error)
       alert(`Failed to generate cover letter: ${error instanceof Error ? error.message : "Unknown error"}`)
-      
+
       // Fallback to basic generatio
       setShowGenerator(false)
     } finally {
@@ -178,10 +215,16 @@ export function CoverLetterPage() {
       let response: CoverLetter
       if (editingLetter) {
         response = await updateCoverLetter(editingLetter.id, letterData)
-        setCoverLetters(prev => prev.map(letter => letter.id === editingLetter.id ? response : letter))
+        setCoverLetters((prev) => prev.map((letter) => (letter.id === editingLetter.id ? response : letter)))
+        toast.success("Cover letter updated successfully!", {
+          description: "Your changes have been saved.",
+        })
       } else {
         response = await createCoverLetter(letterData)
-        setCoverLetters(prev => [response, ...prev])
+        setCoverLetters((prev) => [response, ...prev])
+        toast.success("Cover letter created successfully!", {
+          description: "Your AI-generated cover letter has been saved.",
+        })
       }
 
       setIsDialogOpen(false)
@@ -189,11 +232,16 @@ export function CoverLetterPage() {
       setGeneratedLetter("")
       setCurrentJobDescription("")
       setCurrentTone("")
+      setSelectedCVId("")
       setEditingLetter(null)
+      setViewingLetter(null)
       setAnalysisResult(null)
+      setIsViewMode(false)
     } catch (error) {
       console.error("Error saving cover letter:", error)
-      alert("Failed to save cover letter")
+      toast.error("Failed to save cover letter", {
+        description: "Please try again or contact support if the issue persists.",
+      })
     } finally {
       setIsLoading(false)
     }
@@ -201,16 +249,24 @@ export function CoverLetterPage() {
 
   const handleEdit = (letter: CoverLetter) => {
     setEditingLetter(letter)
+    setViewingLetter(null)
     setCurrentJobDescription(letter.job_description)
     setCurrentTone(letter.tone)
     setGeneratedLetter(letter.generated_letter)
+    setSelectedCVId(letter.cv_id.toString()) // Add this line to set the selected CV ID
     setShowGenerator(false)
+    setIsViewMode(false)
     setIsDialogOpen(true)
   }
 
   const handleView = (letter: CoverLetter) => {
+    setViewingLetter(letter)
+    setEditingLetter(null)
+    setCurrentJobDescription(letter.job_description)
+    setCurrentTone(letter.tone)
     setGeneratedLetter(letter.generated_letter)
     setShowGenerator(false)
+    setIsViewMode(true)
     setIsDialogOpen(true)
   }
 
@@ -222,6 +278,9 @@ export function CoverLetterPage() {
     document.body.appendChild(element)
     element.click()
     document.body.removeChild(element)
+    toast.success("Cover letter downloaded!", {
+      description: "The file has been saved to your downloads folder.",
+    })
   }
 
   const handleDelete = async (letter: CoverLetter) => {
@@ -229,11 +288,29 @@ export function CoverLetterPage() {
       try {
         await deleteCoverLetter(letter.id)
         setCoverLetters((prev) => prev.filter((l) => l.id !== letter.id))
+        toast.success("Cover letter deleted successfully!", {
+          description: "The cover letter has been permanently removed.",
+        })
       } catch (error) {
         console.error("Error deleting cover letter:", error)
-        alert("Failed to delete cover letter")
+        toast.error("Failed to delete cover letter", {
+          description: "Please try again or contact support if the issue persists.",
+        })
       }
     }
+  }
+
+  const handleOpenNewGenerator = () => {
+    setEditingLetter(null)
+    setViewingLetter(null)
+    setCurrentJobDescription("")
+    setCurrentTone("")
+    setSelectedCVId("")
+    setGeneratedLetter("")
+    setAnalysisResult(null)
+    setIsViewMode(false)
+    setShowGenerator(true)
+    setIsDialogOpen(true)
   }
 
   const filteredLetters = coverLetters.filter((letter) => {
@@ -244,7 +321,6 @@ export function CoverLetterPage() {
       letter.generated_letter.toLowerCase().includes(searchLower)
     )
   })
-
 
   if (isLoading && coverLetters.length === 0) {
     return (
@@ -270,27 +346,30 @@ export function CoverLetterPage() {
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+            <Button
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              onClick={handleOpenNewGenerator}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Generate AI Cover Letter
             </Button>
           </DialogTrigger>
           <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
             <DialogHeader>
-              <DialogTitle>{editingLetter ? "Edit Cover Letter" : "Generate AI Cover Letter"}</DialogTitle>
+              <DialogTitle>
+                {isViewMode ? "View Cover Letter" : editingLetter ? "Edit Cover Letter" : "Generate AI Cover Letter"}
+              </DialogTitle>
               <DialogDescription>
                 {showGenerator
                   ? "Provide job details to generate a personalized cover letter with AI"
-                  : "Review and edit your AI-generated cover letter"}
+                  : isViewMode
+                    ? "Review your AI-generated cover letter"
+                    : "Review and edit your AI-generated cover letter"}
               </DialogDescription>
             </DialogHeader>
 
             {showGenerator ? (
-              <CoverLetterGenerator
-                onGenerate={handleGenerate}
-                isGenerating={isGenerating}
-                cvs={cvs}
-              />
+              <CoverLetterGenerator onGenerate={handleGenerate} isGenerating={isGenerating} cvs={cvs} />
             ) : (
               <div className="space-y-6">
                 {analysisResult && (
@@ -332,34 +411,79 @@ export function CoverLetterPage() {
 
                 <div className="space-y-4">
                   <div>
-                    <Label className="text-sm font-medium">Tone: {currentTone}</Label>
+                    <Label className="text-sm font-medium">Tone</Label>
+                    {isViewMode ? (
+                      <Badge variant="outline" className="ml-2">
+                        {currentTone}
+                      </Badge>
+                    ) : (
+                      <Select value={currentTone} onValueChange={setCurrentTone} disabled={isViewMode}>
+                        <SelectTrigger className="w-[180px] mt-1">
+                          <SelectValue placeholder="Select tone" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {tones.map((tone: { id: string; name: string; description: string; example: string }) => (
+                            <SelectItem key={tone.id} value={tone.id}>
+                              {tone.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                   </div>
                   <div>
-                    <Label className="text-sm font-medium">AI-Generated Cover Letter</Label>
+                    <Label className="text-sm font-medium">{isViewMode ? "Cover Letter" : "Edit Cover Letter"}</Label>
                     <Textarea
                       value={generatedLetter}
-                      onChange={(e) => setGeneratedLetter(e.target.value)}
+                      onChange={(e) => !isViewMode && setGeneratedLetter(e.target.value)}
                       className="min-h-[400px] mt-2"
-                      placeholder="Your AI-generated cover letter will appear here..."
+                      placeholder="Your cover letter will appear here..."
+                      readOnly={isViewMode}
                     />
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2">
+                <div className="flex justify-between items-center">
                   <Button
                     variant="outline"
                     onClick={() => {
-                      setShowGenerator(true)
-                      setGeneratedLetter("")
-                      setAnalysisResult(null)
+                      if (isViewMode) {
+                        setIsDialogOpen(false)
+                        setViewingLetter(null)
+                        setIsViewMode(false)
+                      } else {
+                        setShowGenerator(true)
+                        setGeneratedLetter("")
+                        setAnalysisResult(null)
+                        setEditingLetter(null)
+                      }
                     }}
                   >
-                    Back to Generator
+                    {isViewMode ? "Close" : "Back to Generator"}
                   </Button>
-                  <Button onClick={handleSaveLetter} className="bg-gradient-to-r from-purple-600 to-pink-600">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Save AI Cover Letter
-                  </Button>
+
+                  {!isViewMode && (
+                    <Button onClick={handleSaveLetter} className="bg-gradient-to-r from-purple-600 to-pink-600">
+                      <FileText className="h-4 w-4 mr-2" />
+                      {editingLetter ? "Update Cover Letter" : "Save Cover Letter"}
+                    </Button>
+                  )}
+
+                  {isViewMode && viewingLetter && (
+                    <div className="flex gap-2">
+                      <Button variant="outline" onClick={() => handleDownload(viewingLetter)}>
+                        <Download className="h-4 w-4 mr-2" />
+                        Download
+                      </Button>
+                      <Button
+                        onClick={() => handleEdit(viewingLetter)}
+                        className="bg-gradient-to-r from-purple-600 to-pink-600"
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -440,9 +564,7 @@ export function CoverLetterPage() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="default">
-                            AI
-                          </Badge>
+                          <Badge variant="default">AI</Badge>
                         </TableCell>
                         <TableCell>
                           <div className="max-w-xs">
@@ -454,17 +576,48 @@ export function CoverLetterPage() {
                         <TableCell>{new Date(letter.created_at).toLocaleDateString()}</TableCell>
                         <TableCell>
                           <div className="flex gap-1">
-                            <Button variant="ghost" size="sm" onClick={() => handleView(letter)}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleView(letter)
+                              }}
+                              title="View"
+                            >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleEdit(letter)}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleEdit(letter)
+                              }}
+                              title="Edit"
+                            >
                               <Edit className="h-4 w-4" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleDelete(letter)}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleDownload(letter)
+                              }}
+                              title="Download"
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleDelete(letter)
+                              }}
                               className="text-red-600 hover:text-red-700"
+                              title="Delete"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -514,12 +667,15 @@ export function CoverLetterPage() {
                         Created: {new Date(letter.created_at).toLocaleDateString()}
                       </div>
 
-                      <div className="flex gap-2">
+                      <div className="grid grid-cols-3 gap-2 w-full">
                         <Button
                           variant="outline"
                           size="sm"
                           className="flex-1 bg-transparent"
-                          onClick={() => handleView(letter)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleView(letter)
+                          }}
                         >
                           <Eye className="h-4 w-4 mr-1" />
                           View
@@ -528,10 +684,37 @@ export function CoverLetterPage() {
                           variant="outline"
                           size="sm"
                           className="flex-1 bg-transparent"
-                          onClick={() => handleEdit(letter)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleEdit(letter)
+                          }}
                         >
                           <Edit className="h-4 w-4 mr-1" />
                           Edit
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 bg-transparent text-red-600 hover:text-red-700 hover:bg-red-50"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDelete(letter)
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Delete
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 bg-transparent col-span-3"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDownload(letter)
+                          }}
+                        >
+                          <Download className="h-4 w-4 mr-1" />
+                          Download
                         </Button>
                       </div>
                     </div>
