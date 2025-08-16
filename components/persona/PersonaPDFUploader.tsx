@@ -29,6 +29,13 @@ const PDFUploader = ({ onDataExtracted }: PDFUploaderProps) => {
     }
   }, []);
 
+  useEffect(() => {
+    // Automatically extract data when a file is selected and pdfjs is loaded
+    if (file && pdfjs) {
+      extractDataFromPDF();
+    }
+  }, [file, pdfjs]);
+
   const handleFileSelect = (selectedFile: File) => {
     if (selectedFile.type === "application/pdf") {
       setFile(selectedFile);
@@ -56,7 +63,7 @@ const PDFUploader = ({ onDataExtracted }: PDFUploaderProps) => {
     setIsDragOver(false);
   };
 
-const parseExtractedText = (text: string): Partial<Omit<CVData, "id" | "createdAt">> => {
+  const parseExtractedText = (text: string): Partial<Omit<CVData, "id" | "createdAt">> => {
     const data: Omit<CVData, "id" | "createdAt"> = {
       personalInfo: {
         fullName: "",
@@ -256,9 +263,10 @@ const parseExtractedText = (text: string): Partial<Omit<CVData, "id" | "createdA
 
       const parsedData = parseExtractedText(fullText);
       onDataExtracted(parsedData);
+      toast.success("Data extracted successfully!");
     } catch (error) {
       console.error("Error extracting data from PDF:", error);
-      toast("Error extracting data from PDF. Please try again.");
+      toast.error("Error extracting data from PDF. Please try again.");
     } finally {
       setIsExtracting(false);
     }
@@ -290,9 +298,15 @@ const parseExtractedText = (text: string): Partial<Omit<CVData, "id" | "createdA
             <>
               <FileText className="h-3 w-3 text-green-600" />
               <div className="">
-                <p className="text-lg font-medium text-green-700">PDF Uploaded Successfully</p>
-                <p className="text-sm text-muted-foreground">{file.name}</p>
+                <p className="text-xs font-medium text-green-700">PDF Uploaded Successfully</p>
+                <p className="text-xs text-muted-foreground">{file.name}</p>
               </div>
+              {isExtracting && (
+                <div className="mt-2 flex items-center text-sm text-muted-foreground">
+                  <Loader2 className="animate-spin mr-2 h-4 w-4" />
+                  Extracting data...
+                </div>
+              )}
             </>
           ) : (
             <>
@@ -304,27 +318,6 @@ const parseExtractedText = (text: string): Partial<Omit<CVData, "id" | "createdA
           )}
         </div>
       </Card>
-
-      {file && (
-        <div className="text-center">
-          <Button
-            onClick={extractDataFromPDF}
-            disabled={isExtracting || !pdfjs}
-            size="lg"
-            variant="default"
-            className="w-full max-w-sm"
-          >
-            {isExtracting ? (
-              <>
-                <Loader2 className="animate-spin mr-2" />
-                Extracting Data...
-              </>
-            ) : (
-              "Extract Data from PDF"
-            )}
-          </Button>
-        </div>
-      )}
     </div>
   );
 };

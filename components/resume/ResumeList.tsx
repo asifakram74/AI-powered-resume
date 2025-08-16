@@ -56,6 +56,7 @@ import { CVWizard } from "./AddEditResume";
 import { toast } from "sonner";
 
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { Crown,UserCircle } from "lucide-react";
 
 export function ResumePage() {
   const router = useRouter();
@@ -244,15 +245,23 @@ export function ResumePage() {
                       <TableRow key={cv.id}>
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage src="/placeholder.svg" />
-                              <AvatarFallback>
-                                {cv?.title
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")}
-                              </AvatarFallback>
-                            </Avatar>
+                          <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                                                     <AvatarFallback 
+                                                       className={`bg-gradient-to-br ${
+                                                         user?.role === 'admin' 
+                                                           ? 'from-red-500 to-pink-500' 
+                                                           : 'from-blue-600 to-purple-600'
+                                                       } text-white font-semibold`}
+                                                     >
+                                                       {user?.role === 'admin' ? (
+                                                         <Crown className="h-5 w-5" />
+                                                       ) : user?.name ? (
+                                                         user.name.charAt(0).toUpperCase()
+                                                       ) : (
+                                                         <UserCircle className="h-5 w-5" />
+                                                       )}
+                                                     </AvatarFallback>
+                                                   </Avatar>
                             <div>
                               <div className="font-medium">{cv.title}</div>
                             </div>
@@ -335,15 +344,23 @@ export function ResumePage() {
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        <Avatar className="h-12 w-12">
-                          <AvatarImage src="/placeholder.svg" />
-                          <AvatarFallback>
-                            {cv?.title
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
-                          </AvatarFallback>
-                        </Avatar>
+                        <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                                                                            <AvatarFallback 
+                                                                              className={`bg-gradient-to-br ${
+                                                                                user?.role === 'admin' 
+                                                                                  ? 'from-red-500 to-pink-500' 
+                                                                                  : 'from-blue-600 to-purple-600'
+                                                                              } text-white font-semibold`}
+                                                                            >
+                                                                              {user?.role === 'admin' ? (
+                                                                                <Crown className="h-5 w-5" />
+                                                                              ) : user?.name ? (
+                                                                                user.name.charAt(0).toUpperCase()
+                                                                              ) : (
+                                                                                <UserCircle className="h-5 w-5" />
+                                                                              )}
+                                                                            </AvatarFallback>
+                                                                          </Avatar>
                         <div>
                           <CardTitle className="text-lg">{cv.title}</CardTitle>
                         </div>
