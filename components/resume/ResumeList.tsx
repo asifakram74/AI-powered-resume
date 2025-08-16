@@ -1,31 +1,70 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { FileText, Grid, List, Search, TrendingUp, Award, Target, Users, Edit, Trash2, Download, Eye, Plus } from "lucide-react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { getCVs, deleteCV, createCV, updateCV, type CV, CreateCVData } from "@/lib/redux/service/cvService"
-import { useRouter } from "next/navigation"
-import { useAppSelector } from "@/lib/redux/hooks"
-import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog"
-import { CVWizard } from "./AddEditResume"
-import { toast } from "sonner"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  FileText,
+  Grid,
+  List,
+  Search,
+  TrendingUp,
+  Award,
+  Target,
+  Users,
+  Edit,
+  Trash2,
+  Download,
+  Eye,
+  Plus,
+} from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  getCVs,
+  deleteCV,
+  createCV,
+  updateCV,
+  type CV,
+  CreateCVData,
+} from "@/lib/redux/service/cvService";
+import { useRouter } from "next/navigation";
+import { useAppSelector } from "@/lib/redux/hooks";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { CVWizard } from "./AddEditResume";
+import { toast } from "sonner";
 
-import  {ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 export function ResumePage() {
-  const router = useRouter()
-  const [cvs, setCVs] = useState<CV[]>([])
-  const [viewMode, setViewMode] = useState<"grid" | "table">("table")
-  const [searchTerm, setSearchTerm] = useState("")
-  const [isLoading, setIsLoading] = useState(true)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
+  const router = useRouter();
+  const [cvs, setCVs] = useState<CV[]>([]);
+  const [viewMode, setViewMode] = useState<"grid" | "table">("table");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [selectedCV, setSelectedCV] = useState<CV | null>(null);
   const { user } = useAppSelector((state) => state.auth);
   const userId = user?.id;
@@ -33,63 +72,66 @@ export function ResumePage() {
   useEffect(() => {
     const fetchCVs = async () => {
       try {
-        setIsLoading(true)
-        const data = await getCVs(userId?.toString() || '')
-        setCVs(data)
+        setIsLoading(true);
+        const data = await getCVs(userId?.toString() || "");
+        setCVs(data);
       } catch (error) {
-        console.error("Error fetching CVs:", error)
+        console.error("Error fetching CVs:", error);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchCVs()
-  }, [userId])
+    fetchCVs();
+  }, [userId]);
 
   // Delete functionality is now handled directly in the ConfirmDialog component
 
   const handleCreateAICV = (personaId: string) => {
-    router.push(`/create-cv?personaId=${personaId}`)
-  }
+    router.push(`/create-cv?personaId=${personaId}`);
+  };
 
   const handleSaveCV = async (cvData: CreateCVData) => {
     try {
-      const response = await createCV(cvData)
-      setCVs(prev => [response, ...prev])
-      setIsDialogOpen(false)
+      const response = await createCV(cvData);
+      setCVs((prev) => [response, ...prev]);
+      setIsDialogOpen(false);
     } catch (error) {
-      console.error("Error creating CV:", error)
+      console.error("Error creating CV:", error);
     }
-  }
+  };
 
   const handleUpdateCV = async (cvData: CreateCVData) => {
-    if (!selectedCV) return
+    if (!selectedCV) return;
     try {
-      const response = await updateCV(selectedCV.id, cvData)
-      setCVs(prev => prev.map(c => c.id === selectedCV.id ? response : c))
-      setIsEditing(false)
+      const response = await updateCV(selectedCV.id, cvData);
+      setCVs((prev) =>
+        prev.map((c) => (c.id === selectedCV.id ? response : c))
+      );
+      setIsEditing(false);
     } catch (error) {
-      console.error("Error updating CV:", error)
+      console.error("Error updating CV:", error);
     }
-  }
+  };
 
- // In ResumeList.tsx
-const handleEdit = (cv: CV) => {
-  router.push(`/create-cv?cvId=${cv.id}`);
-};
+  // In ResumeList.tsx
+  const handleEdit = (cv: CV) => {
+    router.push(`/create-cv?cvId=${cv.id}`);
+  };
 
   // Filter CVs based on search term
-  const filteredCVs = cvs.filter(cv =>
-    cv.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cv.layout_id.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredCVs = cvs.filter(
+    (cv) =>
+      cv.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cv.layout_id.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (isLoading && cvs.length === 0) {
     return (
       <div className="fixed inset-0 flex justify-center items-center bg-white">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
       </div>
-    )
+    );
   }
 
   return (
@@ -129,8 +171,8 @@ const handleEdit = (cv: CV) => {
             editingCV={selectedCV}
             onSave={handleUpdateCV}
             onCancel={() => {
-              setIsEditing(false)
-              setSelectedCV(null)
+              setIsEditing(false);
+              setSelectedCV(null);
             }}
           />
         </DialogContent>
@@ -144,8 +186,12 @@ const handleEdit = (cv: CV) => {
             <CardContent className="p-4">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-lg font-semibold">Your Resumes ({filteredCVs.length})</h3>
-                  <p className="text-sm text-gray-600">View your professional resumes</p>
+                  <h3 className="text-lg font-semibold">
+                    Your Resumes ({filteredCVs.length})
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    View your professional resumes
+                  </p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
@@ -217,13 +263,33 @@ const handleEdit = (cv: CV) => {
                             {cv.layout_id.replace("-", " ")}
                           </Badge>
                         </TableCell>
-                        <TableCell>{new Date(cv.created_at).toLocaleDateString()}</TableCell>
-                        <TableCell>{new Date(cv.updated_at).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          {new Date(cv.created_at).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          {new Date(cv.updated_at).toLocaleDateString()}
+                        </TableCell>
                         <TableCell>
                           <div className="flex gap-1">
-                            <Button variant="ghost" size="sm" onClick={() => handleEdit(cv)}>
+                            {/* View button */}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEdit(cv)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            {/* Edit button */}
+
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEdit(cv)}
+                            >
                               <Edit className="h-4 w-4" />
                             </Button>
+
+                            {/* Delete button with confirmation */}
                             <ConfirmDialog
                               title={`Delete "${cv.title}"`}
                               description="Are you sure you want to delete this resume? This action cannot be undone."
@@ -232,10 +298,15 @@ const handleEdit = (cv: CV) => {
                               onConfirm={async () => {
                                 try {
                                   await deleteCV(cv.id);
-                                  setCVs(prev => prev.filter(c => c.id !== cv.id));
+                                  setCVs((prev) =>
+                                    prev.filter((c) => c.id !== cv.id)
+                                  );
                                   toast.success("Resume deleted successfully");
                                 } catch (error) {
-                                  console.error("Error deleting resume:", error);
+                                  console.error(
+                                    "Error deleting resume:",
+                                    error
+                                  );
                                   toast.error("Failed to delete resume");
                                 }
                               }}
@@ -249,14 +320,6 @@ const handleEdit = (cv: CV) => {
                                 </Button>
                               }
                             />
-                            {/* <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => router.push(`/create-cv?personaId=${cv.personas_id}&step=template`)}
-                              className="text-blue-600 hover:text-blue-700"
-                            >
-                              Create AI CV
-                            </Button> */}
                           </div>
                         </TableCell>
                       </TableRow>
@@ -297,8 +360,14 @@ const handleEdit = (cv: CV) => {
                       </div>
 
                       <div className="text-xs text-gray-500">
-                        <div>Created: {new Date(cv.created_at).toLocaleDateString()}</div>
-                        <div>Updated: {new Date(cv.updated_at).toLocaleDateString()}</div>
+                        <div>
+                          Created:{" "}
+                          {new Date(cv.created_at).toLocaleDateString()}
+                        </div>
+                        <div>
+                          Updated:{" "}
+                          {new Date(cv.updated_at).toLocaleDateString()}
+                        </div>
                       </div>
 
                       <div className="flex gap-2">
@@ -319,7 +388,9 @@ const handleEdit = (cv: CV) => {
                           onConfirm={async () => {
                             try {
                               await deleteCV(cv.id);
-                              setCVs(prev => prev.filter(c => c.id !== cv.id));
+                              setCVs((prev) =>
+                                prev.filter((c) => c.id !== cv.id)
+                              );
                               toast.success("Resume deleted successfully");
                             } catch (error) {
                               console.error("Error deleting resume:", error);
@@ -352,8 +423,12 @@ const handleEdit = (cv: CV) => {
             <div className="rounded-full bg-gray-100 p-6 mb-4">
               <Search className="h-8 w-8 text-gray-400" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No resumes found</h3>
-            <p className="text-gray-500 mb-4">Try adjusting your search terms</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No resumes found
+            </h3>
+            <p className="text-gray-500 mb-4">
+              Try adjusting your search terms
+            </p>
             <Button variant="outline" onClick={() => setSearchTerm("")}>
               Clear Search
             </Button>
@@ -367,7 +442,9 @@ const handleEdit = (cv: CV) => {
             <div className="rounded-full bg-gray-100 p-6 mb-4">
               <FileText className="h-8 w-8 text-gray-400" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No resumes found</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No resumes found
+            </h3>
             <p className="text-gray-500 mb-4">You don't have any resumes yet</p>
           </CardContent>
         </Card>
@@ -387,8 +464,12 @@ const handleEdit = (cv: CV) => {
                 <Target className="h-4 w-4 text-blue-600" />
               </div>
               <div>
-                <h4 className="font-medium text-gray-900">Tailor Your Resume</h4>
-                <p className="text-sm text-gray-600">Customize your resume for each job application</p>
+                <h4 className="font-medium text-gray-900">
+                  Tailor Your Resume
+                </h4>
+                <p className="text-sm text-gray-600">
+                  Customize your resume for each job application
+                </p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -396,8 +477,12 @@ const handleEdit = (cv: CV) => {
                 <Award className="h-4 w-4 text-green-600" />
               </div>
               <div>
-                <h4 className="font-medium text-gray-900">Highlight Achievements</h4>
-                <p className="text-sm text-gray-600">Focus on quantifiable accomplishments and results</p>
+                <h4 className="font-medium text-gray-900">
+                  Highlight Achievements
+                </h4>
+                <p className="text-sm text-gray-600">
+                  Focus on quantifiable accomplishments and results
+                </p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -405,13 +490,17 @@ const handleEdit = (cv: CV) => {
                 <Users className="h-4 w-4 text-purple-600" />
               </div>
               <div>
-                <h4 className="font-medium text-gray-900">Professional Format</h4>
-                <p className="text-sm text-gray-600">Use clean, professional templates that are ATS-friendly</p>
+                <h4 className="font-medium text-gray-900">
+                  Professional Format
+                </h4>
+                <p className="text-sm text-gray-600">
+                  Use clean, professional templates that are ATS-friendly
+                </p>
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
