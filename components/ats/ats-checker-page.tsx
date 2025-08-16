@@ -165,8 +165,8 @@ export default function ATSCheckerPage() {
                 analysisResult.score >= 80
                   ? "Excellent! Your resume is well-optimized for ATS systems."
                   : analysisResult.score >= 60
-                  ? "Good! Your resume has room for improvement."
-                  : "Needs work. Consider implementing the suggestions below.",
+                    ? "Good! Your resume has room for improvement."
+                    : "Needs work. Consider implementing the suggestions below.",
               bold: true,
             }),
           ],
@@ -250,7 +250,7 @@ export default function ATSCheckerPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 p-6">=
+    <div className="max-w-7xl mx-auto space-y-8 p-6">
       <div className="bg-gradient-to-r from-green-50 to-teal-50 rounded-2xl p-8 text-center">
         <div className="max-w-3xl mx-auto">
           <div className="inline-flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 mb-4 shadow-sm">
@@ -266,12 +266,12 @@ export default function ATSCheckerPage() {
             Get past applicant tracking systems and land more interviews with our
             AI-powered resume analyzer
           </p>
-          
+
           <div className="flex justify-center">
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 shadow-lg hover:shadow-teal-500/20 transition-all duration-300"
                 >
                   <FileCheck className="h-5 w-5 mr-2" />
@@ -383,8 +383,8 @@ export default function ATSCheckerPage() {
                             {analysisResult.score >= 80
                               ? "Excellent! Your resume is well-optimized for ATS systems."
                               : analysisResult.score >= 60
-                              ? "Good! Your resume has room for improvement."
-                              : "Needs work. Consider implementing the suggestions below."}
+                                ? "Good! Your resume has room for improvement."
+                                : "Needs work. Consider implementing the suggestions below."}
                           </p>
                         </CardContent>
                       </Card>

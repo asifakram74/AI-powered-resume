@@ -23,6 +23,7 @@ export type User = {
 export type ProfileResponse = {
   name: string
   email: string
+  phone?: string
   plan_type: string
   status: string
   cvs_count: number
