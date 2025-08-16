@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
+import { Document, Packer, Paragraph } from "docx"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   ArrowLeft,
@@ -798,41 +799,269 @@ export function CVPageClientContent() {
   }
 
   const handleDocxExport = async () => {
-    if (!aiResponse || !persona) {
-      showErrorToast("Export Failed", "No CV data available for export.")
-      return
-    }
-
     try {
-      const cvHTML = document.getElementById("cv-preview-content")?.outerHTML || ""
-      const response = await fetch("/api/export-docx", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ html: cvHTML }),
-      })
-      const result = await response.json()
-      if (result.error) {
-        showErrorToast("Export Failed", "DOCX export is not yet implemented. This feature will be available soon.")
-      } else {
-        const url = window.URL.createObjectURL(
-          new Blob([result.docx], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" }),
-        )
-        const link = document.createElement("a")
-        link.href = url
-        link.download = `${persona?.full_name || "resume"}-cv.docx`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        window.URL.revokeObjectURL(url)
+      if (!aiResponse || !persona) {
+        showErrorToast("Export Failed", "No CV data available for export.");
+        return;
       }
+  
+      // Import docx dynamically to avoid SSR issues
+      const { Document, Paragraph, TextRun, HeadingLevel, Packer } = await import("docx");
+  
+      // Create document sections
+      const sections = [
+        // Personal Info
+        new Paragraph({
+          heading: HeadingLevel.HEADING_1,
+          children: [
+            new TextRun({
+              text: aiResponse.optimizedCV.personalInfo.name,
+              bold: true,
+              size: 28,
+            }),
+          ],
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: aiResponse.optimizedCV.personalInfo.email,
+              size: 22,
+            }),
+          ],
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: aiResponse.optimizedCV.personalInfo.phone,
+              size: 22,
+            }),
+          ],
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: aiResponse.optimizedCV.personalInfo.location,
+              size: 22,
+            }),
+          ],
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: aiResponse.optimizedCV.personalInfo.linkedin,
+              size: 22,
+            }),
+          ],
+        }),
+        new Paragraph({ text: "" }), // Empty paragraph for spacing
+  
+        // Summary
+        new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          children: [
+            new TextRun({
+              text: "Professional Summary",
+              bold: true,
+              size: 24,
+            }),
+          ],
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: aiResponse.optimizedCV.summary,
+              size: 22,
+            }),
+          ],
+        }),
+        new Paragraph({ text: "" }),
+  
+        // Work Experience
+        new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          children: [
+            new TextRun({
+              text: "Work Experience",
+              bold: true,
+              size: 24,
+            }),
+          ],
+        }),
+        ...aiResponse.optimizedCV.workExperience.flatMap((exp) => [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `${exp.title} at ${exp.company}`,
+                bold: true,
+                size: 22,
+              }),
+            ],
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: exp.duration,
+                italics: true,
+                size: 20,
+              }),
+            ],
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: exp.description,
+                size: 22,
+              }),
+            ],
+          }),
+          new Paragraph({ text: "" }),
+        ]),
+  
+        // Education
+        new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          children: [
+            new TextRun({
+              text: "Education",
+              bold: true,
+              size: 24,
+            }),
+          ],
+        }),
+        ...aiResponse.optimizedCV.education.flatMap((edu) => [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `${edu.degree} - ${edu.institution}`,
+                bold: true,
+                size: 22,
+              }),
+            ],
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `${edu.year} | GPA: ${edu.gpa}`,
+                size: 20,
+              }),
+            ],
+          }),
+          new Paragraph({ text: "" }),
+        ]),
+  
+        // Skills
+        new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          children: [
+            new TextRun({
+              text: "Skills",
+              bold: true,
+              size: 24,
+            }),
+          ],
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: aiResponse.optimizedCV.skills.join(", "),
+              size: 22,
+            }),
+          ],
+        }),
+        new Paragraph({ text: "" }),
+  
+        // Projects
+        new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          children: [
+            new TextRun({
+              text: "Projects",
+              bold: true,
+              size: 24,
+            }),
+          ],
+        }),
+        ...aiResponse.optimizedCV.projects.flatMap((proj) => [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: proj.name,
+                bold: true,
+                size: 22,
+              }),
+            ],
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: proj.description,
+                size: 22,
+              }),
+            ],
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `Technologies: ${proj.technologies.join(", ")}`,
+                size: 20,
+              }),
+            ],
+          }),
+          new Paragraph({ text: "" }),
+        ]),
+  
+        // Certifications
+        aiResponse.optimizedCV.certifications.length > 0
+          ? new Paragraph({
+              heading: HeadingLevel.HEADING_2,
+              children: [
+                new TextRun({
+                  text: "Certifications",
+                  bold: true,
+                  size: 24,
+                }),
+              ],
+            })
+          : null,
+        ...aiResponse.optimizedCV.certifications.flatMap((cert) => [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: cert,
+                size: 22,
+              }),
+            ],
+          }),
+        ]),
+      ].filter(Boolean); // Remove null sections
+  
+      // Filter out any null values from sections and ensure they are Paragraph objects
+      const validSections = sections.filter((section): section is InstanceType<typeof Paragraph> => section !== null);
+      
+      const doc = new Document({
+        sections: [
+          {
+            properties: {},
+            children: validSections,
+          },
+        ],
+      });
+  
+      // Generate blob and download
+      const blob = await Packer.toBlob(doc);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${persona.full_name || "CV"}_${new Date().toISOString().split("T")[0]}.docx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("Error exporting as DOCX:", error)
-      showErrorToast("Export Failed", "Unable to export as DOCX. Please try again.")
+      console.error("Error generating DOCX:", error);
+      showErrorToast("Export Failed", "Unable to generate DOCX file. Please try again.");
     }
-  }
-
+  };
   const handleSaveCV = async () => {
     if (!aiResponse || !selectedTemplate || !persona || !user?.id) {
       showErrorToast("Save Failed", "Missing required data. Please regenerate your CV and try again.")

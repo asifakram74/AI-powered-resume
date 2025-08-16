@@ -31,7 +31,6 @@ interface ProfileFormData {
   name: string
   email: string
   plan_type?: string
-  status?: string
 }
 
 export function ProfilePage() {
@@ -54,7 +53,6 @@ export function ProfilePage() {
       name: profile?.name || '',
       email: profile?.email || '',
       plan_type: profile?.plan_type || 'Free',
-      status: profile?.status || 'active',
     }
   })
 
@@ -115,7 +113,6 @@ export function ProfilePage() {
         name: profile.name,
         email: profile.email,
         plan_type: profile.plan_type,
-        status: profile.status,
       })
     }
   }, [profile, reset])
@@ -124,7 +121,6 @@ export function ProfilePage() {
     try {
       await dispatch(updateProfile({
         name: data.name,
-        email: data.email,
       })).unwrap()
       await dispatch(fetchProfile()).unwrap()
       showSuccessToast("Profile updated successfully")
@@ -248,10 +244,6 @@ export function ProfilePage() {
                   <Label className="text-sm font-mediumfont-bold text-gray-900 dark:text-white">Account Type</Label>
                   <p  className="text-sm font-medium capitalize text-gray-500">{profile.plan_type || 'Free'}</p>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-mediumfont-bold text-gray-900 dark:text-white">Account Status</Label>
-                  <p  className="text-sm font-medium capitalize text-gray-500">{profile.status}</p>
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -286,7 +278,6 @@ export function ProfilePage() {
             name: profile?.name || '',
             email: profile?.email || '',
             plan_type: profile?.plan_type || 'Free',
-            status: profile?.status || 'active',
           });
         }
         setShowEditModal(open);
@@ -338,11 +329,6 @@ export function ProfilePage() {
                 <Label>Account Type</Label>
                 <Input value={profile?.plan_type || 'Free'} disabled />
               </div>
-
-              {/* <div className="space-y-2">
-                <Label>Account Status</Label>
-                <Input value={profile?.status || 'active'} disabled />
-              </div> */}
             </div>
 
             <DialogFooter>
@@ -354,7 +340,6 @@ export function ProfilePage() {
                     name: profile?.name || '',
                     email: profile?.email || '',
                     plan_type: profile?.plan_type || 'Free',
-                    status: profile?.status || 'active',
                   });
                   setShowEditModal(false);
                 }}
