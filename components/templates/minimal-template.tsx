@@ -23,7 +23,7 @@ export function MinimalTemplate({ data, isPreview = false }: MinimalTemplateProp
             {data.personalInfo.email} • {data.personalInfo.phone}
           </p>
           <p>
-            {data.personalInfo.city}, {data.personalInfo.country}
+            {data.personalInfo.city} {data.personalInfo.country}
             {data.personalInfo.address && ` • ${data.personalInfo.address}`}
           </p>
         </div>

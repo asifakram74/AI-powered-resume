@@ -73,12 +73,20 @@ export function CreativeTemplate({ data, isPreview = false }: CreativeTemplatePr
                 <Phone className="w-5 h-5" />
                 <span>{data.personalInfo.phone}</span>
               </div>
-              <div className="flex items-center gap-3">
-                <MapPin className="w-5 h-5" />
-                <span>
-                  {data.personalInfo.city}, {data.personalInfo.country}
-                </span>
-              </div>
+              <div className="flex items-start gap-3">
+  <MapPin className="w-5 h-5 mt-0.5" />
+  <div>
+    <span>
+      {data.personalInfo.city}{data.personalInfo.city && data.personalInfo.country ? ' ' : ''}
+      {data.personalInfo.country}
+    </span>
+    {data.personalInfo.address && (
+      <div className="text-sm text-gray-100 mt-1">
+        {data.personalInfo.address}
+      </div>
+    )}
+  </div>
+</div>
             </div>
           </div>
         </div>

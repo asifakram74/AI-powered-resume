@@ -471,6 +471,16 @@ export function CreatePersonaPage() {
             </Button>
           </DialogTrigger>
           <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {editingPersona ? 'Edit Persona' : 'Create New Persona'}
+              </DialogTitle>
+              <DialogDescription>
+                {editingPersona 
+                  ? 'Update the persona details below.'
+                  : 'Create a new persona by filling in the details below.'}
+              </DialogDescription>
+            </DialogHeader>
             {!showForm ? (
               <PersonaCreationOptions onOptionSelect={handleOptionSelect} />
             ) : (

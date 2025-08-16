@@ -259,7 +259,7 @@ export function PersonaForm({
           ...prev.languages,
           {
             ...currentLanguage,
-            id: Date.now().toString(),
+            id: crypto.randomUUID(),
           },
         ],
       }));
@@ -885,9 +885,20 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             <div className="space-y-2">
               <Label>Added Languages:</Label>
               <div className="flex flex-wrap gap-2">
-                {formData.languages.map((lang) => (
-                  <Badge key={lang.id} variant="secondary">
+                {formData.languages.map((lang, index) => (
+                  <Badge 
+                    key={`${lang.name}-${lang.proficiency}-${index}`} 
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
                     {lang.name} ({lang.proficiency})
+                    <button
+                      type="button"
+                      onClick={() => removeLanguage(lang.id)}
+                      className="ml-1.5 rounded-full bg-white/20 p-0.5 hover:bg-white/30"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
                   </Badge>
                 ))}
               </div>
