@@ -20,7 +20,6 @@ export const PDFUploader = ({
   className 
 }: PDFUploaderProps) => {
   const [file, setFile] = useState<File | null>(null);
-  const [isExtracting, setIsExtracting] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [pdfjs, setPdfjs] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -35,12 +34,42 @@ export const PDFUploader = ({
     }
   }, []);
 
-  const handleFileSelect = (selectedFile: File) => {
+  const extractTextFromPDF = async (pdfFile: File) => {
+    if (!pdfjs) return "";
+    
+    try {
+      const arrayBuffer = await pdfFile.arrayBuffer();
+      const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+      let fullText = "";
+
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items
+          .map((item: any) => item.str)
+          .join(" ");
+        fullText += pageText + "\n";
+      }
+
+      return fullText;
+    } catch (error) {
+      console.error("Error extracting text from PDF:", error);
+      toast.error("Error extracting text from PDF. Please try again.");
+      return "";
+    }
+  };
+
+  const handleFileSelect = async (selectedFile: File) => {
     if (selectedFile.type === "application/pdf") {
       setFile(selectedFile);
       onFileUploaded(selectedFile);
+      // Automatically extract text when file is selected
+      const extractedText = await extractTextFromPDF(selectedFile);
+      if (extractedText) {
+        onExtractedText(extractedText);
+      }
     } else {
-      toast("Please select a PDF file");
+      toast.error("Please select a PDF file");
     }
   };
 
@@ -66,33 +95,6 @@ export const PDFUploader = ({
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
-  };
-
-  const extractTextFromPDF = async () => {
-    if (!file || !pdfjs) return;
-
-    setIsExtracting(true);
-    try {
-      const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
-      let fullText = "";
-
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const textContent = await page.getTextContent();
-        const pageText = textContent.items
-          .map((item: any) => item.str)
-          .join(" ");
-        fullText += pageText + "\n";
-      }
-
-      onExtractedText(fullText);
-    } catch (error) {
-      console.error("Error extracting text from PDF:", error);
-      toast("Error extracting text from PDF. Please try again.");
-    } finally {
-      setIsExtracting(false);
-    }
   };
 
   return (
@@ -149,23 +151,6 @@ export const PDFUploader = ({
           )}
         </div>
       </Card>
-
-      {file && (
-        <Button
-          onClick={extractTextFromPDF}
-          disabled={isExtracting || !pdfjs}
-          className="w-full"
-        >
-          {isExtracting ? (
-            <>
-              <Loader2 className="animate-spin mr-2 h-4 w-4" />
-              Extracting Text...
-            </>
-          ) : (
-            "Extract Text from PDF"
-          )}
-        </Button>
-      )}
     </div>
   );
 };

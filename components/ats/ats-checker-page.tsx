@@ -301,14 +301,14 @@ export default function ATSCheckerPage() {
                           onExtractedText={setExtractedText}
                           onFileUploaded={setResumeFile}
                         />
-                        {extractedText && (
+                        {/* {extractedText && (
                           <div className="mt-4 p-3 bg-gray-50 rounded text-sm text-gray-600">
                             <p>
                               Text extracted from resume ({extractedText.length}{" "}
                               characters)
                             </p>
                           </div>
-                        )}
+                        )} */}
                       </CardContent>
                     </Card>
 
@@ -590,7 +590,7 @@ export default function ATSCheckerPage() {
       </div>
 
       {/* Tips Section */}
-      <Card className="border-0 shadow-lg">
+      {/* <Card className="border-0 shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-2xl">
             <TrendingUp className="h-6 w-6 text-teal-600" />
@@ -643,10 +643,10 @@ export default function ATSCheckerPage() {
             </div>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* CTA Section */}
-      <div className="text-center py-8">
+      {/* <div className="text-center py-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">
           Ready to Optimize Your Resume?
         </h2>
@@ -665,7 +665,7 @@ export default function ATSCheckerPage() {
             </Button>
           </DialogTrigger>
         </Dialog>
-      </div>
+      </div> */}
     </div>
   );
 }
