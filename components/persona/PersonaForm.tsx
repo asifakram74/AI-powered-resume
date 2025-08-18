@@ -251,6 +251,13 @@ export function PersonaForm({
     }
   };
 
+  const removeLanguage = (id: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      languages: prev.languages.filter((lang) => lang.id !== id),
+    }));
+  };
+
   const addLanguage = () => {
     if (currentLanguage.name) {
       setFormData((prev) => ({
