@@ -170,25 +170,67 @@ export function CoverLetterGenerator({ onGenerate, isGenerating }: CoverLetterGe
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Job Description
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <Label>Paste the job description here *</Label>
-            <Textarea
-              value={jobDescription}
-              onChange={(e) => setJobDescription(e.target.value)}
-              placeholder="Paste the complete job description, including requirements, responsibilities, and company information..."
-              className="min-h-[200px] resize-none"
-            />
-            <p className="text-sm text-gray-500">Include as much detail as possible for a more tailored cover letter</p>
-          </div>
-        </CardContent>
-      </Card>
+  <CardHeader>
+    <CardTitle className="flex items-center gap-2">
+      <FileText className="h-5 w-5" />
+      Job Description
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+  <div className="space-y-2">
+  <Label>Paste the job description here *</Label>
+  <Textarea
+    value={jobDescription}
+    onChange={(e) => setJobDescription(e.target.value)}
+    placeholder="Paste the complete job description, including requirements, responsibilities, and company information..."
+    className="min-h-[200px] resize-none"
+  />
+  <p className="text-sm text-gray-500">
+    Include as much detail as possible for a more tailored cover letter
+  </p>
+
+  {/* Validation errors */}
+  {jobDescription.trim() && (() => {
+    const input = jobDescription.trim();
+
+    if (input.length < 30) {
+      return (
+        <p className="text-sm text-red-600">
+          Job description must be at least 30 characters.
+        </p>
+      );
+    }
+
+    if (input.split(/\s+/).length < 3) {
+      return (
+        <p className="text-sm text-red-600">
+          Please provide at least 3 words.
+        </p>
+      );
+    }
+
+    if (/^[0-9\s]+$/.test(input)) {
+      return (
+        <p className="text-sm text-red-600">
+          Job description cannot be only numbers.
+        </p>
+      );
+    }
+
+    if (/^[^a-zA-Z0-9]+$/.test(input)) {
+      return (
+        <p className="text-sm text-red-600">
+          Job description cannot be only special characters.
+        </p>
+      );
+    }
+
+    return null; // ✅ valid
+  })()}
+</div>
+
+  </CardContent>
+</Card>
 
       <Card>
         <CardHeader>

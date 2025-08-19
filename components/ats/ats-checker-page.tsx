@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -37,6 +38,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  
 } from "@/components/ui/dialog";
 import * as htmlToImage from "html-to-image";
 import { jsPDF } from "jspdf";
@@ -320,12 +322,44 @@ export default function ATSCheckerPage() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <Textarea
-                          value={jobDescription}
-                          onChange={(e) => setJobDescription(e.target.value)}
-                          placeholder="Paste the job description here..."
-                          className="min-h-[200px]"
-                        />
+                      <div className="space-y-2">
+  <Label>Paste the job description here *</Label>
+  <Textarea
+    value={jobDescription}
+    onChange={(e) => setJobDescription(e.target.value)}
+    placeholder="Paste the complete job description, including requirements, responsibilities, and company information..."
+    className="min-h-[200px] resize-none"
+  />
+  <p className="text-sm text-gray-500">
+    Include as much detail as possible for a more tailored cover letter
+  </p>
+
+  {/* Validation errors */}
+  {jobDescription.trim().length > 0 && (() => {
+    const input = jobDescription.trim();
+
+    if (input.length < 30) {
+      return <p className="text-sm text-red-600">Job description must be at least 30 characters long.</p>;
+    }
+
+    if (input.split(/\s+/).length < 3) {
+      return <p className="text-sm text-red-600">Please provide at least 3 words.</p>;
+    }
+
+    // ❌ Block only if the whole input is just numbers
+    if (/^\d+$/.test(input)) {
+      return <p className="text-sm text-red-600">Job description cannot be only numbers.</p>;
+    }
+
+    // ❌ Block only if the whole input is just special characters
+    if (/^[^a-zA-Z0-9]+$/.test(input)) {
+      return <p className="text-sm text-red-600">Job description cannot be only special characters.</p>;
+    }
+
+    return null; // ✅ valid
+  })()}
+</div>
+
                       </CardContent>
                     </Card>
 

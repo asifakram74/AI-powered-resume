@@ -296,15 +296,46 @@ export function CVWizard({
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="job_description">Job Description</Label>
-              <Textarea
-                id="job_description"
-                {...register("job_description")}
-                placeholder="Enter the job description..."
-                className="min-h-[200px]"
-                rows={10}
-              />
-            </div>
+  <Label htmlFor="job_description">Job Description *</Label>
+  <Textarea
+    id="job_description"
+    {...register("job_description", {
+      required: "Job description is required",
+      validate: (value) => {
+        // Trim spaces
+        const input = value.trim();
+
+        // Minimum length check
+        if (input.length < 30) {
+          return "Job description must be at least 30 characters long.";
+        }
+
+        // Word count check
+        if (input.split(/\s+/).length < 3) {
+          return "Please provide a more detailed job description (at least 3 words).";
+        }
+
+        // Regex: reject ONLY numbers or ONLY special chars
+        const onlyNumbers = /^[0-9\s]+$/.test(input);
+        const onlySymbols = /^[^a-zA-Z0-9]+$/.test(input);
+        if (onlyNumbers || onlySymbols) {
+          return "Invalid job description. Please provide meaningful text.";
+        }
+
+        return true; // ✅ valid input
+      },
+    })}
+    placeholder="Enter the job description..."
+    className="min-h-[200px]"
+    rows={10}
+  />
+  {errors.job_description && (
+    <p className="text-sm text-red-600">
+      {errors.job_description.message}
+    </p>
+  )}
+</div>
+
           </CardContent>
         </Card>
         <div className="flex justify-end gap-2 pt-4 border-t">
