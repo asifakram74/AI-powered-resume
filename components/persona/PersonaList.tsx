@@ -444,7 +444,7 @@ export function CreatePersonaPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 text-white">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg resumaic-gradient-green text-white">
             <Sparkles className="h-6 w-6" />
           </div>
           <div>
@@ -460,7 +460,7 @@ export function CreatePersonaPage() {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              className="resumaic-gradient-green  hover:opacity-90  hover-lift button-press "
               onClick={() => {
                 setShowForm(false);
                 setPrefilledData(null);
@@ -568,21 +568,22 @@ export function CreatePersonaPage() {
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
-                                                     <AvatarFallback 
-                                                       className={`bg-gradient-to-br ${
-                                                         user?.role === 'admin' 
-                                                           ? 'from-red-500 to-pink-500' 
-                                                           : 'from-blue-600 to-purple-600'
-                                                       } text-white font-semibold`}
-                                                     >
-                                                       {user?.role === 'admin' ? (
-                                                         <Crown className="h-5 w-5" />
-                                                       ) : user?.name ? (
-                                                         user.name.charAt(0).toUpperCase()
-                                                       ) : (
-                                                         <UserCircle className="h-5 w-5" />
-                                                       )}
-                                                     </AvatarFallback>
+                            <AvatarFallback
+  className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${
+    user?.role === 'admin'
+      ? ''
+      : 'bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]'
+  }`}
+>
+  {user?.role === 'admin' ? (
+    <Crown className="h-5 w-5 text-[#EA580C]" /> // Orange crown for admin
+  ) : user?.name ? (
+    user.name.charAt(0).toUpperCase()
+  ) : (
+    <UserCircle className="h-5 w-5 text-[#70E4A8]" />
+  )}
+</AvatarFallback>
+
                                                    </Avatar>
                             <div>
                               <div className="font-medium">
@@ -696,21 +697,22 @@ export function CreatePersonaPage() {
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
-                          <AvatarFallback 
-                            className={`bg-gradient-to-br ${
-                              user?.role === 'admin' 
-                                ? 'from-red-500 to-pink-500' 
-                                : 'from-blue-600 to-purple-600'
-                            } text-white font-semibold`}
-                          >
-                            {user?.role === 'admin' ? (
-                              <Crown className="h-5 w-5" />
-                            ) : user?.name ? (
-                              user.name.charAt(0).toUpperCase()
-                            ) : (
-                              <UserCircle className="h-5 w-5" />
-                            )}
-                          </AvatarFallback>
+                      <AvatarFallback
+  className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${
+    user?.role === 'admin'
+      ? ''
+      : 'bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]'
+  }`}
+>
+  {user?.role === 'admin' ? (
+    <Crown className="h-5 w-5 text-[#EA580C]" /> // Orange crown for admin
+  ) : user?.name ? (
+    user.name.charAt(0).toUpperCase()
+  ) : (
+    <UserCircle className="h-5 w-5 text-[#70E4A8]" />
+  )}
+</AvatarFallback>
+
                         </Avatar>
                         <div>
                           <CardTitle className="text-lg">
@@ -889,55 +891,84 @@ export function CreatePersonaPage() {
       )}
 
       {/* Quick Tips */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            Pro Tips
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="flex items-start gap-3">
-              <div className="rounded-full bg-blue-100 p-2">
-                <User className="h-4 w-4 text-blue-600" />
-              </div>
-              <div>
-                <h4 className="font-medium text-gray-900">
-                  Complete Information
-                </h4>
-                <p className="text-sm text-gray-600">
-                  Fill in all sections for the most comprehensive persona
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="rounded-full bg-green-100 p-2">
-                <Briefcase className="h-4 w-4 text-green-600" />
-              </div>
-              <div>
-                <h4 className="font-medium text-gray-900">
-                  Detailed Experience
-                </h4>
-                <p className="text-sm text-gray-600">
-                  Include specific responsibilities and achievements
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="rounded-full bg-purple-100 p-2">
-                <Target className="h-4 w-4 text-purple-600" />
-              </div>
-              <div>
-                <h4 className="font-medium text-gray-900">Relevant Skills</h4>
-                <p className="text-sm text-gray-600">
-                  Focus on skills that match your career goals
-                </p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <Card className="animate-slide-up-delay-3 hover:shadow-lg transition-all duration-300">
+  <CardHeader>
+    <CardTitle className="flex items-center gap-3 font-rubik text-[#2D3639]">
+      <div className="p-2 bg-gradient-to-br from-[#70E4A8] to-[#EA580C] rounded-lg">
+        <TrendingUp className="h-5 w-5 text-white" />
+      </div>
+      Pro Tips
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      
+      {/* Tip 1 */}
+      <div
+        className="flex items-start gap-4 animate-fade-in-stagger"
+        style={{ animationDelay: "100ms" }}
+      >
+        <div
+          className="rounded-full bg-[#70E4A8]/20 p-3 animate-float"
+          style={{ animationDelay: "0s" }}
+        >
+          <User className="h-5 w-5 text-[#70E4A8]" />
+        </div>
+        <div>
+          <h4 className="font-semibold text-[#2D3639] font-rubik">
+            Complete Information
+          </h4>
+          <p className="text-sm text-gray-600 font-inter">
+            Fill in all sections for the most comprehensive persona
+          </p>
+        </div>
+      </div>
+
+      {/* Tip 2 */}
+      <div
+        className="flex items-start gap-4 animate-fade-in-stagger"
+        style={{ animationDelay: "200ms" }}
+      >
+        <div
+          className="rounded-full bg-[#EA580C]/20 p-3 animate-float"
+          style={{ animationDelay: "0.5s" }}
+        >
+          <Briefcase className="h-5 w-5 text-[#EA580C]" />
+        </div>
+        <div>
+          <h4 className="font-semibold text-[#2D3639] font-rubik">
+            Detailed Experience
+          </h4>
+          <p className="text-sm text-gray-600 font-inter">
+            Include specific responsibilities and achievements
+          </p>
+        </div>
+      </div>
+
+      {/* Tip 3 */}
+      <div
+        className="flex items-start gap-4 animate-fade-in-stagger"
+        style={{ animationDelay: "300ms" }}
+      >
+        <div
+          className="rounded-full bg-blue-100 p-3 animate-float"
+          style={{ animationDelay: "1s" }}
+        >
+          <Target className="h-5 w-5 text-blue-600" />
+        </div>
+        <div>
+          <h4 className="font-semibold text-[#2D3639] font-rubik">
+            Relevant Skills
+          </h4>
+          <p className="text-sm text-gray-600 font-inter">
+            Focus on skills that match your career goals
+          </p>
+        </div>
+      </div>
+    </div>
+  </CardContent>
+</Card>
+
     </div>
   );
 }

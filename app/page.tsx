@@ -1,12 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import Image from "next/image";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,6 +33,7 @@ import {
   Download,
   Users,
 } from "lucide-react"
+import Image from "next/image"
 
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
 import { logoutUser } from "@/lib/redux/slices/authSlice"
@@ -205,6 +204,26 @@ export default function HomePage() {
   const dispatch = useAppDispatch()
   const { user } = useAppSelector((state) => state.auth)
 
+  useEffect(() => {
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: "0px 0px -50px 0px",
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("in-view")
+        }
+      })
+    }, observerOptions)
+
+    const animateElements = document.querySelectorAll(".scroll-animate")
+    animateElements.forEach((el) => observer.observe(el))
+
+    return () => observer.disconnect()
+  }, [])
+
   const handleLogout = async () => {
     await dispatch(logoutUser())
     window.location.href = "/"
@@ -213,24 +232,36 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-white font-sans">
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-lg border-b border-gray-100 shadow-sm">
+      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-lg border-b border-gray-100 shadow-sm animate-fade-in">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
+            <div className="flex items-center gap-3 animate-slide-up">
             <div className="flex items-center gap-3">
             <Link href="/" >
                 <Image src="/Resumic.png" alt="Logo" width={200} height= {90}  className="cursor-pointer"/>
             </Link>
             </div>
 
+            </div>
+
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-[#2D3639] hover:text-[#70E4A8] transition-colors font-medium">
+            <div className="hidden md:flex items-center space-x-8 animate-slide-up stagger-2">
+              <a
+                href="#features"
+                className="text-[#2D3639] hover:text-[#70E4A8] transition-all duration-300 font-medium hover:scale-105"
+              >
                 Features
               </a>
-              <a href="#pricing" className="text-[#2D3639] hover:text-[#70E4A8] transition-colors font-medium">
+              <a
+                href="#pricing"
+                className="text-[#2D3639] hover:text-[#70E4A8] transition-all duration-300 font-medium hover:scale-105"
+              >
                 Pricing
               </a>
-              <a href="#testimonials" className="text-[#2D3639] hover:text-[#70E4A8] transition-colors font-medium">
+              <a
+                href="#testimonials"
+                className="text-[#2D3639] hover:text-[#70E4A8] transition-all duration-300 font-medium hover:scale-105"
+              >
                 Success Stories
               </a>
 
@@ -239,15 +270,15 @@ export default function HomePage() {
                   {/* User Dropdown */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
-                        <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-[#70E4A8] transition-colors">
+                      <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 hover-lift">
+                        <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-[#70E4A8] transition-all duration-300">
                           <AvatarFallback
                             className={`${
                               user?.role === "admin" ? "bg-[#EA580C]" : "resumaic-gradient-green"
                             } text-white font-semibold`}
                           >
                             {user?.role === "admin" ? (
-                              <Settings className="h-5 w-5" />
+                              <Settings className="h-5 w-5 animate-bounce-subtle" />
                             ) : user?.name ? (
                               user.name.charAt(0).toUpperCase()
                             ) : (
@@ -257,7 +288,7 @@ export default function HomePage() {
                         </Avatar>
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-64 p-2" align="end" forceMount>
+                    <DropdownMenuContent className="w-64 p-2 animate-scale-in" align="end" forceMount>
                       <DropdownMenuLabel className="font-normal">
                         <div className="flex flex-col space-y-1">
                           <p className="text-sm font-medium leading-none">{user?.name || "User"}</p>
@@ -309,7 +340,10 @@ export default function HomePage() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                   <Link href="/dashboard">
-                    <Button size="sm" className="resumaic-gradient-green text-white hover:opacity-90 shadow-lg">
+                    <Button
+                      size="sm"
+                      className="resumaic-gradient-green text-white hover:opacity-90 shadow-lg hover-lift button-press "
+                    >
                       Dashboard
                     </Button>
                   </Link>
@@ -317,12 +351,15 @@ export default function HomePage() {
               ) : (
                 <div className="flex items-center space-x-4">
                   <Link href="/auth/signin">
-                    <Button variant="ghost" size="sm" className="text-[#2D3639] hover:text-[#70E4A8]">
+                    <Button variant="ghost" size="sm" className="text-[#2D3639] hover:text-[#70E4A8] hover-lift">
                       Sign In
                     </Button>
                   </Link>
                   <Link href="/auth/signup">
-                    <Button size="sm" className="resumaic-gradient-green text-white hover:opacity-90 shadow-lg">
+                    <Button
+                      size="sm"
+                      className="resumaic-gradient-green text-white hover:opacity-90 shadow-lg hover-lift button-press animate-pulse-glow"
+                    >
                       Get Started
                     </Button>
                   </Link>
@@ -332,7 +369,12 @@ export default function HomePage() {
 
             {/* Mobile menu button */}
             <div className="md:hidden">
-              <Button variant="ghost" size="sm" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="hover-lift"
+              >
                 {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </Button>
             </div>
@@ -340,7 +382,7 @@ export default function HomePage() {
 
           {/* Mobile Navigation */}
           {mobileMenuOpen && (
-            <div className="md:hidden py-4 border-t border-gray-200">
+            <div className="md:hidden py-4 border-t border-gray-200 animate-slide-up">
               <div className="flex flex-col space-y-4">
                 <a href="#features" className="text-gray-600 hover:text-gray-900">
                   Features
@@ -355,7 +397,7 @@ export default function HomePage() {
                 {/* Mobile User Section */}
                 <div className="pt-4 border-t border-gray-200">
                   <div className="flex items-center gap-3 mb-4">
-                    <Avatar className="h-8 w-8">
+                    <Avatar className="h-8 w-8 hover-lift">
                       <AvatarImage src="/placeholder.svg?height=32&width=32" alt="User" />
                       <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white text-sm">
                         {user?.name?.charAt(0) || "U"}
@@ -398,40 +440,40 @@ export default function HomePage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-green-50 via-white to-orange-50">
-        <div className="absolute inset-0 bg-[url('/abstract-geometric-pattern.png')] opacity-5"></div>
+      <section className="relative overflow-hidden bg-gradient-to-br from-green-50 via-white to-orange-50 animated-gradient">
+        <div className="absolute inset-0 bg-[url('/abstract-geometric-pattern.png')] opacity-5 animate-float"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 relative">
           <div className="text-center">
-            <Badge className="mb-6 bg-[#70E4A8]/10 text-[#2D3639] border-[#70E4A8]/20 hover:bg-[#70E4A8]/20">
-              <Sparkles className="h-3 w-3 mr-1" />
+            <Badge className="mb-6 bg-[#70E4A8]/10 text-[#2D3639] border-[#70E4A8]/20 hover:bg-[#70E4A8]/20 animate-slide-up hover-lift">
+              <Sparkles className="h-3 w-3 mr-1 animate-bounce-subtle" />
               Powered by Advanced AI Technology
             </Badge>
 
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold font-serif text-[#2D3639] mb-6 leading-tight">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold font-serif text-[#2D3639] mb-6 leading-tight animate-slide-up stagger-1">
               Build Your Dream
-              <span className="resumaic-text-gradient block">Career Story</span>
+              <span className="resumaic-text-gradient block animate-slide-up stagger-2">Career Story</span>
               with AI-Powered Resumes
             </h1>
 
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed animate-slide-up stagger-3">
               Transform your career with intelligent resume building. Our AI creates professional, ATS-optimized resumes
               that get you noticed by top employers and land more interviews.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16 animate-slide-up stagger-4">
               <Link href="/dashboard">
                 <Button
                   size="lg"
-                  className="resumaic-gradient-green text-white hover:opacity-90 text-lg px-8 py-4 shadow-xl"
+                  className="resumaic-gradient-green text-white hover:opacity-90 text-lg px-8 py-4 shadow-xl hover-lift button-press animate-pulse-glow"
                 >
                   Start Building Free
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="ml-2 h-5 w-5 animate-bounce-subtle" />
                 </Button>
               </Link>
               <Button
                 variant="outline"
                 size="lg"
-                className="text-lg px-8 py-4 border-2 border-[#70E4A8] text-[#2D3639] hover:bg-[#70E4A8] hover:text-white bg-transparent"
+                className="text-lg px-8 py-4 border-2 border-[#70E4A8] text-[#2D3639] hover:bg-[#70E4A8] hover:text-white bg-transparent hover-lift button-press"
               >
                 <Download className="mr-2 h-5 w-5" />
                 View Sample Resume
@@ -439,21 +481,21 @@ export default function HomePage() {
             </div>
 
             {/* Enhanced Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
-              <div className="text-center p-4 rounded-xl bg-white/60 backdrop-blur-sm shadow-lg">
-                <div className="text-3xl font-bold text-[#2D3639] font-serif">150K+</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto animate-slide-up stagger-5">
+              <div className="text-center p-4 rounded-xl bg-white/60 backdrop-blur-sm shadow-lg hover-lift scroll-animate">
+                <div className="text-3xl font-bold text-[#2D3639] font-serif animate-bounce-subtle">150K+</div>
                 <div className="text-sm text-gray-600 font-medium">Resumes Created</div>
               </div>
-              <div className="text-center p-4 rounded-xl bg-white/60 backdrop-blur-sm shadow-lg">
-                <div className="text-3xl font-bold text-[#2D3639] font-serif">98%</div>
+              <div className="text-center p-4 rounded-xl bg-white/60 backdrop-blur-sm shadow-lg hover-lift scroll-animate stagger-1">
+                <div className="text-3xl font-bold text-[#2D3639] font-serif animate-bounce-subtle">98%</div>
                 <div className="text-sm text-gray-600 font-medium">ATS Success Rate</div>
               </div>
-              <div className="text-center p-4 rounded-xl bg-white/60 backdrop-blur-sm shadow-lg">
-                <div className="text-3xl font-bold text-[#2D3639] font-serif">4.9★</div>
+              <div className="text-center p-4 rounded-xl bg-white/60 backdrop-blur-sm shadow-lg hover-lift scroll-animate stagger-2">
+                <div className="text-3xl font-bold text-[#2D3639] font-serif animate-bounce-subtle">4.9★</div>
                 <div className="text-sm text-gray-600 font-medium">User Rating</div>
               </div>
-              <div className="text-center p-4 rounded-xl bg-white/60 backdrop-blur-sm shadow-lg">
-                <div className="text-3xl font-bold text-[#2D3639] font-serif">24/7</div>
+              <div className="text-center p-4 rounded-xl bg-white/60 backdrop-blur-sm shadow-lg hover-lift scroll-animate stagger-3">
+                <div className="text-3xl font-bold text-[#2D3639] font-serif animate-bounce-subtle">24/7</div>
                 <div className="text-sm text-gray-600 font-medium">AI Assistant</div>
               </div>
             </div>
@@ -464,7 +506,7 @@ export default function HomePage() {
       {/* Features Section */}
       <section id="features" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
+          <div className="text-center mb-20 scroll-animate">
             <h2 className="text-4xl md:text-5xl font-bold font-serif text-[#2D3639] mb-6">
               Powerful Features for Modern Professionals
             </h2>
@@ -478,11 +520,11 @@ export default function HomePage() {
             {features.map((feature, index) => (
               <Card
                 key={index}
-                className="border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-white"
+                className={`border-0 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white hover-lift scroll-animate stagger-${(index % 6) + 1}`}
               >
                 <CardHeader className="pb-4">
                   <div
-                    className={`w-14 h-14 rounded-2xl ${feature.color} flex items-center justify-center mb-6 shadow-lg`}
+                    className={`w-14 h-14 rounded-2xl ${feature.color} flex items-center justify-center mb-6 shadow-lg animate-float hover-glow`}
                   >
                     <feature.icon className="h-7 w-7 text-white" />
                   </div>
@@ -500,9 +542,9 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials Section */}
-      <section id="testimonials" className="py-24 bg-gradient-to-br from-gray-50 to-green-50/30">
+      <section id="testimonials" className="py-24 bg-gradient-to-br from-gray-50 to-green-50/30 animated-gradient">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
+          <div className="text-center mb-20 scroll-animate">
             <h2 className="text-4xl md:text-5xl font-bold font-serif text-[#2D3639] mb-6">
               Success Stories from Our Users
             </h2>
@@ -513,16 +555,22 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="border-0 shadow-xl bg-white hover:shadow-2xl transition-all duration-300">
+              <Card
+                key={index}
+                className={`border-0 shadow-xl bg-white hover:shadow-2xl transition-all duration-500 hover-lift scroll-animate stagger-${index + 1}`}
+              >
                 <CardContent className="p-8">
                   <div className="flex items-center mb-6">
                     {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="h-5 w-5 text-[#EA580C] fill-current" />
+                      <Star
+                        key={i}
+                        className={`h-5 w-5 text-[#EA580C] fill-current animate-bounce-subtle stagger-${i + 1}`}
+                      />
                     ))}
                   </div>
                   <p className="text-gray-700 mb-8 text-lg leading-relaxed italic">"{testimonial.content}"</p>
                   <div className="flex items-center gap-4">
-                    <Avatar className="h-12 w-12">
+                    <Avatar className="h-12 w-12 hover-lift">
                       <AvatarImage src={testimonial.image || "/placeholder.svg"} />
                       <AvatarFallback className="resumaic-gradient-green text-white font-semibold">
                         {testimonial.name
@@ -548,7 +596,7 @@ export default function HomePage() {
       {/* Pricing Section */}
       <section id="pricing" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
+          <div className="text-center mb-20 scroll-animate">
             <h2 className="text-4xl md:text-5xl font-bold font-serif text-[#2D3639] mb-6">Choose Your Success Plan</h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Start free and scale as you grow. No hidden fees, cancel anytime.
@@ -559,10 +607,10 @@ export default function HomePage() {
             {pricingPlans.map((plan, index) => (
               <Card
                 key={index}
-                className={`relative border-2 ${plan.popular ? "border-[#70E4A8] shadow-2xl scale-105" : "border-gray-200 shadow-xl"} bg-white`}
+                className={`relative border-2 ${plan.popular ? "border-[#70E4A8] shadow-2xl scale-105 animate-pulse-glow" : "border-gray-200 shadow-xl"} bg-white hover-lift scroll-animate stagger-${index + 1} transition-all duration-500`}
               >
                 {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 animate-bounce-subtle">
                     <Badge className="resumaic-gradient-green text-white px-6 py-2 text-sm font-semibold shadow-lg">
                       Most Popular
                     </Badge>
@@ -571,7 +619,9 @@ export default function HomePage() {
                 <CardHeader className="text-center pb-6 pt-8">
                   <CardTitle className="text-2xl font-bold font-serif text-[#2D3639]">{plan.name}</CardTitle>
                   <div className="mt-6">
-                    <span className="text-5xl font-bold text-[#2D3639] font-serif">{plan.price}</span>
+                    <span className="text-5xl font-bold text-[#2D3639] font-serif animate-bounce-subtle">
+                      {plan.price}
+                    </span>
                     <span className="text-gray-600 text-lg">/{plan.period}</span>
                   </div>
                   <CardDescription className="mt-4 text-base">{plan.description}</CardDescription>
@@ -579,15 +629,18 @@ export default function HomePage() {
                 <CardContent className="space-y-8 px-8 pb-8">
                   <ul className="space-y-4">
                     {plan.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-center gap-3">
-                        <CheckCircle className="h-5 w-5 text-[#70E4A8] flex-shrink-0" />
+                      <li
+                        key={featureIndex}
+                        className={`flex items-center gap-3 animate-slide-up stagger-${featureIndex + 1}`}
+                      >
+                        <CheckCircle className="h-5 w-5 text-[#70E4A8] flex-shrink-0 animate-bounce-subtle" />
                         <span className="text-gray-700">{feature}</span>
                       </li>
                     ))}
                   </ul>
                   <Link href="/dashboard">
                     <Button
-                      className={`w-full ${plan.buttonStyle} text-lg py-3 font-semibold transition-all duration-200`}
+                      className={`w-full ${plan.buttonStyle} text-lg py-3 font-semibold transition-all duration-200 hover-lift button-press`}
                       size="lg"
                     >
                       {plan.buttonText}
@@ -601,27 +654,29 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 resumaic-gradient-green">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl md:text-5xl font-bold font-serif text-white mb-8">Ready to Transform Your Career?</h2>
-          <p className="text-xl text-green-100 mb-12 leading-relaxed">
+      <section className="py-24 resumaic-gradient-green animated-gradient">
+        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8 scroll-animate">
+          <h2 className="text-4xl md:text-5xl font-bold font-serif text-white mb-8 animate-slide-up">
+            Ready to Transform Your Career?
+          </h2>
+          <p className="text-xl text-green-100 mb-12 leading-relaxed animate-slide-up stagger-1">
             Join over 150,000 professionals who've accelerated their careers with AI-powered resumes that get results.
           </p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center">
+          <div className="flex flex-col sm:flex-row gap-6 justify-center animate-slide-up stagger-2">
             <Link href="/dashboard">
               <Button
                 size="lg"
                 variant="secondary"
-                className="text-lg px-10 py-4 bg-white text-[#2D3639] hover:bg-gray-100 shadow-xl font-semibold"
+                className="text-lg px-10 py-4 bg-white text-[#2D3639] hover:bg-gray-100 shadow-xl font-semibold hover-lift button-press"
               >
                 Start Building Free
-                <ArrowRight className="ml-2 h-5 w-5" />
+                <ArrowRight className="ml-2 h-5 w-5 animate-bounce-subtle" />
               </Button>
             </Link>
             <Button
               size="lg"
               variant="outline"
-              className="text-lg px-10 py-4 border-2 border-white text-white hover:bg-white hover:text-[#70E4A8] bg-transparent font-semibold"
+              className="text-lg px-10 py-4 border-2 border-white text-white hover:bg-white hover:text-[#70E4A8] bg-transparent font-semibold hover-lift button-press"
             >
               <Users className="mr-2 h-5 w-5" />
               Schedule Demo
@@ -632,11 +687,11 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="bg-[#2D3639] text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-animate">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
-            <div className="col-span-1 md:col-span-2">
+            <div className="col-span-1 md:col-span-2 animate-slide-up">
               <div className="flex items-center gap-3 mb-6">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#70E4A8] shadow-lg">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#70E4A8] shadow-lg animate-pulse-glow">
                   <FileText className="h-5 w-5 text-white" />
                 </div>
                 <span className="text-2xl font-bold font-serif">Resumaic</span>
@@ -646,61 +701,75 @@ export default function HomePage() {
                 and accelerate your career growth.
               </p>
               <div className="flex gap-4">
-                <Button variant="ghost" size="sm" className="text-gray-300 hover:text-[#70E4A8] hover:bg-gray-700">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-300 hover:text-[#70E4A8] hover:bg-gray-700 hover-lift"
+                >
                   <Globe className="h-5 w-5" />
                 </Button>
-                <Button variant="ghost" size="sm" className="text-gray-300 hover:text-[#70E4A8] hover:bg-gray-700">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-300 hover:text-[#70E4A8] hover:bg-gray-700 hover-lift"
+                >
                   <Mail className="h-5 w-5" />
                 </Button>
               </div>
             </div>
 
-            <div>
+            <div className="animate-slide-up stagger-1">
               <h3 className="font-bold font-serif mb-6 text-lg">Product</h3>
               <ul className="space-y-3 text-gray-300">
                 <li>
-                  <a href="#features" className="hover:text-[#70E4A8] transition-colors">
+                  <a
+                    href="#features"
+                    className="hover:text-[#70E4A8] transition-all duration-300 hover:scale-105 inline-block"
+                  >
                     Features
                   </a>
                 </li>
                 <li>
-                  <a href="#pricing" className="hover:text-[#70E4A8] transition-colors">
+                  <a
+                    href="#pricing"
+                    className="hover:text-[#70E4A8] transition-all duration-300 hover:scale-105 inline-block"
+                  >
                     Pricing
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#70E4A8] transition-colors">
+                  <a href="#" className="hover:text-[#70E4A8] transition-all duration-300 hover:scale-105 inline-block">
                     Templates
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#70E4A8] transition-colors">
+                  <a href="#" className="hover:text-[#70E4A8] transition-all duration-300 hover:scale-105 inline-block">
                     API Access
                   </a>
                 </li>
               </ul>
             </div>
 
-            <div>
+            <div className="animate-slide-up stagger-2">
               <h3 className="font-bold font-serif mb-6 text-lg">Support</h3>
               <ul className="space-y-3 text-gray-300">
                 <li>
-                  <a href="#" className="hover:text-[#70E4A8] transition-colors">
+                  <a href="#" className="hover:text-[#70E4A8] transition-all duration-300 hover:scale-105 inline-block">
                     Help Center
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#70E4A8] transition-colors">
+                  <a href="#" className="hover:text-[#70E4A8] transition-all duration-300 hover:scale-105 inline-block">
                     Contact Support
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#70E4A8] transition-colors">
+                  <a href="#" className="hover:text-[#70E4A8] transition-all duration-300 hover:scale-105 inline-block">
                     Privacy Policy
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#70E4A8] transition-colors">
+                  <a href="#" className="hover:text-[#70E4A8] transition-all duration-300 hover:scale-105 inline-block">
                     Terms of Service
                   </a>
                 </li>
@@ -708,7 +777,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="border-t border-gray-600 mt-16 pt-8 text-center text-gray-400">
+          <div className="border-t border-gray-600 mt-16 pt-8 text-center text-gray-400 animate-fade-in">
             <p>&copy; 2024 Resumaic. All rights reserved. Built with AI for the future of work.</p>
           </div>
         </div>

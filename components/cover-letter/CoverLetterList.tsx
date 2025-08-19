@@ -8,9 +8,9 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { toast } from "sonner"
 import {
-  Mail,
   Grid,
   List,
   Eye,
@@ -18,11 +18,12 @@ import {
   Trash2,
   Download,
   Search,
-  Plus,
   TrendingUp,
   Target,
   Sparkles,
   FileText,
+  Crown,
+  UserCircle,
 } from "lucide-react"
 import {
   Dialog,
@@ -330,23 +331,22 @@ export function CoverLetterPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-white">
-            <Mail className="h-6 w-6" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg resumaic-gradient-green text-white">
+            <Sparkles className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">AI Cover Letter Generator</h1>
-            <p className="text-gray-600">Create personalized cover letters with DeepSeek AI</p>
+            <h1 className="text-3xl font-bold text-gray-900">Create Cover Letters</h1>
+            <p className="text-gray-600">Generate professional cover letters with AI assistance</p>
           </div>
         </div>
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
               onClick={handleOpenNewGenerator}
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Generate AI Cover Letter
+              Create Cover Letter
             </Button>
           </DialogTrigger>
           <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
@@ -447,24 +447,23 @@ export function CoverLetterPage() {
 
                 <div className="flex justify-end items-center space-x-1">
                   {(!editingLetter || isViewMode) && (
-                  <Button
-                  variant="outline"
-                  onClick={() => {
-                    if (isViewMode) {
-                      setIsDialogOpen(false)
-                      setViewingLetter(null)
-                      setIsViewMode(false)
-                    } else {
-                      setShowGenerator(true)
-                      setGeneratedLetter("")
-                      setAnalysisResult(null)
-                      setEditingLetter(null)
-                    }
-                  }}
-                >
-                  {isViewMode ? "Close" : "Back to Generator"}
-                </Button>
-                
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        if (isViewMode) {
+                          setIsDialogOpen(false)
+                          setViewingLetter(null)
+                          setIsViewMode(false)
+                        } else {
+                          setShowGenerator(true)
+                          setGeneratedLetter("")
+                          setAnalysisResult(null)
+                          setEditingLetter(null)
+                        }
+                      }}
+                    >
+                      {isViewMode ? "Close" : "Back to Generator"}
+                    </Button>
                   )}
 
                   {!isViewMode && (
@@ -520,15 +519,15 @@ export function CoverLetterPage() {
             <CardContent className="p-4">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-lg font-semibold">Your AI Cover Letters ({filteredLetters.length})</h3>
-                  <p className="text-sm text-gray-600">Manage your AI-generated cover letters</p>
+                  <h3 className="text-lg font-semibold">Generated Cover Letters ({filteredLetters.length})</h3>
+                  <p className="text-sm text-gray-600">View and manage your AI-generated cover letters</p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
                   <div className="relative w-full sm:w-80">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <Input
-                      placeholder="Search cover letters..."
+                      placeholder="Search cover letters by job description, tone..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="pl-10 w-full"
@@ -562,9 +561,9 @@ export function CoverLetterPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead>Profile</TableHead>
                       <TableHead>Job Description</TableHead>
                       <TableHead>Tone</TableHead>
-                      <TableHead>Preview</TableHead>
                       <TableHead>Created</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
@@ -572,6 +571,33 @@ export function CoverLetterPage() {
                   <TableBody>
                     {filteredLetters.map((letter) => (
                       <TableRow key={letter.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                              <AvatarFallback
+                                className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${
+                                  user?.role === "admin"
+                                    ? ""
+                                    : "bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]"
+                                }`}
+                              >
+                                {user?.role === "admin" ? (
+                                  <Crown className="h-5 w-5 text-[#EA580C]" />
+                                ) : user?.name ? (
+                                  user.name.charAt(0).toUpperCase()
+                                ) : (
+                                  <UserCircle className="h-5 w-5 text-[#70E4A8]" />
+                                )}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="font-medium">Cover Letter #{letter.id}</div>
+                              <div className="text-sm text-gray-600">
+                                {new Date(letter.created_at).toLocaleDateString()}
+                              </div>
+                            </div>
+                          </div>
+                        </TableCell>
                         <TableCell>
                           <div className="max-w-xs">
                             <p className="text-sm font-medium truncate">
@@ -584,18 +610,12 @@ export function CoverLetterPage() {
                             {letter.tone}
                           </Badge>
                         </TableCell>
-                        <TableCell>
-                          <div className="max-w-xs">
-                            <p className="text-sm text-gray-600 truncate">
-                              {letter.generated_letter.substring(0, 80)}...
-                            </p>
-                          </div>
-                        </TableCell>
                         <TableCell>{new Date(letter.created_at).toLocaleDateString()}</TableCell>
                         <TableCell>
                           <div className="flex gap-1">
                             <Button
                               variant="ghost"
+                              className="cursor-pointer"
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation()
@@ -607,6 +627,7 @@ export function CoverLetterPage() {
                             </Button>
                             <Button
                               variant="ghost"
+                              className="cursor-pointer"
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation()
@@ -615,17 +636,6 @@ export function CoverLetterPage() {
                               title="Edit"
                             >
                               <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleDownload(letter)
-                              }}
-                              title="Download"
-                            >
-                              <Download className="h-4 w-4" />
                             </Button>
                             <ConfirmDialog
                               title="Delete Cover Letter"
@@ -657,64 +667,62 @@ export function CoverLetterPage() {
               {filteredLetters.map((letter) => (
                 <Card key={letter.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Mail className="h-5 w-5" />
-                      AI Cover Letter
-                    </CardTitle>
-                    <CardDescription>
-                      <Badge variant="secondary" className="capitalize">
-                        {letter.tone} tone
-                      </Badge>
-                      <Badge variant="default" className="ml-2">
-                        AI Generated
-                      </Badge>
-                    </CardDescription>
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                          <AvatarFallback
+                            className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${
+                              user?.role === "admin"
+                                ? ""
+                                : "bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]"
+                            }`}
+                          >
+                            {user?.role === "admin" ? (
+                              <Crown className="h-5 w-5 text-[#EA580C]" />
+                            ) : user?.name ? (
+                              user.name.charAt(0).toUpperCase()
+                            ) : (
+                              <UserCircle className="h-5 w-5 text-[#70E4A8]" />
+                            )}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <CardTitle className="text-lg">Cover Letter #{letter.id}</CardTitle>
+                          <CardDescription>{letter.tone} tone</CardDescription>
+                        </div>
+                      </div>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div>
-                        <Label className="text-sm font-medium">Job Description Preview</Label>
+                        <Label className="text-sm font-medium">Job Description</Label>
                         <p className="text-sm text-gray-600 mt-1 line-clamp-3">
                           {letter.job_description.substring(0, 150)}...
                         </p>
                       </div>
 
                       <div>
-                        <Label className="text-sm font-medium">AI Letter Preview</Label>
+                        <Label className="text-sm font-medium">Cover Letter Preview</Label>
                         <p className="text-sm text-gray-600 mt-1 line-clamp-3">
                           {letter.generated_letter.substring(0, 150)}...
                         </p>
+                      </div>
+
+                      <div>
+                        <Label className="text-sm font-medium">Tone</Label>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          <Badge variant="secondary" className="text-xs capitalize">
+                            {letter.tone}
+                          </Badge>
+                        </div>
                       </div>
 
                       <div className="text-xs text-gray-500">
                         Created: {new Date(letter.created_at).toLocaleDateString()}
                       </div>
 
-                      <div className="grid grid-cols-3 gap-2 w-full">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 bg-transparent"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleView(letter)
-                          }}
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          View
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 bg-transparent"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleEdit(letter)
-                          }}
-                        >
-                          <Edit className="h-4 w-4 mr-1" />
-                          Edit
-                        </Button>
+                      <div className="flex gap-2 items-center">
                         <ConfirmDialog
                           title="Delete Cover Letter"
                           description={`Are you sure you want to delete this cover letter? This action cannot be undone.`}
@@ -725,24 +733,27 @@ export function CoverLetterPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="flex-1 bg-transparent text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer"
+                              className="text-red-600 hover:text-red-700 bg-transparent"
                             >
-                              <Trash2 className="h-4 w-4 mr-1" />
-                              Delete
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           }
                         />
                         <Button
                           variant="outline"
                           size="sm"
-                          className="flex-1 bg-transparent col-span-3"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleDownload(letter)
-                          }}
+                          onClick={() => handleEdit(letter)}
+                          className="bg-transparent p-2"
                         >
-                          <Download className="h-4 w-4 mr-1" />
-                          Download
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleView(letter)}
+                          className="bg-transparent p-2"
+                        >
+                          <Eye className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
@@ -755,53 +766,79 @@ export function CoverLetterPage() {
       )}
 
       {/* Empty State */}
+      {filteredLetters.length === 0 && coverLetters.length > 0 && (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="rounded-full bg-gray-100 p-6 mb-4">
+              <Search className="h-8 w-8 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No cover letters found</h3>
+            <p className="text-gray-500 mb-4">Try adjusting your search terms or create a new cover letter</p>
+            <Button variant="outline" onClick={() => setSearchTerm("")}>
+              Clear Search
+            </Button>
+          </CardContent>
+        </Card>
+      )}
       {coverLetters.length === 0 && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
             <div className="rounded-full bg-gray-100 p-6 mb-4">
-              <Mail className="h-8 w-8 text-gray-400" />
+              <Sparkles className="h-8 w-8 text-gray-400" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No AI cover letters created yet</h3>
-            <p className="text-gray-500 mb-4">Generate your first AI-powered cover letter to get started</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No cover letters created yet</h3>
+            <p className="text-gray-500 mb-4">
+              Create your first AI cover letter by clicking the "Create Cover Letter" button above
+            </p>
           </CardContent>
         </Card>
       )}
 
       {/* Tips */}
-      <Card>
+      {/* Quick Tips */}
+      <Card className="animate-slide-up-delay-3 hover:shadow-lg transition-all duration-300">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            AI Cover Letter Tips
+          <CardTitle className="flex items-center gap-3 font-rubik text-[#2D3639]">
+            <div className="p-2 bg-gradient-to-br from-[#70E4A8] to-[#EA580C] rounded-lg">
+              <TrendingUp className="h-5 w-5 text-white" />
+            </div>
+            Pro Tips
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="flex items-start gap-3">
-              <div className="rounded-full bg-purple-100 p-2">
-                <Target className="h-4 w-4 text-purple-600" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Tip 1 */}
+            <div className="flex items-start gap-4 animate-fade-in-stagger" style={{ animationDelay: "100ms" }}>
+              <div className="rounded-full bg-[#70E4A8]/20 p-3 animate-float" style={{ animationDelay: "0s" }}>
+                <Target className="h-5 w-5 text-[#70E4A8]" />
               </div>
               <div>
-                <h4 className="font-medium text-gray-900">Be Specific</h4>
-                <p className="text-sm text-gray-600">Include detailed job requirements for better AI personalization</p>
+                <h4 className="font-semibold text-[#2D3639] font-rubik">Be Specific</h4>
+                <p className="text-sm text-gray-600 font-inter">
+                  Include detailed job requirements for better AI personalization
+                </p>
               </div>
             </div>
-            <div className="flex items-start gap-3">
-              <div className="rounded-full bg-pink-100 p-2">
-                <Sparkles className="h-4 w-4 text-pink-600" />
+
+            {/* Tip 2 */}
+            <div className="flex items-start gap-4 animate-fade-in-stagger" style={{ animationDelay: "200ms" }}>
+              <div className="rounded-full bg-[#EA580C]/20 p-3 animate-float" style={{ animationDelay: "0.5s" }}>
+                <Sparkles className="h-5 w-5 text-[#EA580C]" />
               </div>
               <div>
-                <h4 className="font-medium text-gray-900">Choose the Right Tone</h4>
-                <p className="text-sm text-gray-600">Match your tone to the company culture and industry</p>
+                <h4 className="font-semibold text-[#2D3639] font-rubik">Choose the Right Tone</h4>
+                <p className="text-sm text-gray-600 font-inter">Match your tone to the company culture and industry</p>
               </div>
             </div>
-            <div className="flex items-start gap-3">
-              <div className="rounded-full bg-blue-100 p-2">
-                <FileText className="h-4 w-4 text-blue-600" />
+
+            {/* Tip 3 */}
+            <div className="flex items-start gap-4 animate-fade-in-stagger" style={{ animationDelay: "300ms" }}>
+              <div className="rounded-full bg-blue-100 p-3 animate-float" style={{ animationDelay: "1s" }}>
+                <FileText className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <h4 className="font-medium text-gray-900">Review and Edit</h4>
-                <p className="text-sm text-gray-600">Always review and customize the AI-generated content</p>
+                <h4 className="font-semibold text-[#2D3639] font-rubik">Review and Edit</h4>
+                <p className="text-sm text-gray-600 font-inter">Always review and customize the AI-generated content</p>
               </div>
             </div>
           </div>

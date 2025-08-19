@@ -1,27 +1,32 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { Rubik, Inter } from "next/font/google"
 import "./globals.css"
 import { ReduxProvider } from "@/lib/redux/provider"
+import { Toaster } from "sonner"
 import HydrateAuth from "@/components/auth/HydrateAuth"
-import { Toaster } from "sonner";
 
+const rubik = Rubik({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-rubik",
+})
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+})
 
 export const metadata: Metadata = {
-  title: "CV Builder AI - Professional Resume Tool",
-  description: "Create professional resumes and AI personas with our advanced CV builder",
+  title: "Resumaic - AI-Powered Resume Builder",
+  description: "Create professional resumes with AI technology",
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html lang="en" className={`${rubik.variable} ${inter.variable} antialiased`}>
+      <body className="font-sans">
         <ReduxProvider>
           <HydrateAuth />
           <Toaster position="top-right" richColors />

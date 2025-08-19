@@ -23,6 +23,7 @@ import {
   Download,
   Eye,
   Plus,
+  Sparkles,
 } from "lucide-react";
 import {
   Table,
@@ -51,12 +52,14 @@ import {
   DialogContent,
   DialogTrigger,
   DialogTitle,
+  DialogDescription,
+  DialogHeader,
 } from "@/components/ui/dialog";
 import { CVWizard } from "./AddEditResume";
 import { toast } from "sonner";
 
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
-import { Crown,UserCircle } from "lucide-react";
+import { Crown, UserCircle } from "lucide-react";
 
 export function ResumePage() {
   const router = useRouter();
@@ -86,8 +89,6 @@ export function ResumePage() {
     fetchCVs();
   }, [userId]);
 
-  // Delete functionality is now handled directly in the ConfirmDialog component
-
   const handleCreateAICV = (personaId: string) => {
     router.push(`/create-cv?personaId=${personaId}`);
   };
@@ -97,8 +98,10 @@ export function ResumePage() {
       const response = await createCV(cvData);
       setCVs((prev) => [response, ...prev]);
       setIsDialogOpen(false);
+      toast.success("Resume created successfully");
     } catch (error) {
       console.error("Error creating CV:", error);
+      toast.error("Failed to create resume");
     }
   };
 
@@ -110,14 +113,27 @@ export function ResumePage() {
         prev.map((c) => (c.id === selectedCV.id ? response : c))
       );
       setIsEditing(false);
+      setSelectedCV(null);
+      toast.success("Resume updated successfully");
     } catch (error) {
       console.error("Error updating CV:", error);
+      toast.error("Failed to update resume");
     }
   };
 
-  // In ResumeList.tsx
-  const handleEdit = (cv: CV) => {
-    router.push(`/create-cv?cvId=${cv.id}`);
+   const handleEdit = (cv: CV) => {
+        router.push(`/create-cv?cvId=${cv.id}`);
+      };  
+
+  const handleDelete = async (cv: CV) => {
+    try {
+      await deleteCV(cv.id);
+      setCVs((prev) => prev.filter((c) => c.id !== cv.id));
+      toast.success("Resume deleted successfully");
+    } catch (error) {
+      console.error("Error deleting resume:", error);
+      toast.error("Failed to delete resume");
+    }
   };
 
   // Filter CVs based on search term
@@ -137,26 +153,39 @@ export function ResumePage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-green-600 to-blue-600 text-white">
-            <FileText className="h-6 w-6" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg resumaic-gradient-green text-white">
+            <Sparkles className="h-6 w-6" />
           </div>
           <div>
             <h1 className="text-3xl font-bold text-gray-900">My Resumes</h1>
-            <p className="text-gray-600">View your professional resumes</p>
+            <p className="text-gray-600">
+              View and manage your professional resumes
+            </p>
           </div>
         </div>
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700">
+            <Button
+              className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
+              onClick={() => {
+                setIsDialogOpen(true);
+              }}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Create Resume
             </Button>
           </DialogTrigger>
           <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
-            <DialogTitle className="sr-only">Create New Resume</DialogTitle>
+            <DialogHeader>
+              <DialogTitle>Create New Resume</DialogTitle>
+              <DialogDescription>
+                Create a new resume by filling in the details below.
+              </DialogDescription>
+            </DialogHeader>
             <CVWizard
               onSave={handleSaveCV}
               onCancel={() => setIsDialogOpen(false)}
@@ -166,8 +195,13 @@ export function ResumePage() {
       </div>
 
       <Dialog open={isEditing} onOpenChange={setIsEditing}>
-        <DialogContent className="w-[95vw] !max-w-none max-h-[90vh] overflow-x-auto">
-          <DialogTitle className="sr-only">Edit Resume</DialogTitle>
+        <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Resume</DialogTitle>
+            <DialogDescription>
+              Update the resume details below.
+            </DialogDescription>
+          </DialogHeader>
           <CVWizard
             editingCV={selectedCV}
             onSave={handleUpdateCV}
@@ -179,8 +213,6 @@ export function ResumePage() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete confirmation is now handled inline with each delete button */}
-
       {cvs.length > 0 && (
         <>
           <Card>
@@ -191,7 +223,7 @@ export function ResumePage() {
                     Your Resumes ({filteredCVs.length})
                   </h3>
                   <p className="text-sm text-gray-600">
-                    View your professional resumes
+                    View and manage your professional resumes
                   </p>
                 </div>
 
@@ -199,7 +231,7 @@ export function ResumePage() {
                   <div className="relative w-full sm:w-80">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <Input
-                      placeholder="Search resumes by title, name..."
+                      placeholder="Search resumes by title, template..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="pl-10 w-full"
@@ -245,23 +277,23 @@ export function ResumePage() {
                       <TableRow key={cv.id}>
                         <TableCell>
                           <div className="flex items-center gap-3">
-                          <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
-                                                     <AvatarFallback 
-                                                       className={`bg-gradient-to-br ${
-                                                         user?.role === 'admin' 
-                                                           ? 'from-red-500 to-pink-500' 
-                                                           : 'from-blue-600 to-purple-600'
-                                                       } text-white font-semibold`}
-                                                     >
-                                                       {user?.role === 'admin' ? (
-                                                         <Crown className="h-5 w-5" />
-                                                       ) : user?.name ? (
-                                                         user.name.charAt(0).toUpperCase()
-                                                       ) : (
-                                                         <UserCircle className="h-5 w-5" />
-                                                       )}
-                                                     </AvatarFallback>
-                                                   </Avatar>
+                            <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                              <AvatarFallback
+                                className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${
+                                  user?.role === "admin"
+                                    ? ""
+                                    : "bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]"
+                                }`}
+                              >
+                                {user?.role === "admin" ? (
+                                  <Crown className="h-5 w-5 text-[#EA580C]" />
+                                ) : user?.name ? (
+                                  user.name.charAt(0).toUpperCase()
+                                ) : (
+                                  <UserCircle className="h-5 w-5 text-[#70E4A8]" />
+                                )}
+                              </AvatarFallback>
+                            </Avatar>
                             <div>
                               <div className="font-medium">{cv.title}</div>
                             </div>
@@ -280,50 +312,31 @@ export function ResumePage() {
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-1">
-                            {/* View button */}
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleEdit(cv)}
+                                  onClick={() => handleEdit(cv)}                              className="cursor-pointer"
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            {/* Edit button */}
-
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleEdit(cv)}
+                                  onClick={() => handleEdit(cv)}                              className="cursor-pointer"
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
-
-                            {/* Delete button with confirmation */}
                             <ConfirmDialog
                               title={`Delete "${cv.title}"`}
                               description="Are you sure you want to delete this resume? This action cannot be undone."
                               confirmText="Delete"
                               cancelText="Cancel"
-                              onConfirm={async () => {
-                                try {
-                                  await deleteCV(cv.id);
-                                  setCVs((prev) =>
-                                    prev.filter((c) => c.id !== cv.id)
-                                  );
-                                  toast.success("Resume deleted successfully");
-                                } catch (error) {
-                                  console.error(
-                                    "Error deleting resume:",
-                                    error
-                                  );
-                                  toast.error("Failed to delete resume");
-                                }
-                              }}
+                              onConfirm={() => handleDelete(cv)}
                               trigger={
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="text-red-600 hover:text-red-700"
+                                  className="text-red-600 hover:text-red-700 cursor-pointer"
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -340,27 +353,30 @@ export function ResumePage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredCVs.map((cv) => (
-                <Card key={cv.id} className="hover:shadow-lg transition-shadow">
+                <Card
+                  key={cv.id}
+                  className="hover:shadow-lg transition-shadow"
+                >
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
-                                                                            <AvatarFallback 
-                                                                              className={`bg-gradient-to-br ${
-                                                                                user?.role === 'admin' 
-                                                                                  ? 'from-red-500 to-pink-500' 
-                                                                                  : 'from-blue-600 to-purple-600'
-                                                                              } text-white font-semibold`}
-                                                                            >
-                                                                              {user?.role === 'admin' ? (
-                                                                                <Crown className="h-5 w-5" />
-                                                                              ) : user?.name ? (
-                                                                                user.name.charAt(0).toUpperCase()
-                                                                              ) : (
-                                                                                <UserCircle className="h-5 w-5" />
-                                                                              )}
-                                                                            </AvatarFallback>
-                                                                          </Avatar>
+                          <AvatarFallback
+                            className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${
+                              user?.role === "admin"
+                                ? ""
+                                : "bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]"
+                            }`}
+                          >
+                            {user?.role === "admin" ? (
+                              <Crown className="h-5 w-5 text-[#EA580C]" />
+                            ) : user?.name ? (
+                              user.name.charAt(0).toUpperCase()
+                            ) : (
+                              <UserCircle className="h-5 w-5 text-[#70E4A8]" />
+                            )}
+                          </AvatarFallback>
+                        </Avatar>
                         <div>
                           <CardTitle className="text-lg">{cv.title}</CardTitle>
                         </div>
@@ -387,38 +403,33 @@ export function ResumePage() {
                         </div>
                       </div>
 
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 items-center">
                         <Button
                           variant="outline"
                           size="sm"
-                          className="flex-1 bg-transparent"
-                          onClick={() => handleEdit(cv)}
+                              onClick={() => handleEdit(cv)}                          className="bg-transparent p-2"
                         >
-                          <Edit className="h-4 w-4 mr-1" />
-                          Edit
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(cv)}
+                          className="bg-transparent p-2"
+                        >
+                          <Edit className="h-4 w-4" />
                         </Button>
                         <ConfirmDialog
                           title={`Delete "${cv.title}"`}
                           description="Are you sure you want to delete this resume? This action cannot be undone."
                           confirmText="Delete"
                           cancelText="Cancel"
-                          onConfirm={async () => {
-                            try {
-                              await deleteCV(cv.id);
-                              setCVs((prev) =>
-                                prev.filter((c) => c.id !== cv.id)
-                              );
-                              toast.success("Resume deleted successfully");
-                            } catch (error) {
-                              console.error("Error deleting resume:", error);
-                              toast.error("Failed to delete resume");
-                            }
-                          }}
+                          onConfirm={() => handleDelete(cv)}
                           trigger={
                             <Button
                               variant="outline"
                               size="sm"
-                              className="text-red-600 hover:text-red-700 bg-transparent"
+                              className="text-red-600 hover:text-red-700 bg-transparent p-2"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -434,6 +445,7 @@ export function ResumePage() {
         </>
       )}
 
+      {/* Empty State */}
       {filteredCVs.length === 0 && cvs.length > 0 && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
@@ -444,7 +456,7 @@ export function ResumePage() {
               No resumes found
             </h3>
             <p className="text-gray-500 mb-4">
-              Try adjusting your search terms
+              Try adjusting your search terms or create a new resume
             </p>
             <Button variant="outline" onClick={() => setSearchTerm("")}>
               Clear Search
@@ -452,7 +464,6 @@ export function ResumePage() {
           </CardContent>
         </Card>
       )}
-
       {cvs.length === 0 && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
@@ -460,57 +471,86 @@ export function ResumePage() {
               <FileText className="h-8 w-8 text-gray-400" />
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No resumes found
+              No resumes created yet
             </h3>
-            <p className="text-gray-500 mb-4">You don't have any resumes yet</p>
+            <p className="text-gray-500 mb-4">
+              Create your first professional resume by clicking the "Create
+              Resume" button above
+            </p>
           </CardContent>
         </Card>
       )}
 
-      <Card>
+      {/* Quick Tips */}
+      <Card className="animate-slide-up-delay-3 hover:shadow-lg transition-all duration-300">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-3 font-rubik text-[#2D3639]">
+            <div className="p-2 bg-gradient-to-br from-[#70E4A8] to-[#EA580C] rounded-lg">
+              <TrendingUp className="h-5 w-5 text-white" />
+            </div>
             Resume Tips
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="flex items-start gap-3">
-              <div className="rounded-full bg-blue-100 p-2">
-                <Target className="h-4 w-4 text-blue-600" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Tip 1 */}
+            <div
+              className="flex items-start gap-4 animate-fade-in-stagger"
+              style={{ animationDelay: "100ms" }}
+            >
+              <div
+                className="rounded-full bg-[#70E4A8]/20 p-3 animate-float"
+                style={{ animationDelay: "0s" }}
+              >
+                <Target className="h-5 w-5 text-[#70E4A8]" />
               </div>
               <div>
-                <h4 className="font-medium text-gray-900">
+                <h4 className="font-semibold text-[#2D3639] font-rubik">
                   Tailor Your Resume
                 </h4>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 font-inter">
                   Customize your resume for each job application
                 </p>
               </div>
             </div>
-            <div className="flex items-start gap-3">
-              <div className="rounded-full bg-green-100 p-2">
-                <Award className="h-4 w-4 text-green-600" />
+
+            {/* Tip 2 */}
+            <div
+              className="flex items-start gap-4 animate-fade-in-stagger"
+              style={{ animationDelay: "200ms" }}
+            >
+              <div
+                className="rounded-full bg-[#EA580C]/20 p-3 animate-float"
+                style={{ animationDelay: "0.5s" }}
+              >
+                <Award className="h-5 w-5 text-[#EA580C]" />
               </div>
               <div>
-                <h4 className="font-medium text-gray-900">
+                <h4 className="font-semibold text-[#2D3639] font-rubik">
                   Highlight Achievements
                 </h4>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 font-inter">
                   Focus on quantifiable accomplishments and results
                 </p>
               </div>
             </div>
-            <div className="flex items-start gap-3">
-              <div className="rounded-full bg-purple-100 p-2">
-                <Users className="h-4 w-4 text-purple-600" />
+
+            {/* Tip 3 */}
+            <div
+              className="flex items-start gap-4 animate-fade-in-stagger"
+              style={{ animationDelay: "300ms" }}
+            >
+              <div
+                className="rounded-full bg-blue-100 p-3 animate-float"
+                style={{ animationDelay: "1s" }}
+              >
+                <Users className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <h4 className="font-medium text-gray-900">
+                <h4 className="font-semibold text-[#2D3639] font-rubik">
                   Professional Format
                 </h4>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 font-inter">
                   Use clean, professional templates that are ATS-friendly
                 </p>
               </div>
