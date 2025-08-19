@@ -59,14 +59,6 @@ export function PersonaCreationOptions({
 
   return (
     <div className="space-y-6">
-      <div className="text-center">
-        <h3 className="text-lg font-semibold mb-2">
-          Create Your CV Persona
-        </h3>
-        <p className="text-sm text-gray-600">
-          Build a professional profile that showcases your skills and achievements. Choose your preferred method and review your complete persona before finalizing.
-        </p>
-      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card 
