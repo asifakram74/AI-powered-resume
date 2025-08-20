@@ -452,6 +452,8 @@ export function CoverLetterPage({ user }: PageProps) {
                     <Label className="text-sm font-medium">{isViewMode ? "Cover Letter" : "Edit Cover Letter"}</Label>
                     <Textarea
                       value={generatedLetter}
+                      rows={10}
+
                       onChange={(e) => !isViewMode && setGeneratedLetter(e.target.value)}
                       className="min-h-[400px] mt-2"
                       placeholder="Your cover letter will appear here..."
@@ -709,7 +711,7 @@ export function CoverLetterPage({ user }: PageProps) {
                   <CardContent>
                     <div className="space-y-4">
                       <div>
-                        <Label className="text-sm font-medium">Job Description</Label>
+                        {/* <Label className="text-sm font-medium">Job Description</Label> */}
                         <p className="text-sm text-gray-600 mt-1 line-clamp-3">
                           {letter.job_description.substring(0, 150)}...
                         </p>

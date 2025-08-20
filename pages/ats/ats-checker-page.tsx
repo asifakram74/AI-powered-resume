@@ -322,7 +322,7 @@ export default function ATSCheckerPage() {
                         value={jobDescription}
                         onChange={(e) => setJobDescription(e.target.value)}
                         placeholder="Paste the complete job description, including requirements, responsibilities, and company information..."
-                        className="min-h-[200px] resize-none font-inter"
+                        className="min-h-[200px] resize-none font-inter" style={{ wordBreak: 'break-all' }}
                       />
                       <p className="text-sm text-gray-500 font-inter">
                         Include as much detail as possible for a more tailored analysis
