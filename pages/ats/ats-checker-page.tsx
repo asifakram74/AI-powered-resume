@@ -375,7 +375,7 @@ export default function ATSCheckerPage() {
                         disabled={
                           !extractedText || !jobDescription.trim() || isAnalyzing
                         }
-                        className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 px-8 py-3"
+                        className="resumaic-gradient-green hover:opacity-90  button-press px-8 py-3"
                         size="lg"
                       >
                         {isAnalyzing ? (
@@ -550,6 +550,7 @@ export default function ATSCheckerPage() {
 
                       {/* Close Analysis Button */}
                       <Button
+                        className="resumaic-gradient-green hover:opacity-90  button-press"
                         onClick={() => {
                           setAnalysisResult(null);
                           setResumeFile(null);
