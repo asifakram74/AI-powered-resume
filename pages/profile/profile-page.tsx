@@ -168,7 +168,7 @@ export function ProfilePage() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
         <div className="flex items-top gap-4">
           <Avatar className="h-16 w-16">
-            <AvatarFallback className="bg-gradient-to-br from-indigo-600 to-purple-600 text-white text-2xl font-medium">
+            <AvatarFallback className="resumaic-gradient-green hover:opacity-90  button-press text-white text-2xl font-medium">
               {profile?.name
                 ?.split(" ")
                 .map((n) => n[0])
@@ -221,7 +221,7 @@ export function ProfilePage() {
             <Edit className="h-4 w-4 mr-2" />
             Edit Profile
           </Button>
-          <Button className="w-50" onClick={() => setShowPasswordDialog(true)}>
+          <Button className="w-50 resumaic-gradient-green hover:opacity-90  button-press" onClick={() => setShowPasswordDialog(true)}>
             <Shield className="h-4 w-4 mr-2" />
             Change Password
           </Button>
@@ -357,6 +357,7 @@ export function ProfilePage() {
                 Cancel
               </Button>
               <Button
+              className="resumaic-gradient-green hover:opacity-90  button-press"
                 type="submit"
                 disabled={authLoading || !isDirty}
               >

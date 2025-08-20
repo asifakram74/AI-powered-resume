@@ -116,7 +116,7 @@ const handleCancel = () => {
       <DialogContent>
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2  ">
               <Shield className="h-5 w-5" />
               Change Password
             </DialogTitle>
@@ -236,7 +236,9 @@ const handleCancel = () => {
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button 
+            className="resumaic-gradient-green hover:opacity-90  button-press"
+            type="submit" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />

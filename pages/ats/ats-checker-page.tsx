@@ -38,7 +38,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  
 } from "@/components/ui/dialog";
 import * as htmlToImage from "html-to-image";
 import { jsPDF } from "jspdf";
@@ -117,8 +116,8 @@ export default function ATSCheckerPage() {
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-600";
-    if (score >= 60) return "text-yellow-600";
+    if (score >= 80) return "text-[#70E4A8]";
+    if (score >= 60) return "text-[#EA580C]";
     return "text-red-600";
   };
 
@@ -253,370 +252,362 @@ export default function ATSCheckerPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 p-6">
-      <div className="bg-gradient-to-r from-green-50 to-teal-50 rounded-2xl p-8 text-center">
-        <div className="max-w-3xl mx-auto">
-          <div className="inline-flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 mb-4 shadow-sm">
-            <CheckCircle className="h-5 w-5 text-teal-600 mr-2" />
-            <span className="font-medium text-teal-800">
-              Professional ATS Optimization Tool
-            </span>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg resumaic-gradient-green text-white">
+            <FileCheck className="h-6 w-6" />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Optimize Your Resume for <span className="text-teal-600">ATS</span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-8">
-            Get past applicant tracking systems and land more interviews with our
-            AI-powered resume analyzer
-          </p>
-
-          <div className="flex justify-center">
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 shadow-lg hover:shadow-teal-500/20 transition-all duration-300"
-                >
-                  <FileCheck className="h-5 w-5 mr-2" />
-                  Check Resume Now
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
-                <DialogHeader>
-                  <DialogTitle>ATS Resume Analysis</DialogTitle>
-                  <DialogDescription>
-                    Upload your resume and job description for ATS optimization
-                    analysis
-                  </DialogDescription>
-                </DialogHeader>
-
-                {!analysisResult ? (
-                  <div className="space-y-6">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <FileText className="h-5 w-5" />
-                          Upload Resume
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <PDFUploader
-                          onExtractedText={setExtractedText}
-                          onFileUploaded={setResumeFile}
-                        />
-                        {/* {extractedText && (
-                          <div className="mt-4 p-3 bg-gray-50 rounded text-sm text-gray-600">
-                            <p>
-                              Text extracted from resume ({extractedText.length}{" "}
-                              characters)
-                            </p>
-                          </div>
-                        )} */}
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Briefcase className="h-5 w-5" />
-                          Job Description
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                      <div className="space-y-2">
-  <Label>Paste the job description here *</Label>
-  <Textarea
-    value={jobDescription}
-    onChange={(e) => setJobDescription(e.target.value)}
-    placeholder="Paste the complete job description, including requirements, responsibilities, and company information..."
-    className="min-h-[200px] resize-none"
-  />
-  <p className="text-sm text-gray-500">
-    Include as much detail as possible for a more tailored cover letter
-  </p>
-
-  {/* Validation errors */}
-  {jobDescription.trim().length > 0 && (() => {
-    const input = jobDescription.trim();
-
-    if (input.length < 30) {
-      return <p className="text-sm text-red-600">Job description must be at least 30 characters long.</p>;
-    }
-
-    if (input.split(/\s+/).length < 3) {
-      return <p className="text-sm text-red-600">Please provide at least 3 words.</p>;
-    }
-
-    // ❌ Block only if the whole input is just numbers
-    if (/^\d+$/.test(input)) {
-      return <p className="text-sm text-red-600">Job description cannot be only numbers.</p>;
-    }
-
-    // ❌ Block only if the whole input is just special characters
-    if (/^[^a-zA-Z0-9]+$/.test(input)) {
-      return <p className="text-sm text-red-600">Job description cannot be only special characters.</p>;
-    }
-
-    return null; // ✅ valid
-  })()}
-</div>
-
-                      </CardContent>
-                    </Card>
-
-                    {error && (
-                      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                        {error}
-                      </div>
-                    )}
-
-                    <div className="flex justify-center">
-                      <Button
-                        onClick={handleAnalyze}
-                        disabled={
-                          !extractedText || !jobDescription.trim() || isAnalyzing
-                        }
-                        className="resumaic-gradient-green hover:opacity-90  button-press px-8 py-3"
-                        size="lg"
-                      >
-                        {isAnalyzing ? (
-                          <>
-                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                            Analyzing Resume...
-                          </>
-                        ) : (
-                          <>
-                            <CheckCircle className="h-5 w-5 mr-2" />
-                            Analyze Resume
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    <div ref={analysisRef} className="space-y-6">
-                      {/* Overall Score */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center justify-between">
-                            <span className="flex items-center gap-2">
-                              <BarChart3 className="h-5 w-5" />
-                              ATS Compatibility Score
-                            </span>
-                            <Badge
-                              variant={getScoreBadgeVariant(analysisResult.score)}
-                              className="text-lg px-3 py-1"
-                            >
-                              {analysisResult.score}/100
-                            </Badge>
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <Progress value={analysisResult.score} className="h-3" />
-                          <p className="text-sm text-gray-600 mt-2">
-                            {analysisResult.score >= 80
-                              ? "Excellent! Your resume is well-optimized for ATS systems."
-                              : analysisResult.score >= 60
-                                ? "Good! Your resume has room for improvement."
-                                : "Needs work. Consider implementing the suggestions below."}
-                          </p>
-                        </CardContent>
-                      </Card>
-
-                      {/* Section Scores */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Section Analysis</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            {Object.entries(analysisResult.sections).map(
-                              ([section, data]) => (
-                                <div
-                                  key={section}
-                                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                                >
-                                  <div>
-                                    <h4 className="font-medium">{section}</h4>
-                                    <p className="text-sm text-gray-600">
-                                      {data.feedback}
-                                    </p>
-                                  </div>
-                                  <div className="text-right">
-                                    <span
-                                      className={`font-bold ${getScoreColor(
-                                        data.score
-                                      )}`}
-                                    >
-                                      {data.score}/100
-                                    </span>
-                                  </div>
-                                </div>
-                              )
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* Keywords Analysis */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Card>
-                          <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-green-600">
-                              <CheckCircle className="h-5 w-5" />
-                              Matched Keywords
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="flex flex-wrap gap-2">
-                              {analysisResult.keywords.matched.map((keyword) => (
-                                <Badge
-                                  key={keyword}
-                                  variant="default"
-                                  className="bg-green-100 text-green-800"
-                                >
-                                  {keyword}
-                                </Badge>
-                              ))}
-                            </div>
-                          </CardContent>
-                        </Card>
-
-                        <Card>
-                          <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-red-600">
-                              <AlertTriangle className="h-5 w-5" />
-                              Missing Keywords
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="flex flex-wrap gap-2">
-                              {analysisResult.keywords.missing.map((keyword) => (
-                                <Badge
-                                  key={keyword}
-                                  variant="destructive"
-                                  className="bg-red-100 text-red-800"
-                                >
-                                  {keyword}
-                                </Badge>
-                              ))}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
-
-                      {/* Suggestions */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <Target className="h-5 w-5" />
-                            Improvement Suggestions
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <ul className="space-y-2">
-                            {analysisResult.suggestions.map((suggestion, index) => (
-                              <li key={index} className="flex items-start gap-2">
-                                <span className="text-blue-600 mt-1">•</span>
-                                <span className="text-sm">{suggestion}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </CardContent>
-                      </Card>
-                    </div>
-
-                    <div className="flex justify-end gap-2 mt-4">
-                      {/* Export Dropdown */}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className="flex items-center gap-2"
-                          >
-                            <Download className="h-4 w-4" />
-                            Export
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuItem onClick={exportAsPDF}>
-                            Export as PDF
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={exportAsDOCX}>
-                            Export as DOCX
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-
-                      {/* Close Analysis Button */}
-                      <Button
-                        className="resumaic-gradient-green hover:opacity-90  button-press"
-                        onClick={() => {
-                          setAnalysisResult(null);
-                          setResumeFile(null);
-                          setJobDescription("");
-                          setExtractedText("");
-                          setIsDialogOpen(false);
-                        }}
-                      >
-                        Close Analysis
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </DialogContent>
-            </Dialog>
+          <div>
+            <h1 className="text-3xl font-bold text-[#2D3639] font-rubik">
+              ATS Resume Checker
+            </h1>
+            <p className="text-gray-600 font-inter">
+              Optimize your resume for Applicant Tracking Systems and land more interviews
+            </p>
           </div>
         </div>
+
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button
+              className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
+              onClick={() => {
+                setIsDialogOpen(true);
+                setAnalysisResult(null);
+              }}
+            >
+              <FileCheck className="h-5 w-5 mr-2" />
+              Check Resume Now
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
+            <DialogHeader>
+              <DialogTitle className="font-rubik text-[#2D3639]">
+                ATS Resume Analysis
+              </DialogTitle>
+              <DialogDescription className="font-inter">
+                Upload your resume and job description for ATS optimization analysis
+              </DialogDescription>
+            </DialogHeader>
+
+            {!analysisResult ? (
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 font-rubik text-[#2D3639]">
+                      <FileText className="h-5 w-5 text-[#70E4A8]" />
+                      Upload Resume
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <PDFUploader
+                      onExtractedText={setExtractedText}
+                      onFileUploaded={setResumeFile}
+                    />
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 font-rubik text-[#2D3639]">
+                      <Briefcase className="h-5 w-5 text-[#70E4A8]" />
+                      Job Description
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <Label className="font-inter">Paste the job description here *</Label>
+                      <Textarea
+                        value={jobDescription}
+                        onChange={(e) => setJobDescription(e.target.value)}
+                        placeholder="Paste the complete job description, including requirements, responsibilities, and company information..."
+                        className="min-h-[200px] resize-none font-inter"
+                      />
+                      <p className="text-sm text-gray-500 font-inter">
+                        Include as much detail as possible for a more tailored analysis
+                      </p>
+
+                      {jobDescription.trim().length > 0 && (() => {
+                        const input = jobDescription.trim();
+
+                        if (input.length < 30) {
+                          return <p className="text-sm text-red-600 font-inter">Job description must be at least 30 characters long.</p>;
+                        }
+
+                        if (input.split(/\s+/).length < 3) {
+                          return <p className="text-sm text-red-600 font-inter">Please provide at least 3 words.</p>;
+                        }
+
+                        if (/^\d+$/.test(input)) {
+                          return <p className="text-sm text-red-600 font-inter">Job description cannot be only numbers.</p>;
+                        }
+
+                        if (/^[^a-zA-Z0-9]+$/.test(input)) {
+                          return <p className="text-sm text-red-600 font-inter">Job description cannot be only special characters.</p>;
+                        }
+
+                        return null;
+                      })()}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {error && (
+                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded font-inter">
+                    {error}
+                  </div>
+                )}
+
+                <div className="flex justify-center">
+                  <Button
+                    onClick={handleAnalyze}
+                    disabled={
+                      !extractedText || !jobDescription.trim() || isAnalyzing
+                    }
+                    className="resumaic-gradient-green hover:opacity-90 button-press px-8 py-3"
+                    size="lg"
+                  >
+                    {isAnalyzing ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                        Analyzing Resume...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="h-5 w-5 mr-2" />
+                        Analyze Resume
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div ref={analysisRef} className="space-y-6">
+                  {/* Overall Score */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center justify-between font-rubik text-[#2D3639]">
+                        <span className="flex items-center gap-2">
+                          <BarChart3 className="h-5 w-5 text-[#70E4A8]" />
+                          ATS Compatibility Score
+                        </span>
+                        <Badge
+                          variant={getScoreBadgeVariant(analysisResult.score)}
+                          className="text-lg px-3 py-1 font-inter"
+                        >
+                          {analysisResult.score}/100
+                        </Badge>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Progress value={analysisResult.score} className="h-3 bg-gray-200">
+                        <div 
+                          className="h-full resumaic-gradient-green transition-all duration-300" 
+                          style={{ width: `${analysisResult.score}%` }}
+                        />
+                      </Progress>
+                      <p className="text-sm text-gray-600 mt-2 font-inter">
+                        {analysisResult.score >= 80
+                          ? "Excellent! Your resume is well-optimized for ATS systems."
+                          : analysisResult.score >= 60
+                            ? "Good! Your resume has room for improvement."
+                            : "Needs work. Consider implementing the suggestions below."}
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  {/* Section Scores */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="font-rubik text-[#2D3639]">Section Analysis</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {Object.entries(analysisResult.sections).map(
+                          ([section, data]) => (
+                            <div
+                              key={section}
+                              className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                            >
+                              <div>
+                                <h4 className="font-medium font-rubik text-[#2D3639]">{section}</h4>
+                                <p className="text-sm text-gray-600 font-inter">
+                                  {data.feedback}
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <span
+                                  className={`font-bold font-rubik ${getScoreColor(data.score)}`}
+                                >
+                                  {data.score}/100
+                                </span>
+                              </div>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Keywords Analysis */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-[#70E4A8] font-rubik">
+                          <CheckCircle className="h-5 w-5" />
+                          Matched Keywords
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex flex-wrap gap-2">
+                          {analysisResult.keywords.matched.map((keyword) => (
+                            <Badge
+                              key={keyword}
+                              variant="default"
+                              className="bg-[#70E4A8]/20 text-[#2D3639] hover:bg-[#70E4A8]/30 font-inter"
+                            >
+                              {keyword}
+                            </Badge>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-[#EA580C] font-rubik">
+                          <AlertTriangle className="h-5 w-5" />
+                          Missing Keywords
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex flex-wrap gap-2">
+                          {analysisResult.keywords.missing.map((keyword) => (
+                            <Badge
+                              key={keyword}
+                              variant="outline"
+                              className="bg-[#EA580C]/10 text-[#EA580C] border-[#EA580C]/20 hover:bg-[#EA580C]/20 font-inter"
+                            >
+                              {keyword}
+                            </Badge>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Suggestions */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 font-rubik text-[#2D3639]">
+                        <Target className="h-5 w-5 text-[#70E4A8]" />
+                        Improvement Suggestions
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-3">
+                        {analysisResult.suggestions.map((suggestion, index) => (
+                          <li key={index} className="flex items-start gap-3 p-3 bg-[#70E4A8]/5 rounded-lg">
+                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#70E4A8] text-white text-xs font-bold mt-0.5">
+                              {index + 1}
+                            </div>
+                            <span className="text-sm font-inter text-[#2D3639]">{suggestion}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="flex justify-end gap-2 mt-6">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="flex items-center gap-2 font-inter border-[#70E4A8]/30 hover:border-[#70E4A8]/50"
+                      >
+                        <Download className="h-4 w-4" />
+                        Export
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="font-inter">
+                      <DropdownMenuItem onClick={exportAsPDF}>
+                        Export as PDF
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={exportAsDOCX}>
+                        Export as DOCX
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  <Button
+                    className="resumaic-gradient-green hover:opacity-90 button-press font-inter"
+                    onClick={() => {
+                      setAnalysisResult(null);
+                      setResumeFile(null);
+                      setJobDescription("");
+                      setExtractedText("");
+                      setIsDialogOpen(false);
+                    }}
+                  >
+                    Close Analysis
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Features Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="hover:shadow-lg transition-shadow duration-300">
+        <Card className="hover:shadow-lg transition-shadow duration-300 border-2 border-transparent hover:border-[#70E4A8]/20">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
+              <div className="p-2 rounded-lg bg-[#70E4A8]/20 text-[#70E4A8]">
                 <FileCheck className="h-6 w-6" />
               </div>
-              <CardTitle>ATS Compatibility</CardTitle>
+              <CardTitle className="font-rubik text-[#2D3639]">ATS Compatibility</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600">
+            <p className="text-gray-600 font-inter">
               Get a detailed score showing how well your resume will perform in
               Applicant Tracking Systems.
             </p>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow duration-300">
+        <Card className="hover:shadow-lg transition-shadow duration-300 border-2 border-transparent hover:border-[#70E4A8]/20">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-100 text-green-600">
+              <div className="p-2 rounded-lg bg-[#70E4A8]/20 text-[#70E4A8]">
                 <Search className="h-6 w-6" />
               </div>
-              <CardTitle>Keyword Analysis</CardTitle>
+              <CardTitle className="font-rubik text-[#2D3639]">Keyword Analysis</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600">
+            <p className="text-gray-600 font-inter">
               See which keywords from the job description are missing from your
               resume.
             </p>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow duration-300">
+        <Card className="hover:shadow-lg transition-shadow duration-300 border-2 border-transparent hover:border-[#70E4A8]/20">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-purple-100 text-purple-600">
+              <div className="p-2 rounded-lg bg-[#70E4A8]/20 text-[#70E4A8]">
                 <Target className="h-6 w-6" />
               </div>
-              <CardTitle>Actionable Tips</CardTitle>
+              <CardTitle className="font-rubik text-[#2D3639]">Actionable Tips</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600">
+            <p className="text-gray-600 font-inter">
               Receive personalized suggestions to improve your resume's ATS
               performance.
             </p>
@@ -624,83 +615,50 @@ export default function ATSCheckerPage() {
         </Card>
       </div>
 
-      {/* Tips Section */}
-      {/* <Card className="border-0 shadow-lg">
+      {/* Quick Tips */}
+      <Card className="animate-slide-up-delay-3 hover:shadow-lg transition-all duration-300 border-2 border-transparent hover:border-[#70E4A8]/20">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-2xl">
-            <TrendingUp className="h-6 w-6 text-teal-600" />
-            ATS Optimization Tips
+          <CardTitle className="flex items-center gap-3 font-rubik text-[#2D3639]">
+            <div className="p-2 bg-gradient-to-br from-[#70E4A8] to-[#EA580C] rounded-lg">
+              <TrendingUp className="h-5 w-5 text-white" />
+            </div>
+            Pro Tips for ATS Optimization
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
-              <div className="rounded-full bg-green-100 p-3 flex-shrink-0">
-                <Target className="h-5 w-5 text-green-600" />
+            <div className="flex items-start gap-4 animate-fade-in-stagger" style={{ animationDelay: "100ms" }}>
+              <div className="rounded-full bg-[#70E4A8]/20 p-3 animate-float" style={{ animationDelay: "0s" }}>
+                <FileText className="h-5 w-5 text-[#70E4A8]" />
               </div>
               <div>
-                <h4 className="font-medium text-lg text-gray-900 mb-2">
-                  Keyword Optimization
-                </h4>
-                <p className="text-gray-600">
-                  Include relevant keywords from the job description throughout
-                  your resume, especially in skills and experience sections.
-                </p>
+                <h4 className="font-semibold text-[#2D3639] font-rubik">Use Standard Sections</h4>
+                <p className="text-sm text-gray-600 font-inter">Stick to common section headers like "Experience," "Education," and "Skills"</p>
               </div>
             </div>
-            <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
-              <div className="rounded-full bg-teal-100 p-3 flex-shrink-0">
-                <Award className="h-5 w-5 text-teal-600" />
+
+            <div className="flex items-start gap-4 animate-fade-in-stagger" style={{ animationDelay: "200ms" }}>
+              <div className="rounded-full bg-[#EA580C]/20 p-3 animate-float" style={{ animationDelay: "0.5s" }}>
+                <Search className="h-5 w-5 text-[#EA580C]" />
               </div>
               <div>
-                <h4 className="font-medium text-lg text-gray-900 mb-2">
-                  Simple Formatting
-                </h4>
-                <p className="text-gray-600">
-                  Use clean, simple formatting with standard fonts (Arial, Calibri,
-                  Times New Roman) and avoid tables, columns, and graphics.
-                </p>
+                <h4 className="font-semibold text-[#2D3639] font-rubik">Keyword Optimization</h4>
+                <p className="text-sm text-gray-600 font-inter">Include relevant keywords from the job description throughout your resume</p>
               </div>
             </div>
-            <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
-              <div className="rounded-full bg-blue-100 p-3 flex-shrink-0">
-                <BarChart3 className="h-5 w-5 text-blue-600" />
+
+            <div className="flex items-start gap-4 animate-fade-in-stagger" style={{ animationDelay: "300ms" }}>
+              <div className="rounded-full bg-[#70E4A8]/20 p-3 animate-float" style={{ animationDelay: "1s" }}>
+                <Briefcase className="h-5 w-5 text-[#70E4A8]" />
               </div>
               <div>
-                <h4 className="font-medium text-lg text-gray-900 mb-2">
-                  Quantify Achievements
-                </h4>
-                <p className="text-gray-600">
-                  Include numbers and metrics to show impact (e.g., "Increased
-                  sales by 30%" instead of "Increased sales").
-                </p>
+                <h4 className="font-semibold text-[#2D3639] font-rubik">Quantify Achievements</h4>
+                <p className="text-sm text-gray-600 font-inter">Use numbers and metrics to demonstrate your impact and accomplishments</p>
               </div>
             </div>
           </div>
         </CardContent>
-      </Card> */}
-
-      {/* CTA Section */}
-      {/* <div className="text-center py-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">
-          Ready to Optimize Your Resume?
-        </h2>
-        <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-          Get past applicant tracking systems and increase your chances of landing
-          interviews with our comprehensive analysis.
-        </p>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button
-              size="lg"
-              className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 px-8 py-6 text-lg shadow-lg hover:shadow-teal-500/30"
-            >
-              <FileCheck className="h-5 w-5 mr-2" />
-              Check My Resume Now
-            </Button>
-          </DialogTrigger>
-        </Dialog>
-      </div> */}
+      </Card>
     </div>
   );
 }

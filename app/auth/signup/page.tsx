@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Crown, User, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
 import { registerUser, clearError } from "@/lib/redux/slices/authSlice"
+import Image from "next/image"
 
 export default function SignUpPage() {
   const [name, setName] = useState("")
@@ -61,12 +62,12 @@ export default function SignUpPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-lg">
-              <Crown className="h-6 w-6" />
+        <div className="flex items-center mx-auto mb-4">
+            <Link href="/" >
+                <Image src="/Resumic.png" alt="Logo" width={200} height= {90}  className="cursor-pointer"/>
+            </Link>
             </div>
-          </div>
-          <CardTitle className="text-2xl font-bold text-gray-900">Create Your Account</CardTitle>
+          <CardTitle className="text-xl font-bold text-gray-900">Create Your Account</CardTitle>
           <CardDescription>Join CV Builder AI to get started</CardDescription>
         </CardHeader>
         <CardContent>
@@ -161,7 +162,7 @@ export default function SignUpPage() {
             <Button
               type="submit"
               // disabled={loading || !name || !email || !password || !confirmPassword || !!passwordError}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              className="w-full resumaic-gradient-green hover:opacity-90  button-press"
             >
               {loading ? (
                 <>
