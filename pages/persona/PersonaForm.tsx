@@ -1295,7 +1295,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             !formData.personalInfo.jobTitle ||
             isGenerating
           }
-          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+          className="resumaic-gradient-green hover:opacity-90  button-press"
         >
           {isGenerating ? (
             <>
