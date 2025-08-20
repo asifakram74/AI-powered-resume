@@ -205,7 +205,7 @@ useEffect(() => {
                       `/create-cv?personaId=${selectedPersonaId}&templateId=${selectedTemplate.id}`
                     );
                   }}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  className="resumaic-gradient-green hover:opacity-90  button-press"
                 >
                   Create AI CV
                 </Button>
@@ -357,7 +357,7 @@ useEffect(() => {
           <Button
             type="submit"
             disabled={isLoading}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 cursor-pointer"
+            className="resumaic-gradient-green hover:opacity-90  button-press"
           >
             {isLoading ? (
               <>
