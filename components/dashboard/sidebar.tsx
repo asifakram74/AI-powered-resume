@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { FileText, Mail, CheckCircle, UserCircle, Sparkles, BarChart3, LogOut, ChevronDown } from "lucide-react"
+import { FileText, Mail, CheckCircle, UserCircle, Sparkles, BarChart3, LogOut, ChevronDown, Users } from "lucide-react"
 import Link from "next/link"
 import {
   Sidebar as SidebarPrimitive,
@@ -11,25 +11,66 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarFooter,
+  SidebarGroup,
 } from "@/components/ui/sidebar"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
 import { logoutUser } from "@/lib/redux/slices/authSlice"
 import { useRouter } from "next/navigation"
+import { getCVs } from "@/lib/redux/service/resumeService"
+
+function useResumeCount(userId: string | number | undefined) {
+  const [resumeCount, setResumeCount] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const { profile } = useAppSelector((state) => state.auth)
+
+  useEffect(() => {
+    const fetchResumeCount = async () => {
+      if (!userId) return
+
+      try {
+        setLoading(true)
+        if (profile?.cvs_count !== undefined) {
+          setResumeCount(profile.cvs_count)
+        } else {
+          const cvs = await getCVs(userId.toString())
+          setResumeCount(cvs.length)
+        }
+      } catch (error) {
+        console.error("Failed to fetch resume count:", error)
+        setResumeCount(0)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchResumeCount()
+  }, [userId, profile?.cvs_count])
+
+  return { resumeCount, loading }
+}
 
 interface SidebarProps {
   activePage: string
   setActivePage: (page: string) => void
+  user: {
+    id: string | number;
+    role?: string;
+    name?: string;
+    email?: string;
+    profilePicture?: string;
+  } | null
   onExportPDF?: () => Promise<void>
   onExportDOCX?: () => Promise<void>
   onExportPNG?: () => Promise<void>
   exportMode?: boolean
 }
 
-const menuItems = [
+const regularMenuItems = [
   {
     id: "create-persona",
     label: "Persona",
@@ -39,14 +80,12 @@ const menuItems = [
     id: "resumes",
     label: "Resumes",
     badge: "AI",
-    // badgeColor: "resumaic-gradient-green text-white shadow-lg",
     icon: FileText,
   },
   {
     id: "cover-letter",
     label: "Cover Letters",
     badge: "AI",
-    // badgeColor: "resumaic-gradient-green text-white ",
     icon: Mail,
   },
   {
@@ -60,21 +99,34 @@ const menuItems = [
     id: "profile",
     label: "Profile",
     icon: UserCircle,
+    badge: "",
+    badgeColor: "transparent",
+  },
+]
+
+const adminMenuItems = [
+  {
+    id: "users",
+    label: "User Management",
+    icon: Users,
+    badge: "",
+    badgeColor: "transparent",
   },
 ]
 
 export function Sidebar({
   activePage,
   setActivePage,
+  user,
   onExportPDF,
   onExportDOCX,
   onExportPNG,
-  exportMode = false,
+  exportMode = false
 }: SidebarProps) {
   const [isMounted, setIsMounted] = useState(false)
   const dispatch = useAppDispatch()
   const router = useRouter()
-  const { user } = useAppSelector((state) => state.auth)
+  const { resumeCount, loading } = useResumeCount(user?.id)
 
   useEffect(() => {
     setIsMounted(true)
@@ -84,6 +136,21 @@ export function Sidebar({
     await dispatch(logoutUser())
     router.push("/")
   }
+
+  const isAdmin = user?.role?.toLowerCase() === "admin"
+  const maxResumes = 3
+  const progressPercentage = Math.min((resumeCount / maxResumes) * 100, 100)
+
+  // Function to get user initials
+  const getInitials = (name?: string) => {
+    if (!name) return "US";
+    return name
+      .split(" ")
+      .map(n => n[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
+  };
 
   return (
     <SidebarPrimitive
@@ -104,46 +171,66 @@ export function Sidebar({
             </div>
           </div>
           {user && (
-            <div className="mt-4 p-4 bg-gradient-to-br from-green-50/80 to-white rounded-2xl border border-green-100/50 shadow-sm animate-fade-in-up animation-delay-200">
-              <p className="text-sm font-semibold text-gray-900">{user.name}</p>
-              <p className="text-xs text-gray-500">{user.email}</p>
+            <div className="mt-4 p-3 bg-gray-50 rounded-lg flex items-top gap-3">
+              <Avatar className="h-10 w-10">
+                <AvatarFallback className="bg-gradient-to-br resumaic-gradient-green text-2x text-white font-medium">
+                  {user?.name
+                    ?.split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .slice(0, 2)
+                    .toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                <p className="text-xs text-gray-500">{user.email}</p>
+                {
+                  user.role?.toLowerCase() === 'admin' && (
+                    <Badge className="bg-gradient-to-br resumaic-gradient-green text-white text-xs">
+                      Administrator
+                    </Badge>
+                  )}
+              </div>
             </div>
           )}
         </SidebarHeader>
       </Link>
 
-      <SidebarContent className="px-4">
-        <SidebarMenu className="space-y-2">
-          {menuItems.map((item, index) => (
-            <SidebarMenuItem key={item.id} className={`animate-fade-in-up animation-delay-${(index + 1) * 100}`}>
-              <SidebarMenuButton
-                onClick={() => setActivePage(item.id)}
-                isActive={activePage === item.id}
-                className={`
-                  w-full justify-start gap-3 px-4 py-3.5 text-left rounded-2xl transition-all duration-300
-                  hover:bg-gradient-to-r hover:from-green-50/80 hover:to-orange-50/30 hover:shadow-lg hover:scale-[1.02]
-                  data-[active=true]:resumaic-gradient-subtle data-[active=true]:text-gray-900 data-[active=true]:shadow-xl 
-                  data-[active=true]:border data-[active=true]:border-green-200/50 data-[active=true]:scale-[1.02]
-                  group cursor-pointer transform
-                `}
-              >
-                <div className="flex items-center gap-3 flex-1">
-                  <item.icon className="h-5 w-5 text-gray-600 group-data-[active=true]:text-green-700 transition-all duration-300 group-hover:scale-110" />
-                  <span className="font-semibold text-gray-700 group-data-[active=true]:text-gray-900 group-hover:text-gray-900">
-                    {item.label}
-                  </span>
-                </div>
-                {item.badge && (
-                  <Badge
-                    className={`text-xs px-3 py-1 font-bold rounded-full transform transition-all duration-300 group-hover:scale-110 ${item.badgeColor || "bg-gray-100 text-gray-700"}`}
-                  >
-                    {item.badge}
-                  </Badge>
-                )}
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
+      <SidebarContent className="px-3">
+        <SidebarGroup>
+          <SidebarMenu className="space-y-1">
+            {[...regularMenuItems, ...(isAdmin ? adminMenuItems : [])].map((item, index) => (
+              <SidebarMenuItem key={item.id} className={`animate-fade-in-up animation-delay-${(index + 1) * 100}`}>
+                <SidebarMenuButton
+                  onClick={() => setActivePage(item.id)}
+                  isActive={activePage === item.id}
+                  className={`
+                    w-full justify-start gap-3 px-4 py-3.5 text-left rounded-2xl transition-all duration-300
+                    hover:bg-gradient-to-r hover:from-green-50/80 hover:to-orange-50/30 hover:shadow-lg hover:scale-[1.02]
+                    data-[active=true]:resumaic-gradient-subtle data-[active=true]:text-gray-900 data-[active=true]:shadow-xl 
+                    data-[active=true]:border data-[active=true]:border-green-200/50 data-[active=true]:scale-[1.02]
+                    group cursor-pointer transform
+                  `}
+                >
+                  <div className="flex items-center gap-3 flex-1">
+                    <item.icon className="h-5 w-5 text-gray-600 group-data-[active=true]:text-green-700 transition-all duration-300 group-hover:scale-110" />
+                    <span className="font-semibold text-gray-700 group-data-[active=true]:text-gray-900 group-hover:text-gray-900">
+                      {item.label}
+                    </span>
+                  </div>
+                  {item.badge && (
+                    <Badge
+                      className={`text-xs px-3 py-1 font-bold rounded-full transform transition-all duration-300 group-hover:scale-110 ${item.badgeColor || "bg-gray-100 text-gray-700"}`}
+                    >
+                      {item.badge}
+                    </Badge>
+                  )}
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter className="p-4 mt-auto space-y-4">
@@ -174,8 +261,7 @@ export function Sidebar({
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          /* Updated usage stats card with Resumaic branding and enhanced animations */
-          <div className="p-5 rounded-2xl bg-gradient-to-br from-green-50/80 via-white to-orange-50/30 border border-green-200/50  ">
+          <div className="p-5 rounded-2xl bg-gradient-to-br from-green-50/80 via-white to-orange-50/30 border border-green-200/50">
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2.5 rounded-xl resumaic-gradient-green shadow-lg">
                 <BarChart3 className="h-4 w-4 text-white" />
@@ -185,14 +271,26 @@ export function Sidebar({
               </div>
             </div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-gray-600">Personas created</span>
-              <span className="text-sm font-bold ">3/10</span>
+              <span className="text-xs font-medium text-gray-600">
+                Resumes created
+              </span>
+              {loading ? (
+                <div className="h-4 w-10 bg-gray-200 rounded animate-pulse"></div>
+              ) : (
+                <span className="text-sm font-bold">
+                  {resumeCount}/{maxResumes}
+                </span>
+              )}
             </div>
             <div className="w-full bg-gray-200/80 rounded-full h-2 shadow-inner">
-              <div
-                className="resumaic-gradient-green h-2 rounded-full shadow-sm animate-pulse-slow"
-                style={{ width: "30%" }}
-              ></div>
+              {loading ? (
+                <div className="h-2 rounded-full bg-gray-300 animate-pulse"></div>
+              ) : (
+                <div
+                  className="resumaic-gradient-green h-2 rounded-full shadow-sm transition-all duration-700 ease-out"
+                  style={{ width: `${progressPercentage}%` }}
+                ></div>
+              )}
             </div>
           </div>
         )}

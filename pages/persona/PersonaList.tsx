@@ -45,9 +45,10 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import type { CVData } from "@/types/cv-data";
-import { PersonaCreationOptions } from "@/components/persona/AddEditPersona";
-import { PersonaForm } from "@/components/persona/PersonaForm";
+import { PersonaCreationOptions } from "@/pages/persona/AddEditPersona";
+import { PersonaForm } from "@/pages/persona/PersonaForm";
 import {
+  getAllPersonas,
   getPersonas,
   getPersonaById,
   createPersona,
@@ -56,12 +57,12 @@ import {
   type PersonaData,
   type PersonaResponse,
 } from "@/lib/redux/service/pasonaService";
-import { useAppSelector, useAppDispatch } from "@/lib/redux/hooks";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
-import { Crown,UserCircle } from "lucide-react";
+import { Crown, UserCircle } from "lucide-react";
+import { PageProps } from "@/app/dashboard/page";
 
-export function CreatePersonaPage() {
+export function CreatePersonaPage({ user }: PageProps) {
   const [personas, setPersonas] = useState<CVData[]>([])
   const [viewMode, setViewMode] = useState<"grid" | "table">("table");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -72,14 +73,21 @@ export function CreatePersonaPage() {
     Omit<CVData, "id" | "createdAt">
   > | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAppSelector((state) => state.auth);
   const userId = user?.id;
 
   useEffect(() => {
     const fetchPersonas = async () => {
       try {
         setIsLoading(true);
-        const data = await getPersonas(userId?.toString() || '');
+
+        let data: PersonaResponse[] = [];
+
+        if (user?.role?.toLowerCase() === 'admin') {
+          data = await getAllPersonas();
+        } else {
+          data = await getPersonas(userId?.toString() || "");
+        }
+
         const formattedPersonas = data.map((persona: PersonaResponse) => ({
           id: persona.id.toString(),
           personalInfo: {
@@ -118,6 +126,7 @@ export function CreatePersonaPage() {
           createdAt: persona.created_at || new Date().toISOString(),
           generatedPersona: "",
         }));
+
         setPersonas(formattedPersonas);
       } catch (error) {
         console.error("Error fetching personas:", error);
@@ -126,10 +135,11 @@ export function CreatePersonaPage() {
       }
     };
 
-    if (userId) {
+    if (user) {
       fetchPersonas();
     }
-  }, [userId]);
+  }, [user, userId]);
+
 
   const handleOptionSelect = (
     option: "manual" | "pdf" | "linkedin",
@@ -405,7 +415,6 @@ export function CreatePersonaPage() {
     }
   };
 
-  // Filter personas based on search term
   const filteredPersonas = personas.filter((persona) => {
     const searchLower = searchTerm.toLowerCase();
     return (
@@ -477,7 +486,7 @@ export function CreatePersonaPage() {
                 {editingPersona ? 'Edit Persona' : 'Create New Persona'}
               </DialogTitle>
               <DialogDescription>
-                {editingPersona 
+                {editingPersona
                   ? 'Update the persona details below.'
                   : 'Create a new persona by filling in the details below.'}
               </DialogDescription>
@@ -568,23 +577,22 @@ export function CreatePersonaPage() {
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
-                            <AvatarFallback
-  className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${
-    user?.role === 'admin'
-      ? ''
-      : 'bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]'
-  }`}
->
-  {user?.role === 'admin' ? (
-    <Crown className="h-5 w-5 text-[#EA580C]" /> // Orange crown for admin
-  ) : user?.name ? (
-    user.name.charAt(0).toUpperCase()
-  ) : (
-    <UserCircle className="h-5 w-5 text-[#70E4A8]" />
-  )}
-</AvatarFallback>
+                              <AvatarFallback
+                                className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${user?.role === 'admin'
+                                  ? ''
+                                  : 'bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]'
+                                  }`}
+                              >
+                                {user?.role === 'admin' ? (
+                                  <Crown className="h-5 w-5 text-[#EA580C]" /> // Orange crown for admin
+                                ) : user?.name ? (
+                                  user.name.charAt(0).toUpperCase()
+                                ) : (
+                                  <UserCircle className="h-5 w-5 text-[#70E4A8]" />
+                                )}
+                              </AvatarFallback>
 
-                                                   </Avatar>
+                            </Avatar>
                             <div>
                               <div className="font-medium">
                                 {persona.personalInfo.fullName}
@@ -696,22 +704,21 @@ export function CreatePersonaPage() {
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
-                      <AvatarFallback
-  className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${
-    user?.role === 'admin'
-      ? ''
-      : 'bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]'
-  }`}
->
-  {user?.role === 'admin' ? (
-    <Crown className="h-5 w-5 text-[#EA580C]" /> // Orange crown for admin
-  ) : user?.name ? (
-    user.name.charAt(0).toUpperCase()
-  ) : (
-    <UserCircle className="h-5 w-5 text-[#70E4A8]" />
-  )}
-</AvatarFallback>
+                        <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                          <AvatarFallback
+                            className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${user?.role === 'admin'
+                              ? ''
+                              : 'bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]'
+                              }`}
+                          >
+                            {user?.role === 'admin' ? (
+                              <Crown className="h-5 w-5 text-[#EA580C]" />
+                            ) : user?.name ? (
+                              user.name.charAt(0).toUpperCase()
+                            ) : (
+                              <UserCircle className="h-5 w-5 text-[#70E4A8]" />
+                            )}
+                          </AvatarFallback>
 
                         </Avatar>
                         <div>
@@ -892,82 +899,82 @@ export function CreatePersonaPage() {
 
       {/* Quick Tips */}
       <Card className="animate-slide-up-delay-3 hover:shadow-lg transition-all duration-300">
-  <CardHeader>
-    <CardTitle className="flex items-center gap-3 font-rubik text-[#2D3639]">
-      <div className="p-2 bg-gradient-to-br from-[#70E4A8] to-[#EA580C] rounded-lg">
-        <TrendingUp className="h-5 w-5 text-white" />
-      </div>
-      Pro Tips
-    </CardTitle>
-  </CardHeader>
-  <CardContent>
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      
-      {/* Tip 1 */}
-      <div
-        className="flex items-start gap-4 animate-fade-in-stagger"
-        style={{ animationDelay: "100ms" }}
-      >
-        <div
-          className="rounded-full bg-[#70E4A8]/20 p-3 animate-float"
-          style={{ animationDelay: "0s" }}
-        >
-          <User className="h-5 w-5 text-[#70E4A8]" />
-        </div>
-        <div>
-          <h4 className="font-semibold text-[#2D3639] font-rubik">
-            Complete Information
-          </h4>
-          <p className="text-sm text-gray-600 font-inter">
-            Fill in all sections for the most comprehensive persona
-          </p>
-        </div>
-      </div>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-3 font-rubik text-[#2D3639]">
+            <div className="p-2 bg-gradient-to-br from-[#70E4A8] to-[#EA580C] rounded-lg">
+              <TrendingUp className="h-5 w-5 text-white" />
+            </div>
+            Pro Tips
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-      {/* Tip 2 */}
-      <div
-        className="flex items-start gap-4 animate-fade-in-stagger"
-        style={{ animationDelay: "200ms" }}
-      >
-        <div
-          className="rounded-full bg-[#EA580C]/20 p-3 animate-float"
-          style={{ animationDelay: "0.5s" }}
-        >
-          <Briefcase className="h-5 w-5 text-[#EA580C]" />
-        </div>
-        <div>
-          <h4 className="font-semibold text-[#2D3639] font-rubik">
-            Detailed Experience
-          </h4>
-          <p className="text-sm text-gray-600 font-inter">
-            Include specific responsibilities and achievements
-          </p>
-        </div>
-      </div>
+            {/* Tip 1 */}
+            <div
+              className="flex items-start gap-4 animate-fade-in-stagger"
+              style={{ animationDelay: "100ms" }}
+            >
+              <div
+                className="rounded-full bg-[#70E4A8]/20 p-3 animate-float"
+                style={{ animationDelay: "0s" }}
+              >
+                <User className="h-5 w-5 text-[#70E4A8]" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-[#2D3639] font-rubik">
+                  Complete Information
+                </h4>
+                <p className="text-sm text-gray-600 font-inter">
+                  Fill in all sections for the most comprehensive persona
+                </p>
+              </div>
+            </div>
 
-      {/* Tip 3 */}
-      <div
-        className="flex items-start gap-4 animate-fade-in-stagger"
-        style={{ animationDelay: "300ms" }}
-      >
-        <div
-          className="rounded-full bg-blue-100 p-3 animate-float"
-          style={{ animationDelay: "1s" }}
-        >
-          <Target className="h-5 w-5 text-blue-600" />
-        </div>
-        <div>
-          <h4 className="font-semibold text-[#2D3639] font-rubik">
-            Relevant Skills
-          </h4>
-          <p className="text-sm text-gray-600 font-inter">
-            Focus on skills that match your career goals
-          </p>
-        </div>
-      </div>
-    </div>
-  </CardContent>
-</Card>
+            {/* Tip 2 */}
+            <div
+              className="flex items-start gap-4 animate-fade-in-stagger"
+              style={{ animationDelay: "200ms" }}
+            >
+              <div
+                className="rounded-full bg-[#EA580C]/20 p-3 animate-float"
+                style={{ animationDelay: "0.5s" }}
+              >
+                <Briefcase className="h-5 w-5 text-[#EA580C]" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-[#2D3639] font-rubik">
+                  Detailed Experience
+                </h4>
+                <p className="text-sm text-gray-600 font-inter">
+                  Include specific responsibilities and achievements
+                </p>
+              </div>
+            </div>
+
+            {/* Tip 3 */}
+            <div
+              className="flex items-start gap-4 animate-fade-in-stagger"
+              style={{ animationDelay: "300ms" }}
+            >
+              <div
+                className="rounded-full bg-blue-100 p-3 animate-float"
+                style={{ animationDelay: "1s" }}
+              >
+                <Target className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-[#2D3639] font-rubik">
+                  Relevant Skills
+                </h4>
+                <p className="text-sm text-gray-600 font-inter">
+                  Focus on skills that match your career goals
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
     </div>
   );

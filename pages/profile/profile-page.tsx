@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useForm } from "react-hook-form"
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
-import { updateProfile, fetchProfile } from "@/lib/redux/slices/authSlice"
+import { updateProfile, fetchProfile, clearProfile } from "@/lib/redux/slices/authSlice" // Import clearProfile
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -15,10 +15,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { ChangePassword } from "./ChangePassword"
 import { getPersonas } from "@/lib/redux/service/pasonaService"
-import { getCVs } from "@/lib/redux/service/cvService"
+import { getCVs } from "@/lib/redux/service/resumeService"
 import { getCoverLetters } from "@/lib/redux/service/coverLetterService"
 import { getATSResumes } from "@/lib/redux/service/atsResumeService"
 import { showSuccessToast, showErrorToast } from "@/components/ui/toast"
+import { useRouter } from "next/navigation"
 
 interface StatItem {
   label: string
@@ -35,19 +36,20 @@ interface ProfileFormData {
 
 export function ProfilePage() {
   const dispatch = useAppDispatch()
+  const router = useRouter()
   const { profile, loading: authLoading, user } = useAppSelector((state) => state.auth)
   const [stats, setStats] = useState<StatItem[]>([])
   const [showEditModal, setShowEditModal] = useState(false)
   const [showPasswordDialog, setShowPasswordDialog] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [loadingError, setLoadingError] = useState<string | null>(null)
+  const hasLoaded = useRef(false)
 
   const {
     register,
     handleSubmit,
     formState: { errors, isDirty },
     reset,
-    watch,
   } = useForm<ProfileFormData>({
     defaultValues: {
       name: profile?.name || '',
@@ -57,10 +59,16 @@ export function ProfilePage() {
   })
 
   useEffect(() => {
-    const loadData = async () => {
+    const checkAndLoadProfile = async () => {
       try {
         setIsLoading(true)
-        await dispatch(fetchProfile()).unwrap()
+        
+        if (profile && user && profile.email !== user.email) {
+          dispatch(clearProfile())
+          await dispatch(fetchProfile()).unwrap()
+        } else if (!profile) {
+          await dispatch(fetchProfile()).unwrap()
+        }
 
         if (user?.id) {
           const [personas, cvs, coverLetters, atsResumes] = await Promise.all([
@@ -97,15 +105,18 @@ export function ProfilePage() {
             },
           ])
         }
+        
+        hasLoaded.current = true
       } catch (error) {
         setLoadingError("Failed to load profile data. Please try again.")
+        router.push('/login')
       } finally {
         setIsLoading(false)
       }
     }
 
-    loadData()
-  }, [dispatch, user?.id])
+    checkAndLoadProfile()
+  }, [dispatch, user?.id, profile, router])
 
   useEffect(() => {
     if (profile) {
@@ -141,12 +152,12 @@ export function ProfilePage() {
     )
   }
 
-  if (isLoading || !profile) {
+  if (loadingError || !profile) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Alert variant="destructive" className="w-auto">
           <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{isLoading || "Failed to load profile data"}</AlertDescription>
+          <AlertDescription>{loadingError || "Failed to load profile data"}</AlertDescription>
         </Alert>
       </div>
     )
@@ -157,7 +168,6 @@ export function ProfilePage() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
         <div className="flex items-top gap-4">
           <Avatar className="h-16 w-16">
-            <AvatarImage src="" />
             <AvatarFallback className="bg-gradient-to-br from-indigo-600 to-purple-600 text-white text-2xl font-medium">
               {profile?.name
                 ?.split(" ")
@@ -230,19 +240,19 @@ export function ProfilePage() {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-sm font-mediumfont-bold text-gray-900 dark:text-white">Full Name</Label>
-                  <p className="text-sm font-medium text-gray-500">{profile.name}</p>
+                  <Label className="text-sm font-medium text-gray-900 dark:text-white">Full Name</Label>
+                  <p className="text-sm text-gray-500">{profile.name}</p>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-mediumfont-bold text-gray-900 dark:text-white">Email Address</Label>
+                  <Label className="text-sm font-medium text-gray-900 dark:text-white">Email Address</Label>
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4 text-gray-400" />
-                    <p className="text-sm font-medium text-gray-500">{profile.email}</p>
+                    <p className="text-sm text-gray-500">{profile.email}</p>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-mediumfont-bold text-gray-900 dark:text-white">Account Type</Label>
-                  <p  className="text-sm font-medium capitalize text-gray-500">{profile.plan_type || 'Free'}</p>
+                  <Label className="text-sm font-medium text-gray-900 dark:text-white">Account Type</Label>
+                  <p  className="text-sm capitalize text-gray-500">{profile.plan_type || 'Free'}</p>
                 </div>
               </div>
             </CardContent>
@@ -253,7 +263,7 @@ export function ProfilePage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 font-bold text-gray-900 dark:text-white" />
+                <TrendingUp className="h-5 w-5 text-gray-900 dark:text-white" />
                 Usage Statistics
               </CardTitle>
             </CardHeader>
@@ -262,8 +272,8 @@ export function ProfilePage() {
                 {stats.map((stat, index) => (
                   <div key={index} className="text-center p-3 bg-gray-50 rounded-lg">
                     <stat.icon className={`h-6 w-6 mx-auto mb-2 ${stat.color}`} />
-                    <h3 className="text-2xl font-bold font-bold text-gray-900 dark:text-white">{stat.value}</h3>
-                    <p className="text-sm font-bold text-gray-500">{stat.label}</p>
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</h3>
+                    <p className="text-sm text-gray-500">{stat.label}</p>
                   </div>
                 ))}
               </div>

@@ -190,6 +190,12 @@ const dashboardMenuItems = [
     label: "Profile",
     icon: UserCircle,
     href: "/dashboard?page=profile",
+  }, 
+   {
+    id: "users",
+    label: "Users",
+    icon: UserCircle,
+    href: "/dashboard?page=users",
   },
   {
     id: "settings",

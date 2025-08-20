@@ -123,7 +123,7 @@ export default function SignInPage() {
 
             <Button
               type="submit"
-              disabled={loading || !email || !password}
+              // disabled={loading || !email || !password}
               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
             >
               {loading ? (

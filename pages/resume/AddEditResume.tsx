@@ -16,9 +16,10 @@ import {
 import Select from 'react-select';
 import { Badge } from "@/components/ui/badge";
 import { Save } from "lucide-react";
-import type { CreateCVData, CV } from "@/lib/redux/service/cvService";
+import type { CreateCVData, CV } from "@/lib/redux/service/resumeService";
 import { useAppSelector } from "@/lib/redux/hooks";
 import {
+  getAllPersonas,
   getPersonas,
   type PersonaResponse,
 } from "@/lib/redux/service/pasonaService";
@@ -85,33 +86,44 @@ export function CVWizard({
 
   const currentPersonaId = watch("personas_id");
 
-  useEffect(() => {
-    const loadPersonas = async () => {
-      if (!user?.id) return;
-      setIsLoading(true);
-      try {
-        const data = await getPersonas(user.id.toString());
-        console.log("Fetched personas:", data);
-        setPersonas(data);
-        setApiError(null);
-
-        if (personaId || editingCV?.personas_id) {
-          const personaExists = data.some(
-            (p) => p.id.toString() === (personaId || editingCV?.personas_id)
-          );
-          if (!personaExists) {
-            console.warn("Specified persona not found in fetched list");
-          }
-        }
-      } catch (error) {
-        console.error("Error loading personas:", error);
-        setApiError("Failed to load personas. Please try again.");
-      } finally {
-        setIsLoading(false);
+useEffect(() => {
+  const loadPersonas = async () => {
+    // For admin users, we don't need user.id to fetch all personas
+    if (!user?.id && user?.role?.toLowerCase() !== 'admin') return;
+    
+    setIsLoading(true);
+    try {
+      let data;
+      
+      // Conditionally call different APIs based on user role
+      if (user?.role?.toLowerCase() === 'admin') {
+        data = await getAllPersonas(); // API for admin users
+      } else {
+        data = await getPersonas(user.id.toString()); // API for regular users
       }
-    };
-    loadPersonas();
-  }, [user?.id, personaId, editingCV?.personas_id]);
+      
+      console.log("Fetched personas:", data);
+      setPersonas(data);
+      setApiError(null);
+
+      if (personaId || editingCV?.personas_id) {
+        const personaExists = data.some(
+          (p) => p.id.toString() === (personaId || editingCV?.personas_id)
+        );
+        if (!personaExists) {
+          console.warn("Specified persona not found in fetched list");
+        }
+      }
+    } catch (error) {
+      console.error("Error loading personas:", error);
+      setApiError("Failed to load personas. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  loadPersonas();
+}, [user?.id, user?.role, personaId, editingCV?.personas_id]);
 
   const handleTemplateSelect = (template: { id: string; name: string }) => {
     setSelectedTemplate(template);

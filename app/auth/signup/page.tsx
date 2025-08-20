@@ -18,7 +18,10 @@ export default function SignUpPage() {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [passwordError, setPasswordError] = useState("")
 
   const router = useRouter()
   const dispatch = useAppDispatch()
@@ -28,9 +31,25 @@ export default function SignUpPage() {
     dispatch(clearError())
   }, [dispatch])
 
+  useEffect(() => {
+    // Validate password match
+    if (password && confirmPassword && password !== confirmPassword) {
+      setPasswordError("Passwords do not match")
+    } else {
+      setPasswordError("")
+    }
+  }, [password, confirmPassword])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     dispatch(clearError())
+    setPasswordError("")
+
+    // Validate passwords match before submitting
+    if (password !== confirmPassword) {
+      setPasswordError("Passwords do not match")
+      return
+    }
 
     const result = await dispatch(registerUser({ name, email, password }))
     if (registerUser.fulfilled.match(result)) {
@@ -113,9 +132,35 @@ export default function SignUpPage() {
               </div>
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm your password"
+                  className="pl-10 pr-10"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {passwordError && (
+                <p className="text-sm text-red-500">{passwordError}</p>
+              )}
+            </div>
+
             <Button
               type="submit"
-              disabled={loading || !name || !email || !password}
+              // disabled={loading || !name || !email || !password || !confirmPassword || !!passwordError}
               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
             >
               {loading ? (

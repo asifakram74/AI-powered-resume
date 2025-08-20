@@ -38,15 +38,15 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
+  getAllCVs,
   getCVs,
   deleteCV,
   createCV,
   updateCV,
   type CV,
   CreateCVData,
-} from "@/lib/redux/service/cvService";
+} from "@/lib/redux/service/resumeService";
 import { useRouter } from "next/navigation";
-import { useAppSelector } from "@/lib/redux/hooks";
 import {
   Dialog,
   DialogContent,
@@ -57,11 +57,11 @@ import {
 } from "@/components/ui/dialog";
 import { CVWizard } from "./AddEditResume";
 import { toast } from "sonner";
-
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Crown, UserCircle } from "lucide-react";
+import { PageProps } from "@/app/dashboard/page";
 
-export function ResumePage() {
+export function ResumePage({ user }: PageProps) {
   const router = useRouter();
   const [cvs, setCVs] = useState<CV[]>([]);
   const [viewMode, setViewMode] = useState<"grid" | "table">("table");
@@ -70,24 +70,30 @@ export function ResumePage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedCV, setSelectedCV] = useState<CV | null>(null);
-  const { user } = useAppSelector((state) => state.auth);
   const userId = user?.id;
 
   useEffect(() => {
-    const fetchCVs = async () => {
-      try {
-        setIsLoading(true);
-        const data = await getCVs(userId?.toString() || "");
-        setCVs(data);
-      } catch (error) {
-        console.error("Error fetching CVs:", error);
-      } finally {
-        setIsLoading(false);
+  const fetchCVs = async () => {
+    try {
+      setIsLoading(true);
+      
+      let data;
+      if (user?.role?.toLowerCase() === 'admin') {
+        data = await getAllCVs();
+      } else {
+        data = await getCVs(userId?.toString() || "");
       }
-    };
+      
+      setCVs(data);
+    } catch (error) {
+      console.error("Error fetching CVs:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    fetchCVs();
-  }, [userId]);
+  fetchCVs();
+}, [userId, user?.role]);
 
   const handleCreateAICV = (personaId: string) => {
     router.push(`/create-cv?personaId=${personaId}`);
@@ -121,9 +127,9 @@ export function ResumePage() {
     }
   };
 
-   const handleEdit = (cv: CV) => {
-        router.push(`/create-cv?cvId=${cv.id}`);
-      };  
+  const handleEdit = (cv: CV) => {
+    router.push(`/create-cv?cvId=${cv.id}`);
+  };
 
   const handleDelete = async (cv: CV) => {
     try {
@@ -279,11 +285,10 @@ export function ResumePage() {
                           <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
                               <AvatarFallback
-                                className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${
-                                  user?.role === "admin"
+                                className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${user?.role === "admin"
                                     ? ""
                                     : "bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]"
-                                }`}
+                                  }`}
                               >
                                 {user?.role === "admin" ? (
                                   <Crown className="h-5 w-5 text-[#EA580C]" />
@@ -315,14 +320,14 @@ export function ResumePage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                                  onClick={() => handleEdit(cv)}                              className="cursor-pointer"
+                              onClick={() => handleEdit(cv)} className="cursor-pointer"
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="sm"
-                                  onClick={() => handleEdit(cv)}                              className="cursor-pointer"
+                              onClick={() => handleEdit(cv)} className="cursor-pointer"
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -362,11 +367,10 @@ export function ResumePage() {
                       <div className="flex items-center gap-3">
                         <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
                           <AvatarFallback
-                            className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${
-                              user?.role === "admin"
+                            className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${user?.role === "admin"
                                 ? ""
                                 : "bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]"
-                            }`}
+                              }`}
                           >
                             {user?.role === "admin" ? (
                               <Crown className="h-5 w-5 text-[#EA580C]" />
@@ -407,7 +411,7 @@ export function ResumePage() {
                         <Button
                           variant="outline"
                           size="sm"
-                              onClick={() => handleEdit(cv)}                          className="bg-transparent p-2"
+                          onClick={() => handleEdit(cv)} className="bg-transparent p-2"
                         >
                           <Eye className="h-4 w-4" />
                         </Button>

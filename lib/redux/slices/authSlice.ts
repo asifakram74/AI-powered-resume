@@ -88,10 +88,13 @@ const authSlice = createSlice({
       localStorage.removeItem("token")
       localStorage.removeItem("user")
       state.user = null
-      state.profile = null
+      state.profile = null // Add this line
       state.token = null
       state.error = null
       state.loading = false
+    },
+    clearProfile: (state) => { // Add this new action
+      state.profile = null
     },
     setCredentials: (state, action: PayloadAction<{ token: string; user: User }>) => {
       state.token = action.payload.token
@@ -111,6 +114,7 @@ const authSlice = createSlice({
         state.loading = false
         state.user = action.payload.user
         state.token = action.payload.token
+        state.profile = null // Clear any previous profile on new login
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false
@@ -155,6 +159,7 @@ const authSlice = createSlice({
         localStorage.removeItem("token")
         localStorage.removeItem("user")
         state.user = null
+        state.profile = null // Add this line to clear profile on logout
         state.token = null
         state.error = null
         state.loading = false
@@ -166,5 +171,5 @@ const authSlice = createSlice({
   },
 })
 
-export const { clearAuth, setCredentials, clearError } = authSlice.actions
+export const { clearAuth, clearProfile, setCredentials, clearError } = authSlice.actions
 export default authSlice.reducer

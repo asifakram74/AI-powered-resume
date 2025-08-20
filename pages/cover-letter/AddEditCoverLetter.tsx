@@ -5,9 +5,13 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Sparkles, FileText, Wand2 } from "lucide-react"
+import { Sparkles, FileText } from "lucide-react"
 import { useAppSelector } from "@/lib/redux/hooks"
-import { getCVs, type CV } from "@/lib/redux/service/cvService"
+import {
+  getAllCVs,
+  getCVs,
+  type CV
+} from "@/lib/redux/service/resumeService"
 import Select from 'react-select'
 
 interface CoverLetterGeneratorProps {
@@ -59,22 +63,27 @@ export function CoverLetterGenerator({ onGenerate, isGenerating }: CoverLetterGe
   const userId = user?.id
 
   useEffect(() => {
-    const loadCVs = async () => {
-      if (!user?.id) return
-      setIsLoading(true)
+    const fetchCVs = async () => {
       try {
-        const data = await getCVs(user.id.toString())
-        console.log("Fetched CVs:", data)
-        setCVs(data)
-      } catch (error) {
-        console.error("Error loading CVs:", error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
+        setIsLoading(true);
 
-    loadCVs()
-  }, [user?.id])
+        let data;
+        if (user?.role?.toLowerCase() === 'admin') {
+          data = await getAllCVs();
+        } else {
+          data = await getCVs(userId?.toString() || "");
+        }
+
+        setCVs(data);
+      } catch (error) {
+        console.error("Error fetching CVs:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCVs();
+  }, [userId, user?.role]);
 
   const handleGenerate = () => {
     if (!jobDescription.trim() || !selectedTone || !selectedCVId || !userId) {
@@ -99,18 +108,6 @@ export function CoverLetterGenerator({ onGenerate, isGenerating }: CoverLetterGe
 
   return (
     <div className="space-y-6">
-      <div className="text-center">
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <div className="rounded-full bg-gradient-to-r from-purple-100 to-pink-100 p-3">
-            <Wand2 className="h-6 w-6 text-purple-600" />
-          </div>
-          <h3 className="text-2xl font-bold text-gray-900">AI Cover Letter Generator</h3>
-        </div>
-        <p className="text-gray-600">
-          Paste the job description and select your preferred tone to generate a personalized cover letter
-        </p>
-      </div>
-
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -170,67 +167,67 @@ export function CoverLetterGenerator({ onGenerate, isGenerating }: CoverLetterGe
       </Card>
 
       <Card>
-  <CardHeader>
-    <CardTitle className="flex items-center gap-2">
-      <FileText className="h-5 w-5" />
-      Job Description
-    </CardTitle>
-  </CardHeader>
-  <CardContent>
-  <div className="space-y-2">
-  <Label>Paste the job description here *</Label>
-  <Textarea
-    value={jobDescription}
-    onChange={(e) => setJobDescription(e.target.value)}
-    placeholder="Paste the complete job description, including requirements, responsibilities, and company information..."
-    className="min-h-[200px] resize-none"
-  />
-  <p className="text-sm text-gray-500">
-    Include as much detail as possible for a more tailored cover letter
-  </p>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Job Description
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Label>Paste the job description here *</Label>
+            <Textarea
+              value={jobDescription}
+              onChange={(e) => setJobDescription(e.target.value)}
+              placeholder="Paste the complete job description, including requirements, responsibilities, and company information..."
+              className="min-h-[200px] resize-none"
+            />
+            <p className="text-sm text-gray-500">
+              Include as much detail as possible for a more tailored cover letter
+            </p>
 
-  {/* Validation errors */}
-  {jobDescription.trim() && (() => {
-    const input = jobDescription.trim();
+            {/* Validation errors */}
+            {jobDescription.trim() && (() => {
+              const input = jobDescription.trim();
 
-    if (input.length < 30) {
-      return (
-        <p className="text-sm text-red-600">
-          Job description must be at least 30 characters.
-        </p>
-      );
-    }
+              if (input.length < 30) {
+                return (
+                  <p className="text-sm text-red-600">
+                    Job description must be at least 30 characters.
+                  </p>
+                );
+              }
 
-    if (input.split(/\s+/).length < 3) {
-      return (
-        <p className="text-sm text-red-600">
-          Please provide at least 3 words.
-        </p>
-      );
-    }
+              if (input.split(/\s+/).length < 3) {
+                return (
+                  <p className="text-sm text-red-600">
+                    Please provide at least 3 words.
+                  </p>
+                );
+              }
 
-    if (/^[0-9\s]+$/.test(input)) {
-      return (
-        <p className="text-sm text-red-600">
-          Job description cannot be only numbers.
-        </p>
-      );
-    }
+              if (/^[0-9\s]+$/.test(input)) {
+                return (
+                  <p className="text-sm text-red-600">
+                    Job description cannot be only numbers.
+                  </p>
+                );
+              }
 
-    if (/^[^a-zA-Z0-9]+$/.test(input)) {
-      return (
-        <p className="text-sm text-red-600">
-          Job description cannot be only special characters.
-        </p>
-      );
-    }
+              if (/^[^a-zA-Z0-9]+$/.test(input)) {
+                return (
+                  <p className="text-sm text-red-600">
+                    Job description cannot be only special characters.
+                  </p>
+                );
+              }
 
-    return null; // ✅ valid
-  })()}
-</div>
+              return null; // ✅ valid
+            })()}
+          </div>
 
-  </CardContent>
-</Card>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

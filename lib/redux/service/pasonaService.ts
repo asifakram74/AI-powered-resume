@@ -55,7 +55,6 @@ export interface PersonaResponse {
   generatedPersona?: string
 }
 
-// For Getting All data
 export const getAllPersonas = async (): Promise<PersonaResponse[]> => {
   try {
     const response = await api.get(`/personas`);

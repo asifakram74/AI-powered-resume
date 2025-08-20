@@ -419,25 +419,6 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
 
   return (
     <div className="space-y-6 max-h-[70vh] overflow-y-auto">
-      {prefilledData && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <div className="flex items-center gap-2">
-            <div className="rounded-full bg-green-100 p-1">
-              <Sparkles className="h-4 w-4 text-green-600" />
-            </div>
-            <div>
-              <h4 className="font-medium text-green-900">
-                Data Pre-filled Successfully!
-              </h4>
-              <p className="text-sm text-green-700">
-                Review the information below and complete any missing fields
-                before generating your persona.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Personal Information */}
       <Card>
         <CardHeader>

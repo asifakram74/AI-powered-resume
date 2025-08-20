@@ -36,6 +36,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { CoverLetterGenerator } from "./AddEditCoverLetter"
 import {
+  getAllCoverLetters,
   getCoverLetters,
   createCoverLetter,
   updateCoverLetter,
@@ -43,11 +44,15 @@ import {
   type CoverLetter,
   type CreateCoverLetterData,
 } from "@/lib/redux/service/coverLetterService"
-import { useAppSelector } from "@/lib/redux/hooks"
-import { getCVs, type CV } from "@/lib/redux/service/cvService"
+import {
+  getAllCVs,
+  getCVs,
+  type CV
+} from "@/lib/redux/service/resumeService"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
+import { PageProps } from "@/app/dashboard/page";
 
-export function CoverLetterPage() {
+export function CoverLetterPage({ user }: PageProps) {
   const [cvs, setCVs] = useState<CV[]>([])
   const [coverLetters, setCoverLetters] = useState<CoverLetter[]>([])
   const [selectedCVId, setSelectedCVId] = useState("")
@@ -64,7 +69,6 @@ export function CoverLetterPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [analysisResult, setAnalysisResult] = useState<any>(null)
   const [isViewMode, setIsViewMode] = useState(false)
-  const { user } = useAppSelector((state) => state.auth)
   const userId = user?.id
 
   const tones = [
@@ -103,29 +107,44 @@ export function CoverLetterPage() {
   useEffect(() => {
     const fetchCVs = async () => {
       try {
-        const data = await getCVs(userId?.toString() || "")
-        setCVs(data)
-      } catch (error) {
-        console.error("Error fetching CVs:", error)
-      }
-    }
+        setIsLoading(true);
 
-    if (userId) {
-      fetchCVs()
-    }
-  }, [userId])
+        let data;
+        if (user?.role?.toLowerCase() === 'admin') {
+          data = await getAllCVs();
+        } else {
+          data = await getCVs(userId?.toString() || "");
+        }
+
+        setCVs(data);
+      } catch (error) {
+        console.error("Error fetching CVs:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCVs();
+  }, [userId, user?.role]);
 
   useEffect(() => {
     const fetchCoverLetters = async () => {
       try {
-        if (!user?.id) {
+        if (!user?.id && user?.role?.toLowerCase() !== 'admin') {
           console.log("No user ID available - user might not be logged in")
           return
         }
-        setIsLoading(true)
-        const data = await getCoverLetters(userId?.toString() || "")
-        console.log("Fetched cover letters:", data)
 
+        setIsLoading(true)
+
+        let data;
+        if (user?.role?.toLowerCase() === 'admin') {
+          data = await getAllCoverLetters();
+        } else {
+          data = await getCoverLetters(userId?.toString() || "");
+        }
+
+        console.log("Fetched cover letters:", data)
         setCoverLetters(Array.isArray(data) ? data : [])
       } catch (error) {
         console.error("Error fetching cover letters:", error)
@@ -136,7 +155,7 @@ export function CoverLetterPage() {
     }
 
     fetchCoverLetters()
-  }, [user?.id])
+  }, [user?.id, user?.role])
 
   const handleGenerate = async (jobDescription: string, tone: string, cvId: string, userId: string) => {
     setIsGenerating(true)
@@ -188,13 +207,10 @@ export function CoverLetterPage() {
   }
 
   const getCVContentForAI = async (cv: CV) => {
-    // This would typically extract detailed CV content
-    // For now, we'll use the basic CV data
     return {
       title: cv.title,
       jobDescription: cv.job_description,
       layout: cv.layout_id,
-      // Add more detailed CV content here
     }
   }
 
@@ -328,7 +344,6 @@ export function CoverLetterPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-lg resumaic-gradient-green text-white">
@@ -575,11 +590,10 @@ export function CoverLetterPage() {
                           <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
                               <AvatarFallback
-                                className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${
-                                  user?.role === "admin"
-                                    ? ""
-                                    : "bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]"
-                                }`}
+                                className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${user?.role === "admin"
+                                  ? ""
+                                  : "bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]"
+                                  }`}
                               >
                                 {user?.role === "admin" ? (
                                   <Crown className="h-5 w-5 text-[#EA580C]" />
@@ -671,11 +685,10 @@ export function CoverLetterPage() {
                       <div className="flex items-center gap-3">
                         <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
                           <AvatarFallback
-                            className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${
-                              user?.role === "admin"
-                                ? ""
-                                : "bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]"
-                            }`}
+                            className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${user?.role === "admin"
+                              ? ""
+                              : "bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]"
+                              }`}
                           >
                             {user?.role === "admin" ? (
                               <Crown className="h-5 w-5 text-[#EA580C]" />

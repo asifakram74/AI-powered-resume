@@ -19,6 +19,16 @@ export interface CreateCoverLetterData {
   generated_letter: string
 }
 
+export const getAllCoverLetters = async (): Promise<CoverLetter[]> => {
+  try {
+    const response = await api.get(`/cover-letters`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching cover-letters:", error);
+    throw new Error("Failed to fetch cover-letters. Please try again later.");
+  }
+};
+
 export const getCoverLetters = async (userId: string): Promise<CoverLetter[]> => {
   try {
     const response = await api.get(`/cover-letters?user_id=${userId}`, {

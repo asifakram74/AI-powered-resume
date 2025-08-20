@@ -18,7 +18,7 @@ import {
   Loader2,
 } from "lucide-react";
 import type { CVData } from "@/types/cv-data";
-import PDFUploader  from "@/components/persona/PersonaPDFUploader";
+import PDFUploader  from "@/pages/persona/PersonaPDFUploader";
 
 interface PersonaCreationOptionsProps {
   onOptionSelect: (

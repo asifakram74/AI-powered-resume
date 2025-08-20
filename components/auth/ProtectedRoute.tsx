@@ -1,21 +1,46 @@
 "use client"
 
-import type React from "react"
 import { useAppSelector } from "@/lib/redux/hooks"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 
-export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const token = useAppSelector((state) => state.auth.token)
+interface ProtectedRouteProps {
+  children: React.ReactNode
+  requiredRole?: string // Optional role requirement
+}
+
+export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
+  const { user, loading } = useAppSelector((state) => state.auth)
   const router = useRouter()
 
   useEffect(() => {
-    if (!token) {
-      router.push("/auth/signin")
+    if (!loading) {
+      // Redirect if not authenticated
+      if (!user) {
+        router.push("/auth/signin")
+        return
+      }
+      
+      // Redirect if doesn't have required role
+      if (requiredRole && user.role !== requiredRole) {
+        router.push("/dashboard")
+      }
     }
-  }, [token, router])
+  }, [user, loading, router, requiredRole])
 
-  if (!token) return null
+  if (loading) {
+    return <LoadingSpinner />
+  }
+
+  if (!user) {
+    return null
+  }
+
+  // Check role if required
+  if (requiredRole && user.role !== requiredRole) {
+    return null
+  }
 
   return <>{children}</>
 }
