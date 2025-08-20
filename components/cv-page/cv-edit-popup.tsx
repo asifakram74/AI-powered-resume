@@ -1,73 +1,87 @@
-"use client"
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Plus, Trash2, Save, X } from "lucide-react"
+"use client";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Trash2, Save, X } from "lucide-react";
 
 interface OptimizedCV {
   personalInfo: {
-    name: string
-    email: string
-    phone: string
-    location: string
-    linkedin: string
-    website: string
-  }
-  summary: string
+    name: string;
+    email: string;
+    phone: string;
+    location: string;
+    linkedin: string;
+    website: string;
+  };
+  summary: string;
   workExperience: Array<{
-    title: string
-    company: string
-    duration: string
-    description: string
-  }>
+    title: string;
+    company: string;
+    duration: string;
+    description: string;
+  }>;
   education: Array<{
-    degree: string
-    institution: string
-    year: string
-    gpa: string
-  }>
-  skills: string[]
+    degree: string;
+    institution: string;
+    year: string;
+    gpa: string;
+  }>;
+  skills: string[];
   projects: Array<{
-    name: string
-    description: string
-    technologies: string[]
-  }>
-  certifications: string[]
-  languages: string[]
-  interests: string[]
+    name: string;
+    description: string;
+    technologies: string[];
+  }>;
+  certifications: string[];
+  languages: string[];
+  interests: string[];
 }
 
 interface CVEditPopupProps {
-  cvData: OptimizedCV
-  onSave: (updatedData: OptimizedCV) => void
-  isOpen: boolean
-  onClose: () => void
-  isLoading?: boolean
+  cvData: OptimizedCV;
+  onSave: (updatedData: OptimizedCV) => void;
+  isOpen: boolean;
+  onClose: () => void;
+  isLoading?: boolean;
 }
 
-export function CVEditPopup({ cvData, onSave, isOpen, onClose, isLoading = false }: CVEditPopupProps) {
-  const [editingData, setEditingData] = useState<OptimizedCV>(cvData)
-  const [isSaving, setIsSaving] = useState(false)
+export function CVEditPopup({
+  cvData,
+  onSave,
+  isOpen,
+  onClose,
+  isLoading = false,
+}: CVEditPopupProps) {
+  const [editingData, setEditingData] = useState<OptimizedCV>(cvData);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Update editing data when cvData changes
   useEffect(() => {
-    setEditingData(cvData)
-  }, [cvData])
+    setEditingData(cvData);
+  }, [cvData]);
 
-  const handlePersonalInfoChange = (field: keyof OptimizedCV["personalInfo"], value: string) => {
+  const handlePersonalInfoChange = (
+    field: keyof OptimizedCV["personalInfo"],
+    value: string
+  ) => {
     setEditingData({
       ...editingData,
       personalInfo: {
         ...editingData.personalInfo,
         [field]: value,
       },
-    })
-  }
+    });
+  };
 
   const addWorkExperience = () => {
     const newExp = {
@@ -75,28 +89,32 @@ export function CVEditPopup({ cvData, onSave, isOpen, onClose, isLoading = false
       company: "",
       duration: "",
       description: "",
-    }
+    };
     setEditingData({
       ...editingData,
       workExperience: [...editingData.workExperience, newExp],
-    })
-  }
+    });
+  };
 
-  const updateWorkExperience = (index: number, field: keyof OptimizedCV["workExperience"][0], value: string) => {
-    const updatedExperience = [...editingData.workExperience]
-    updatedExperience[index] = { ...updatedExperience[index], [field]: value }
+  const updateWorkExperience = (
+    index: number,
+    field: keyof OptimizedCV["workExperience"][0],
+    value: string
+  ) => {
+    const updatedExperience = [...editingData.workExperience];
+    updatedExperience[index] = { ...updatedExperience[index], [field]: value };
     setEditingData({
       ...editingData,
       workExperience: updatedExperience,
-    })
-  }
+    });
+  };
 
   const removeWorkExperience = (index: number) => {
     setEditingData({
       ...editingData,
       workExperience: editingData.workExperience.filter((_, i) => i !== index),
-    })
-  }
+    });
+  };
 
   const addEducation = () => {
     const newEdu = {
@@ -104,72 +122,80 @@ export function CVEditPopup({ cvData, onSave, isOpen, onClose, isLoading = false
       institution: "",
       year: "",
       gpa: "",
-    }
+    };
     setEditingData({
       ...editingData,
       education: [...editingData.education, newEdu],
-    })
-  }
+    });
+  };
 
-  const updateEducation = (index: number, field: keyof OptimizedCV["education"][0], value: string) => {
-    const updatedEducation = [...editingData.education]
-    updatedEducation[index] = { ...updatedEducation[index], [field]: value }
+  const updateEducation = (
+    index: number,
+    field: keyof OptimizedCV["education"][0],
+    value: string
+  ) => {
+    const updatedEducation = [...editingData.education];
+    updatedEducation[index] = { ...updatedEducation[index], [field]: value };
     setEditingData({
       ...editingData,
       education: updatedEducation,
-    })
-  }
+    });
+  };
 
   const removeEducation = (index: number) => {
     setEditingData({
       ...editingData,
       education: editingData.education.filter((_, i) => i !== index),
-    })
-  }
+    });
+  };
 
   const addProject = () => {
     const newProject = {
       name: "",
       description: "",
       technologies: [],
-    }
+    };
     setEditingData({
       ...editingData,
       projects: [...editingData.projects, newProject],
-    })
-  }
+    });
+  };
 
-  const updateProject = (index: number, field: keyof OptimizedCV["projects"][0], value: string | string[]) => {
-    const updatedProjects = [...editingData.projects]
-    updatedProjects[index] = { ...updatedProjects[index], [field]: value }
+  const updateProject = (
+    index: number,
+    field: keyof OptimizedCV["projects"][0],
+    value: string | string[]
+  ) => {
+    const updatedProjects = [...editingData.projects];
+    updatedProjects[index] = { ...updatedProjects[index], [field]: value };
     setEditingData({
       ...editingData,
       projects: updatedProjects,
-    })
-  }
+    });
+  };
 
   const removeProject = (index: number) => {
     setEditingData({
       ...editingData,
       projects: editingData.projects.filter((_, i) => i !== index),
-    })
-  }
+    });
+  };
 
   const handleSave = async () => {
-    setIsSaving(true)
+    setIsSaving(true);
     try {
-      await onSave(editingData)
+      await onSave(editingData);
     } catch (error) {
-      console.error("Error saving CV:", error)
+      console.error("Error saving CV:", error);
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   const handleCancel = () => {
-    setEditingData(cvData) // Reset to original data
-    onClose()
-  }
+    setEditingData(cvData); // Reset to original data
+    onClose();
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -199,43 +225,60 @@ export function CVEditPopup({ cvData, onSave, isOpen, onClose, isLoading = false
                     <Input
                       placeholder="Full Name"
                       value={editingData.personalInfo.name}
-                      onChange={(e) => handlePersonalInfoChange("name", e.target.value)}
+                      onChange={(e) =>
+                        handlePersonalInfoChange("name", e.target.value)
+                      }
                     />
                     <Input
                       placeholder="Email"
                       type="email"
                       value={editingData.personalInfo.email}
-                      onChange={(e) => handlePersonalInfoChange("email", e.target.value)}
+                      onChange={(e) =>
+                        handlePersonalInfoChange("email", e.target.value)
+                      }
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <Input
                       placeholder="Phone"
                       value={editingData.personalInfo.phone}
-                      onChange={(e) => handlePersonalInfoChange("phone", e.target.value)}
+                      onChange={(e) =>
+                        handlePersonalInfoChange("phone", e.target.value)
+                      }
                     />
                     <Input
                       placeholder="Location"
                       value={editingData.personalInfo.location}
-                      onChange={(e) => handlePersonalInfoChange("location", e.target.value)}
+                      onChange={(e) =>
+                        handlePersonalInfoChange("location", e.target.value)
+                      }
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <Input
                       placeholder="LinkedIn"
                       value={editingData.personalInfo.linkedin}
-                      onChange={(e) => handlePersonalInfoChange("linkedin", e.target.value)}
+                      onChange={(e) =>
+                        handlePersonalInfoChange("linkedin", e.target.value)
+                      }
                     />
                     <Input
                       placeholder="Website"
                       value={editingData.personalInfo.website}
-                      onChange={(e) => handlePersonalInfoChange("website", e.target.value)}
+                      onChange={(e) =>
+                        handlePersonalInfoChange("website", e.target.value)
+                      }
                     />
                   </div>
                   <Textarea
                     placeholder="Professional Summary"
                     value={editingData.summary}
-                    onChange={(e) => setEditingData({ ...editingData, summary: e.target.value })}
+                    onChange={(e) =>
+                      setEditingData({
+                        ...editingData,
+                        summary: e.target.value,
+                      })
+                    }
                     rows={4}
                   />
                 </CardContent>
@@ -256,10 +299,17 @@ export function CVEditPopup({ cvData, onSave, isOpen, onClose, isLoading = false
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {editingData.workExperience.map((exp, index) => (
-                    <div key={index} className="p-4 border rounded-lg space-y-3">
+                    <div
+                      key={index}
+                      className="p-4 border rounded-lg space-y-3"
+                    >
                       <div className="flex justify-between items-start">
                         <h4 className="font-medium">Experience {index + 1}</h4>
-                        <Button onClick={() => removeWorkExperience(index)} size="sm" variant="destructive">
+                        <Button
+                          onClick={() => removeWorkExperience(index)}
+                          size="sm"
+                          variant="destructive"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -267,23 +317,43 @@ export function CVEditPopup({ cvData, onSave, isOpen, onClose, isLoading = false
                         <Input
                           placeholder="Job Title"
                           value={exp.title}
-                          onChange={(e) => updateWorkExperience(index, "title", e.target.value)}
+                          onChange={(e) =>
+                            updateWorkExperience(index, "title", e.target.value)
+                          }
                         />
                         <Input
                           placeholder="Company"
                           value={exp.company}
-                          onChange={(e) => updateWorkExperience(index, "company", e.target.value)}
+                          onChange={(e) =>
+                            updateWorkExperience(
+                              index,
+                              "company",
+                              e.target.value
+                            )
+                          }
                         />
                       </div>
                       <Input
                         placeholder="Duration (e.g., 2020 - 2023)"
                         value={exp.duration}
-                        onChange={(e) => updateWorkExperience(index, "duration", e.target.value)}
+                        onChange={(e) =>
+                          updateWorkExperience(
+                            index,
+                            "duration",
+                            e.target.value
+                          )
+                        }
                       />
                       <Textarea
                         placeholder="Job Description"
                         value={exp.description}
-                        onChange={(e) => updateWorkExperience(index, "description", e.target.value)}
+                        onChange={(e) =>
+                          updateWorkExperience(
+                            index,
+                            "description",
+                            e.target.value
+                          )
+                        }
                         rows={3}
                       />
                     </div>
@@ -306,10 +376,17 @@ export function CVEditPopup({ cvData, onSave, isOpen, onClose, isLoading = false
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {editingData.education.map((edu, index) => (
-                    <div key={index} className="p-4 border rounded-lg space-y-3">
+                    <div
+                      key={index}
+                      className="p-4 border rounded-lg space-y-3"
+                    >
                       <div className="flex justify-between items-start">
                         <h4 className="font-medium">Education {index + 1}</h4>
-                        <Button onClick={() => removeEducation(index)} size="sm" variant="destructive">
+                        <Button
+                          onClick={() => removeEducation(index)}
+                          size="sm"
+                          variant="destructive"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -317,24 +394,36 @@ export function CVEditPopup({ cvData, onSave, isOpen, onClose, isLoading = false
                         <Input
                           placeholder="Degree"
                           value={edu.degree}
-                          onChange={(e) => updateEducation(index, "degree", e.target.value)}
+                          onChange={(e) =>
+                            updateEducation(index, "degree", e.target.value)
+                          }
                         />
                         <Input
                           placeholder="Institution"
                           value={edu.institution}
-                          onChange={(e) => updateEducation(index, "institution", e.target.value)}
+                          onChange={(e) =>
+                            updateEducation(
+                              index,
+                              "institution",
+                              e.target.value
+                            )
+                          }
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <Input
                           placeholder="Year"
                           value={edu.year}
-                          onChange={(e) => updateEducation(index, "year", e.target.value)}
+                          onChange={(e) =>
+                            updateEducation(index, "year", e.target.value)
+                          }
                         />
                         <Input
                           placeholder="GPA (optional)"
                           value={edu.gpa}
-                          onChange={(e) => updateEducation(index, "gpa", e.target.value)}
+                          onChange={(e) =>
+                            updateEducation(index, "gpa", e.target.value)
+                          }
                         />
                       </div>
                     </div>
@@ -357,22 +446,33 @@ export function CVEditPopup({ cvData, onSave, isOpen, onClose, isLoading = false
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {editingData.projects.map((project, index) => (
-                    <div key={index} className="p-4 border rounded-lg space-y-3">
+                    <div
+                      key={index}
+                      className="p-4 border rounded-lg space-y-3"
+                    >
                       <div className="flex justify-between items-start">
                         <h4 className="font-medium">Project {index + 1}</h4>
-                        <Button onClick={() => removeProject(index)} size="sm" variant="destructive">
+                        <Button
+                          onClick={() => removeProject(index)}
+                          size="sm"
+                          variant="destructive"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                       <Input
                         placeholder="Project Name"
                         value={project.name}
-                        onChange={(e) => updateProject(index, "name", e.target.value)}
+                        onChange={(e) =>
+                          updateProject(index, "name", e.target.value)
+                        }
                       />
                       <Textarea
                         placeholder="Project Description"
                         value={project.description}
-                        onChange={(e) => updateProject(index, "description", e.target.value)}
+                        onChange={(e) =>
+                          updateProject(index, "description", e.target.value)
+                        }
                         rows={3}
                       />
                       <Textarea
@@ -385,7 +485,7 @@ export function CVEditPopup({ cvData, onSave, isOpen, onClose, isLoading = false
                             e.target.value
                               .split(",")
                               .map((tech) => tech.trim())
-                              .filter((tech) => tech),
+                              .filter((tech) => tech)
                           )
                         }
                         rows={2}
@@ -493,7 +593,11 @@ export function CVEditPopup({ cvData, onSave, isOpen, onClose, isLoading = false
 
         {/* Action Buttons */}
         <div className="flex justify-end gap-2 pt-4 border-t">
-          <Button onClick={handleCancel} variant="outline" disabled={isSaving || isLoading}>
+          <Button
+            onClick={handleCancel}
+            variant="outline"
+            disabled={isSaving || isLoading}
+          >
             <X className="h-4 w-4 mr-2" />
             Cancel
           </Button>
@@ -504,5 +608,5 @@ export function CVEditPopup({ cvData, onSave, isOpen, onClose, isLoading = false
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

@@ -605,7 +605,7 @@ export function CoverLetterPage({ user }: PageProps) {
                               </AvatarFallback>
                             </Avatar>
                             <div>
-                              <div className="font-medium">Cover Letter #{letter.id}</div>
+                              <div className="font-medium">Cover Letter</div>
                               <div className="text-sm text-gray-600">
                                 {new Date(letter.created_at).toLocaleDateString()}
                               </div>

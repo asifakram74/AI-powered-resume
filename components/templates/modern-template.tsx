@@ -1,20 +1,36 @@
-"use client"
+"use client";
 
-import { Mail, Phone, MapPin, ExternalLink, Github } from "lucide-react"
-import type { CVData } from "@/types/cv-data"
+import { Mail, Phone, MapPin, ExternalLink, Github } from "lucide-react";
+import type { CVData } from "@/types/cv-data";
 
 interface ModernTemplateProps {
-  data: CVData
-  isPreview?: boolean
+  data: CVData;
+  isPreview?: boolean;
 }
 
-export function ModernTemplate({ data, isPreview = false }: ModernTemplateProps) {
+export function ModernTemplate({
+  data,
+  isPreview = false,
+}: ModernTemplateProps) {
   const formatDate = (date: string) => {
-    if (!date) return ""
-    const [year, month] = date.split("-")
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    return `${monthNames[Number.parseInt(month) - 1]} ${year}`
-  }
+    if (!date) return "";
+    const [year, month] = date.split("-");
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    return `${monthNames[Number.parseInt(month) - 1]} ${year}`;
+  };
 
   return (
     <div className="flex min-h-screen bg-white print:min-h-0 print:shadow-none">
@@ -83,10 +99,15 @@ export function ModernTemplate({ data, isPreview = false }: ModernTemplateProps)
             <div className="space-y-4">
               {data.skills.technical.length > 0 && (
                 <div>
-                  <h3 className="font-semibold mb-2 text-sm">Technical Skills</h3>
+                  <h3 className="font-semibold mb-2 text-sm">
+                    Technical Skills
+                  </h3>
                   <div className="flex flex-wrap gap-2">
                     {data.skills.technical.map((skill, index) => (
-                      <span key={index} className="bg-blue-600 text-white px-2 py-1 rounded text-xs">
+                      <span
+                        key={index}
+                        className="bg-blue-600 text-white px-2 py-1 rounded text-xs"
+                      >
                         {skill}
                       </span>
                     ))}
@@ -98,7 +119,10 @@ export function ModernTemplate({ data, isPreview = false }: ModernTemplateProps)
                   <h3 className="font-semibold mb-2 text-sm">Soft Skills</h3>
                   <div className="flex flex-wrap gap-2">
                     {data.skills.soft.map((skill, index) => (
-                      <span key={index} className="bg-slate-600 text-white px-2 py-1 rounded text-xs">
+                      <span
+                        key={index}
+                        className="bg-slate-600 text-white px-2 py-1 rounded text-xs"
+                      >
                         {skill}
                       </span>
                     ))}
@@ -111,7 +135,9 @@ export function ModernTemplate({ data, isPreview = false }: ModernTemplateProps)
           {/* Languages */}
           {data.languages.length > 0 && (
             <div className="print:break-inside-avoid">
-              <h2 className="text-xl font-bold mb-4 text-blue-300">Languages</h2>
+              <h2 className="text-xl font-bold mb-4 text-blue-300">
+                Languages
+              </h2>
               <div className="space-y-2">
                 {data.languages.map((lang) => (
                   <div key={lang.id} className="flex justify-between text-sm">
@@ -131,10 +157,20 @@ export function ModernTemplate({ data, isPreview = false }: ModernTemplateProps)
                 <div key={edu.id} className="text-sm print:break-inside-avoid">
                   <h3 className="font-semibold">{edu.degree}</h3>
                   <p className="text-blue-200">{edu.institutionName}</p>
-                  {edu.location && <p className="text-gray-300">{edu.location}</p>}
-                  {edu.graduationDate && <p className="text-gray-400 text-xs">{formatDate(edu.graduationDate)}</p>}
-                  {edu.gpa && <p className="text-gray-400 text-xs">GPA: {edu.gpa}</p>}
-                  {edu.honors && <p className="text-blue-200 text-xs">{edu.honors}</p>}
+                  {edu.location && (
+                    <p className="text-gray-300">{edu.location}</p>
+                  )}
+                  {edu.graduationDate && (
+                    <p className="text-gray-400 text-xs">
+                      {formatDate(edu.graduationDate)}
+                    </p>
+                  )}
+                  {edu.gpa && (
+                    <p className="text-gray-400 text-xs">GPA: {edu.gpa}</p>
+                  )}
+                  {edu.honors && (
+                    <p className="text-blue-200 text-xs">{edu.honors}</p>
+                  )}
                 </div>
               ))}
             </div>
@@ -143,10 +179,15 @@ export function ModernTemplate({ data, isPreview = false }: ModernTemplateProps)
           {/* Interests */}
           {data.additional.interests.length > 0 && (
             <div className="print:break-inside-avoid">
-              <h2 className="text-xl font-bold mb-4 text-blue-300">Interests</h2>
+              <h2 className="text-xl font-bold mb-4 text-blue-300">
+                Interests
+              </h2>
               <div className="flex flex-wrap gap-2">
                 {data.additional.interests.map((interest, index) => (
-                  <span key={index} className="bg-slate-600 text-white px-2 py-1 rounded text-xs">
+                  <span
+                    key={index}
+                    className="bg-slate-600 text-white px-2 py-1 rounded text-xs"
+                  >
                     {interest}
                   </span>
                 ))}
@@ -161,25 +202,43 @@ export function ModernTemplate({ data, isPreview = false }: ModernTemplateProps)
         <div className="space-y-8">
           {/* Header */}
           <div className="border-b border-gray-200 pb-6 mb-8 print:break-inside-avoid">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">{data.personalInfo.fullName}</h1>
-            <h2 className="text-xl text-blue-600 font-medium mb-4">{data.personalInfo.jobTitle}</h2>
-            <p className="text-gray-600 leading-relaxed">{data.personalInfo.summary}</p>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">
+              {data.personalInfo.fullName}
+            </h1>
+            <h2 className="text-xl text-blue-600 font-medium mb-4">
+              {data.personalInfo.jobTitle}
+            </h2>
+            <p className="text-gray-600 leading-relaxed">
+              {data.personalInfo.summary}
+            </p>
           </div>
 
           {/* Experience */}
           <div className="print:break-inside-avoid">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Experience</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              Experience
+            </h2>
             <div className="space-y-6">
               {data.experience.map((exp, index) => (
-                <div key={exp.id} className="border-l-4 border-blue-500 pl-6 print:break-inside-avoid">
+                <div
+                  key={exp.id}
+                  className="border-l-4 border-blue-500 pl-6 print:break-inside-avoid"
+                >
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <h3 className="text-xl font-semibold text-gray-900">{exp.jobTitle}</h3>
-                      <p className="text-blue-600 font-medium">{exp.companyName}</p>
-                      {exp.location && <p className="text-gray-500 text-sm">{exp.location}</p>}
+                      <h3 className="text-xl font-semibold text-gray-900">
+                        {exp.jobTitle}
+                      </h3>
+                      <p className="text-blue-600 font-medium">
+                        {exp.companyName}
+                      </p>
+                      {exp.location && (
+                        <p className="text-gray-500 text-sm">{exp.location}</p>
+                      )}
                     </div>
                     <span className="text-gray-500 text-sm">
-                      {formatDate(exp.startDate)} - {exp.current ? "Present" : formatDate(exp.endDate)}
+                      {formatDate(exp.startDate)} -{" "}
+                      {exp.current ? "Present" : formatDate(exp.endDate)}
                     </span>
                   </div>
                   <ul className="text-gray-700 leading-relaxed space-y-1">
@@ -198,14 +257,23 @@ export function ModernTemplate({ data, isPreview = false }: ModernTemplateProps)
           {/* Projects */}
           {data.projects.length > 0 && (
             <div className="print:break-inside-avoid">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Projects</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                Projects
+              </h2>
               <div className="space-y-6">
                 {data.projects.map((project) => (
-                  <div key={project.id} className="border rounded-lg p-4 print:break-inside-avoid">
+                  <div
+                    key={project.id}
+                    className="border rounded-lg p-4 print:break-inside-avoid"
+                  >
                     <div className="flex justify-between items-start mb-2">
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900">{project.name}</h3>
-                        <p className="text-blue-600 font-medium">{project.role}</p>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {project.name}
+                        </h3>
+                        <p className="text-blue-600 font-medium">
+                          {project.role}
+                        </p>
                       </div>
                       <div className="flex space-x-2">
                         {project.liveDemoLink && (
@@ -233,7 +301,10 @@ export function ModernTemplate({ data, isPreview = false }: ModernTemplateProps)
                     <p className="text-gray-700 mb-3">{project.description}</p>
                     <div className="flex flex-wrap gap-2">
                       {project.technologies.map((tech, index) => (
-                        <span key={index} className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-sm">
+                        <span
+                          key={index}
+                          className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-sm"
+                        >
                           {tech}
                         </span>
                       ))}
@@ -247,16 +318,27 @@ export function ModernTemplate({ data, isPreview = false }: ModernTemplateProps)
           {/* Certifications */}
           {data.certifications.length > 0 && (
             <div className="print:break-inside-avoid">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Certifications & Awards</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                Certifications & Awards
+              </h2>
               <div className="space-y-3">
                 {data.certifications.map((cert) => (
-                  <div key={cert.id} className="flex justify-between items-center print:break-inside-avoid">
+                  <div
+                    key={cert.id}
+                    className="flex justify-between items-center print:break-inside-avoid"
+                  >
                     <div>
-                      <h3 className="font-semibold text-gray-900">{cert.title}</h3>
-                      <p className="text-gray-600">{cert.issuingOrganization}</p>
+                      <h3 className="font-semibold text-gray-900">
+                        {cert.title}
+                      </h3>
+                      <p className="text-gray-600">
+                        {cert.issuingOrganization}
+                      </p>
                     </div>
                     <div className="text-right">
-                      <span className="text-gray-500 text-sm">{formatDate(cert.dateObtained)}</span>
+                      <span className="text-gray-500 text-sm">
+                        {formatDate(cert.dateObtained)}
+                      </span>
                       {cert.verificationLink && (
                         <div>
                           <a
@@ -278,5 +360,5 @@ export function ModernTemplate({ data, isPreview = false }: ModernTemplateProps)
         </div>
       </div>
     </div>
-  )
+  );
 }

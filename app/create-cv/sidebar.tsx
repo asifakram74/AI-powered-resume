@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Download, PlusCircle, Layout, Palette, Layers, Crown, LogOut, Home, FileText, FileOutput, FileInput } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 import {
   Sidebar as SidebarPrimitive,
   SidebarContent,
@@ -64,15 +65,11 @@ export function Sidebar({
     >
       <Link href="/">
         <SidebarHeader className="p-6 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-lg">
-              <Crown className="h-5 w-5" />
+        <div className="flex items-center gap-3">
+            <Link href="/" >
+                <Image src="/Resumic.png" alt="Logo" width={200} height= {90}  className="cursor-pointer"/>
+            </Link>
             </div>
-            <div>
-              <h1 className="text-lg font-bold text-gray-900">CV Builder AI</h1>
-              <p className="text-xs text-gray-500">Professional Resume Tool</p>
-            </div>
-          </div>
           {user && (
             <div className="mt-4 p-3 bg-gray-50 rounded-lg">
               <p className="text-sm font-medium text-gray-900">{user.name}</p>

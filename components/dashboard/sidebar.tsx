@@ -13,6 +13,7 @@ import {
   SidebarFooter,
   SidebarGroup,
 } from "@/components/ui/sidebar"
+import Image from "next/image"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -157,19 +158,20 @@ export function Sidebar({
       className={`w-64 border-r border-gray-200/60 bg-white/95 backdrop-blur-xl shadow-xl ${!isMounted ? "invisible" : "animate-slide-in-left"}`}
       aria-hidden={!isMounted}
     >
-      <Link href="/">
         <SidebarHeader className="p-6 pb-4">
-          <div className="flex items-center gap-3 group cursor-pointer">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl resumaic-gradient-green text-white shadow-xl transform transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
-              <FileText className="h-6 w-6" />
-            </div>
-            <div className="animate-fade-in-up">
+          <div className="flex items-center cursor-pointer">
+              <Link href="/" >
+                <Image src="/Resumic.png" alt="Logo" width={200} height= {120}  className="cursor-pointer"/>
+            </Link>
+            {/* <p className="text-xs text-gray-500 font-medium">AI Resume Builder</p> */}
+
+            {/* <div className="animate-fade-in-up">
               <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                 Resumaic
               </h1>
-              <p className="text-xs text-gray-500 font-medium">AI Resume Builder</p>
-            </div>
+            </div> */}
           </div>
+          
           {user && (
             <div className="mt-4 p-3 bg-gray-50 rounded-lg flex items-top gap-3">
               <Avatar className="h-10 w-10">
@@ -195,7 +197,6 @@ export function Sidebar({
             </div>
           )}
         </SidebarHeader>
-      </Link>
 
       <SidebarContent className="px-3">
         <SidebarGroup>
