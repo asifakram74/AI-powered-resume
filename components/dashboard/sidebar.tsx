@@ -154,7 +154,7 @@ export function Sidebar({
 
   return (
     <SidebarPrimitive
-      className={`border-r border-gray-200/60 bg-white/95 backdrop-blur-xl shadow-xl ${!isMounted ? "invisible" : "animate-slide-in-left"}`}
+      className={`w-64 border-r border-gray-200/60 bg-white/95 backdrop-blur-xl shadow-xl ${!isMounted ? "invisible" : "animate-slide-in-left"}`}
       aria-hidden={!isMounted}
     >
       <Link href="/">

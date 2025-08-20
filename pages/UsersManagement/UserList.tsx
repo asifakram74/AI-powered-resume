@@ -23,6 +23,10 @@ import {
   ChevronRight,
   Grid,
   List,
+  Sparkles,
+  TrendingUp,
+  Briefcase,
+  Target,
 } from "lucide-react";
 import {
   Dialog,
@@ -205,7 +209,7 @@ export function UserList({ user }: PageProps) {
   if (isLoading && getUsersArray().length === 0) {
     return (
       <div className="fixed inset-0 flex justify-center items-center bg-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900" />
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#70E4A8]" />
       </div>
     );
   }
@@ -216,16 +220,15 @@ export function UserList({ user }: PageProps) {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 text-white">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg resumaic-gradient-green text-white">
             <UserIcon className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-            <p className="text-gray-600">
+            <h1 className="text-3xl font-bold text-[#2D3639] font-rubik">User Management</h1>
+            <p className="text-gray-600 font-inter">
               Manage all system users
             </p>
           </div>
@@ -234,7 +237,7 @@ export function UserList({ user }: PageProps) {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
               onClick={() => {
                 setEditingUser(null);
                 setIsDialogOpen(true);
@@ -244,12 +247,12 @@ export function UserList({ user }: PageProps) {
               Add User
             </Button>
           </DialogTrigger>
-          <DialogContent className="w-[70vw] max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
             <DialogHeader>
-              <DialogTitle>
+              <DialogTitle className="font-rubik text-[#2D3639]">
                 {editingUser ? "Edit User" : "Create New User"}
               </DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="font-inter">
                 {editingUser
                   ? "Update user details below"
                   : "Fill in the user details below"}
@@ -287,10 +290,10 @@ export function UserList({ user }: PageProps) {
             <CardContent className="p-4">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-lg font-semibold">
+                  <h3 className="text-lg font-semibold font-rubik text-[#2D3639]">
                     System Users ({filteredUsers.length})
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 font-inter">
                     View and manage all registered users
                   </p>
                 </div>
@@ -302,7 +305,7 @@ export function UserList({ user }: PageProps) {
                       placeholder="Search users by name, email, role..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 w-full"
+                      className="pl-10 w-full font-inter"
                     />
                   </div>
 
@@ -311,6 +314,7 @@ export function UserList({ user }: PageProps) {
                       variant={viewMode === "grid" ? "default" : "outline"}
                       size="sm"
                       onClick={() => setViewMode("grid")}
+                      className="border-[#70E4A8]/30 hover:border-[#70E4A8]/50"
                     >
                       <Grid className="h-4 w-4" />
                     </Button>
@@ -318,6 +322,7 @@ export function UserList({ user }: PageProps) {
                       variant={viewMode === "table" ? "default" : "outline"}
                       size="sm"
                       onClick={() => setViewMode("table")}
+                      className="border-[#70E4A8]/30 hover:border-[#70E4A8]/50"
                     >
                       <List className="h-4 w-4" />
                     </Button>
@@ -333,22 +338,22 @@ export function UserList({ user }: PageProps) {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>User</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Plan</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Verified</TableHead>
-                      <TableHead>Actions</TableHead>
+                      <TableHead className="font-rubik">User</TableHead>
+                      <TableHead className="font-rubik">Email</TableHead>
+                      <TableHead className="font-rubik">Role</TableHead>
+                      <TableHead className="font-rubik">Plan</TableHead>
+                      <TableHead className="font-rubik">Status</TableHead>
+                      <TableHead className="font-rubik">Verified</TableHead>
+                      <TableHead className="font-rubik">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredUsers.map((user) => (
-                      <TableRow key={user.id}>
+                      <TableRow key={user.id} className="hover:bg-[#70E4A8]/5">
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            <Avatar className="h-10 w-10">
-                              <AvatarFallback>
+                            <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-[#70E4A8] transition-colors">
+                              <AvatarFallback className="bg-[#70E4A8]/20 text-[#70E4A8] font-semibold">
                                 {user.name
                                   .split(" ")
                                   .map((n) => n[0])
@@ -356,16 +361,16 @@ export function UserList({ user }: PageProps) {
                               </AvatarFallback>
                             </Avatar>
                             <div>
-                              <div className="font-medium">{user.name}</div>
-                              <div className="text-sm text-gray-600">
+                              <div className="font-medium font-rubik text-[#2D3639]">{user.name}</div>
+                              <div className="text-sm text-gray-600 font-inter">
                                 Joined: {new Date(user.created_at).toLocaleDateString()}
                               </div>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Mail className="h-4 w-4 text-gray-500" />
+                          <div className="flex items-center gap-2 font-inter">
+                            <Mail className="h-4 w-4 text-[#70E4A8]" />
                             {user.email}
                           </div>
                         </TableCell>
@@ -374,17 +379,24 @@ export function UserList({ user }: PageProps) {
                             variant={
                               user.role === "admin" ? "default" : "secondary"
                             }
+                            className="bg-[#70E4A8]/20 text-[#2D3639] hover:bg-[#70E4A8]/30 font-inter"
                           >
                             {user.role}
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline">{user.plan}</Badge>
+                          <Badge variant="outline" className="border-[#70E4A8]/30 text-[#2D3639] font-inter">
+                            {user.plan}
+                          </Badge>
                         </TableCell>
                         <TableCell>
                           <Badge
                             variant={user.status === "active" ? "default" : "destructive"}
-                            className="cursor-pointer"
+                            className={`cursor-pointer font-inter ${
+                              user.status === "active" 
+                                ? "bg-[#70E4A8]/20 text-[#2D3639] hover:bg-[#70E4A8]/30" 
+                                : "bg-[#EA580C]/20 text-[#EA580C] hover:bg-[#EA580C]/30"
+                            }`}
                             onClick={() => toggleUserStatus(user)}
                           >
                             {user.status}
@@ -392,7 +404,7 @@ export function UserList({ user }: PageProps) {
                         </TableCell>
                         <TableCell>
                           {user.email_verified_at ? (
-                            <Badge variant="secondary">
+                            <Badge variant="secondary" className="bg-[#70E4A8]/20 text-[#2D3639] font-inter">
                               <Check className="h-3 w-3 mr-1" />
                               Verified
                             </Badge>
@@ -401,7 +413,7 @@ export function UserList({ user }: PageProps) {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleVerifyEmail(user.id)}
-                              className="text-xs"
+                              className="text-xs text-[#EA580C] hover:text-[#EA580C] hover:bg-[#EA580C]/10 font-inter"
                             >
                               <X className="h-3 w-3 mr-1" />
                               Not Verified
@@ -414,6 +426,7 @@ export function UserList({ user }: PageProps) {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleEdit(user)}
+                              className="text-[#70E4A8] hover:text-[#70E4A8] hover:bg-[#70E4A8]/10"
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -427,7 +440,7 @@ export function UserList({ user }: PageProps) {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="text-red-600 hover:text-red-700"
+                                  className="text-[#EA580C] hover:text-[#EA580C] hover:bg-[#EA580C]/10"
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -444,12 +457,12 @@ export function UserList({ user }: PageProps) {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredUsers.map((user) => (
-                <Card key={user.id} className="hover:shadow-lg transition-shadow">
+                <Card key={user.id} className="hover:shadow-lg transition-shadow border-2 border-transparent hover:border-[#70E4A8]/20">
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        <Avatar className="h-12 w-12">
-                          <AvatarFallback>
+                        <Avatar className="h-12 w-12 border-2 border-gray-200 hover:border-[#70E4A8] transition-colors">
+                          <AvatarFallback className="bg-[#70E4A8]/20 text-[#70E4A8] font-semibold">
                             {user.name
                               .split(" ")
                               .map((n) => n[0])
@@ -457,8 +470,8 @@ export function UserList({ user }: PageProps) {
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <CardTitle className="text-lg">{user.name}</CardTitle>
-                          <CardDescription>{user.email}</CardDescription>
+                          <CardTitle className="text-lg font-rubik text-[#2D3639]">{user.name}</CardTitle>
+                          <CardDescription className="font-inter">{user.email}</CardDescription>
                         </div>
                       </div>
                     </div>
@@ -466,20 +479,24 @@ export function UserList({ user }: PageProps) {
                   <CardContent>
                     <div className="space-y-4">
                       <div>
-                        <Label className="text-sm font-medium">Role</Label>
-                        <p className="text-sm text-gray-600">{user.role}</p>
+                        <Label className="text-sm font-medium font-rubik text-[#2D3639]">Role</Label>
+                        <p className="text-sm text-gray-600 font-inter">{user.role}</p>
                       </div>
 
                       <div>
-                        <Label className="text-sm font-medium">Plan</Label>
-                        <p className="text-sm text-gray-600">{user.plan}</p>
+                        <Label className="text-sm font-medium font-rubik text-[#2D3639]">Plan</Label>
+                        <p className="text-sm text-gray-600 font-inter">{user.plan}</p>
                       </div>
 
                       <div>
-                        <Label className="text-sm font-medium">Status</Label>
+                        <Label className="text-sm font-medium font-rubik text-[#2D3639]">Status</Label>
                         <Badge
                           variant={user.status === "active" ? "default" : "destructive"}
-                          className="cursor-pointer"
+                          className={`cursor-pointer font-inter ${
+                            user.status === "active" 
+                              ? "bg-[#70E4A8]/20 text-[#2D3639] hover:bg-[#70E4A8]/30" 
+                              : "bg-[#EA580C]/20 text-[#EA580C] hover:bg-[#EA580C]/30"
+                          }`}
                           onClick={() => toggleUserStatus(user)}
                         >
                           {user.status}
@@ -487,9 +504,9 @@ export function UserList({ user }: PageProps) {
                       </div>
 
                       <div>
-                        <Label className="text-sm font-medium">Verified</Label>
+                        <Label className="text-sm font-medium font-rubik text-[#2D3639]">Verified</Label>
                         {user.email_verified_at ? (
-                          <Badge variant="secondary">
+                          <Badge variant="secondary" className="bg-[#70E4A8]/20 text-[#2D3639] font-inter">
                             <Check className="h-3 w-3 mr-1" />
                             Verified
                           </Badge>
@@ -498,7 +515,7 @@ export function UserList({ user }: PageProps) {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleVerifyEmail(user.id)}
-                            className="text-xs"
+                            className="text-xs text-[#EA580C] hover:text-[#EA580C] hover:bg-[#EA580C]/10 font-inter"
                           >
                             <X className="h-3 w-3 mr-1" />
                             Not Verified
@@ -506,7 +523,7 @@ export function UserList({ user }: PageProps) {
                         )}
                       </div>
 
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-gray-500 font-inter">
                         Joined: {new Date(user.created_at).toLocaleDateString()}
                       </div>
 
@@ -515,7 +532,7 @@ export function UserList({ user }: PageProps) {
                           variant="outline"
                           size="sm"
                           onClick={() => handleEdit(user)}
-                          className="bg-transparent"
+                          className="bg-transparent border-[#70E4A8]/30 text-[#70E4A8] hover:bg-[#70E4A8]/10 hover:border-[#70E4A8]/50"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -529,7 +546,7 @@ export function UserList({ user }: PageProps) {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="text-red-600 hover:text-red-700 bg-transparent"
+                              className="text-[#EA580C] border-[#EA580C]/30 hover:bg-[#EA580C]/10 hover:border-[#EA580C]/50"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -546,7 +563,7 @@ export function UserList({ user }: PageProps) {
           {/* Pagination */}
           {usersData?.users && usersData.users.total > usersData.users.per_page && (
             <div className="flex items-center justify-between px-2">
-              <div className="text-sm text-muted-foreground">
+              <div className="text-sm text-muted-foreground font-inter">
                 Showing{" "}
                 <strong>
                   {usersData.users.from}-{usersData.users.to}
@@ -559,6 +576,7 @@ export function UserList({ user }: PageProps) {
                   size="sm"
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
+                  className="border-[#70E4A8]/30 hover:border-[#70E4A8]/50 font-inter"
                 >
                   <ChevronLeft className="h-4 w-4" />
                   Previous
@@ -568,6 +586,7 @@ export function UserList({ user }: PageProps) {
                   size="sm"
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === usersData.users.last_page}
+                  className="border-[#70E4A8]/30 hover:border-[#70E4A8]/50 font-inter"
                 >
                   Next
                   <ChevronRight className="h-4 w-4" />
@@ -585,13 +604,17 @@ export function UserList({ user }: PageProps) {
             <div className="rounded-full bg-gray-100 p-6 mb-4">
               <Search className="h-8 w-8 text-gray-400" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-[#2D3639] mb-2 font-rubik">
               No users found
             </h3>
-            <p className="text-gray-500 mb-4">
+            <p className="text-gray-500 mb-4 font-inter">
               Try adjusting your search terms or create a new user
             </p>
-            <Button variant="outline" onClick={() => setSearchTerm("")}>
+            <Button 
+              variant="outline" 
+              onClick={() => setSearchTerm("")}
+              className="border-[#70E4A8]/30 hover:border-[#70E4A8]/50 font-inter"
+            >
               Clear Search
             </Button>
           </CardContent>
@@ -604,10 +627,10 @@ export function UserList({ user }: PageProps) {
             <div className="rounded-full bg-gray-100 p-6 mb-4">
               <UserIcon className="h-8 w-8 text-gray-400" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-[#2D3639] mb-2 font-rubik">
               No users registered yet
             </h3>
-            <p className="text-gray-500 mb-4">
+            <p className="text-gray-500 mb-4 font-inter">
               Create your first user by clicking the "Add User" button above
             </p>
           </CardContent>
@@ -616,49 +639,94 @@ export function UserList({ user }: PageProps) {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
+        <Card className="hover:shadow-lg transition-shadow duration-300 border-2 border-transparent hover:border-[#70E4A8]/20">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <UserIcon className="h-4 w-4 text-gray-500" />
+            <CardTitle className="text-sm font-medium font-rubik text-[#2D3639]">Total Users</CardTitle>
+            <UserIcon className="h-4 w-4 text-[#70E4A8]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold font-rubik text-[#2D3639]">
               {usersData?.users?.total || 0}
             </div>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 font-inter">
               All registered system users
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="hover:shadow-lg transition-shadow duration-300 border-2 border-transparent hover:border-[#70E4A8]/20">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-            <Check className="h-4 w-4 text-green-500" />
+            <CardTitle className="text-sm font-medium font-rubik text-[#2D3639]">Active Users</CardTitle>
+            <Check className="h-4 w-4 text-[#70E4A8]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold font-rubik text-[#2D3639]">
               {getUsersArray().filter(u => u.status === "active").length}
             </div>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 font-inter">
               Currently active accounts
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="hover:shadow-lg transition-shadow duration-300 border-2 border-transparent hover:border-[#70E4A8]/20">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Admins</CardTitle>
-            <Shield className="h-4 w-4 text-blue-500" />
+            <CardTitle className="text-sm font-medium font-rubik text-[#2D3639]">Admins</CardTitle>
+            <Shield className="h-4 w-4 text-[#70E4A8]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold font-rubik text-[#2D3639]">
               {getUsersArray().filter(u => u.role === "admin").length}
             </div>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 font-inter">
               Users with admin privileges
             </p>
           </CardContent>
         </Card>
       </div>
+
+      {/* Quick Tips */}
+      <Card className="animate-slide-up-delay-3 hover:shadow-lg transition-all duration-300 border-2 border-transparent hover:border-[#70E4A8]/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-3 font-rubik text-[#2D3639]">
+            <div className="p-2 bg-gradient-to-br from-[#70E4A8] to-[#EA580C] rounded-lg">
+              <TrendingUp className="h-5 w-5 text-white" />
+            </div>
+            User Management Tips
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="flex items-start gap-4 animate-fade-in-stagger" style={{ animationDelay: "100ms" }}>
+              <div className="rounded-full bg-[#70E4A8]/20 p-3 animate-float" style={{ animationDelay: "0s" }}>
+                <UserIcon className="h-5 w-5 text-[#70E4A8]" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-[#2D3639] font-rubik">Role Management</h4>
+                <p className="text-sm text-gray-600 font-inter">Assign appropriate roles to control user access and permissions</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4 animate-fade-in-stagger" style={{ animationDelay: "200ms" }}>
+              <div className="rounded-full bg-[#EA580C]/20 p-3 animate-float" style={{ animationDelay: "0.5s" }}>
+                <Shield className="h-5 w-5 text-[#EA580C]" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-[#2D3639] font-rubik">Admin Privileges</h4>
+                <p className="text-sm text-gray-600 font-inter">Limit admin access to trusted users only</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4 animate-fade-in-stagger" style={{ animationDelay: "300ms" }}>
+              <div className="rounded-full bg-[#70E4A8]/20 p-3 animate-float" style={{ animationDelay: "1s" }}>
+                <Briefcase className="h-5 w-5 text-[#70E4A8]" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-[#2D3639] font-rubik">Plan Management</h4>
+                <p className="text-sm text-gray-600 font-inter">Monitor and manage user subscription plans effectively</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
