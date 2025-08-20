@@ -498,7 +498,7 @@ export function CoverLetterPage({ user }: PageProps) {
                         <Download className="h-4 w-4 mr-2" />
                         Download
                       </Button>
-                      <Button onClick={handleSaveLetter} className="bg-gradient-to-r from-purple-600 to-pink-600">
+                      <Button onClick={handleSaveLetter} className="resumaic-gradient-green hover:opacity-90  button-press">
                         <FileText className="h-4 w-4 mr-2" />
                         {editingLetter ? "Update Cover Letter" : "Save Cover Letter"}
                       </Button>
@@ -513,7 +513,7 @@ export function CoverLetterPage({ user }: PageProps) {
                       </Button>
                       <Button
                         onClick={() => handleEdit(viewingLetter)}
-                        className="bg-gradient-to-r from-purple-600 to-pink-600"
+                        className="resumaic-gradient-green hover:opacity-90  button-press"
                       >
                         <Edit className="h-4 w-4 mr-2" />
                         Edit

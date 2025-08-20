@@ -307,7 +307,7 @@ export function CoverLetterGenerator({ onGenerate, isGenerating }: CoverLetterGe
         <Button
           onClick={handleGenerate}
           disabled={!jobDescription.trim() || !selectedTone || !selectedCVId || isGenerating}
-          className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-8 py-3 text-lg"
+          className="resumaic-gradient-green hover:opacity-90  button-press px-4 py-3 text-lg"
           size="lg"
         >
           {isGenerating ? (
