@@ -8,6 +8,11 @@ import { cn } from "@/lib/utils";
 import type { CVData } from "@/types/cv-data";
 import { toast } from "sonner"
 
+// Helper function to remove duplicates from an array
+const removeDuplicates = (arr: string[]): string[] => {
+  return [...new Set(arr)];
+};
+
 interface PDFUploaderProps {
   onDataExtracted: (data: Partial<Omit<CVData, "id" | "createdAt">>) => void;
 }
@@ -70,14 +75,13 @@ const PDFUploader = ({ onDataExtracted }: PDFUploaderProps) => {
         },
         body: JSON.stringify({
           extractedText: text,
-          jobDescription: "Extract all possible data from this resume and format it properly"
         }),
       });
-
+  
       if (!response.ok) {
         throw new Error("Failed to analyze with DeepSeek");
       }
-
+  
       const result = await response.json();
       
       // Log the raw DeepSeek response
@@ -93,49 +97,75 @@ const PDFUploader = ({ onDataExtracted }: PDFUploaderProps) => {
           address: result.personalInfo?.address || "",
           city: result.personalInfo?.city || "",
           country: result.personalInfo?.country || "",
-          profilePicture: "",
+          profilePicture: result.personalInfo?.profilePicture || "",
           summary: result.personalInfo?.summary || "",
+          linkedin: result.personalInfo?.linkedin || "",
+          github: result.personalInfo?.github || "",
         },
         experience: Array.isArray(result.experience) 
           ? result.experience.map((exp: any, index: number) => ({
               id: index.toString(),
               jobTitle: exp.jobTitle || "",
-              companyName: exp.company || "",
-              startDate: exp.duration?.split(' - ')[0] || "",
-              endDate: exp.duration?.toLowerCase() === 'current' ? 'Present' : (exp.duration?.split(' - ')[1] || ""),
-              responsibilities: exp.description ? [exp.description] : [],
-              isCurrent: exp.duration?.toLowerCase() === 'current'
+              companyName: exp.companyName || "",
+              location: exp.location || "",
+              startDate: exp.startDate || "",
+              endDate: exp.endDate || "",
+              current: exp.current || false,
+              responsibilities: exp.responsibilities || [],
             }))
           : [],
         education: Array.isArray(result.education)
           ? result.education.map((edu: any, index: number) => ({
               id: index.toString(),
               degree: edu.degree || "",
-              institution: edu.institution || "",
-              year: edu.year || "",
-              description: ""
-            }))
-          : [],
-        certifications: Array.isArray(result.certifications)
-          ? result.certifications.map((cert: string, index: number) => ({
-              id: index.toString(),
-              name: cert,
-              date: ""
-            }))
-          : [],
-        languages: Array.isArray(result.languages)
-          ? result.languages.map((lang: string, index: number) => ({
-              id: index.toString(),
-              name: lang,
-              level: ""
+              institutionName: edu.institutionName || "",
+              location: edu.location || "",
+              graduationDate: edu.graduationDate || "",
+              gpa: edu.gpa || "",
+              honors: edu.honors || "",
+              additionalInfo: edu.additionalInfo || "",
             }))
           : [],
         skills: {
-          technical: Array.isArray(result.skills) ? result.skills : [],
-          soft: [],
+          technical: Array.isArray(result.skills?.technical) 
+            ? removeDuplicates(result.skills.technical) 
+            : [],
+          soft: Array.isArray(result.skills?.soft) 
+            ? removeDuplicates(result.skills.soft) 
+            : [],
+        },
+        languages: Array.isArray(result.languages)
+          ? result.languages.map((lang: any, index: number) => ({
+              id: index.toString(),
+              name: lang.name || "",
+              proficiency: lang.proficiency || "Intermediate",
+            }))
+          : [],
+        certifications: Array.isArray(result.certifications)
+          ? result.certifications.map((cert: any, index: number) => ({
+              id: index.toString(),
+              title: cert.title || "",
+              issuingOrganization: cert.issuingOrganization || "",
+              dateObtained: cert.dateObtained || "",
+              verificationLink: cert.verificationLink || "",
+            }))
+          : [],
+        projects: Array.isArray(result.projects)
+          ? result.projects.map((project: any, index: number) => ({
+              id: index.toString(),
+              name: project.name || "",
+              role: project.role || "Developer",
+              description: project.description || "",
+              technologies: Array.isArray(project.technologies) ? project.technologies : [],
+              liveDemoLink: project.liveDemoLink || "",
+              githubLink: project.githubLink || "",
+            }))
+          : [],
+        additional: {
+          interests: Array.isArray(result.additional?.interests) ? result.additional.interests : [],
         },
       };
-
+  
       // Log the transformed data
       console.log('Transformed Data:', JSON.stringify(transformedData, null, 2));
       
@@ -145,7 +175,6 @@ const PDFUploader = ({ onDataExtracted }: PDFUploaderProps) => {
       throw error;
     }
   };
-
   const extractDataFromPDF = async () => {
     if (!file || !pdfjs) return;
 

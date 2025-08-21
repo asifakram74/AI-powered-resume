@@ -202,7 +202,7 @@ export function UserList({ user }: PageProps) {
       user?.email?.toLowerCase().includes(searchLower) ||
       user?.role?.toLowerCase().includes(searchLower) ||
       user?.plan?.toLowerCase().includes(searchLower) ||
-      user?.status?.toLowerCase().includes(searchLower)
+      String(user?.status)?.toLowerCase().includes(searchLower)
     );
   });
 
@@ -354,10 +354,12 @@ export function UserList({ user }: PageProps) {
                           <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-[#70E4A8] transition-colors">
                               <AvatarFallback className="bg-[#70E4A8]/20 text-[#70E4A8] font-semibold">
-                                {user.name
+                                {(user.name || "")
                                   .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")}
+                                  .map((n, i) => ({ char: n[0], id: i }))
+                                  .map(({ char, id }) => (
+                                    <span key={`initial-${id}`}>{char}</span>
+                                  ))}
                               </AvatarFallback>
                             </Avatar>
                             <div>
@@ -463,10 +465,12 @@ export function UserList({ user }: PageProps) {
                       <div className="flex items-center gap-3">
                         <Avatar className="h-12 w-12 border-2 border-gray-200 hover:border-[#70E4A8] transition-colors">
                           <AvatarFallback className="bg-[#70E4A8]/20 text-[#70E4A8] font-semibold">
-                            {user.name
+                            {(user.name || "")
                               .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
+                              .map((n, i) => ({ char: n[0], id: i }))
+                              .map(({ char, id }) => (
+                                <span key={`grid-initial-${id}`}>{char}</span>
+                              ))}
                           </AvatarFallback>
                         </Avatar>
                         <div>
