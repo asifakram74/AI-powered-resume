@@ -33,7 +33,7 @@ import * as htmlToImage from "html-to-image";
 import { jsPDF } from "jspdf";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Sidebar } from "@/components/dashboard/sidebar";
-import { CreatePersonaPage } from "@/pages/persona/PersonaList";
+import  CreatePersonaPage  from "@/pages/persona/PersonaList";
 import { ResumePage } from "@/pages/resume/ResumeList";
 import { CoverLetterPage } from "@/pages/cover-letter/CoverLetterList";
 import ATSCheckerPage from "@/pages/ats/ats-checker-page";
@@ -415,20 +415,19 @@ export function CVPageClientContent() {
   const renderActivePage = () => {
     switch (activePage) {
       case "create-persona":
-        return <CreatePersonaPage />;
+        return <CreatePersonaPage user={user} />;
       case "resumes":
-        return <ResumePage />;
+        return <ResumePage user={user} />;
       case "cover-letter":
-        return <CoverLetterPage />;
+        return <CoverLetterPage user={user} />;
       case "ats-checker":
-        return <ATSCheckerPage />;
+        return <ATSCheckerPage  />;
       case "profile":
-        return <ProfilePage />;
+        return <ProfilePage  />;
       default:
-        return <CreatePersonaPage />;
+        return <CreatePersonaPage user={user} />;
     }
   };
-
   const handleLogout = async () => {
     await dispatch(logoutUser());
     router.push("/");
@@ -1371,6 +1370,7 @@ export function CVPageClientContent() {
       <SidebarProvider>
         <div className="flex min-h-screen">
           <Sidebar
+            user={user}
             activePage="cv-export"
             setActivePage={(page) => {
               if (page === "create-persona") {
