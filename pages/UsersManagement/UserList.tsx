@@ -734,3 +734,4 @@ export function UserList({ user }: PageProps) {
     </div>
   );
 }
+export default UserList;

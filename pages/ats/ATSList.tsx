@@ -508,3 +508,4 @@ export function ATSListPage() {
     </div>
   );
 }
+export default ATSListPage

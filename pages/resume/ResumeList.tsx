@@ -565,3 +565,4 @@ export function ResumePage({ user }: PageProps) {
     </div>
   );
 }
+export default ResumePage

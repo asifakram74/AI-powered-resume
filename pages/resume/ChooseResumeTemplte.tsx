@@ -227,3 +227,5 @@ export function CVTemplates({
     </div>
   );
 }
+export default CVTemplates
+

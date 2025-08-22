@@ -254,3 +254,4 @@ const handleCancel = () => {
     </Dialog>
   )
 }
+export default ChangePassword

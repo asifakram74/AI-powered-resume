@@ -376,3 +376,4 @@ useEffect(() => {
     </div>
   );
 }
+export default CVWizard

@@ -420,3 +420,4 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
     </div>
   )
 }
+export default UserForm;

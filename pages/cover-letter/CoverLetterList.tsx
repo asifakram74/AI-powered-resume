@@ -862,3 +862,4 @@ export function CoverLetterPage({ user }: PageProps) {
     </div>
   )
 }
+export default CoverLetterPage;

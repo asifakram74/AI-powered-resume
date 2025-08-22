@@ -52,3 +52,4 @@ export function CVPreview({ data, template }: CVPreviewProps) {
     </div>
   );
 }
+export default CVPreview

@@ -330,3 +330,4 @@ export function CoverLetterGenerator({ onGenerate, isGenerating }: CoverLetterGe
     </div>
   )
 }
+export default CoverLetterGenerator;

@@ -104,3 +104,4 @@ export function StatsCard() {
     </Card>
   )
 }
+export default StatsCard
