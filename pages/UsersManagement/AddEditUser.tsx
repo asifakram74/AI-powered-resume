@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -7,24 +9,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
-import { 
-  createUser, 
-  updateUser, 
-  getUserById, 
-  type CreateUserData, 
-  type UpdateUserData, 
-  type User 
-} from "@/lib/redux/service/userService"
 import {
-  User as UserIcon,
-  Mail,
-  Shield,
-  TrendingUp,
-  Briefcase,
-  Target,
-  CheckCircle,
-  XCircle,
-} from "lucide-react"
+  createUser,
+  updateUser,
+  getUserById,
+  type CreateUserData,
+  type UpdateUserData,
+  type User,
+} from "@/lib/redux/service/userService"
+import { UserIcon, Shield, TrendingUp, Briefcase, Target, CheckCircle, XCircle, AlertCircle } from "lucide-react"
 
 interface UserFormProps {
   userId?: number
@@ -78,10 +71,12 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  
+  const [validationErrors, setValidationErrors] = useState<Record<string, string[]>>({})
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    password: "",
     role: "user",
     status: "active",
     plan: "free",
@@ -94,7 +89,10 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
 
   useEffect(() => {
     if (initialData) {
-      setFormData(initialData)
+      setFormData({
+        ...initialData,
+        password: '', // Add empty password field when loading initial data
+      })
     } else if (mode === "edit" && userId) {
       loadUserData()
     }
@@ -107,6 +105,7 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
       setFormData({
         name: user.name,
         email: user.email,
+        password: "", // Keep empty for edit mode
         role: user.role,
         status: user.status,
         plan: user.plan,
@@ -126,35 +125,79 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked ? 1 : 0 : value
+      [name]: type === "checkbox" ? ((e.target as HTMLInputElement).checked ? 1 : 0) : value,
     }))
+
+    if (validationErrors[name]) {
+      setValidationErrors((prev) => {
+        const newErrors = { ...prev }
+        delete newErrors[name]
+        return newErrors
+      })
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
+    setValidationErrors({})
+
     try {
       setIsSubmitting(true)
-      
-      if (onSave) {
-        onSave(formData)
-      } else {
-        if (mode === "create") {
-          await createUser(formData as CreateUserData)
-          toast.success("User created successfully")
-        } else if (userId) {
-          await updateUser(userId, formData as UpdateUserData)
-          toast.success("User updated successfully")
+
+      if (mode === "create") {
+        const createData: CreateUserData = {
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          role: formData.role,
+          status: formData.status,
+          plan: formData.plan,
+          plan_type: formData.plan_type,
+          dark_mode: formData.dark_mode,
+          language: formData.language,
+          push_notifications: formData.push_notifications,
+          email_updates: formData.email_updates,
         }
-        
-        router.push("/admin/users")
-        router.refresh()
+        const response = await createUser(createData)
+        toast.success("User created successfully")
+        onSave?.(createData)
+      } else if (mode === "edit" && userId) {
+        const updateData: UpdateUserData = {
+          name: formData.name,
+          email: formData.email,
+          role: formData.role,
+          status: formData.status,
+          plan: formData.plan,
+          plan_type: formData.plan_type,
+          dark_mode: formData.dark_mode,
+          language: formData.language,
+          push_notifications: formData.push_notifications,
+          email_updates: formData.email_updates,
+        }
+        await updateUser(userId, updateData)
+        toast.success("User updated successfully")
+        onSave?.(updateData)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving user:", error)
-      toast.error(`Failed to ${mode === "create" ? "create" : "update"} user`)
+
+      if (error.isValidationError && error.errors) {
+        setValidationErrors(error.errors)
+
+        toast.error("Please fix the validation errors below")
+
+        Object.entries(error.errors).forEach(([field, messages]) => {
+          if (Array.isArray(messages) && messages.length > 0) {
+            toast.error(`${field}: ${messages[0]}`)
+          }
+        })
+      } else {
+        const errorMessage = error.message || "Failed to save user. Please try again."
+        toast.error(errorMessage)
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -166,6 +209,15 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
     } else {
       router.push("/admin/users")
     }
+  }
+
+  const getFieldError = (fieldName: string): string | null => {
+    const errors = validationErrors[fieldName]
+    return errors && errors.length > 0 ? errors[0] : null
+  }
+
+  const hasFieldError = (fieldName: string): boolean => {
+    return validationErrors[fieldName] && validationErrors[fieldName].length > 0
   }
 
   if (isLoading) {
@@ -195,6 +247,26 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
         </div>
       </div>
 
+      {Object.keys(validationErrors).length > 0 && (
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-red-500 mt-0.5" />
+              <div>
+                <h3 className="font-semibold text-red-800 font-rubik">Please fix the following errors:</h3>
+                <ul className="mt-2 space-y-1">
+                  {Object.entries(validationErrors).map(([field, messages]) => (
+                    <li key={field} className="text-sm text-red-700 font-inter">
+                      <strong className="capitalize">{field}:</strong> {messages[0]}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Basic Information Card */}
@@ -207,7 +279,9 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name" className="font-rubik text-[#2D3639]">Full Name *</Label>
+                <Label htmlFor="name" className="font-rubik text-[#2D3639]">
+                  Full Name *
+                </Label>
                 <Input
                   id="name"
                   name="name"
@@ -215,12 +289,15 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
                   onChange={handleChange}
                   placeholder="Enter full name"
                   required
-                  className="font-inter border-[#70E4A8]/30 focus:border-[#70E4A8]"
+                  className={`font-inter ${hasFieldError("name") ? "border-red-500 focus:border-red-500" : "border-[#70E4A8]/30 focus:border-[#70E4A8]"}`}
                 />
+                {getFieldError("name") && <p className="text-sm text-red-600 font-inter">{getFieldError("name")}</p>}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="font-rubik text-[#2D3639]">Email Address *</Label>
+                <Label htmlFor="email" className="font-rubik text-[#2D3639]">
+                  Email Address *
+                </Label>
                 <Input
                   id="email"
                   name="email"
@@ -229,44 +306,76 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
                   onChange={handleChange}
                   placeholder="Enter email address"
                   required
-                  className="font-inter border-[#70E4A8]/30 focus:border-[#70E4A8]"
+                  className={`font-inter ${hasFieldError("email") ? "border-red-500 focus:border-red-500" : "border-[#70E4A8]/30 focus:border-[#70E4A8]"}`}
                 />
+                {getFieldError("email") && <p className="text-sm text-red-600 font-inter">{getFieldError("email")}</p>}
               </div>
 
+              {mode === "create" && (
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="font-rubik text-[#2D3639]">
+                    Password *
+                  </Label>
+                  <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="••••••••"
+                    required
+                    minLength={8}
+                    className={`font-inter ${hasFieldError("password") ? "border-red-500 focus:border-red-500" : "border-[#70E4A8]/30 focus:border-[#70E4A8]"}`}
+                  />
+                  {getFieldError("password") && (
+                    <p className="text-sm text-red-600 font-inter">{getFieldError("password")}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground">Password must be at least 8 characters long</p>
+                </div>
+              )}
+
               <div className="space-y-2">
-                <Label htmlFor="role" className="font-rubik text-[#2D3639]">Role *</Label>
+                <Label htmlFor="role" className="font-rubik text-[#2D3639]">
+                  Role *
+                </Label>
                 <select
                   id="role"
                   name="role"
                   value={formData.role}
                   onChange={handleChange}
-                  className="flex h-10 w-full rounded-md border border-[#70E4A8]/30 bg-background px-3 py-2 text-sm font-inter ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#70E4A8] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className={`flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm font-inter ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#70E4A8] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${hasFieldError("role") ? "border-red-500" : "border-[#70E4A8]/30"}`}
                   required
                 >
-                  {roles.map(role => (
+                  {roles.map((role) => (
                     <option key={role.value} value={role.value}>
                       {role.label}
                     </option>
                   ))}
                 </select>
+                {getFieldError("role") && <p className="text-sm text-red-600 font-inter">{getFieldError("role")}</p>}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="status" className="font-rubik text-[#2D3639]">Status *</Label>
+                <Label htmlFor="status" className="font-rubik text-[#2D3639]">
+                  Status *
+                </Label>
                 <select
                   id="status"
                   name="status"
                   value={formData.status}
                   onChange={handleChange}
-                  className="flex h-10 w-full rounded-md border border-[#70E4A8]/30 bg-background px-3 py-2 text-sm font-inter ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#70E4A8] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className={`flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm font-inter ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#70E4A8] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${hasFieldError("status") ? "border-red-500" : "border-[#70E4A8]/30"}`}
                   required
                 >
-                  {statuses.map(status => (
+                  {statuses.map((status) => (
                     <option key={status.value} value={status.value}>
                       {status.label}
                     </option>
                   ))}
                 </select>
+                {getFieldError("status") && (
+                  <p className="text-sm text-red-600 font-inter">{getFieldError("status")}</p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -281,57 +390,70 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="plan" className="font-rubik text-[#2D3639]">Plan *</Label>
+                <Label htmlFor="plan" className="font-rubik text-[#2D3639]">
+                  Plan *
+                </Label>
                 <select
                   id="plan"
                   name="plan"
                   value={formData.plan}
                   onChange={handleChange}
-                  className="flex h-10 w-full rounded-md border border-[#70E4A8]/30 bg-background px-3 py-2 text-sm font-inter ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#70E4A8] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className={`flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm font-inter ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#70E4A8] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${hasFieldError("plan") ? "border-red-500" : "border-[#70E4A8]/30"}`}
                   required
                 >
-                  {plans.map(plan => (
+                  {plans.map((plan) => (
                     <option key={plan.value} value={plan.value}>
                       {plan.label}
                     </option>
                   ))}
                 </select>
+                {getFieldError("plan") && <p className="text-sm text-red-600 font-inter">{getFieldError("plan")}</p>}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="plan_type" className="font-rubik text-[#2D3639]">Plan Type *</Label>
+                <Label htmlFor="plan_type" className="font-rubik text-[#2D3639]">
+                  Plan Type *
+                </Label>
                 <select
                   id="plan_type"
                   name="plan_type"
                   value={formData.plan_type}
                   onChange={handleChange}
-                  className="flex h-10 w-full rounded-md border border-[#70E4A8]/30 bg-background px-3 py-2 text-sm font-inter ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#70E4A8] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className={`flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm font-inter ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#70E4A8] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${hasFieldError("plan_type") ? "border-red-500" : "border-[#70E4A8]/30"}`}
                   required
                 >
-                  {planTypes.map(type => (
+                  {planTypes.map((type) => (
                     <option key={type.value} value={type.value}>
                       {type.label}
                     </option>
                   ))}
                 </select>
+                {getFieldError("plan_type") && (
+                  <p className="text-sm text-red-600 font-inter">{getFieldError("plan_type")}</p>
+                )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="language" className="font-rubik text-[#2D3639]">Language *</Label>
+                <Label htmlFor="language" className="font-rubik text-[#2D3639]">
+                  Language *
+                </Label>
                 <select
                   id="language"
                   name="language"
                   value={formData.language}
                   onChange={handleChange}
-                  className="flex h-10 w-full rounded-md border border-[#70E4A8]/30 bg-background px-3 py-2 text-sm font-inter ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#70E4A8] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className={`flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm font-inter ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#70E4A8] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${hasFieldError("language") ? "border-red-500" : "border-[#70E4A8]/30"}`}
                   required
                 >
-                  {languages.map(lang => (
+                  {languages.map((lang) => (
                     <option key={lang.value} value={lang.value}>
                       {lang.label}
                     </option>
                   ))}
                 </select>
+                {getFieldError("language") && (
+                  <p className="text-sm text-red-600 font-inter">{getFieldError("language")}</p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -355,7 +477,9 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
                 </div>
                 <div>
                   <h4 className="font-semibold text-[#2D3639] font-rubik">Role Assignment</h4>
-                  <p className="text-sm text-gray-600 font-inter">Assign admin roles only to trusted users who need system-wide access</p>
+                  <p className="text-sm text-gray-600 font-inter">
+                    Assign admin roles only to trusted users who need system-wide access
+                  </p>
                 </div>
               </div>
 
@@ -365,7 +489,9 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
                 </div>
                 <div>
                   <h4 className="font-semibold text-[#2D3639] font-rubik">Plan Selection</h4>
-                  <p className="text-sm text-gray-600 font-inter">Choose appropriate plans based on user needs and feature requirements</p>
+                  <p className="text-sm text-gray-600 font-inter">
+                    Choose appropriate plans based on user needs and feature requirements
+                  </p>
                 </div>
               </div>
 
@@ -375,7 +501,9 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
                 </div>
                 <div>
                   <h4 className="font-semibold text-[#2D3639] font-rubik">Active Status</h4>
-                  <p className="text-sm text-gray-600 font-inter">Keep users active to ensure they can access all system features</p>
+                  <p className="text-sm text-gray-600 font-inter">
+                    Keep users active to ensure they can access all system features
+                  </p>
                 </div>
               </div>
 
@@ -385,7 +513,9 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
                 </div>
                 <div>
                   <h4 className="font-semibold text-[#2D3639] font-rubik">Suspension</h4>
-                  <p className="text-sm text-gray-600 font-inter">Suspend users temporarily if needed, rather than deleting accounts</p>
+                  <p className="text-sm text-gray-600 font-inter">
+                    Suspend users temporarily if needed, rather than deleting accounts
+                  </p>
                 </div>
               </div>
             </div>
@@ -397,7 +527,7 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
             type="button"
             variant="outline"
             onClick={handleCancel}
-            className="border-[#70E4A8]/30 hover:border-[#70E4A8]/50 text-[#2D3639] font-inter"
+            className="border-[#70E4A8]/30 hover:border-[#70E4A8]/50 text-[#2D3639] font-inter bg-transparent"
           >
             Cancel
           </Button>
@@ -420,4 +550,4 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
     </div>
   )
 }
-export default UserForm;
+export default UserForm

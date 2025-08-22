@@ -23,6 +23,8 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [passwordError, setPasswordError] = useState("")
+  const [apiError, setApiError] = useState("")
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({})
 
   const router = useRouter()
   const dispatch = useAppDispatch()
@@ -45,6 +47,8 @@ export default function SignUpPage() {
     e.preventDefault()
     dispatch(clearError())
     setPasswordError("")
+    setApiError("")
+    setFieldErrors({})
 
     // Validate passwords match before submitting
     if (password !== confirmPassword) {
@@ -52,9 +56,18 @@ export default function SignUpPage() {
       return
     }
 
-    const result = await dispatch(registerUser({ name, email, password }))
-    if (registerUser.fulfilled.match(result)) {
-      router.push("/auth/signin")
+    try {
+      const result = await dispatch(registerUser({ name, email, password }))
+      if (registerUser.fulfilled.match(result)) {
+        router.push("/auth/signin")
+      }
+    } catch (error: any) {
+      if (error.response?.data?.errors) {
+        setFieldErrors(error.response.data.errors)
+        setApiError("Please fix the validation errors below")
+      } else {
+        setApiError(error.response?.data?.message || "Registration failed")
+      }
     }
   }
 
@@ -72,9 +85,18 @@ export default function SignUpPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
+            {(error || apiError) && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{error || apiError}</AlertDescription>
+                {Object.entries(fieldErrors).length > 0 && (
+                  <ul className="mt-2 list-disc list-inside">
+                    {Object.entries(fieldErrors).map(([field, messages]) => (
+                      <li key={field}>
+                        <strong>{field}:</strong> {messages.join(', ')}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </Alert>
             )}
 

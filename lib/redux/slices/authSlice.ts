@@ -46,6 +46,13 @@ export const registerUser = createAsyncThunk<RegisterResponse, RegisterData>(
       const response = await AuthService.register(userData)
       return response
     } catch (error: any) {
+      // Handle validation errors
+      if (error.response?.data?.errors) {
+        return rejectWithValue({
+          message: error.response.data.message || "Validation failed",
+          errors: error.response.data.errors
+        })
+      }
       return rejectWithValue(error.response?.data?.message || "Registration failed")
     }
   },
@@ -129,7 +136,16 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false
-        state.error = action.payload as string
+        if (action.payload && typeof action.payload === 'object' && 'errors' in action.payload) {
+          // Handle validation errors
+          const payload = action.payload as { message: string; errors: Record<string, string[]> }
+          state.error = Object.entries(payload.errors)
+            .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
+            .join('; ')
+        } else {
+          // Handle other errors
+          state.error = typeof action.payload === 'string' ? action.payload : 'Registration failed'
+        }
       })
       .addCase(fetchProfile.pending, (state) => {
         state.loading = true
