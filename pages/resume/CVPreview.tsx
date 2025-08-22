@@ -5,6 +5,7 @@ import { ModernTemplate } from "@/components/templates/modern-template";
 import { ClassicTemplate } from "@/components/templates/classic-template";
 import { MinimalTemplate } from "@/components/templates/minimal-template";
 import { CreativeTemplate } from "@/components/templates/creative-template";
+import { sampleCVData } from "@/lib/sample-cv-data";
 import { useRef } from "react";
 
 interface CVTemplate {
@@ -15,11 +16,21 @@ interface CVTemplate {
 }
 
 interface CVPreviewProps {
-  data: CVData;
-  template: CVTemplate;
+  data?: CVData;
+  template?: CVTemplate;
 }
 
-export function CVPreview({ data, template }: CVPreviewProps) {
+const defaultTemplate: CVTemplate = {
+  id: "modern",
+  name: "Modern",
+  description: "Default modern resume template",
+  category: "modern",
+};
+
+export function CVPreview({
+  data = sampleCVData,
+  template = defaultTemplate,
+}: CVPreviewProps) {
   const previewRef = useRef<HTMLDivElement>(null);
 
   const renderTemplate = () => {
