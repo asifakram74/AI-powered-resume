@@ -198,3 +198,5 @@ export function PersonaCreationOptions({
     </div>
   );
 }
+
+export default PersonaCreationOptions;

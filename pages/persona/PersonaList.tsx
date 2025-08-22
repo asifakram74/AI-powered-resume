@@ -62,7 +62,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Crown, UserCircle } from "lucide-react";
 import { PageProps } from "@/app/dashboard/page";
 
-export function CreatePersonaPage({ user }: PageProps) {
+function CreatePersonaPage({ user }: PageProps) {
   const [personas, setPersonas] = useState<CVData[]>([])
   const [viewMode, setViewMode] = useState<"grid" | "table">("table");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -979,3 +979,5 @@ export function CreatePersonaPage({ user }: PageProps) {
     </div>
   );
 }
+
+export default CreatePersonaPage;

@@ -154,3 +154,4 @@ export const PDFUploader = ({
     </div>
   );
 };
+export default PDFUploader;

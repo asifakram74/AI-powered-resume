@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { Sidebar } from "@/components/dashboard/sidebar"
-import { CreatePersonaPage } from "@/pages/persona/PersonaList"
+import CreatePersonaPage from "@/pages/persona/PersonaList"
 import { ResumePage } from "@/pages/resume/ResumeList"
 import { CoverLetterPage } from "@/pages/cover-letter/CoverLetterList"
 import ATSCheckerPage from "@/pages/ats/ats-checker-page"
