@@ -404,9 +404,9 @@ export function CVPageClientContent() {
 
   const searchParams = useSearchParams();
   const router = useRouter();
-  const personaId = searchParams.get("personaId");
-  const cvId = searchParams.get("cvId");
-  const templateIdFromUrl = searchParams.get("templateId");
+  const personaId = searchParams?.get("personaId") ?? '';
+  const cvId = searchParams?.get("cvId") ?? '';
+  const templateIdFromUrl = searchParams?.get("templateId") ?? '';
 
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
