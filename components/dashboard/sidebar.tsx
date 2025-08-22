@@ -208,21 +208,20 @@ export function Sidebar({
                   isActive={activePage === item.id}
                   className={`
                     w-full justify-start gap-3 px-4 py-3.5 text-left rounded-2xl transition-all duration-300
-                    hover:bg-gradient-to-r hover:from-green-50/80 hover:to-orange-50/30 hover:shadow-lg hover:scale-[1.02]
                     data-[active=true]:resumaic-gradient-subtle data-[active=true]:text-gray-900 data-[active=true]:shadow-xl 
-                    data-[active=true]:border data-[active=true]:border-green-200/50 data-[active=true]:scale-[1.02]
-                    group cursor-pointer transform
+                    data-[active=true]:border data-[active=true]:border-green-200/50
+                    cursor-pointer transform
                   `}
                 >
                   <div className="flex items-center gap-3 flex-1">
-                    <item.icon className="h-5 w-5 text-gray-600 group-data-[active=true]:text-green-700 transition-all duration-300 group-hover:scale-110" />
-                    <span className="font-semibold text-gray-700 group-data-[active=true]:text-gray-900 group-hover:text-gray-900">
+                    <item.icon className="h-5 w-5 text-gray-600 group-data-[active=true]:text-green-700" />
+                    <span className="font-semibold text-gray-700 data-[active=true]:text-gray-900">
                       {item.label}
                     </span>
                   </div>
                   {item.badge && (
                     <Badge
-                      className={`text-xs px-3 py-1 font-bold rounded-full transform transition-all duration-300 group-hover:scale-110 ${item.badgeColor || "bg-gray-100 text-gray-700"}`}
+                      className={`text-xs px-3 py-1 font-bold rounded-full ${item.badgeColor || "bg-gray-100 text-gray-700"}`}
                     >
                       {item.badge}
                     </Badge>
@@ -261,7 +260,7 @@ export function Sidebar({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        ) : (
+        ) : !isAdmin ? (
           <div className="p-5 rounded-2xl bg-gradient-to-br from-green-50/80 via-white to-orange-50/30 border border-green-200/50">
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2.5 rounded-xl resumaic-gradient-green shadow-lg">
@@ -294,7 +293,7 @@ export function Sidebar({
               )}
             </div>
           </div>
-        )}
+        ) : null}
 
         <Button
           variant="outline"
