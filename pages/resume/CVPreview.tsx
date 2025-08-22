@@ -34,7 +34,7 @@ export function CVPreview({
   const previewRef = useRef<HTMLDivElement>(null);
 
   const renderTemplate = () => {
-    switch (template.id) {
+    switch (template?.id) {
       case "modern":
         return <ModernTemplate data={data} />;
       case "classic":
