@@ -30,6 +30,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
+
 import { PDFUploader } from "./PDFUploader";
 import {
   Dialog,
@@ -129,21 +131,78 @@ export default function ATSCheckerPage() {
 
   const exportAsPDF = async () => {
     if (!analysisRef.current) return;
-
+  
     try {
-      const dataUrl = await htmlToImage.toPng(analysisRef.current);
+      const element = analysisRef.current;
       const pdf = new jsPDF("p", "mm", "a4");
-      const imgProps = pdf.getImageProperties(dataUrl);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-      pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight);
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 15; // 15mm margins
+      const contentWidth = pageWidth - 2 * margin;
+      
+      // Get the actual height of the content
+      const originalHeight = element.scrollHeight;
+      const originalWidth = element.scrollWidth;
+      
+      // Calculate scale to fit content width
+      const scale = contentWidth / originalWidth;
+      const scaledHeight = originalHeight * scale;
+      
+      // Create canvas with proper dimensions
+      const canvas = document.createElement('canvas');
+      canvas.width = originalWidth * 2; // Higher resolution
+      canvas.height = originalHeight * 2;
+      const ctx = canvas.getContext('2d');
+      
+      if (!ctx) return;
+      
+      // Scale the context for high resolution
+      ctx.scale(2, 2);
+      
+      // Use html-to-image with better options
+      const dataUrl = await htmlToImage.toPng(element, {
+        // canvas: canvas,
+        quality: 1,
+        pixelRatio: 2,
+        backgroundColor: '#ffffff',
+        skipFonts: true
+      });
+      
+      // Add first page
+      let position = 0;
+      let currentPage = 1;
+      
+      while (position < scaledHeight) {
+        if (currentPage > 1) {
+          pdf.addPage();
+        }
+        
+        // Calculate how much of the image to show on this page with 4px bottom margin
+        const bottomMargin = 4; // 4px bottom margin
+        const pageContentHeight = Math.min(pageHeight - 2 * margin - bottomMargin, scaledHeight - position);
+        
+        pdf.addImage(
+          dataUrl,
+          'PNG',
+          margin,
+          margin - position,
+          contentWidth,
+          scaledHeight,
+          undefined,
+          'MEDIUM'
+        );
+        
+        position += pageHeight - 2 * margin - bottomMargin;
+        currentPage++;
+      }
+      
       pdf.save("ats-analysis-report.pdf");
+      
     } catch (error) {
       console.error("Error exporting as PDF:", error);
+      toast.error("Failed to export PDF. Please try again.");
     }
   };
-
   const exportAsDOCX = async () => {
     if (!analysisResult) return;
 
