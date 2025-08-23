@@ -38,6 +38,11 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 
+  /* Fallback font variables to avoid remote fetch */
+  --font-inter: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-rubik: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+
   /* Resumaic Brand Colors */
   --resumaic-green: #70e4a8;
   --resumaic-black: #000000;
