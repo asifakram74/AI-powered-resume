@@ -1,3 +1,4 @@
+
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
@@ -6,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Document, Packer, Paragraph } from "docx";
 import { Card, CardContent } from "@/components/ui/card";
 import { Zap } from "lucide-react";
-
+import html2canvas from "html2canvas";
 import {
   ArrowLeft,
   Sparkles,
@@ -766,12 +767,12 @@ export function CVPageClientContent() {
         );
         return;
       }
-
+  
       const loadingToastId = showLoadingToast(
         `Preparing ${format.toUpperCase()} export...`,
         "Processing your CV for download"
       );
-
+  
       switch (format) {
         case "pdf":
           const printWindow = window.open("", "_blank");
@@ -783,6 +784,7 @@ export function CVPageClientContent() {
             );
             return;
           }
+          
           const clonedContent = cvElement.cloneNode(true) as HTMLElement;
           const styles = Array.from(document.styleSheets)
             .map((sheet) => {
@@ -795,58 +797,84 @@ export function CVPageClientContent() {
               }
             })
             .join("");
-
+  
           printWindow.document.write(`
             <!DOCTYPE html>
             <html>
               <head>
-                <title>CV Export</title>
+                <title>${persona?.full_name || "Resume"} - CV</title>
                 <style>${styles}</style>
                 <style>
-                  body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
-                  @media print { body { margin: 0; padding: 0; } }
+                  body { 
+                    margin: 0; 
+                    padding: 15px; 
+                    font-family: Arial, sans-serif; 
+                    background-color: white;
+                  }
+                  @media print { 
+                    body { 
+                      margin: 0; 
+                      padding: 0; 
+                    } 
+                    .no-print {
+                      display: none !important;
+                    }
+                  }
+                  .print-button {
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 10px 15px;
+                    background-color: #007bff;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    z-index: 1000;
+                  }
                 </style>
               </head>
-              <body>${clonedContent.outerHTML}</body>
+              <body>
+                ${clonedContent.outerHTML}
+                <button class="print-button no-print" onclick="window.print()">Print / Save as PDF</button>
+                <script>
+                  // Auto-print after page loads
+                  window.onload = function() {
+                    setTimeout(function() {
+                      window.print();
+                    }, 500);
+                  };
+                  
+                  // Close window after printing
+                  window.onafterprint = function() {
+                    setTimeout(function() {
+                      window.close();
+                    }, 500);
+                  };
+                </script>
+              </body>
             </html>
           `);
           printWindow.document.close();
-          printWindow.print();
-
-          toast.dismiss(loadingToastId);
-          showSuccessToast(
-            "PDF Ready! 📄",
-            "Your CV is ready for printing or saving"
-          );
+  
+          // Dismiss loading toast after a short delay to allow print dialog to appear
+          setTimeout(() => {
+            toast.dismiss(loadingToastId);
+            showSuccessToast(
+              "PDF Ready! 📄",
+              "Use the print dialog to save as PDF or print"
+            );
+          }, 1000);
           break;
-
+  
         case "png":
-          const dataUrl = await htmlToImage.toPng(cvElement, {
-            quality: 1,
-            pixelRatio: 2,
-            backgroundColor: "#ffffff",
-          });
-          const link = document.createElement("a");
-          link.download = `${persona?.full_name || "CV"}_${
-            new Date().toISOString().split("T")[0]
-          }.png`;
-          link.href = dataUrl;
-          link.click();
-
+          await exportAsPNG();
           toast.dismiss(loadingToastId);
-          showSuccessToast(
-            "PNG Downloaded! 🖼️",
-            "Your CV image has been saved to downloads"
-          );
           break;
-
+        
         case "docx":
           await handleDocxExport();
           toast.dismiss(loadingToastId);
-          showSuccessToast(
-            "DOCX Downloaded! 📝",
-            "Your editable CV document is ready"
-          );
           break;
       }
     } catch (error: any) {
@@ -857,54 +885,7 @@ export function CVPageClientContent() {
       );
     }
   };
-
-  const exportAsPDF = async () => {
-    try {
-      const cvElement = document.getElementById("cv-preview-content");
-      if (!cvElement) {
-        showErrorToast(
-          "Export Failed",
-          "CV preview not found. Please refresh and try again."
-        );
-        return;
-      }
-
-      // Use html-to-image approach for better quality
-      const dataUrl = await htmlToImage.toPng(cvElement, {
-        quality: 1.0,
-        pixelRatio: 2,
-        backgroundColor: "#ffffff",
-      });
-
-      const pdf = new jsPDF("p", "mm", "a4");
-      const imgProps = pdf.getImageProperties(dataUrl);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-      // Handle multiple pages if content is too long
-      if (pdfHeight > pdf.internal.pageSize.getHeight()) {
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        let position = 0;
-
-        while (position < pdfHeight) {
-          pdf.addImage(dataUrl, "PNG", 0, -position, pdfWidth, pdfHeight);
-          position += pageHeight;
-          if (position < pdfHeight) {
-            pdf.addPage();
-          }
-        }
-      } else {
-        pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight);
-      }
-
-      pdf.save(`${persona?.full_name || "resume"}-cv.pdf`);
-    } catch (error) {
-      console.error("Error exporting as PDF:", error);
-      // Fallback to print method
-      handleExport("pdf");
-    }
-  };
-
+  
   const exportAsPNG = async () => {
     try {
       const cvElement = document.getElementById("cv-preview-content");
@@ -915,35 +896,40 @@ export function CVPageClientContent() {
         );
         return;
       }
-
+  
       const dataUrl = await htmlToImage.toPng(cvElement, {
         quality: 1.0,
         pixelRatio: 2,
         backgroundColor: "#ffffff",
       });
-
+  
       // Create download link
       const link = document.createElement("a");
       link.download = `${persona?.full_name || "resume"}-cv.png`;
       link.href = dataUrl;
       link.click();
+      
+      showSuccessToast(
+        "PNG Downloaded! 📸",
+        "Your CV has been downloaded as PNG"
+      );
     } catch (error) {
       console.error("Error exporting as PNG:", error);
       showErrorToast("Export Failed", "PNG export failed. Please try again.");
     }
   };
-
+  
   const handleDocxExport = async () => {
     try {
       if (!aiResponse || !persona) {
         showErrorToast("Export Failed", "No CV data available for export.");
         return;
       }
-
+  
       // Import docx dynamically to avoid SSR issues
       const { Document, Paragraph, TextRun, HeadingLevel, Packer } =
         await import("docx");
-
+  
       // Create document sections
       const sections = [
         // Personal Info
@@ -990,7 +976,7 @@ export function CVPageClientContent() {
           ],
         }),
         new Paragraph({ text: "" }), // Empty paragraph for spacing
-
+  
         // Summary
         new Paragraph({
           heading: HeadingLevel.HEADING_2,
@@ -1011,7 +997,7 @@ export function CVPageClientContent() {
           ],
         }),
         new Paragraph({ text: "" }),
-
+  
         // Work Experience
         new Paragraph({
           heading: HeadingLevel.HEADING_2,
@@ -1052,7 +1038,7 @@ export function CVPageClientContent() {
           }),
           new Paragraph({ text: "" }),
         ]),
-
+  
         // Education
         new Paragraph({
           heading: HeadingLevel.HEADING_2,
@@ -1084,7 +1070,7 @@ export function CVPageClientContent() {
           }),
           new Paragraph({ text: "" }),
         ]),
-
+  
         // Skills
         new Paragraph({
           heading: HeadingLevel.HEADING_2,
@@ -1105,7 +1091,7 @@ export function CVPageClientContent() {
           ],
         }),
         new Paragraph({ text: "" }),
-
+  
         // Projects
         new Paragraph({
           heading: HeadingLevel.HEADING_2,
@@ -1145,7 +1131,7 @@ export function CVPageClientContent() {
           }),
           new Paragraph({ text: "" }),
         ]),
-
+  
         // Certifications
         aiResponse.optimizedCV.certifications.length > 0
           ? new Paragraph({
@@ -1170,12 +1156,12 @@ export function CVPageClientContent() {
           }),
         ]),
       ].filter(Boolean); // Remove null sections
-
+  
       // Filter out any null values from sections and ensure they are Paragraph objects
       const validSections = sections.filter(
         (section): section is InstanceType<typeof Paragraph> => section !== null
       );
-
+  
       const doc = new Document({
         sections: [
           {
@@ -1184,7 +1170,7 @@ export function CVPageClientContent() {
           },
         ],
       });
-
+  
       // Generate blob and download
       const blob = await Packer.toBlob(doc);
       const url = URL.createObjectURL(blob);
@@ -1197,6 +1183,11 @@ export function CVPageClientContent() {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+      
+      showSuccessToast(
+        "DOCX Downloaded! 📝",
+        "Your CV has been downloaded as DOCX"
+      );
     } catch (error) {
       console.error("Error generating DOCX:", error);
       showErrorToast(
@@ -1383,7 +1374,7 @@ export function CVPageClientContent() {
                 router.push("/dashboard?page=profile");
               }
             }}
-            onExportPDF={exportAsPDF}
+            onExportPDF={() => handleExport('pdf')}
             onExportDOCX={handleDocxExport}
             onExportPNG={exportAsPNG}
             exportMode={true}
