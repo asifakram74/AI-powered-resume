@@ -387,8 +387,8 @@ export function UserList({ user }: PageProps) {
                       <TableHead className="font-sans">Email</TableHead>
                       <TableHead className="font-sans">Role</TableHead>
                       <TableHead className="font-sans">Plan</TableHead>
-                      <TableHead className="font-sans">Status</TableHead>
-                      <TableHead className="font-sans">Verified</TableHead>
+                      {/* <TableHead className="font-sans">Status</TableHead> */}
+                      {/* <TableHead className="font-sans">Verified</TableHead> */}
                       <TableHead className="font-sans">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -432,7 +432,7 @@ export function UserList({ user }: PageProps) {
                             {user.plan}
                           </Badge>
                         </TableCell>
-                        <TableCell>
+                        {/* <TableCell>
                           <Badge
                             variant={user.status === "active" ? "default" : "destructive"}
                             className={`cursor-pointer font-sans ${
@@ -444,8 +444,8 @@ export function UserList({ user }: PageProps) {
                           >
                             {user.status}
                           </Badge>
-                        </TableCell>
-                        <TableCell>
+                        </TableCell> */}
+                        {/* <TableCell>
                           {user.email_verified_at ? (
                             <Badge variant="secondary" className="bg-[#70E4A8]/20 text-[#2D3639] font-sans">
                               <Check className="h-3 w-3 mr-1" />
@@ -462,7 +462,7 @@ export function UserList({ user }: PageProps) {
                               Not Verified
                             </Button>
                           )}
-                        </TableCell>
+                        </TableCell> */}
                         <TableCell>
                           <div className="flex gap-1">
                             <Button
