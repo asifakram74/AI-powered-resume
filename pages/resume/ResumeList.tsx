@@ -130,6 +130,9 @@ export function ResumePage({ user }: PageProps) {
   const handleEdit = (cv: CV) => {
     router.push(`/create-cv?cvId=${cv.id}`);
   };
+  const handleView = (cv: CV) => {
+    router.push(`/create-cv?cvId=${cv.id}&view=true`);
+  };
 
   const handleDelete = async (cv: CV) => {
     try {
@@ -320,7 +323,7 @@ export function ResumePage({ user }: PageProps) {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleEdit(cv)} className="cursor-pointer"
+                              onClick={() => handleView(cv)} className="cursor-pointer"
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
@@ -411,7 +414,7 @@ export function ResumePage({ user }: PageProps) {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleEdit(cv)} className="bg-transparent p-2"
+                          onClick={() => handleView(cv)} className="bg-transparent p-2"
                         >
                           <Eye className="h-4 w-4" />
                         </Button>

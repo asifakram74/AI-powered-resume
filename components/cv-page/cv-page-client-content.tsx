@@ -402,12 +402,14 @@ export function CVPageClientContent() {
   const [existingCV, setExistingCV] = useState<CV | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showEditPopup, setShowEditPopup] = useState(false);
+  const [isViewMode, setIsViewMode] = useState(false); // Add this state
 
   const searchParams = useSearchParams();
   const router = useRouter();
   const personaId = searchParams?.get("personaId") ?? '';
   const cvId = searchParams?.get("cvId") ?? '';
   const templateIdFromUrl = searchParams?.get("templateId") ?? '';
+  const viewMode = searchParams?.get("view") === 'true'; // Check for view mode parameter
 
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
@@ -459,6 +461,11 @@ export function CVPageClientContent() {
       setSelectedTemplate(defaultTemplate);
     }
   }, [templateIdFromUrl, selectedTemplate]);
+
+  useEffect(() => {
+    // Set view mode based on URL parameter
+    setIsViewMode(viewMode);
+  }, [viewMode]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -1385,37 +1392,19 @@ export function CVPageClientContent() {
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      {existingCV ? (
-                        // <input
-                        //   type="text"
-                        //   value={existingCV.title}
-                        //   onChange={(e) => handleUpdateTitle(e.target.value)}
-                        //   className="text-2xl font-bold bg-transparent border-none outline-none focus:bg-white focus:border focus:border-gray-300 focus:rounded px-2 py-1"
-                        //   onBlur={() => setHasUnsavedChanges(false)}
-                        // />
-                        <h1 className="text-2xl font-bold text-gray-900">
-                          Update Your CV
-                        </h1>
-                      ) : (
-                        <h1 className="text-2xl font-bold text-gray-900">
-                          Create Your CV
-                        </h1>
-                      )}
+                      <h1 className="text-2xl font-bold text-gray-900">
+                        {existingCV?.title || 'Create Your CV'}
+                      </h1>
                       {hasUnsavedChanges && (
                         <span className="text-sm text-orange-600 bg-orange-100 px-2 py-1 rounded">
                           Unsaved changes
                         </span>
                       )}
                     </div>
-                    <p className="text-gray-600">
-                      {existingCV
-                        ? "Edit your CV details and export when ready"
-                        : "Generate a professional CV from your persona data"}
-                    </p>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    {aiResponse && (
+                    {!isViewMode && aiResponse && (
                       <>
                         <Button
                           onClick={() => setShowEditPopup(true)}
@@ -1442,27 +1431,29 @@ export function CVPageClientContent() {
                       </>
                     )}
 
-                    <Button
-                      onClick={handleSaveCV}
-                      disabled={isSaving || !aiResponse}
-                      className="flex items-center gap-2"
-                    >
-                      {isSaving ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Save className="h-4 w-4" />
-                      )}
-                      {isSaving
-                        ? "Saving..."
-                        : existingCV
-                        ? "Update CV"
-                        : "Save CV"}
-                    </Button>
+                    {!isViewMode && (
+                      <Button
+                        onClick={handleSaveCV}
+                        disabled={isSaving || !aiResponse}
+                        className="flex items-center gap-2"
+                      >
+                        {isSaving ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Save className="h-4 w-4" />
+                        )}
+                        {isSaving
+                          ? "Saving..."
+                          : existingCV
+                          ? "Update CV"
+                          : "Save CV"}
+                      </Button>
+                    )}
                   </div>
                 </div>
 
                 {/* Template Selection for Updates */}
-                {existingCV && (
+                {existingCV && !isViewMode && (
                   <Card>
                     <CardContent className="p-4">
                       <h3 className="text-lg font-semibold mb-3">
