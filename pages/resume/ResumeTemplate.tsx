@@ -4,6 +4,14 @@ import { ModernTemplate } from "@/components/templates/modern-template";
 import { ClassicTemplate } from "@/components/templates/classic-template";
 import { CreativeTemplate } from "@/components/templates/creative-template";
 import { MinimalTemplate } from "@/components/templates/minimal-template";
+import { ModernTemplate2 } from "@/components/templates/modern-template2";
+import { ModernTemplate3 } from "@/components/templates/modern-template3";
+import { ClassicTemplate2 } from "@/components/templates/classic-template-2";
+import { ClassicTemplate3 } from "@/components/templates/classic-template-3";
+import { CreativeTemplate2 } from "@/components/templates/creative-template-2";
+import { CreativeTemplate3 } from "@/components/templates/creative-template-3";
+import { MinimalTemplate2 } from "@/components/templates/minimal-template2";
+import { MinimalTemplate3 } from "@/components/templates/minimal-template3";
 import type { CVData } from "@/types/cv-data";
 
 interface ResumeTemplateProps {
@@ -26,6 +34,14 @@ export default function ResumeTemplate({
     classic: ClassicTemplate,
     creative: CreativeTemplate,
     minimal: MinimalTemplate,
+    "modern-2": ModernTemplate2,
+    "modern-3": ModernTemplate3,
+    "classic-2": ClassicTemplate2,
+    "classic-3": ClassicTemplate3,
+    "creative-2": CreativeTemplate2,
+    "creative-3": CreativeTemplate3,
+    "minimal-2": MinimalTemplate2,
+    "minimal-3": MinimalTemplate3,
   };
 
   const TemplateComponent = templateMap[templateId as keyof typeof templateMap];

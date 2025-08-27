@@ -72,6 +72,23 @@ Response Format (JSON ONLY):
       throw new Error("DeepSeek API key not configured")
     }
 
+    // Log the request for debugging
+    console.log("Request to DeepSeek API:", {
+      model: "deepseek-chat",
+      messages: [
+        {
+          role: "system",
+          content: "You are a helpful assistant that specializes in resume optimization and ATS analysis.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      temperature: 0.3,
+      max_tokens: 2000,
+    });
+
     const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -102,6 +119,9 @@ Response Format (JSON ONLY):
 
     const data = await response.json()
     const text = data.choices[0]?.message?.content || ""
+    
+    // Log the full response for debugging
+    console.log("DeepSeek API response:", text);
     
     // Parse the JSON response
     let parsedResponse

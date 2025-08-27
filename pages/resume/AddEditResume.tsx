@@ -32,6 +32,13 @@ import {
 import { CVTemplates } from "./ChooseResumeTemplte";
 import { useForm } from "react-hook-form";
 
+interface CVTemplate {
+  id: string;
+  name: string;
+  description: string;
+  category: "modern" | "classic" | "creative" | "minimal";
+}
+
 interface CVWizardProps {
   editingCV?: CV | null;
   onSave: (data: CreateCVData) => Promise<void>;
@@ -125,7 +132,7 @@ useEffect(() => {
   loadPersonas();
 }, [user?.id, user?.role, personaId, editingCV?.personas_id]);
 
-  const handleTemplateSelect = (template: { id: string; name: string }) => {
+  const handleTemplateSelect = (template: CVTemplate) => {
     setSelectedTemplate(template);
     setSelectedTemplateId(template.id);
     setValue("layout_id", template.id);
