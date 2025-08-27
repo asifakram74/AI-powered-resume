@@ -55,6 +55,55 @@ const templates: CVTemplate[] = [
     description: "Simple, clean layout focusing on content",
     category: "minimal",
   },
+  // New templates
+  {
+    id: "classic-2",
+    name: "Classic Traditional 2",
+    description: "An updated classic format for conservative industries",
+    category: "classic",
+  },
+  {
+    id: "classic-3",
+    name: "Classic Traditional 3",
+    description: "Another variation of the classic format",
+    category: "classic",
+  },
+  {
+    id: "creative-2",
+    name: "Creative Designer 2",
+    description: "A new creative design for professionals",
+    category: "creative",
+  },
+  {
+    id: "creative-3",
+    name: "Creative Designer 3",
+    description: "Another creative design option",
+    category: "creative",
+  },
+  {
+    id: "minimal-2",
+    name: "Minimal Clean 2",
+    description: "An updated minimal layout focusing on content",
+    category: "minimal",
+  },
+  {
+    id: "minimal-3",
+    name: "Minimal Clean 3",
+    description: "Another variation of the minimal layout",
+    category: "minimal",
+  },
+  {
+    id: "modern-2",
+    name: "Modern Professional 2",
+    description: "An updated modern design for professionals",
+    category: "modern",
+  },
+  {
+    id: "modern-3",
+    name: "Modern Professional 3",
+    description: "Another modern design option",
+    category: "modern",
+  },
 ];
 
 const dashboardMenuItems = [

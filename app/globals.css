@@ -343,3 +343,32 @@
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
+/* Add to your global CSS or template components */
+@media print {
+  .page-break {
+    page-break-before: always;
+  }
+  
+  .avoid-break {
+    page-break-inside: avoid;
+  }
+  
+  .break-after {
+    page-break-after: always;
+  }
+}
+
+/* Ensure proper spacing for print */
+.cv-section {
+  margin-bottom: 20px;
+}
+
+.cv-experience-item,
+.cv-education-item {
+  page-break-inside: avoid;
+}
+
+/* Add page breaks between major sections if needed */
+.cv-section:not(:first-child) {
+  margin-top: 30px;
+}

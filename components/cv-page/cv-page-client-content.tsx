@@ -1,3 +1,4 @@
+
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
@@ -6,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Document, Packer, Paragraph } from "docx";
 import { Card, CardContent } from "@/components/ui/card";
 import { Zap } from "lucide-react";
-
+import html2canvas from "html2canvas";
 import {
   ArrowLeft,
   Sparkles,
@@ -119,6 +120,55 @@ const templates: CVTemplate[] = [
     name: "Minimal Clean",
     description: "Simple, clean layout focusing on content",
     category: "minimal",
+  },
+  // New templates
+  {
+    id: "classic-2",
+    name: "Classic Traditional 2",
+    description: "An updated classic format for conservative industries",
+    category: "classic",
+  },
+  {
+    id: "classic-3",
+    name: "Classic Traditional 3",
+    description: "Another variation of the classic format",
+    category: "classic",
+  },
+  {
+    id: "creative-2",
+    name: "Creative Designer 2",
+    description: "A new creative design for professionals",
+    category: "creative",
+  },
+  {
+    id: "creative-3",
+    name: "Creative Designer 3",
+    description: "Another creative design option",
+    category: "creative",
+  },
+  {
+    id: "minimal-2",
+    name: "Minimal Clean 2",
+    description: "An updated minimal layout focusing on content",
+    category: "minimal",
+  },
+  {
+    id: "minimal-3",
+    name: "Minimal Clean 3",
+    description: "Another variation of the minimal layout",
+    category: "minimal",
+  },
+  {
+    id: "modern-2",
+    name: "Modern Professional 2",
+    description: "An updated modern design for professionals",
+    category: "modern",
+  },
+  {
+    id: "modern-3",
+    name: "Modern Professional 3",
+    description: "Another modern design option",
+    category: "modern",
   },
 ];
 
@@ -401,12 +451,14 @@ export function CVPageClientContent() {
   const [existingCV, setExistingCV] = useState<CV | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showEditPopup, setShowEditPopup] = useState(false);
+  const [isViewMode, setIsViewMode] = useState(false); // Add this state
 
   const searchParams = useSearchParams();
   const router = useRouter();
   const personaId = searchParams?.get("personaId") ?? '';
   const cvId = searchParams?.get("cvId") ?? '';
   const templateIdFromUrl = searchParams?.get("templateId") ?? '';
+  const viewMode = searchParams?.get("view") === 'true'; // Check for view mode parameter
 
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
@@ -458,6 +510,11 @@ export function CVPageClientContent() {
       setSelectedTemplate(defaultTemplate);
     }
   }, [templateIdFromUrl, selectedTemplate]);
+
+  useEffect(() => {
+    // Set view mode based on URL parameter
+    setIsViewMode(viewMode);
+  }, [viewMode]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -766,12 +823,12 @@ export function CVPageClientContent() {
         );
         return;
       }
-
+  
       const loadingToastId = showLoadingToast(
         `Preparing ${format.toUpperCase()} export...`,
         "Processing your CV for download"
       );
-
+  
       switch (format) {
         case "pdf":
           const printWindow = window.open("", "_blank");
@@ -783,6 +840,7 @@ export function CVPageClientContent() {
             );
             return;
           }
+          
           const clonedContent = cvElement.cloneNode(true) as HTMLElement;
           const styles = Array.from(document.styleSheets)
             .map((sheet) => {
@@ -795,58 +853,84 @@ export function CVPageClientContent() {
               }
             })
             .join("");
-
+  
           printWindow.document.write(`
             <!DOCTYPE html>
             <html>
               <head>
-                <title>CV Export</title>
+                <title>${persona?.full_name || "Resume"} - CV</title>
                 <style>${styles}</style>
                 <style>
-                  body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
-                  @media print { body { margin: 0; padding: 0; } }
+                  body { 
+                    margin: 0; 
+                    padding: 15px; 
+                    font-family: Arial, sans-serif; 
+                    background-color: white;
+                  }
+                  @media print { 
+                    body { 
+                      margin: 0; 
+                      padding: 0; 
+                    } 
+                    .no-print {
+                      display: none !important;
+                    }
+                  }
+                  .print-button {
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 10px 15px;
+                    background-color: #007bff;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    z-index: 1000;
+                  }
                 </style>
               </head>
-              <body>${clonedContent.outerHTML}</body>
+              <body>
+                ${clonedContent.outerHTML}
+                <button class="print-button no-print" onclick="window.print()">Print / Save as PDF</button>
+                <script>
+                  // Auto-print after page loads
+                  window.onload = function() {
+                    setTimeout(function() {
+                      window.print();
+                    }, 500);
+                  };
+                  
+                  // Close window after printing
+                  window.onafterprint = function() {
+                    setTimeout(function() {
+                      window.close();
+                    }, 500);
+                  };
+                </script>
+              </body>
             </html>
           `);
           printWindow.document.close();
-          printWindow.print();
-
-          toast.dismiss(loadingToastId);
-          showSuccessToast(
-            "PDF Ready! 📄",
-            "Your CV is ready for printing or saving"
-          );
+  
+          // Dismiss loading toast after a short delay to allow print dialog to appear
+          setTimeout(() => {
+            toast.dismiss(loadingToastId);
+            showSuccessToast(
+              "PDF Ready! 📄",
+              "Use the print dialog to save as PDF or print"
+            );
+          }, 1000);
           break;
-
+  
         case "png":
-          const dataUrl = await htmlToImage.toPng(cvElement, {
-            quality: 1,
-            pixelRatio: 2,
-            backgroundColor: "#ffffff",
-          });
-          const link = document.createElement("a");
-          link.download = `${persona?.full_name || "CV"}_${
-            new Date().toISOString().split("T")[0]
-          }.png`;
-          link.href = dataUrl;
-          link.click();
-
+          await exportAsPNG();
           toast.dismiss(loadingToastId);
-          showSuccessToast(
-            "PNG Downloaded! 🖼️",
-            "Your CV image has been saved to downloads"
-          );
           break;
-
+        
         case "docx":
           await handleDocxExport();
           toast.dismiss(loadingToastId);
-          showSuccessToast(
-            "DOCX Downloaded! 📝",
-            "Your editable CV document is ready"
-          );
           break;
       }
     } catch (error: any) {
@@ -857,54 +941,7 @@ export function CVPageClientContent() {
       );
     }
   };
-
-  const exportAsPDF = async () => {
-    try {
-      const cvElement = document.getElementById("cv-preview-content");
-      if (!cvElement) {
-        showErrorToast(
-          "Export Failed",
-          "CV preview not found. Please refresh and try again."
-        );
-        return;
-      }
-
-      // Use html-to-image approach for better quality
-      const dataUrl = await htmlToImage.toPng(cvElement, {
-        quality: 1.0,
-        pixelRatio: 2,
-        backgroundColor: "#ffffff",
-      });
-
-      const pdf = new jsPDF("p", "mm", "a4");
-      const imgProps = pdf.getImageProperties(dataUrl);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-      // Handle multiple pages if content is too long
-      if (pdfHeight > pdf.internal.pageSize.getHeight()) {
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        let position = 0;
-
-        while (position < pdfHeight) {
-          pdf.addImage(dataUrl, "PNG", 0, -position, pdfWidth, pdfHeight);
-          position += pageHeight;
-          if (position < pdfHeight) {
-            pdf.addPage();
-          }
-        }
-      } else {
-        pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight);
-      }
-
-      pdf.save(`${persona?.full_name || "resume"}-cv.pdf`);
-    } catch (error) {
-      console.error("Error exporting as PDF:", error);
-      // Fallback to print method
-      handleExport("pdf");
-    }
-  };
-
+  
   const exportAsPNG = async () => {
     try {
       const cvElement = document.getElementById("cv-preview-content");
@@ -915,35 +952,40 @@ export function CVPageClientContent() {
         );
         return;
       }
-
+  
       const dataUrl = await htmlToImage.toPng(cvElement, {
         quality: 1.0,
         pixelRatio: 2,
         backgroundColor: "#ffffff",
       });
-
+  
       // Create download link
       const link = document.createElement("a");
       link.download = `${persona?.full_name || "resume"}-cv.png`;
       link.href = dataUrl;
       link.click();
+      
+      showSuccessToast(
+        "PNG Downloaded! 📸",
+        "Your CV has been downloaded as PNG"
+      );
     } catch (error) {
       console.error("Error exporting as PNG:", error);
       showErrorToast("Export Failed", "PNG export failed. Please try again.");
     }
   };
-
+  
   const handleDocxExport = async () => {
     try {
       if (!aiResponse || !persona) {
         showErrorToast("Export Failed", "No CV data available for export.");
         return;
       }
-
+  
       // Import docx dynamically to avoid SSR issues
       const { Document, Paragraph, TextRun, HeadingLevel, Packer } =
         await import("docx");
-
+  
       // Create document sections
       const sections = [
         // Personal Info
@@ -990,7 +1032,7 @@ export function CVPageClientContent() {
           ],
         }),
         new Paragraph({ text: "" }), // Empty paragraph for spacing
-
+  
         // Summary
         new Paragraph({
           heading: HeadingLevel.HEADING_2,
@@ -1011,7 +1053,7 @@ export function CVPageClientContent() {
           ],
         }),
         new Paragraph({ text: "" }),
-
+  
         // Work Experience
         new Paragraph({
           heading: HeadingLevel.HEADING_2,
@@ -1052,7 +1094,7 @@ export function CVPageClientContent() {
           }),
           new Paragraph({ text: "" }),
         ]),
-
+  
         // Education
         new Paragraph({
           heading: HeadingLevel.HEADING_2,
@@ -1084,7 +1126,7 @@ export function CVPageClientContent() {
           }),
           new Paragraph({ text: "" }),
         ]),
-
+  
         // Skills
         new Paragraph({
           heading: HeadingLevel.HEADING_2,
@@ -1105,7 +1147,7 @@ export function CVPageClientContent() {
           ],
         }),
         new Paragraph({ text: "" }),
-
+  
         // Projects
         new Paragraph({
           heading: HeadingLevel.HEADING_2,
@@ -1145,7 +1187,7 @@ export function CVPageClientContent() {
           }),
           new Paragraph({ text: "" }),
         ]),
-
+  
         // Certifications
         aiResponse.optimizedCV.certifications.length > 0
           ? new Paragraph({
@@ -1170,12 +1212,12 @@ export function CVPageClientContent() {
           }),
         ]),
       ].filter(Boolean); // Remove null sections
-
+  
       // Filter out any null values from sections and ensure they are Paragraph objects
       const validSections = sections.filter(
         (section): section is InstanceType<typeof Paragraph> => section !== null
       );
-
+  
       const doc = new Document({
         sections: [
           {
@@ -1184,7 +1226,7 @@ export function CVPageClientContent() {
           },
         ],
       });
-
+  
       // Generate blob and download
       const blob = await Packer.toBlob(doc);
       const url = URL.createObjectURL(blob);
@@ -1197,6 +1239,11 @@ export function CVPageClientContent() {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+      
+      showSuccessToast(
+        "DOCX Downloaded! 📝",
+        "Your CV has been downloaded as DOCX"
+      );
     } catch (error) {
       console.error("Error generating DOCX:", error);
       showErrorToast(
@@ -1383,7 +1430,7 @@ export function CVPageClientContent() {
                 router.push("/dashboard?page=profile");
               }
             }}
-            onExportPDF={exportAsPDF}
+            onExportPDF={() => handleExport('pdf')}
             onExportDOCX={handleDocxExport}
             onExportPNG={exportAsPNG}
             exportMode={true}
@@ -1394,37 +1441,19 @@ export function CVPageClientContent() {
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      {existingCV ? (
-                        // <input
-                        //   type="text"
-                        //   value={existingCV.title}
-                        //   onChange={(e) => handleUpdateTitle(e.target.value)}
-                        //   className="text-2xl font-bold bg-transparent border-none outline-none focus:bg-white focus:border focus:border-gray-300 focus:rounded px-2 py-1"
-                        //   onBlur={() => setHasUnsavedChanges(false)}
-                        // />
-                        <h1 className="text-2xl font-bold text-gray-900">
-                          Update Your CV
-                        </h1>
-                      ) : (
-                        <h1 className="text-2xl font-bold text-gray-900">
-                          Create Your CV
-                        </h1>
-                      )}
+                      <h1 className="text-2xl font-bold text-gray-900">
+                        {existingCV?.title || 'Create Your CV'}
+                      </h1>
                       {hasUnsavedChanges && (
                         <span className="text-sm text-orange-600 bg-orange-100 px-2 py-1 rounded">
                           Unsaved changes
                         </span>
                       )}
                     </div>
-                    <p className="text-gray-600">
-                      {existingCV
-                        ? "Edit your CV details and export when ready"
-                        : "Generate a professional CV from your persona data"}
-                    </p>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    {aiResponse && (
+                    {!isViewMode && aiResponse && (
                       <>
                         <Button
                           onClick={() => setShowEditPopup(true)}
@@ -1451,27 +1480,29 @@ export function CVPageClientContent() {
                       </>
                     )}
 
-                    <Button
-                      onClick={handleSaveCV}
-                      disabled={isSaving || !aiResponse}
-                      className="flex items-center gap-2"
-                    >
-                      {isSaving ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Save className="h-4 w-4" />
-                      )}
-                      {isSaving
-                        ? "Saving..."
-                        : existingCV
-                        ? "Update CV"
-                        : "Save CV"}
-                    </Button>
+                    {!isViewMode && (
+                      <Button
+                        onClick={handleSaveCV}
+                        disabled={isSaving || !aiResponse}
+                        className="flex items-center gap-2"
+                      >
+                        {isSaving ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Save className="h-4 w-4" />
+                        )}
+                        {isSaving
+                          ? "Saving..."
+                          : existingCV
+                          ? "Update CV"
+                          : "Save CV"}
+                      </Button>
+                    )}
                   </div>
                 </div>
 
                 {/* Template Selection for Updates */}
-                {existingCV && (
+                {existingCV && !isViewMode && (
                   <Card>
                     <CardContent className="p-4">
                       <h3 className="text-lg font-semibold mb-3">

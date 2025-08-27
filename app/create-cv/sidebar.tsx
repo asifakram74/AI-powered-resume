@@ -22,7 +22,7 @@ import { useRouter } from "next/navigation"
 interface SidebarProps {
   activePage: string
   setActivePage: (page: string) => void
-  onExportPDF: () => void
+  handleExport: (format: string) => void
   onExportDOCX: () => void
   onExportPNG: () => void
 }
@@ -30,7 +30,7 @@ interface SidebarProps {
 export function Sidebar({ 
   activePage, 
   setActivePage,
-  onExportPDF,
+
   onExportDOCX,
   onExportPNG 
 }: SidebarProps) {
@@ -50,7 +50,7 @@ export function Sidebar({
 
   const handleExport = (format: string) => {
     if (format === "pdf") {
-      onExportPDF();
+      handleExport("pdf");
     } else if (format === "docx") {
       onExportDOCX();
     } else if (format === "png") {
