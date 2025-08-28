@@ -18,6 +18,9 @@ export type User = {
   language: string
   push_notifications: string
   email_updates: string
+  source?: string
+  provider_name?: string
+  provider_id?: string
 }
 
 export type ProfileResponse = {
@@ -46,6 +49,9 @@ export type RegisterResponse = {
     | "language"
     | "push_notifications"
     | "email_updates"
+    | "source"
+    | "provider_name"
+    | "provider_id"
   >
   status: number
   message: string
@@ -101,10 +107,21 @@ export const AuthService = {
   },
 
   changePassword: async (oldPassword: string, newPassword: string): Promise<void> => {
-    await api.post("/change-password", { oldPassword, newPassword })
+    await api.post("/change-password", { old_password: oldPassword, new_password: newPassword })
   },
 
   deleteAccount: async (): Promise<void> => {
     await api.delete("/me")
   },
+
+  linkedinLogin: async (code: string): Promise<AuthResponse> => {
+    const response = await api.post("/linkedin/token", { code })
+    return response.data
+  },
+
+  googleLogin: async (code: string): Promise<AuthResponse> => {
+    const response = await api.post("/google/token", { code });
+    return response.data;
+  },
+
 }

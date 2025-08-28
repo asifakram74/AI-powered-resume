@@ -28,7 +28,25 @@ export default function DashboardPage() {
   const [isClient, setIsClient] = useState(false)
   const { user } = useAppSelector((state) => state.auth)
   const router = useRouter()
-
+// In your dashboard page
+useEffect(() => {
+  const token = localStorage.getItem('token');
+  const userStr = localStorage.getItem('user');
+  
+  if (!token || !userStr) {
+    router.push('/auth/signin');
+    return;
+  }
+  
+  try {
+    const user = JSON.parse(userStr);
+    if (!user.id) {
+      router.push('/auth/signin');
+    }
+  } catch (e) {
+    router.push('/auth/signin');
+  }
+}, [router]);
   useEffect(() => {
     setIsClient(true)
   }, [user])
