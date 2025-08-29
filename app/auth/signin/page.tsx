@@ -281,7 +281,7 @@ export default function SignInPage() {
 
                 <Button
                   type="submit"
-                  disabled={loading || !email || !password}
+                  // disabled={loading || !email || !password}
                   className="w-full resumaic-gradient-green text-white hover:opacity-90"
                 >
                   {loading ? (
