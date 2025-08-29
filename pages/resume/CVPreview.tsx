@@ -7,12 +7,16 @@ import { MinimalTemplate } from "@/components/templates/minimal-template";
 import { CreativeTemplate } from "@/components/templates/creative-template";
 import { ModernTemplate2 } from "@/components/templates/modern-template2";
 import { ModernTemplate3 } from "@/components/templates/modern-template3";
+import { ModernTemplate4 } from "@/components/templates/modern-template-4";
 import { ClassicTemplate2 } from "@/components/templates/classic-template-2";
 import { ClassicTemplate3 } from "@/components/templates/classic-template-3";
+import { ClassicTemplate4 } from "@/components/templates/classic-template-4";
 import { CreativeTemplate2 } from "@/components/templates/creative-template-2";
 import { CreativeTemplate3 } from "@/components/templates/creative-template-3";
+import { CreativeTemplate4 } from "@/components/templates/creative-template-4";
 import { MinimalTemplate2 } from "@/components/templates/minimal-template2";
 import { MinimalTemplate3 } from "@/components/templates/minimal-template3";
+import { MinimalTemplate4 } from "@/components/templates/minimal-template-4";
 import { sampleCVData } from "@/lib/sample-cv-data";
 import { useRef } from "react";
 
@@ -67,6 +71,14 @@ export function CVPreview({
         return <MinimalTemplate2 data={data} />;
       case "minimal-3":
         return <MinimalTemplate3 data={data} />;
+      case "modern-4":
+        return <ModernTemplate4 data={data} />;
+      case "classic-4":
+        return <ClassicTemplate4 data={data} />;
+      case "creative-4":
+        return <CreativeTemplate4 data={data} />;
+      case "minimal-4":
+        return <MinimalTemplate4 data={data} />;
       default:
         return <ModernTemplate data={data} />;
     }
