@@ -104,6 +104,31 @@ const templates: CVTemplate[] = [
     description: "Another modern design option",
     category: "modern",
   },
+  // New template 4 versions
+  {
+    id: "classic-4",
+    name: "Classic Traditional 4",
+    description: "Premium classic format with enhanced layout",
+    category: "classic",
+  },
+  {
+    id: "minimal-4",
+    name: "Minimal Clean 4",
+    description: "Ultra-clean minimal design focusing on content",
+    category: "minimal",
+  },
+  {
+    id: "modern-4",
+    name: "Modern Professional 4",
+    description: "Advanced modern design for professionals",
+    category: "modern",
+  },
+  {
+    id: "creative-4",
+    name: "Creative Designer 4",
+    description: "Premium creative design for professionals",
+    category: "creative",
+  },
 ];
 
 const dashboardMenuItems = [
