@@ -183,15 +183,14 @@ export default function SignInPage() {
           } else {
             localStorage.setItem("token", token);
           }
-
+          const cleanUrl = window.location.pathname;
+          window.history.replaceState({}, document.title, cleanUrl);
           router.push("/dashboard");
         } catch (err) {
           console.error("Error during Google login:", err);
           alert("Google login failed, please try again.");
         } finally {
           setGoogleLoading(false);
-          const cleanUrl = window.location.pathname;
-          window.history.replaceState({}, document.title, cleanUrl);
         }
         return;
       }
@@ -203,6 +202,8 @@ export default function SignInPage() {
           const result = await dispatch(loginWithGoogle(code));
 
           if (loginWithGoogle.fulfilled.match(result)) {
+            const cleanUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
             router.push("/dashboard");
           } else {
             alert(`Google authentication failed: ${result.payload}`);
@@ -212,8 +213,6 @@ export default function SignInPage() {
           alert("Google login failed, please try again.");
         } finally {
           setGoogleLoading(false);
-          const cleanUrl = window.location.pathname;
-          window.history.replaceState({}, document.title, cleanUrl);
         }
       }
     };
