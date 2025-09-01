@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Crown, Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
-import { loginUser, clearError, loginWithLinkedIn, loginWithGoogle } from "@/lib/redux/slices/authSlice"
+import { loginUser, clearError, loginWithLinkedIn, loginWithGoogle, setCredentials } from "@/lib/redux/slices/authSlice"
 import Image from "next/image"
 
 export default function SignInPage() {
@@ -153,7 +153,48 @@ export default function SignInPage() {
   useEffect(() => {
     const handleGoogleCallback = async () => {
       const code = searchParams.get("code");
+      const token = searchParams.get("token");
       const state = searchParams.get("state");
+
+      if (token) {
+        setGoogleLoading(true);
+
+        try {
+          const storedState = localStorage.getItem("google_oauth_state");
+          if (state && state !== storedState) {
+            console.error("Invalid state parameter - possible CSRF attack");
+            return;
+          }
+
+          // Clear the stored state
+          localStorage.removeItem("google_oauth_state");
+
+          const userParam = searchParams.get("user");
+          if (userParam) {
+            try {
+              const user = JSON.parse(decodeURIComponent(userParam));
+              localStorage.setItem("token", token);
+              localStorage.setItem("user", JSON.stringify(user));
+              dispatch(setCredentials({ token, user }));
+            } catch (e) {
+              console.error("Failed to parse user data from callback:", e);
+              throw e;
+            }
+          } else {
+            localStorage.setItem("token", token);
+          }
+
+          router.push("/dashboard");
+        } catch (err) {
+          console.error("Error during Google login:", err);
+          alert("Google login failed, please try again.");
+        } finally {
+          setGoogleLoading(false);
+          const cleanUrl = window.location.pathname;
+          window.history.replaceState({}, document.title, cleanUrl);
+        }
+        return;
+      }
 
       if (code) {
         setGoogleLoading(true);
