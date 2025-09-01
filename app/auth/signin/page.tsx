@@ -149,7 +149,7 @@ export default function SignInPage() {
     };
 
     handleLinkedInCallback();
-  }, [searchParams, router, dispatch]);
+  }, [safeSearchParams, router, dispatch]);
 
   // For Google login
   const handleGoogleSignIn = () => {
@@ -244,7 +244,7 @@ export default function SignInPage() {
     };
 
     handleGoogleCallback();
-  }, [searchParams, router, dispatch]);
+  }, [safeSearchParams, router, dispatch]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
