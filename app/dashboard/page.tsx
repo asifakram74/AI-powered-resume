@@ -12,7 +12,7 @@ import { UserList } from "@/pages/UsersManagement/UserList"
 import ProtectedRoute from "@/components/auth/ProtectedRoute"
 import { useAppSelector } from "@/lib/redux/hooks"
 import { useRouter } from "next/navigation"
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
+// import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 
 export interface PageProps {
   user: {
@@ -20,6 +20,7 @@ export interface PageProps {
     role?: string;
     name?: string;
     email?: string;
+    source?: string;
   } | null;
 }
 
@@ -28,7 +29,25 @@ export default function DashboardPage() {
   const [isClient, setIsClient] = useState(false)
   const { user } = useAppSelector((state) => state.auth)
   const router = useRouter()
-
+// In your dashboard page
+useEffect(() => {
+  const token = localStorage.getItem('token');
+  const userStr = localStorage.getItem('user');
+  
+  if (!token || !userStr) {
+    router.push('/auth/signin');
+    return;
+  }
+  
+  try {
+    const user = JSON.parse(userStr);
+    if (!user.id) {
+      router.push('/auth/signin');
+    }
+  } catch (e) {
+    router.push('/auth/signin');
+  }
+}, [router]);
   useEffect(() => {
     setIsClient(true)
   }, [user])
@@ -36,9 +55,9 @@ export default function DashboardPage() {
   const isAdmin = user?.role?.toLowerCase() === "admin"
 
   const renderActivePage = () => {
-    if (!isClient) {
-      return <LoadingSpinner />
-    }
+    // if (!isClient) {
+    //   // return <LoadingSpinner />
+    // }
 
     switch (activePage) {
       case "create-persona":

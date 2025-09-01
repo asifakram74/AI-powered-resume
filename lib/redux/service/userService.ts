@@ -31,6 +31,7 @@ export interface User {
   otp_count: number | null
   role: string
   status: string
+  
   plan: string
   email_verified_at: string
   plan_type: string
@@ -42,6 +43,10 @@ export interface User {
   language: string
   push_notifications: number
   email_updates: number
+   source: string 
+  
+  
+  
 }
 
 export interface CreateUserData {
@@ -58,6 +63,7 @@ export interface CreateUserData {
   language?: string
   push_notifications?: number
   email_updates?: number
+   source: string
 }
 
 export interface UpdateUserData {
@@ -71,6 +77,7 @@ export interface UpdateUserData {
   language?: string
   push_notifications?: number
   email_updates?: number
+   source: string
 }
 
 export const getUsers = async (page = 1): Promise<UsersApiResponse> => {

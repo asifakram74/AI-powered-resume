@@ -22,6 +22,7 @@ const initialState: AuthState = {
   profile: null,
   token: null,
   loading: false,
+  
   error: null,
 }
 
@@ -38,6 +39,43 @@ export const loginUser = createAsyncThunk<AuthResponse, LoginCredentials>(
     }
   },
 )
+
+export const loginWithLinkedIn = createAsyncThunk<AuthResponse, string>(
+  "auth/loginWithLinkedIn",
+  async (code, { rejectWithValue }) => {
+    try {
+      console.log("Attempting LinkedIn login with code:", code);
+      const response = await AuthService.linkedinLogin(code);
+      console.log("LinkedIn login response:", response);
+
+      if (!response.user || !response.user.id) {
+        throw new Error("User ID missing from LinkedIn login response");
+      }
+
+      localStorage.setItem("token", response.token);
+      localStorage.setItem("user", JSON.stringify(response.user));
+
+      return response;
+    } catch (error: any) {
+      console.error("LinkedIn login failed:", error);
+      return rejectWithValue(error.response?.data?.message || "LinkedIn login failed");
+    }
+  }
+);
+
+export const loginWithGoogle = createAsyncThunk<AuthResponse, string>(
+  "auth/loginWithGoogle",
+  async (code, { rejectWithValue }) => {
+    try {
+      const response = await AuthService.googleLogin(code);
+      localStorage.setItem("token", response.token);
+      localStorage.setItem("user", JSON.stringify(response.user));
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || "Google login failed");
+    }
+  }
+);
 
 export const registerUser = createAsyncThunk<RegisterResponse, RegisterData>(
   "auth/register",
@@ -87,6 +125,28 @@ export const logoutUser = createAsyncThunk("auth/logout", async (_, { rejectWith
   }
 })
 
+export const changePassword = createAsyncThunk(
+  "auth/changePassword",
+  async ({ oldPassword, newPassword }: { oldPassword: string; newPassword: string }, { rejectWithValue }) => {
+    try {
+      await AuthService.changePassword(oldPassword, newPassword)
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || "Password change failed")
+    }
+  }
+)
+
+export const deleteAccount = createAsyncThunk(
+  "auth/deleteAccount",
+  async (_, { rejectWithValue }) => {
+    try {
+      await AuthService.deleteAccount()
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || "Account deletion failed")
+    }
+  }
+)
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -95,12 +155,12 @@ const authSlice = createSlice({
       localStorage.removeItem("token")
       localStorage.removeItem("user")
       state.user = null
-      state.profile = null // Add this line
+      state.profile = null
       state.token = null
       state.error = null
       state.loading = false
     },
-    clearProfile: (state) => { // Add this new action
+    clearProfile: (state) => {
       state.profile = null
     },
     setCredentials: (state, action: PayloadAction<{ token: string; user: User }>) => {
@@ -110,9 +170,25 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null
     },
+    restoreAuth: (state) => {
+      const token = localStorage.getItem("token")
+      const userStr = localStorage.getItem("user")
+
+      if (token && userStr) {
+        try {
+          state.token = token
+          state.user = JSON.parse(userStr)
+        } catch (e) {
+          console.error("Failed to parse stored user data:", e)
+          localStorage.removeItem("token")
+          localStorage.removeItem("user")
+        }
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
+      // Login User
       .addCase(loginUser.pending, (state) => {
         state.loading = true
         state.error = null
@@ -121,18 +197,57 @@ const authSlice = createSlice({
         state.loading = false
         state.user = action.payload.user
         state.token = action.payload.token
-        state.profile = null // Clear any previous profile on new login
+        state.profile = null
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload as string
       })
+      // LinkedIn Login
+      .addCase(loginWithLinkedIn.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(loginWithLinkedIn.fulfilled, (state, action) => {
+        console.log('Redux LinkedIn login fulfilled:', action.payload);
+        state.loading = false;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.profile = null;
+
+        // Check if user has ID and force redirect
+        if (action.payload.user && action.payload.user.id) {
+          console.log('LinkedIn user has ID, should redirect');
+          // You might want to trigger a redirect here or in the component
+        }
+      })
+      .addCase(loginWithLinkedIn.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+      // Google Login
+      .addCase(loginWithGoogle.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(loginWithGoogle.fulfilled, (state, action) => {
+        state.loading = false
+        state.user = action.payload.user
+        state.token = action.payload.token
+        state.profile = null
+      })
+      .addCase(loginWithGoogle.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+      // Register User
       .addCase(registerUser.pending, (state) => {
         state.loading = true
         state.error = null
       })
-      .addCase(registerUser.fulfilled, (state, action) => {
+      .addCase(registerUser.fulfilled, (state) => {
         state.loading = false
+        state.error = null
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false
@@ -147,6 +262,7 @@ const authSlice = createSlice({
           state.error = typeof action.payload === 'string' ? action.payload : 'Registration failed'
         }
       })
+      // Fetch Profile
       .addCase(fetchProfile.pending, (state) => {
         state.loading = true
         state.error = null
@@ -159,6 +275,7 @@ const authSlice = createSlice({
         state.loading = false
         state.error = action.payload as string
       })
+      // Update Profile
       .addCase(updateProfile.pending, (state) => {
         state.loading = true
         state.error = null
@@ -166,16 +283,54 @@ const authSlice = createSlice({
       .addCase(updateProfile.fulfilled, (state, action) => {
         state.loading = false
         state.profile = action.payload
+
+        // Also update user name/email if changed
+        if (state.user && action.payload.name) {
+          state.user.name = action.payload.name
+          localStorage.setItem("user", JSON.stringify(state.user))
+        }
       })
       .addCase(updateProfile.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload as string
       })
+      // Change Password
+      .addCase(changePassword.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(changePassword.fulfilled, (state) => {
+        state.loading = false
+        state.error = null
+      })
+      .addCase(changePassword.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+      // Delete Account
+      .addCase(deleteAccount.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(deleteAccount.fulfilled, (state) => {
+        state.loading = false
+        state.user = null
+        state.profile = null
+        state.token = null
+        state.error = null
+        localStorage.removeItem("token")
+        localStorage.removeItem("user")
+      })
+      .addCase(deleteAccount.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+      // Logout
       .addCase(logoutUser.fulfilled, (state) => {
         localStorage.removeItem("token")
         localStorage.removeItem("user")
         state.user = null
-        state.profile = null // Add this line to clear profile on logout
+        state.profile = null
         state.token = null
         state.error = null
         state.loading = false
@@ -187,5 +342,5 @@ const authSlice = createSlice({
   },
 })
 
-export const { clearAuth, clearProfile, setCredentials, clearError } = authSlice.actions
+export const { clearAuth, clearProfile, setCredentials, clearError, restoreAuth } = authSlice.actions
 export default authSlice.reducer

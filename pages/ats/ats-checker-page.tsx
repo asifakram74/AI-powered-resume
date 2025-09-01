@@ -312,12 +312,10 @@ export default function ATSCheckerPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-8 p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-center gap-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg resumaic-gradient-green text-white">
-            <FileCheck className="h-6 w-6" />
-          </div>
-          <div>
+      
+          <div className="flex flex-col items-center">
             <h1 className="text-3xl font-bold text-[#2D3639] font-rubik">
               ATS Resume Checker
             </h1>

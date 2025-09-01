@@ -3,7 +3,7 @@
 import { useAppSelector } from "@/lib/redux/hooks"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
+// import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -30,7 +30,7 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
   }, [user, loading, router, requiredRole])
 
   if (loading) {
-    return <LoadingSpinner />
+    // return <LoadingSpinner />
   }
 
   if (!user) {
