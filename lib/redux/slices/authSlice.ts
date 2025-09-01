@@ -22,6 +22,7 @@ const initialState: AuthState = {
   profile: null,
   token: null,
   loading: false,
+  
   error: null,
 }
 

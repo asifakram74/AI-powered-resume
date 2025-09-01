@@ -70,7 +70,9 @@ export type LoginCredentials = {
 export type RegisterData = {
   name: string
   email: string
-  password: string
+
+    password: string
+  source?: "Webiste" | "Google" | "Linkedin"
 }
 
 export type UpdateProfileData = {

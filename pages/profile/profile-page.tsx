@@ -31,13 +31,13 @@ interface StatItem {
 interface ProfileFormData {
   name: string
   email: string
-  plan_type?: string
+  // plan_type?: string
 }
 
 export function ProfilePage() {
   const dispatch = useAppDispatch()
   const router = useRouter()
-  const { profile, loading: authLoading, user } = useAppSelector((state) => state.auth)
+  const { profile, user } = useAppSelector((state) => state.auth)
   const [stats, setStats] = useState<StatItem[]>([])
   const [showEditModal, setShowEditModal] = useState(false)
   const [showPasswordDialog, setShowPasswordDialog] = useState(false)
@@ -54,15 +54,15 @@ export function ProfilePage() {
     defaultValues: {
       name: profile?.name || '',
       email: profile?.email || '',
-      plan_type: profile?.plan_type || 'Free',
+      // plan_type: profile?.plan_type || 'Free',
     }
   })
 
   useEffect(() => {
     const checkAndLoadProfile = async () => {
       try {
-        setIsLoading(true)
-        
+        // setIsLoading(true)
+
         if (profile && user && profile.email !== user.email) {
           dispatch(clearProfile())
           await dispatch(fetchProfile()).unwrap()
@@ -105,7 +105,7 @@ export function ProfilePage() {
             },
           ])
         }
-        
+
         hasLoaded.current = true
       } catch (error) {
         setLoadingError("Failed to load profile data. Please try again.")
@@ -123,7 +123,7 @@ export function ProfilePage() {
       reset({
         name: profile.name,
         email: profile.email,
-        plan_type: profile.plan_type,
+        // plan_type: profile.plan_type,
       })
     }
   }, [profile, reset])
@@ -231,7 +231,7 @@ export function ProfilePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <Card className="border-0 shadow-sm">
-            <CardHeader  className="pb-3">
+            <CardHeader className="pb-3">
               <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">Personal Information</CardTitle>
               <CardDescription>
                 Your personal details and account information
@@ -252,7 +252,7 @@ export function ProfilePage() {
                 </div>
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-gray-900 dark:text-white">Account Type</Label>
-                  <p  className="text-sm capitalize text-gray-500">{profile.plan_type || 'Free'}</p>
+                  <p className="text-sm capitalize text-gray-500">{profile.plan_type || 'Free'}</p>
                 </div>
               </div>
             </CardContent>
@@ -287,7 +287,7 @@ export function ProfilePage() {
           reset({
             name: profile?.name || '',
             email: profile?.email || '',
-            plan_type: profile?.plan_type || 'Free',
+            // plan_type: profile?.plan_type || 'Free',
           });
         }
         setShowEditModal(open);
@@ -342,7 +342,7 @@ export function ProfilePage() {
             </div>
 
             <DialogFooter>
-              <Button
+              {/* <Button
                 type="button"
                 variant="outline"
                 onClick={() => {
@@ -355,19 +355,15 @@ export function ProfilePage() {
                 }}
               >
                 Cancel
-              </Button>
+              </Button> */}
               <Button
-              className="resumaic-gradient-green hover:opacity-90  button-press"
+                className="resumaic-gradient-green hover:opacity-90 button-press"
                 type="submit"
-                disabled={authLoading || !isDirty}
+                disabled={!isDirty}  // only disable if form has no changes
               >
-                {authLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : 'Save Changes'}
+                Save Changes
               </Button>
+
             </DialogFooter>
           </form>
         </DialogContent>
