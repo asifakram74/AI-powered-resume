@@ -8,10 +8,19 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Crown, Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
 import { loginUser, clearError, loginWithLinkedIn, loginWithGoogle, setCredentials } from "@/lib/redux/slices/authSlice"
 import Image from "next/image"
+
+function useSafeSearchParams() {
+  try {
+    return useSearchParams()
+  } catch (error) {
+    // Return null during server rendering
+    return null
+  }
+}
 
 export default function SignInPage() {
   const [email, setEmail] = useState("")
@@ -22,7 +31,7 @@ export default function SignInPage() {
   const [googleLoading, setGoogleLoading] = useState(false)
 
   const router = useRouter()
-  const searchParams = useSearchParams()
+ const searchParams = useSafeSearchParams()
   const safeSearchParams = searchParams || new URLSearchParams();
 
   const dispatch = useAppDispatch()
