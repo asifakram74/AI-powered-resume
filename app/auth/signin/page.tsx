@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Crown, Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
 import { loginUser, clearError, loginWithLinkedIn, loginWithGoogle, setCredentials } from "@/lib/redux/slices/authSlice"
@@ -24,6 +23,8 @@ export default function SignInPage() {
 
   const router = useRouter()
   const searchParams = useSearchParams()
+  const safeSearchParams = searchParams || new URLSearchParams();
+
   const dispatch = useAppDispatch()
   const { loading, error, token } = useAppSelector((state) => state.auth)
 
@@ -49,6 +50,7 @@ export default function SignInPage() {
       }
     }
   }, [token, router])
+
   useEffect(() => {
     // Check every second if user is logged in but not on dashboard
     const interval = setInterval(() => {
@@ -70,11 +72,25 @@ export default function SignInPage() {
 
     return () => clearInterval(interval);
   }, [router]);
-  // Handle LinkedIn callback when component mounts
+
+  // For LinkedIn login
+  const handleLinkedInSignIn = () => {
+    const randomState = `secureRandom${Math.floor(Math.random() * 10000)}${Date.now()}`;
+    localStorage.setItem('linkedin_oauth_state', randomState);
+
+    const redirectUri = window.location.hostname === 'localhost'
+      ? 'http://localhost:3000/auth/signin'
+      : 'https://ai-powered-resume-seven.vercel.app/auth/signin';
+
+    const linkedInAuthUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=77980o5hpyil05&redirect_uri=${encodeURIComponent(redirectUri)}&scope=openid%20profile%20email&state=${randomState}`;
+
+    window.location.href = linkedInAuthUrl;
+  }
+
   useEffect(() => {
     const handleLinkedInCallback = async () => {
-      const code = searchParams.get('code');
-      const state = searchParams.get('state');
+      const code = safeSearchParams.get('code');
+      const state = safeSearchParams.get('state');
 
       if (code && state) {
         setLinkedInLoading(true);
@@ -110,11 +126,9 @@ export default function SignInPage() {
             router.push('/dashboard');
           } else {
             console.error('LinkedIn login failed:', result.payload);
-            alert(`LinkedIn authentication failed: ${result.payload}`);
           }
         } catch (error) {
           console.error('Error during LinkedIn authentication:', error);
-          alert('An error occurred during authentication. Please try again.');
         } finally {
           setLinkedInLoading(false);
 
@@ -128,16 +142,7 @@ export default function SignInPage() {
     handleLinkedInCallback();
   }, [searchParams, router, dispatch]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    dispatch(clearError())
-
-    const result = await dispatch(loginUser({ email, password }))
-    if (loginUser.fulfilled.match(result)) {
-      router.push("/dashboard")
-    }
-  }
-
+  // For Google login
   const handleGoogleSignIn = () => {
     const randomState = `secureRandom${Math.floor(Math.random() * 10000)}${Date.now()}`;
     localStorage.setItem("google_oauth_state", randomState);
@@ -152,9 +157,9 @@ export default function SignInPage() {
 
   useEffect(() => {
     const handleGoogleCallback = async () => {
-      const code = searchParams.get("code");
-      const token = searchParams.get("token");
-      const state = searchParams.get("state");
+      const code = safeSearchParams.get("code");
+      const token = safeSearchParams.get("token");
+      const state = safeSearchParams.get("state");
 
       if (token) {
         setGoogleLoading(true);
@@ -169,7 +174,7 @@ export default function SignInPage() {
           // Clear the stored state
           localStorage.removeItem("google_oauth_state");
 
-          const userParam = searchParams.get("user");
+          const userParam = safeSearchParams.get("user");
           if (userParam) {
             try {
               const user = JSON.parse(decodeURIComponent(userParam));
@@ -181,9 +186,9 @@ export default function SignInPage() {
               throw e;
             }
           } else {
-            const id = searchParams.get("id");
-            const name = searchParams.get("name");
-            const email = searchParams.get("email");
+            const id = safeSearchParams.get("id");
+            const name = safeSearchParams.get("name");
+            const email = safeSearchParams.get("email");
 
             localStorage.setItem("token", token);
 
@@ -203,7 +208,6 @@ export default function SignInPage() {
           router.push("/dashboard");
         } catch (err) {
           console.error("Error during Google login:", err);
-          alert("Google login failed, please try again.");
         } finally {
           setGoogleLoading(false);
         }
@@ -221,11 +225,9 @@ export default function SignInPage() {
             window.history.replaceState({}, document.title, cleanUrl);
             router.push("/dashboard");
           } else {
-            alert(`Google authentication failed: ${result.payload}`);
           }
         } catch (err) {
           console.error("Error during Google login:", err);
-          alert("Google login failed, please try again.");
         } finally {
           setGoogleLoading(false);
         }
@@ -235,19 +237,14 @@ export default function SignInPage() {
     handleGoogleCallback();
   }, [searchParams, router, dispatch]);
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    dispatch(clearError())
 
-  // For LinkedIn login
-  const handleLinkedInSignIn = () => {
-    const randomState = `secureRandom${Math.floor(Math.random() * 10000)}${Date.now()}`;
-    localStorage.setItem('linkedin_oauth_state', randomState);
-
-    const redirectUri = window.location.hostname === 'localhost'
-      ? 'http://localhost:3000/auth/signin'
-      : 'https://ai-powered-resume-seven.vercel.app/auth/signin';
-
-    const linkedInAuthUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=77980o5hpyil05&redirect_uri=${encodeURIComponent(redirectUri)}&scope=openid%20profile%20email&state=${randomState}`;
-
-    window.location.href = linkedInAuthUrl;
+    const result = await dispatch(loginUser({ email, password }))
+    if (loginUser.fulfilled.match(result)) {
+      router.push("/dashboard")
+    }
   }
 
   return (
@@ -271,11 +268,6 @@ export default function SignInPage() {
           ) : (
             <>
               <form onSubmit={handleSubmit} className="space-y-4">
-                {error && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address</Label>
