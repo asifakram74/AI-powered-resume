@@ -55,10 +55,10 @@ const plans = [
   { value: "premium", label: "Premium" },
 ]
 
-const planTypes = [
-  { value: "monthly", label: "Monthly" },
-  { value: "annual", label: "Annual" },
-]
+// const planTypes = [
+//   { value: "monthly", label: "Monthly" },
+//   { value: "annual", label: "Annual" },
+// ]
 
 const languages = [
   { value: "en", label: "English" },
@@ -149,6 +149,7 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
 
       if (mode === "create") {
         const createData: CreateUserData = {
+          source: "web",
           name: formData.name,
           email: formData.email,
           password: formData.password,
@@ -166,6 +167,7 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
         onSave?.(createData)
       } else if (mode === "edit" && userId) {
         const updateData: UpdateUserData = {
+          source: "web",
           name: formData.name,
           email: formData.email,
           role: formData.role,
@@ -411,10 +413,10 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="plan_type" className="font-rubik text-[#2D3639]">
+                {/* <Label htmlFor="plan_type" className="font-rubik text-[#2D3639]">
                   Plan Type *
-                </Label>
-                <select
+                </Label> */}
+                {/* <select
                   id="plan_type"
                   name="plan_type"
                   value={formData.plan_type}
@@ -427,7 +429,7 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
                       {type.label}
                     </option>
                   ))}
-                </select>
+                </select> */}
                 {getFieldError("plan_type") && (
                   <p className="text-sm text-red-600 font-inter">{getFieldError("plan_type")}</p>
                 )}

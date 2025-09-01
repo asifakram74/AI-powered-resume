@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -10,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Crown, User, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react"
+import { User, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
 import { registerUser, clearError } from "@/lib/redux/slices/authSlice"
 import Image from "next/image"
@@ -35,7 +34,6 @@ export default function SignUpPage() {
   }, [dispatch])
 
   useEffect(() => {
-    // Validate password match
     if (password && confirmPassword && password !== confirmPassword) {
       setPasswordError("Passwords do not match")
     } else {
@@ -50,14 +48,20 @@ export default function SignUpPage() {
     setApiError("")
     setFieldErrors({})
 
-    // Validate passwords match before submitting
     if (password !== confirmPassword) {
       setPasswordError("Passwords do not match")
       return
     }
 
     try {
-      const result = await dispatch(registerUser({ name, email, password }))
+      // 👇 Always send exact enum value as expected by backend: enum('Webiste', 'Google', 'Linkedin')
+      const result = await dispatch(registerUser({ 
+        name, 
+        email, 
+        password, 
+        source: "Webiste" 
+      }))
+
       if (registerUser.fulfilled.match(result)) {
         router.push("/auth/signin")
       }
@@ -75,11 +79,11 @@ export default function SignUpPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-        <div className="flex items-center mx-auto mb-4">
+          <div className="flex items-center mx-auto mb-4">
             <Link href="/" >
-                <Image src="/Resumic.png" alt="Logo" width={200} height= {90}  className="cursor-pointer"/>
+              <Image src="/Resumic.png" alt="Logo" width={200} height={90} className="cursor-pointer"/>
             </Link>
-            </div>
+          </div>
           <CardTitle className="text-xl font-bold text-gray-900">Create Your Account</CardTitle>
           <CardDescription>Join CV Builder AI to get started</CardDescription>
         </CardHeader>
@@ -92,7 +96,7 @@ export default function SignUpPage() {
                   <ul className="mt-2 list-disc list-inside">
                     {Object.entries(fieldErrors).map(([field, messages]) => (
                       <li key={field}>
-                        <strong>{field}:</strong> {messages.join(', ')}
+                        <strong>{field}:</strong> {messages.join(", ")}
                       </li>
                     ))}
                   </ul>
@@ -183,8 +187,7 @@ export default function SignUpPage() {
 
             <Button
               type="submit"
-              // disabled={loading || !name || !email || !password || !confirmPassword || !!passwordError}
-              className="w-full resumaic-gradient-green hover:opacity-90  button-press"
+              className="w-full resumaic-gradient-green hover:opacity-90 button-press"
             >
               {loading ? (
                 <>

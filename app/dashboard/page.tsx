@@ -12,7 +12,7 @@ import { UserList } from "@/pages/UsersManagement/UserList"
 import ProtectedRoute from "@/components/auth/ProtectedRoute"
 import { useAppSelector } from "@/lib/redux/hooks"
 import { useRouter } from "next/navigation"
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
+// import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 
 export interface PageProps {
   user: {
@@ -20,6 +20,7 @@ export interface PageProps {
     role?: string;
     name?: string;
     email?: string;
+    source?: string;
   } | null;
 }
 
@@ -36,9 +37,9 @@ export default function DashboardPage() {
   const isAdmin = user?.role?.toLowerCase() === "admin"
 
   const renderActivePage = () => {
-    if (!isClient) {
-      return <LoadingSpinner />
-    }
+    // if (!isClient) {
+    //   // return <LoadingSpinner />
+    // }
 
     switch (activePage) {
       case "create-persona":
