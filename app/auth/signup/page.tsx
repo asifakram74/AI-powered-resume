@@ -108,7 +108,6 @@ export default function SignUpPage() {
         } finally {
           setLinkedInLoading(false);
 
-          // Clean up URL parameters
           const cleanUrl = window.location.pathname;
           window.history.replaceState({}, document.title, cleanUrl);
         }
