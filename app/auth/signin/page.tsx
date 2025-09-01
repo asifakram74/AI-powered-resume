@@ -181,7 +181,22 @@ export default function SignInPage() {
               throw e;
             }
           } else {
+            const id = searchParams.get("id");
+            const name = searchParams.get("name");
+            const email = searchParams.get("email");
+
             localStorage.setItem("token", token);
+
+            if (id || name || email) {
+              const user = {
+                id: id ? Number(id) : undefined,
+                name: name ?? undefined,
+                email: email ?? undefined,
+                source: "google",
+              };
+              localStorage.setItem("user", JSON.stringify(user));
+              dispatch(setCredentials({ token, user }));
+            }
           }
           const cleanUrl = window.location.pathname;
           window.history.replaceState({}, document.title, cleanUrl);
