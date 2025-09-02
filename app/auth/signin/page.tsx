@@ -17,7 +17,6 @@ function useSafeSearchParams() {
   try {
     return useSearchParams()
   } catch (error) {
-    // Return null during server rendering
     return null
   }
 }
@@ -31,7 +30,7 @@ export default function SignInPage() {
   const [googleLoading, setGoogleLoading] = useState(false)
 
   const router = useRouter()
- const searchParams = useSafeSearchParams()
+  const searchParams = useSafeSearchParams()
   const safeSearchParams = searchParams || new URLSearchParams();
 
   const dispatch = useAppDispatch()
@@ -42,16 +41,13 @@ export default function SignInPage() {
   }, [dispatch])
 
   useEffect(() => {
-    // Check if user is already logged in (from localStorage)
     const storedToken = localStorage.getItem('token')
     const storedUser = localStorage.getItem('user')
 
     if (storedToken && storedUser) {
       try {
         const user = JSON.parse(storedUser)
-        // Check if user has source field and it's a social login
         if (user.source && user.source !== 'website') {
-          // For social login users, redirect to dashboard directly
           router.push("/dashboard")
         }
       } catch (e) {
@@ -61,7 +57,6 @@ export default function SignInPage() {
   }, [token, router])
 
   useEffect(() => {
-    // Check every second if user is logged in but not on dashboard
     const interval = setInterval(() => {
       const token = localStorage.getItem('token');
       const userStr = localStorage.getItem('user');
@@ -104,20 +99,17 @@ export default function SignInPage() {
       if (code && state) {
         setLinkedInLoading(true);
 
-        // Verify state parameter to prevent CSRF
         const storedState = localStorage.getItem('linkedin_oauth_state');
 
         if (state !== storedState) {
           console.error('Invalid state parameter - possible CSRF attack');
           setLinkedInLoading(false);
 
-          // Clean up URL even on error
           const cleanUrl = window.location.pathname;
           window.history.replaceState({}, document.title, cleanUrl);
           return;
         }
 
-        // Clear the stored state
         localStorage.removeItem('linkedin_oauth_state');
 
         try {
@@ -131,7 +123,6 @@ export default function SignInPage() {
             console.log('Token in localStorage:', localStorage.getItem('token'));
             console.log('User in localStorage:', localStorage.getItem('user'));
 
-            // Force redirect to dashboard
             router.push('/dashboard');
           } else {
             console.error('LinkedIn login failed:', result.payload);
@@ -141,7 +132,6 @@ export default function SignInPage() {
         } finally {
           setLinkedInLoading(false);
 
-          // Clean up URL parameters
           const cleanUrl = window.location.pathname;
           window.history.replaceState({}, document.title, cleanUrl);
         }
@@ -180,7 +170,6 @@ export default function SignInPage() {
             return;
           }
 
-          // Clear the stored state
           localStorage.removeItem("google_oauth_state");
 
           const userParam = safeSearchParams.get("user");
