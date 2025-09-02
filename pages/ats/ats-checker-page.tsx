@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { callNodeApi } from "@/lib/config/api";
 import {
   CheckCircle,
   Upload,
@@ -83,22 +84,16 @@ export default function ATSCheckerPage() {
     setError(null);
 
     try {
-      const response = await fetch("/api/ats-analysis", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          extractedText,
-          jobDescription,
-        }),
+      const response = await callNodeApi.post('/api/ats-analysis', {
+        extractedText,
+        jobDescription,
       });
 
-      const data = await response.json().catch(() => {
+      const data = await response.data.json().catch(() => {
         throw new Error("Invalid JSON response from server");
       });
 
-      if (!response.ok) {
+      if (!response.data.ok) {
         throw new Error(data.error || "Analysis failed");
       }
 

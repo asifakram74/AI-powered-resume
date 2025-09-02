@@ -1,10 +1,14 @@
 import axios from "axios"
 
-// const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://backendcv.onlinetoolpot.com/api"
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api"
+// Laravel Backend URL for authentication and services
+const LARAVEL_API_URL = "https://backendcv.onlinetoolpot.com/api"
 
+// Node.js Backend URL for app/api routes
+const NODEJS_API_URL = process.env.NEXT_PUBLIC_NODEJS_API_URL || "http://localhost:3001/api"
+
+// Laravel API client for authentication and services
 export const api = axios.create({
-  baseURL: API_URL,
+  baseURL: LARAVEL_API_URL,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -12,6 +16,17 @@ export const api = axios.create({
   timeout: 10000,
 })
 
+// Node.js API client for app/api routes
+export const nodeApi = axios.create({
+  baseURL: NODEJS_API_URL,
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
+  timeout: 120000, // 2 minutes for AI operations
+})
+
+// Laravel API interceptors for authentication and services
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token")
@@ -22,6 +37,27 @@ api.interceptors.request.use(
 )
 
 api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token")
+      localStorage.removeItem("user")
+    }
+    return Promise.reject(error)
+  },
+)
+
+// Node.js API interceptors
+nodeApi.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token")
+    if (token) config.headers.Authorization = `Bearer ${token}`
+    return config
+  },
+  (error) => Promise.reject(error),
+)
+
+nodeApi.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
