@@ -89,12 +89,11 @@ export default function ATSCheckerPage() {
         jobDescription,
       });
 
-      const data = await response.data.json().catch(() => {
-        throw new Error("Invalid JSON response from server");
-      });
+      const data = response.data;
 
-      if (!response.data.ok) {
-        throw new Error(data.error || "Analysis failed");
+      // Check if the response contains an error
+      if (data.error) {
+        throw new Error(data.error);
       }
 
       if (!data || typeof data !== "object" || !("score" in data)) {

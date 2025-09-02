@@ -72,11 +72,11 @@ const PDFUploader = ({ onDataExtracted }: PDFUploaderProps) => {
         extractedText: text,
       });
   
-      if (!response.ok) {
+      if (response.status < 200 || response.status >= 300) {
         throw new Error("Failed to analyze with DeepSeek");
       }
   
-      const result = await response.json();
+      const result = response.data;
       
       // Log the raw DeepSeek response
       console.log('Raw DeepSeek Response:', JSON.stringify(result, null, 2));
