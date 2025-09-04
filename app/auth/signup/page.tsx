@@ -55,8 +55,10 @@ export default function SignUpPage() {
     localStorage.setItem('linkedin_oauth_state', randomState);
 
     const redirectUri = window.location.hostname === 'localhost'
-      ? 'http://localhost:3000/auth/signin'
-      : 'https://ai-powered-resume-seven.vercel.app/auth/signin';
+      ? 'http://localhost:3000/auth/signup'
+      : window.location.hostname === 'ai-powered-resume-roan.vercel.app'
+        ? 'https://ai-powered-resume-roan.vercel.app/auth/signup'
+        : 'https://app.resumaic.com/auth/signup';
 
     const linkedInAuthUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=77980o5hpyil05&redirect_uri=${encodeURIComponent(redirectUri)}&scope=openid%20profile%20email&state=${randomState}`;
 
