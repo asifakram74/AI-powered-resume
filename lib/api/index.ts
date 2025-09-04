@@ -1,14 +1,14 @@
 import axios from "axios"
 
 // Laravel Backend URL for authentication and services
-const LARAVEL_API_URL = "https://backendcv.onlinetoolpot.com/api"
+const LARAVEL_API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
 
 // Node.js Backend URL for app/api routes
-const NODEJS_API_URL = process.env.NEXT_PUBLIC_NODEJS_API_URL || "http://localhost:3001/api"
+const NODEJS_API_BASE_URL = process.env.NEXT_PUBLIC_NODEJS_API_URL
 
 // Laravel API client for authentication and services
 export const api = axios.create({
-  baseURL: LARAVEL_API_URL,
+  baseURL: LARAVEL_API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -18,7 +18,7 @@ export const api = axios.create({
 
 // Node.js API client for app/api routes
 export const nodeApi = axios.create({
-  baseURL: NODEJS_API_URL,
+  baseURL: NODEJS_API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",

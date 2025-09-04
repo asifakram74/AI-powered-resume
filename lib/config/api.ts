@@ -1,7 +1,8 @@
 import { nodeApi } from '../api';
 
 // Node.js Backend Configuration for app/api routes
-const NODEJS_API_BASE_URL = process.env.NEXT_PUBLIC_NODEJS_API_URL || 'http://localhost:3001';
+const NODEJS_API_BASE_URL = process.env.NEXT_PUBLIC_NODEJS_API_URL
+console.log("NODEJS_API_BASE_URL",NODEJS_API_BASE_URL)
 
 export const apiConfig = {
   baseURL: NODEJS_API_BASE_URL,
