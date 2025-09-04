@@ -113,16 +113,16 @@ export const AuthService = {
   },
 
   deleteAccount: async (): Promise<void> => {
-    await api.delete("/me")
+    await api.delete("/delete-account")
   },
 
   linkedinLogin: async (code: string): Promise<AuthResponse> => {
-    const response = await api.post("/linkedin/token", { code })
+    const response = await api.post("/linkedin", { code })
     return response.data
   },
 
   googleLogin: async (code: string): Promise<AuthResponse> => {
-    const response = await api.post("/google/token", { code });
+    const response = await api.post("/google", { code });
     return response.data;
   },
 

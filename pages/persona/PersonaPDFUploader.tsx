@@ -6,6 +6,7 @@ import { Upload, FileText, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CVData } from "@/types/cv-data";
 import { toast } from "sonner"
+import { callNodeApi } from "@/lib/config/api";
 
 // Helper function to remove duplicates from an array
 const removeDuplicates = (arr: string[]): string[] => {
@@ -67,21 +68,15 @@ const PDFUploader = ({ onDataExtracted }: PDFUploaderProps) => {
 
   const sendToDeepSeek = async (text: string): Promise<Partial<Omit<CVData, "id" | "createdAt">>> => {
     try {
-      const response = await fetch("/api/parse-resume", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          extractedText: text,
-        }),
+      const response = await callNodeApi.post('/api/parse-resume', {
+        extractedText: text,
       });
   
-      if (!response.ok) {
+      if (response.status < 200 || response.status >= 300) {
         throw new Error("Failed to analyze with DeepSeek");
       }
   
-      const result = await response.json();
+      const result = response.data;
       
       // Log the raw DeepSeek response
       console.log('Raw DeepSeek Response:', JSON.stringify(result, null, 2));

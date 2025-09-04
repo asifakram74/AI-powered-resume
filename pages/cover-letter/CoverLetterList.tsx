@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { callNodeApi } from "@/lib/config/api";
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -173,22 +174,16 @@ export function CoverLetterPage({ user }: PageProps) {
       const cvContent = await getCVContentForAI(selectedCV)
 
       // Call DeepSeek AI for cover letter generation
-      const response = await fetch("/api/cover-letter-generation", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          jobDescription,
-          tone,
-          cvContent,
-          cvData: selectedCV,
-        }),
+      const response = await callNodeApi.post('/api/cover-letter-generation', {
+        jobDescription,
+        tone,
+        cvContent,
+        cvData: selectedCV,
       })
 
-      const data = await response.json()
+      const data = response.data
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error(data.error || "Generation failed")
       }
 

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { callNodeApi } from "@/lib/config/api";
 import { Document, Packer, Paragraph } from "docx";
 import { Card, CardContent } from "@/components/ui/card";
 import { Zap } from "lucide-react";
@@ -606,16 +607,14 @@ export function CVPageClientContent() {
         // 3. Generate AI response only for new CVs
         if (!cvId) {
           const personaText = convertPersonaToText(personaData);
-          const response = await fetch("/api/optimize-cv", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ extractedText: personaText }),
+          const response = await callNodeApi.post('/api/optimize-cv', {
+            extractedText: personaText,
           });
 
-          if (!response.ok) {
+          if (response.status !== 200) {
             throw new Error("Failed to optimize CV");
           }
-          const aiData = await response.json();
+          const aiData = response.data;
           setAiResponse(aiData);
         }
       } catch (err: any) {
@@ -807,17 +806,15 @@ export function CVPageClientContent() {
 
     try {
       const personaText = convertPersonaToText(persona);
-      const response = await fetch("/api/optimize-cv", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ extractedText: personaText }),
+      const response = await callNodeApi.post('/api/optimize-cv', {
+        extractedText: personaText,
       });
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error("Failed to regenerate CV");
       }
 
-      const aiData = await response.json();
+      const aiData = response.data;
       setAiResponse(aiData);
       setHasUnsavedChanges(true);
 

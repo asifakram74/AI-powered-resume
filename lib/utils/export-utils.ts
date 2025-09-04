@@ -2,6 +2,8 @@
  * Export utilities for CV downloads
  */
 
+import { callNodeApi } from '@/lib/config/api';
+
 // PDF Export using browser print API
 export const exportToPDF = async (elementId: string, filename: string = 'cv.pdf') => {
   try {
@@ -97,15 +99,11 @@ export const exportToPNG = async (elementId: string, filename: string = 'cv.png'
 // DOCX Export using server API
 export const exportToDOCX = async (htmlContent: string, filename: string = 'cv.docx') => {
   try {
-    const response = await fetch('/api/export-docx', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ html: htmlContent }),
+    const response = await callNodeApi.post('/api/export-docx', {
+      html: htmlContent,
     })
 
-    if (!response.ok) {
+    if (response.status !== 200) {
       throw new Error('DOCX export failed')
     }
 

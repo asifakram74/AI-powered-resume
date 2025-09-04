@@ -127,7 +127,7 @@ export default function SignUpPage() {
         ? "http://localhost:3000/auth/signin"
         : "https://ai-powered-resume-seven.vercel.app/auth/signin";
 
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
   };
 
   useEffect(() => {
