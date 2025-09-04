@@ -6,7 +6,7 @@ import { Upload, FileText, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CVData } from "@/types/cv-data";
 import { toast } from "sonner"
-import { callNodeApi } from "@/lib/config/api";
+import { callNodeApi } from "../../lib/config/api";
 
 // Helper function to remove duplicates from an array
 const removeDuplicates = (arr: string[]): string[] => {
