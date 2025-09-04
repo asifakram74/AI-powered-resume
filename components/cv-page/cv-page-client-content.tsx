@@ -3,10 +3,10 @@
 import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { Button } from "../../components/ui/button";
 import { callNodeApi } from "../../lib/config/api";
 import { Document, Packer, Paragraph } from "docx";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "../../components/ui/card";
 import { Zap } from "lucide-react";
 import html2canvas from "html2canvas";
 import {
@@ -27,20 +27,20 @@ import {
   getPersonaById,
   type PersonaResponse,
 } from "@/lib/redux/service/pasonaService";
-import { CVPreview } from "@/pages/resume/CVPreview";
+import { CVPreview } from "../../pages/resume/CVPreview";
 import type { CVData } from "@/types/cv-data";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { logoutUser } from "@/lib/redux/slices/authSlice";
 import * as htmlToImage from "html-to-image";
 import { jsPDF } from "jspdf";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { Sidebar } from "@/components/dashboard/sidebar";
-import  CreatePersonaPage  from "@/pages/persona/PersonaList";
-import { ResumePage } from "@/pages/resume/ResumeList";
-import { CoverLetterPage } from "@/pages/cover-letter/CoverLetterList";
-import ATSCheckerPage from "@/pages/ats/ats-checker-page";
-import { ProfilePage } from "@/pages/profile/profile-page";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { SidebarProvider } from "../../components/ui/sidebar";
+import { Sidebar } from "../../components/dashboard/sidebar";
+import  CreatePersonaPage  from "../../pages/persona/PersonaList";
+import { ResumePage } from "../../pages/resume/ResumeList";
+import { CoverLetterPage } from "../../pages/cover-letter/CoverLetterList";
+import ATSCheckerPage from "../../pages/ats/ats-checker-page";
+import { ProfilePage } from "../../pages/profile/profile-page";
+import ProtectedRoute from "../../components/auth/ProtectedRoute";
 import {
   createCV,
   getCVById,

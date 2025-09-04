@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "../../components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "../../components/ui/card";
 import {
   FileText,
   Upload,
@@ -18,8 +18,8 @@ import {
   Loader2,
   Sparkles,
 } from "lucide-react";
-import type { CVData } from "@/types/cv-data";
-import PDFUploader  from "@/pages/persona/PersonaPDFUploader";
+import type { CVData } from "../../types/cv-data";
+import PDFUploader  from "./PersonaPDFUploader";
 
 interface PersonaCreationOptionsProps {
   onOptionSelect: (
