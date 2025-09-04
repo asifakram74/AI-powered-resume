@@ -77,7 +77,6 @@ export interface UpdateUserData {
   language?: string
   push_notifications?: number
   email_updates?: number
-   source: string
 }
 
 export const getUsers = async (page = 1): Promise<UsersApiResponse> => {
