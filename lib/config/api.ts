@@ -1,4 +1,4 @@
-import { nodeApi } from '../api/index';
+import { nodeApi } from '../api';
 
 // Node.js Backend Configuration for app/api routes
 const NODEJS_API_BASE_URL = process.env.NEXT_PUBLIC_NODEJS_API_URL || "https://render-kweq.onrender.com"
