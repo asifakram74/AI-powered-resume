@@ -149,7 +149,7 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
 
       if (mode === "create") {
         const createData: CreateUserData = {
-          source: "web",
+          source: "Website",
           name: formData.name,
           email: formData.email,
           password: formData.password,
@@ -167,7 +167,7 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
         onSave?.(createData)
       } else if (mode === "edit" && userId) {
         const updateData: UpdateUserData = {
-          source: "web",
+          source: "Website",
           name: formData.name,
           email: formData.email,
           role: formData.role,
