@@ -1,7 +1,7 @@
 "use client"
 
 import { Mail, Phone, MapPin, ExternalLink, Github, Calendar, Award, Briefcase } from "lucide-react"
-import type { CVData } from "@/types/cv-data"
+import type { CVData } from "../../types/cv-data"
 
 interface ModernTemplate3Props {
   data: CVData

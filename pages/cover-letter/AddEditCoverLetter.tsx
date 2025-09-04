@@ -1,17 +1,17 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
+import { Button } from "../../components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
+import { Textarea } from "../../components/ui/textarea"
+import { Label } from "../../components/ui/label"
 import { Sparkles, FileText } from "lucide-react"
-import { useAppSelector } from "@/lib/redux/hooks"
+import { useAppSelector } from "../../lib/redux/hooks"
 import {
   getAllCVs,
   getCVs,
   type CV
-} from "@/lib/redux/service/resumeService"
+} from "../../lib/redux/service/resumeService"
 import Select from 'react-select'
 
 interface CoverLetterGeneratorProps {

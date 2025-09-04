@@ -1,6 +1,6 @@
 "use client";
 
-import type { CVData } from "@/types/cv-data";
+import type { CVData } from "../../types/cv-data";
 import {
   Mail,
   Phone,

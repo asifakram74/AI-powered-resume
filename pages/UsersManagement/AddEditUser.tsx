@@ -4,10 +4,10 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Button } from "../../components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
+import { Input } from "../../components/ui/input"
+import { Label } from "../../components/ui/label"
 import { toast } from "sonner"
 import {
   createUser,
@@ -16,7 +16,7 @@ import {
   type CreateUserData,
   type UpdateUserData,
   type User,
-} from "@/lib/redux/service/userService"
+} from "../../lib/redux/service/userService"
 import { UserIcon, Shield, TrendingUp, Briefcase, Target, CheckCircle, XCircle, AlertCircle } from "lucide-react"
 
 interface UserFormProps {

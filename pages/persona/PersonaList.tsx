@@ -56,11 +56,11 @@ import {
   deletePersona,
   type PersonaData,
   type PersonaResponse,
-} from "@/lib/redux/service/pasonaService";
+} from "../../lib/redux/service/pasonaService";
 import { toast } from "sonner";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { Crown, UserCircle } from "lucide-react";
-import { PageProps } from "@/app/dashboard/page";
+import { PageProps } from "../../app/dashboard/page";
 
 function CreatePersonaPage({ user }: PageProps) {
   const [personas, setPersonas] = useState<CVData[]>([])

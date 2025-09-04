@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "../../components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "../../components/ui/card";
 import {
   FileText,
   Grid,
@@ -32,11 +32,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+} from "../../components/ui/table";
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
+import { Badge } from "../../components/ui/badge";
+import { Label } from "../../components/ui/label";
+import { Input } from "../../components/ui/input";
 import {
   getAllCVs,
   getCVs,
@@ -45,7 +45,7 @@ import {
   updateCV,
   type CV,
   CreateCVData,
-} from "@/lib/redux/service/resumeService";
+} from "../../lib/redux/service/resumeService";
 import { useRouter } from "next/navigation";
 import {
   Dialog,
@@ -54,12 +54,12 @@ import {
   DialogTitle,
   DialogDescription,
   DialogHeader,
-} from "@/components/ui/dialog";
+} from "../../components/ui/dialog";
 import { CVWizard } from "./AddEditResume";
 import { toast } from "sonner";
-import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { Crown, UserCircle } from "lucide-react";
-import { PageProps } from "@/app/dashboard/page";
+import { PageProps } from "../../app/dashboard/page";
 
 export function ResumePage({ user }: PageProps) {
   const router = useRouter();

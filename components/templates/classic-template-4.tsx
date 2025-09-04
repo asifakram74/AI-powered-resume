@@ -1,4 +1,4 @@
-import type { CVData } from "@/types/cv-data"
+import type { CVData } from "../../types/cv-data"
 
 interface ClassicTemplate4Props {
   data: CVData

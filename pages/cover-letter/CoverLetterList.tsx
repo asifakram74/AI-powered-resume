@@ -1,15 +1,15 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "../../components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
 import { callNodeApi } from "../../lib/config/api";
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Input } from "../../components/ui/input"
+import { Label } from "../../components/ui/label"
+import { Textarea } from "../../components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
+import { Badge } from "../../components/ui/badge"
+import { Avatar, AvatarFallback } from "../../components/ui/avatar"
 import { toast } from "sonner"
 import {
   Grid,
@@ -33,8 +33,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+} from "../../components/ui/dialog"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
 import { CoverLetterGenerator } from "./AddEditCoverLetter"
 import {
   getAllCoverLetters,
@@ -44,14 +44,14 @@ import {
   deleteCoverLetter,
   type CoverLetter,
   type CreateCoverLetterData,
-} from "@/lib/redux/service/coverLetterService"
+} from "../../lib/redux/service/coverLetterService"
 import {
   getAllCVs,
   getCVs,
   type CV
-} from "@/lib/redux/service/resumeService"
-import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
-import { PageProps } from "@/app/dashboard/page";
+} from "../../lib/redux/service/resumeService"
+import { ConfirmDialog } from "../../components/ui/ConfirmDialog"
+import { PageProps } from "../../app/dashboard/page";
 
 export function CoverLetterPage({ user }: PageProps) {
   const [cvs, setCVs] = useState<CV[]>([])

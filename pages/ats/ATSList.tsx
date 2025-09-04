@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "../../components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "../../components/ui/card";
 import {
   Target,
   Grid,
@@ -28,7 +28,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "../../components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -36,21 +36,21 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+} from "../../components/ui/table";
+import { Badge } from "../../components/ui/badge";
+import { Input } from "../../components/ui/input";
 import {
   ATSResume,
   getATSResumes,
   deleteATSResume,
-} from "@/lib/redux/service/atsResumeService";
-import { useAppSelector } from "@/lib/redux/hooks";
+} from "../../lib/redux/service/atsResumeService";
+import { useAppSelector } from "../../lib/redux/hooks";
 import Link from "next/link";
 import { toast } from "sonner";
-import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { Crown, UserCircle } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback } from "../../components/ui/avatar";
+import { Label } from "../../components/ui/label";
 
 export function ATSListPage() {
   const [atsResumes, setAtsResumes] = useState<ATSResume[]>([]);

@@ -1,12 +1,12 @@
 "use client"
 import { FileText, Mail, Target, UserCircle, TrendingUp } from "lucide-react"
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card"
-import { useAppSelector } from "@/lib/redux/hooks"
+import { Card, CardHeader, CardContent, CardTitle } from "../../components/ui/card"
+import { useAppSelector } from "../../lib/redux/hooks"
 import { useEffect, useState } from "react"
-import { getPersonas } from "@/lib/redux/service/pasonaService"
-import { getCVs } from "@/lib/redux/service/resumeService"
-import { getCoverLetters } from "@/lib/redux/service/coverLetterService"
-import { getATSResumes } from "@/lib/redux/service/atsResumeService"
+import { getPersonas } from "../../lib/redux/service/pasonaService"
+import { getCVs } from "../../lib/redux/service/resumeService"
+import { getCoverLetters } from "../../lib/redux/service/coverLetterService"
+import { getATSResumes } from "../../lib/redux/service/atsResumeService"
 
 interface StatItem {
   label: string

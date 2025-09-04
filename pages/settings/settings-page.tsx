@@ -1,17 +1,17 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "../../components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
+import { Badge } from "../../components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
 import { Settings, Moon, Sun, Bell, Shield, Download, Trash2, Eye, EyeOff, Save, AlertTriangle, Loader2 } from "lucide-react"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Switch } from "@/components/ui/switch"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
+import { Label } from "../../components/ui/label"
+import { Input } from "../../components/ui/input"
+import { Alert, AlertDescription } from "../../components/ui/alert"
+import { Switch } from "../../components/ui/switch"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
+import { Separator } from "../../components/ui/separator"
 import {
   Dialog,
   DialogContent,
@@ -21,7 +21,7 @@ import {
   DialogClose,
   DialogTrigger,
   DialogFooter,
-} from "@/components/ui/dialog"
+} from "../../components/ui/dialog"
 import {
   getSettings,
   updateSettings,
@@ -30,8 +30,8 @@ import {
   deleteAccount,
   type UserSettings,
   type ChangePasswordData,
-} from "@/lib/api/settings"
-import { useAppSelector } from "@/lib/redux/hooks"
+} from "../../lib/api/settings"
+import { useAppSelector } from "../../lib/redux/hooks"
 import { Mail ,Globe} from "lucide-react"
 
 

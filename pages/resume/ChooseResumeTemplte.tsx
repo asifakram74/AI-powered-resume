@@ -6,9 +6,9 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+} from "../../components/ui/card";
+import { Badge } from "../../components/ui/badge";
+import { Button } from "../../components/ui/button";
 import {
   Check,
   Sparkles,
@@ -18,9 +18,9 @@ import {
   Settings,
 } from "lucide-react";
 import Image from "next/image";
-import { sampleCVData } from "@/lib/sample-cv-data";
-import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
-import { logoutUser } from "@/lib/redux/slices/authSlice";
+import { sampleCVData } from "../../lib/sample-cv-data";
+import { useAppDispatch, useAppSelector } from "../../lib/redux/hooks";
+import { logoutUser } from "../../lib/redux/slices/authSlice";
 
 interface CVTemplate {
   id: string;

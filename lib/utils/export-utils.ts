@@ -2,7 +2,7 @@
  * Export utilities for CV downloads
  */
 
-import { callNodeApi } from '@/lib/config/api';
+import { callNodeApi } from '../../lib/config/api';
 
 // PDF Export using browser print API
 export const exportToPDF = async (elementId: string, filename: string = 'cv.pdf') => {

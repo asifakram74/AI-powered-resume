@@ -1,34 +1,34 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
 import { useRouter } from "next/navigation";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
+import { Label } from "../../components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import { Textarea } from "../../components/ui/textarea";
 import { toast } from "sonner"
 import {
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "../../components/ui/select";
 import Select from 'react-select';
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "../../components/ui/badge";
 import { Save } from "lucide-react";
-import type { CreateCVData, CV } from "@/lib/redux/service/resumeService";
-import { useAppSelector } from "@/lib/redux/hooks";
+import type { CreateCVData, CV } from "../../lib/redux/service/resumeService";
+import { useAppSelector } from "../../lib/redux/hooks";
 import {
   getAllPersonas,
   getPersonas,
   type PersonaResponse,
-} from "@/lib/redux/service/pasonaService";
+} from "../../lib/redux/service/pasonaService";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "../../components/ui/dialog";
 import { CVTemplates } from "./ChooseResumeTemplte";
 import { useForm } from "react-hook-form";
 
