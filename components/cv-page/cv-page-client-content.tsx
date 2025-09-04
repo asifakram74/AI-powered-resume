@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { callNodeApi } from "@/lib/config/api";
+import { callNodeApi } from "../../lib/config/api";
 import { Document, Packer, Paragraph } from "docx";
 import { Card, CardContent } from "@/components/ui/card";
 import { Zap } from "lucide-react";
