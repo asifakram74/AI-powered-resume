@@ -1,10 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Button } from "../../components/ui/button"
+import { Label } from "../../components/ui/label"
+import { Input } from "../../components/ui/input"
+import { Alert, AlertDescription } from "../../components/ui/alert"
 import { Eye, EyeOff, Loader2, Shield } from "lucide-react"
 import {
   Dialog,
@@ -13,8 +13,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter
-} from "@/components/ui/dialog"
-import { changePassword, type ChangePasswordData } from "@/lib/api/settings"
+} from "../../components/ui/dialog"
+import { changePassword, type ChangePasswordData } from "../../lib/api/settings"
 import { toast } from "sonner"
 import { useForm } from "react-hook-form"
 
