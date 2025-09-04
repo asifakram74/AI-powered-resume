@@ -30,10 +30,10 @@ A modern, full-stack application for creating professional resumes with AI optim
    Create `.env.local` file:
    ```env
    # Laravel API URL for authentication
-   NEXT_PUBLIC_API_URL=https://your-laravel-api.com/api
+   NEXT_PUBLIC_API_URL=https://backendcv.onlinetoolpot.com/api
    
    # Node.js API URL for AI operations
-   NEXT_PUBLIC_NODEJS_API_URL=http://localhost:3001
+   NEXT_PUBLIC_NODEJS_API_URL=https://render-kweq.onrender.com
    ```
 
 3. **Development Server**
@@ -171,8 +171,8 @@ A modern, full-stack application for creating professional resumes with AI optim
 
 1. **Update Frontend Environment** for production:
    ```env
-   NEXT_PUBLIC_API_URL=https://your-laravel-api.com/api
-   NEXT_PUBLIC_NODEJS_API_URL=https://api.yourdomain.com
+   NEXT_PUBLIC_API_URL=https://backendcv.onlinetoolpot.com/api
+   NEXT_PUBLIC_NODEJS_API_URL=https://render-kweq.onrender.com
    ```
 
 2. **Rebuild Frontend** with production URLs:
@@ -200,8 +200,8 @@ A modern, full-stack application for creating professional resumes with AI optim
 
 ### Frontend (.env.local)
 ```env
-NEXT_PUBLIC_API_URL=https://your-laravel-api.com/api
-NEXT_PUBLIC_NODEJS_API_URL=https://api.yourdomain.com
+NEXT_PUBLIC_API_URL=https://backendcv.onlinetoolpot.com/api
+NEXT_PUBLIC_NODEJS_API_URL=https://render-kweq.onrender.com
 ```
 
 ### Backend (.env)
