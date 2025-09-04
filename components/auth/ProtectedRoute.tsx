@@ -1,6 +1,6 @@
 "use client"
 
-import { useAppSelector } from "@/lib/redux/hooks"
+import { useAppSelector } from "../../lib/redux/hooks"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 // import { LoadingSpinner } from "@/components/ui/LoadingSpinner"

@@ -12,11 +12,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarFooter,
-} from "@/components/ui/sidebar"
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
-import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
-import { logoutUser } from "@/lib/redux/slices/authSlice"
+} from "../../components/ui/sidebar"
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "../../components/ui/dropdown-menu"
+import { Button } from "../../components/ui/button"
+import { useAppDispatch, useAppSelector } from "../../lib/redux/hooks"
+import { logoutUser } from "../../lib/redux/slices/authSlice"
 import { useRouter } from "next/navigation"
 
 interface SidebarProps {

@@ -12,17 +12,17 @@ import {
   SidebarMenuItem,
   SidebarFooter,
   SidebarGroup,
-} from "@/components/ui/sidebar"
+} from "../../components/ui/sidebar"
 import Image from "next/image"
 
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
-import { logoutUser } from "@/lib/redux/slices/authSlice"
+import { Badge } from "../../components/ui/badge"
+import { Button } from "../../components/ui/button"
+import { Avatar, AvatarFallback } from "../../components/ui/avatar"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu"
+import { useAppDispatch, useAppSelector } from "../../lib/redux/hooks"
+import { logoutUser } from "../../lib/redux/slices/authSlice"
 import { useRouter } from "next/navigation"
-import { getCVs } from "@/lib/redux/service/resumeService"
+import { getCVs } from "../../lib/redux/service/resumeService"
 
 function useResumeCount(userId: string | number | undefined) {
   const [resumeCount, setResumeCount] = useState(0)

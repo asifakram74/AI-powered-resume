@@ -1,8 +1,8 @@
 "use client"
 
 import { useEffect } from "react"
-import { useAppDispatch } from "@/lib/redux/hooks"
-import { setCredentials } from "@/lib/redux/slices/authSlice"
+import { useAppDispatch } from "../../lib/redux/hooks"
+import { setCredentials } from "../../lib/redux/slices/authSlice"
 
 export default function HydrateAuth() {
   const dispatch = useAppDispatch()

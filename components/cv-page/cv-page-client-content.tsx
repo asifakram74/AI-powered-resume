@@ -26,11 +26,11 @@ import { useRouter } from "next/navigation";
 import {
   getPersonaById,
   type PersonaResponse,
-} from "@/lib/redux/service/pasonaService";
+} from "../../lib/redux/service/pasonaService";
 import { CVPreview } from "../../pages/resume/CVPreview";
-import type { CVData } from "@/types/cv-data";
-import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
-import { logoutUser } from "@/lib/redux/slices/authSlice";
+import type { CVData } from "../../types/cv-data";
+import { useAppDispatch, useAppSelector } from "../../lib/redux/hooks";
+import { logoutUser } from "../../lib/redux/slices/authSlice";
 import * as htmlToImage from "html-to-image";
 import { jsPDF } from "jspdf";
 import { SidebarProvider } from "../../components/ui/sidebar";
@@ -47,7 +47,7 @@ import {
   updateCV,
   type CreateCVData,
   type CV,
-} from "@/lib/redux/service/resumeService";
+} from "../../lib/redux/service/resumeService";
 import { CVEditPopup } from "./cv-edit-popup";
 
 interface OptimizedCV {

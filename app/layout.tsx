@@ -1,9 +1,9 @@
 import type React from "react";
 import type { Metadata } from "next";
 import "./globals.css";
-import { ReduxProvider } from "@/lib/redux/provider";
+import { ReduxProvider } from "../lib/redux/provider";
 import { Toaster } from "sonner";
-import HydrateAuth from "@/components/auth/HydrateAuth";
+import HydrateAuth from "../components/auth/HydrateAuth";
 
 export const metadata: Metadata = {
   title: "Resumaic - AI-Powered Resume Builder",
