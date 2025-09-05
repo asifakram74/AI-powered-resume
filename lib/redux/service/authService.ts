@@ -71,7 +71,7 @@ export type RegisterData = {
   name: string
   email: string
 
-    password: string
+  password: string
   source?: "Webiste" | "Google" | "Linkedin"
 }
 
@@ -117,12 +117,12 @@ export const AuthService = {
   },
 
   linkedinLogin: async (code: string): Promise<AuthResponse> => {
-    const response = await api.post("/linkedin", { code })
+    const response = await api.post("/linkedin/token", { code })
     return response.data
   },
 
   googleLogin: async (code: string): Promise<AuthResponse> => {
-    const response = await api.post("/google", { code });
+    const response = await api.post("/google/token", { code });
     return response.data;
   },
 
