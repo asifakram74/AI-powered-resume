@@ -152,8 +152,9 @@ export default function SignInPage() {
       window.location.hostname === "localhost"
         ? "http://localhost:3000/auth/signin"
         : "https://ai-powered-resume-roan.vercel.app/auth/signin";
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
 
-    window.location.href = `https://backendcv.onlinetoolpot.com/api/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    // window.location.href = `https://backendcv.onlinetoolpot.com/api/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
   };
 
   useEffect(() => {
