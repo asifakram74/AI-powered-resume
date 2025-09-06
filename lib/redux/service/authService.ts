@@ -116,8 +116,8 @@ export const AuthService = {
     await api.delete("/delete-account")
   },
 
-  linkedinLogin: async (code: string): Promise<AuthResponse> => {
-    const response = await api.post("/linkedin/token", { code })
+  linkedinLogin: async (code: string, action: string = 'signin'): Promise<AuthResponse> => {
+    const response = await api.post("/linkedin/token", { code, action })
     return response.data
   },
 

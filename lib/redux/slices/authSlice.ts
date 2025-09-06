@@ -40,12 +40,12 @@ export const loginUser = createAsyncThunk<AuthResponse, LoginCredentials>(
   },
 )
 
-export const loginWithLinkedIn = createAsyncThunk<AuthResponse, string>(
+export const loginWithLinkedIn = createAsyncThunk<AuthResponse, { code: string; action: string }>(
   "auth/loginWithLinkedIn",
-  async (code, { rejectWithValue }) => {
+  async ({ code, action }, { rejectWithValue }) => {
     try {
-      console.log("Attempting LinkedIn login with code:", code);
-      const response = await AuthService.linkedinLogin(code);
+      console.log("Attempting LinkedIn login with code:", code, "action:", action);
+      const response = await AuthService.linkedinLogin(code, action);
       console.log("LinkedIn login response:", response);
 
       if (!response.user || !response.user.id) {

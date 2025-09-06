@@ -28,6 +28,7 @@ export default function SignInPage() {
   const [rememberMe, setRememberMe] = useState(false)
   const [linkedInLoading, setLinkedInLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
+  const [isClient, setIsClient] = useState(false)
 
   const router = useRouter()
   const searchParams = useSafeSearchParams()
@@ -77,16 +78,36 @@ export default function SignInPage() {
     return () => clearInterval(interval);
   }, [router]);
 
+const getRedirectUri = (action = 'signin') => {
+    if (typeof window === 'undefined') return '';
+    
+    const isLocalhost = window.location.hostname === 'localhost';
+    const isVercel = window.location.hostname === 'ai-powered-resume-roan.vercel.app';
+    const isProduction = window.location.hostname === 'app.resumaic.com';
+    
+    if (isLocalhost) {
+      return `http://localhost:3000/auth/${action}`;
+    } else if (isVercel) {
+      return `https://ai-powered-resume-roan.vercel.app/auth/${action}`;
+    } else if (isProduction) {
+      return `https://app.resumaic.com/auth/${action}`;
+    }
+    return `https://app.resumaic.com/auth/${action}`;
+  };
+
+  useEffect(() => {
+    dispatch(clearError())
+  }, [dispatch])
+
+
+  // Usage:
+  const redirectUri = getRedirectUri('signin');
   // For LinkedIn login
   const handleLinkedInSignIn = () => {
     const randomState = `secureRandom${Math.floor(Math.random() * 10000)}${Date.now()}`;
     localStorage.setItem('linkedin_oauth_state', randomState);
 
-    const redirectUri = window.location.hostname === 'localhost'
-      ? 'http://localhost:3000/auth/signin'
-      : window.location.hostname === 'ai-powered-resume-roan.vercel.app'
-        ? 'https://ai-powered-resume-roan.vercel.app/auth/signin'
-        : 'https://app.resumaic.com/auth/signin';
+    const redirectUri = getRedirectUri('signin');
 
     const linkedInAuthUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=77980o5hpyil05&redirect_uri=${encodeURIComponent(redirectUri)}&scope=openid%20profile%20email&state=${randomState}`;
 
@@ -106,7 +127,6 @@ export default function SignInPage() {
         if (state !== storedState) {
           console.error('Invalid state parameter - possible CSRF attack');
           setLinkedInLoading(false);
-
           const cleanUrl = window.location.pathname;
           window.history.replaceState({}, document.title, cleanUrl);
           return;
@@ -116,7 +136,10 @@ export default function SignInPage() {
 
         try {
           console.log('Calling loginWithLinkedIn with code:', code);
-          const result = await dispatch(loginWithLinkedIn(code));
+          const result = await dispatch(loginWithLinkedIn({ 
+            code, 
+            action: 'signin'
+          }));
           console.log('LinkedIn login result:', result);
 
           if (loginWithLinkedIn.fulfilled.match(result)) {
@@ -124,7 +147,6 @@ export default function SignInPage() {
             console.log('User ID from backend:', result.payload.user.id);
             console.log('Token in localStorage:', localStorage.getItem('token'));
             console.log('User in localStorage:', localStorage.getItem('user'));
-
             router.push('/dashboard');
           } else {
             console.error('LinkedIn login failed:', result.payload);
@@ -133,15 +155,65 @@ export default function SignInPage() {
           console.error('Error during LinkedIn authentication:', error);
         } finally {
           setLinkedInLoading(false);
-
           const cleanUrl = window.location.pathname;
           window.history.replaceState({}, document.title, cleanUrl);
         }
       }
     };
 
-    handleLinkedInCallback();
+      handleLinkedInCallback();
   }, [safeSearchParams, router, dispatch]);
+  // useEffect(() => {
+  //   const handleLinkedInCallback = async () => {
+  //     const code = safeSearchParams.get('code');
+  //     const state = safeSearchParams.get('state');
+
+  //     if (code && state) {
+  //       setLinkedInLoading(true);
+
+  //       const storedState = localStorage.getItem('linkedin_oauth_state');
+
+  //       if (state !== storedState) {
+  //         console.error('Invalid state parameter - possible CSRF attack');
+  //         setLinkedInLoading(false);
+
+  //         const cleanUrl = window.location.pathname;
+  //         window.history.replaceState({}, document.title, cleanUrl);
+  //         return;
+  //       }
+
+  //       localStorage.removeItem('linkedin_oauth_state');
+
+  //       try {
+  //         console.log('Calling loginWithLinkedIn with code:', code);
+
+  //         const result = await dispatch(loginWithLinkedIn(code));
+  //         console.log('LinkedIn login result:', result);
+
+  //         if (loginWithLinkedIn.fulfilled.match(result)) {
+  //           console.log('LinkedIn login successful');
+  //           console.log('User ID from backend:', result.payload.user.id);
+  //           console.log('Token in localStorage:', localStorage.getItem('token'));
+  //           console.log('User in localStorage:', localStorage.getItem('user'));
+
+  //           router.push('/dashboard');
+  //         } else {
+  //           console.error('LinkedIn login failed:', result.payload);
+  //         }
+  //       } catch (error) {
+  //         console.error('Error during LinkedIn authentication:', error);
+  //       } finally {
+  //         setLinkedInLoading(false);
+
+  //         const cleanUrl = window.location.pathname;
+  //         window.history.replaceState({}, document.title, cleanUrl);
+  //       }
+  //     }
+  //   };
+
+  //   handleLinkedInCallback();
+  // }, [safeSearchParams, router, dispatch]);
+
 
   // For Google login
   const handleGoogleSignIn = () => {
