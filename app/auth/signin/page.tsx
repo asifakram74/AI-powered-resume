@@ -153,7 +153,7 @@ export default function SignInPage() {
       ? "http://localhost:3000/auth/signin"
       : "https://ai-powered-resume-roan.vercel.app/auth/signin";
 
-  window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+  window.location.href = `https://ai-powered-resume-roan.vercel.app/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
 };
 
 
