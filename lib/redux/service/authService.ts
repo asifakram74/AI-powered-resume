@@ -71,7 +71,7 @@ export type RegisterData = {
   name: string
   email: string
 
-  password: string
+    password: string
   source?: "Webiste" | "Google" | "Linkedin"
 }
 
@@ -113,11 +113,11 @@ export const AuthService = {
   },
 
   deleteAccount: async (): Promise<void> => {
-    await api.delete("/delete-account")
+    await api.delete("/me")
   },
 
-  linkedinLogin: async (code: string, action: string = 'signin'): Promise<AuthResponse> => {
-    const response = await api.post("/linkedin/token", { code, action })
+  linkedinLogin: async (code: string): Promise<AuthResponse> => {
+    const response = await api.post("/linkedin/token", { code })
     return response.data
   },
 
