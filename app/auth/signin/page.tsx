@@ -145,17 +145,17 @@ export default function SignInPage() {
 
   // For Google login
   const handleGoogleSignIn = () => {
-    const randomState = `secureRandom${Math.floor(Math.random() * 10000)}${Date.now()}`;
-    localStorage.setItem("google_oauth_state", randomState);
+  const randomState = `secureRandom${Math.floor(Math.random() * 10000)}${Date.now()}`;
+  localStorage.setItem("google_oauth_state", randomState);
 
-    const redirectUri =
-      window.location.hostname === "localhost"
-        ? "http://localhost:3000/auth/signin"
-        : "https://ai-powered-resume-roan.vercel.app/auth/signin";
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+  const redirectUri =
+    window.location.hostname === "localhost"
+      ? "http://localhost:3000/auth/signin"
+      : "https://ai-powered-resume-roan.vercel.app/auth/signin";
 
-    // window.location.href = `https://backendcv.onlinetoolpot.com/api/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
-  };
+  window.location.href = `https://backendcv.onlinetoolpot.com/api/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+};
+
 
   useEffect(() => {
     const handleGoogleCallback = async () => {
