@@ -114,6 +114,7 @@ export default function SignInPage() {
 
         localStorage.removeItem('linkedin_oauth_state');
 
+        
         try {
           console.log('Calling loginWithLinkedIn with code:', code);
           const result = await dispatch(loginWithLinkedIn(code));
