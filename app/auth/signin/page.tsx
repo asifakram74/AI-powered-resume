@@ -151,7 +151,7 @@ export default function SignInPage() {
     const redirectUri =
       window.location.hostname === "localhost"
         ? "http://localhost:3000/auth/signin"
-        : "https://ai-powered-resume-seven.vercel.app/auth/signin";
+        : "https://ai-powered-resume-roan.vercel.app/auth/signin";
 
     window.location.href = `https://backendcv.onlinetoolpot.com/api/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
   };
