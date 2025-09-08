@@ -143,18 +143,111 @@ export default function SignInPage() {
   }, [safeSearchParams, router, dispatch]);
 
   // For Google login
-  const handleGoogleSignIn = () => {
+  // const handleGoogleSignIn = () => {
+  //   const randomState = `secureRandom${Math.floor(Math.random() * 10000)}${Date.now()}`;
+  //   localStorage.setItem("google_oauth_state", randomState);
+
+  //   const redirectUri =
+  //     window.location.hostname === "localhost"
+  //       ? "http://localhost:3000/auth/signin"
+  //       : "https://ai-powered-resume-roan.vercel.app/auth/signin";
+
+  //   window.location.href = `http://localhost:3000/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+  // };
+
+
+  // useEffect(() => {
+  //   const handleGoogleCallback = async () => {
+  //     const code = safeSearchParams.get("code");
+  //     const token = safeSearchParams.get("token");
+  //     const state = safeSearchParams.get("state");
+
+  //     if (token) {
+  //       setGoogleLoading(true);
+
+  //       try {
+  //         const storedState = localStorage.getItem("google_oauth_state");
+  //         if (state && state !== storedState) {
+  //           console.error("Invalid state parameter - possible CSRF attack");
+  //           return;
+  //         }
+
+  //         localStorage.removeItem("google_oauth_state");
+
+  //         const userParam = safeSearchParams.get("user");
+  //         if (userParam) {
+  //           try {
+  //             const user = JSON.parse(decodeURIComponent(userParam));
+  //             localStorage.setItem("token", token);
+  //             localStorage.setItem("user", JSON.stringify(user));
+  //             dispatch(setCredentials({ token, user }));
+  //           } catch (e) {
+  //             console.error("Failed to parse user data from callback:", e);
+  //             throw e;
+  //           }
+  //         } else {
+  //           const id = safeSearchParams.get("id");
+  //           const name = safeSearchParams.get("name");
+  //           const email = safeSearchParams.get("email");
+
+  //           localStorage.setItem("token", token);
+
+  //           if (id || name || email) {
+  //             const user = {
+  //               id: id ? Number(id) : undefined,
+  //               name: name ?? undefined,
+  //               email: email ?? undefined,
+  //               source: "google",
+  //             };
+  //             localStorage.setItem("user", JSON.stringify(user));
+  //             dispatch(setCredentials({ token, user }));
+  //           }
+  //         }
+  //         const cleanUrl = window.location.pathname;
+  //         window.history.replaceState({}, document.title, cleanUrl);
+  //         router.push("/dashboard");
+  //       } catch (err) {
+  //         console.error("Error during Google login:", err);
+  //       } finally {
+  //         setGoogleLoading(false);
+  //       }
+  //       return;
+  //     }
+
+  //     if (code) {
+  //       setGoogleLoading(true);
+
+  //       try {
+  //         const result = await dispatch(loginWithGoogle(code));
+
+  //         if (loginWithGoogle.fulfilled.match(result)) {
+  //           const cleanUrl = window.location.pathname;
+  //           window.history.replaceState({}, document.title, cleanUrl);
+  //           router.push("/dashboard");
+  //         } else {
+  //         }
+  //       } catch (err) {
+  //         console.error("Error during Google login:", err);
+  //       } finally {
+  //         setGoogleLoading(false);
+  //       }
+  //     }
+  //   };
+
+  //   handleGoogleCallback();
+  // }, [safeSearchParams, router, dispatch]);
+
+    const handleGoogleSignIn = () => {
     const randomState = `secureRandom${Math.floor(Math.random() * 10000)}${Date.now()}`;
     localStorage.setItem("google_oauth_state", randomState);
 
     const redirectUri =
       window.location.hostname === "localhost"
         ? "http://localhost:3000/auth/signin"
-        : "https://ai-powered-resume-roan.vercel.app/auth/signin";
+        : "https://ai-powered-resume-seven.vercel.app/auth/signin";
 
-    window.location.href = `https://ai-powered-resume-roan.vercel.app/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
   };
-
 
   useEffect(() => {
     const handleGoogleCallback = async () => {
@@ -172,6 +265,7 @@ export default function SignInPage() {
             return;
           }
 
+          // Clear the stored state
           localStorage.removeItem("google_oauth_state");
 
           const userParam = safeSearchParams.get("user");
@@ -235,7 +329,7 @@ export default function SignInPage() {
     };
 
     handleGoogleCallback();
-  }, [safeSearchParams, router, dispatch]);
+  }, [searchParams, router, dispatch]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
