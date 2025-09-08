@@ -116,9 +116,15 @@ export const AuthService = {
     await api.delete("/me")
   },
 
+  // linkedinLogin: async (code: string): Promise<AuthResponse> => {
+  //   const response = await api.post("/linkedin/token", { code })
+  //   return response.data
+  // },
+
   linkedinLogin: async (code: string): Promise<AuthResponse> => {
-    const response = await api.post("/linkedin/token", { code })
-    return response.data
+    // If your api instance already has baseURL set to '/api'
+    const response = await api.post("/linkedin/token", { code });
+    return response.data;
   },
 
   googleLogin: async (code: string): Promise<AuthResponse> => {
