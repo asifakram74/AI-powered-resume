@@ -122,7 +122,6 @@ export const AuthService = {
   // },
 
   linkedinLogin: async (code: string): Promise<AuthResponse> => {
-    // If your api instance already has baseURL set to '/api'
     const response = await api.post("/linkedin/token", { code });
     return response.data;
   },
