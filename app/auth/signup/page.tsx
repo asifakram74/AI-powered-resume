@@ -39,6 +39,7 @@ export default function SignUpPage() {
 
   const searchParams = useSafeSearchParams()
   const safeSearchParams = searchParams || new URLSearchParams();
+
   useEffect(() => {
     dispatch(clearError())
   }, [dispatch])
@@ -67,183 +68,314 @@ export default function SignUpPage() {
     }
   }, [token, router])
 
-    useEffect(() => {
-      const interval = setInterval(() => {
-        const token = localStorage.getItem('token');
-        const userStr = localStorage.getItem('user');
-  
-        if (token && userStr) {
-          try {
-            const user = JSON.parse(userStr);
-            if (user && user.id && window.location.pathname !== '/dashboard') {
-              console.log('Force redirecting to dashboard');
-              router.push('/dashboard');
-            }
-          } catch (e) {
-            console.error('Error parsing user:', e);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const token = localStorage.getItem('token');
+      const userStr = localStorage.getItem('user');
+
+      if (token && userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          if (user && user.id && window.location.pathname !== '/dashboard') {
+            console.log('Force redirecting to dashboard');
+            router.push('/dashboard');
           }
+        } catch (e) {
+          console.error('Error parsing user:', e);
         }
-      }, 1000);
-  
-      return () => clearInterval(interval);
-    }, [router]);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [router]);
 
   // For LinkedIn login
   const handleLinkedInSignUp = () => {
+    localStorage.setItem("oauth_provider", "linkedin");
     const randomState = `secureRandom${Math.floor(Math.random() * 10000)}${Date.now()}`;
     localStorage.setItem('linkedin_oauth_state', randomState);
 
     const redirectUri = window.location.origin + window.location.pathname;
 
     const linkedInAuthUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=77980o5hpyil05&redirect_uri=${encodeURIComponent(redirectUri)}&scope=openid%20profile%20email&state=${randomState}`;
-
     window.location.href = linkedInAuthUrl;
   }
 
-  useEffect(() => {
-    const handleLinkedInCallback = async () => {
-      const code = safeSearchParams.get('code');
-      const state = safeSearchParams.get('state');
-
-      if (code && state) {
-        setLinkedInLoading(true);
-
-        const storedState = localStorage.getItem('linkedin_oauth_state');
-
-        if (state !== storedState) {
-          console.error('Invalid state parameter - possible CSRF attack');
-          setLinkedInLoading(false);
-
-          const cleanUrl = window.location.pathname;
-          window.history.replaceState({}, document.title, cleanUrl);
-          return;
-        }
-
-        localStorage.removeItem('linkedin_oauth_state');
-
-        try {
-          console.log('Calling loginWithLinkedIn with code:', code);
-          const result = await dispatch(loginWithLinkedIn(code));
-          console.log('LinkedIn login result:', result);
-
-          if (loginWithLinkedIn.fulfilled.match(result)) {
-            console.log('LinkedIn login successful');
-            console.log('User ID from backend:', result.payload.user.id);
-            console.log('Token in localStorage:', localStorage.getItem('token'));
-            console.log('User in localStorage:', localStorage.getItem('user'));
-
-            router.push('/dashboard');
-          } else {
-            console.error('LinkedIn login failed:', result.payload);
-          }
-        } catch (error) {
-          console.error('Error during LinkedIn authentication:', error);
-        } finally {
-          setLinkedInLoading(false);
-
-          const cleanUrl = window.location.pathname;
-          window.history.replaceState({}, document.title, cleanUrl);
-        }
-      }
-    };
-
-    handleLinkedInCallback();
-  }, [safeSearchParams, router, dispatch]);
-
   // For Google login
   const handleGoogleSignUp = () => {
+    localStorage.setItem("oauth_provider", "google");
     const randomState = `secureRandom${Math.floor(Math.random() * 10000)}${Date.now()}`;
     localStorage.setItem("google_oauth_state", randomState);
 
-    const redirectUri =
-      window.location.hostname === "localhost"
-        ? "http://localhost:3000/auth/signup"
-        : "https://ai-powered-resume-seven.vercel.app/auth/signup";
-
-    window.location.href = `https://backendcv.onlinetoolpot.com/api/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    const redirectUri = window.location.origin + window.location.pathname;
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
   };
 
   useEffect(() => {
-    const handleGoogleCallback = async () => {
-      const code = safeSearchParams.get("code");
-      const token = safeSearchParams.get("token");
-      const state = safeSearchParams.get("state");
+    const provider = localStorage.getItem("oauth_provider");
+    if (provider === "linkedin") {
+      const handleLinkedInCallback = async () => {
+        const code = safeSearchParams.get('code');
+        const state = safeSearchParams.get('state');
 
-      if (token) {
-        setGoogleLoading(true);
+        if (code && state) {
+          setLinkedInLoading(true);
 
-        try {
-          const storedState = localStorage.getItem("google_oauth_state");
-          if (state && state !== storedState) {
-            console.error("Invalid state parameter - possible CSRF attack");
+          const storedState = localStorage.getItem('linkedin_oauth_state');
+
+          if (state !== storedState) {
+            console.error('Invalid state parameter - possible CSRF attack');
+            setLinkedInLoading(false);
+
+            const cleanUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
             return;
           }
 
-          // Clear the stored state
-          localStorage.removeItem("google_oauth_state");
+          localStorage.removeItem('linkedin_oauth_state');
 
-          const userParam = safeSearchParams.get("user");
-          if (userParam) {
-            try {
-              const user = JSON.parse(decodeURIComponent(userParam));
-              localStorage.setItem("token", token);
-              localStorage.setItem("user", JSON.stringify(user));
-              dispatch(setCredentials({ token, user }));
-            } catch (e) {
-              console.error("Failed to parse user data from callback:", e);
-              throw e;
+          try {
+            console.log('Calling loginWithLinkedIn with code:', code);
+            const result = await dispatch(loginWithLinkedIn(code));
+            console.log('LinkedIn login result:', result);
+
+            if (loginWithLinkedIn.fulfilled.match(result)) {
+              console.log('LinkedIn login successful');
+              console.log('User ID from backend:', result.payload.user.id);
+              console.log('Token in localStorage:', localStorage.getItem('token'));
+              console.log('User in localStorage:', localStorage.getItem('user'));
+
+              router.push('/dashboard');
+            } else {
+              console.error('LinkedIn login failed:', result.payload);
             }
-          } else {
-            const id = safeSearchParams.get("id");
-            const name = safeSearchParams.get("name");
-            const email = safeSearchParams.get("email");
+          } catch (error) {
+            console.error('Error during LinkedIn authentication:', error);
+          } finally {
+            setLinkedInLoading(false);
 
-            localStorage.setItem("token", token);
-
-            if (id || name || email) {
-              const user = {
-                id: id ? Number(id) : undefined,
-                name: name ?? undefined,
-                email: email ?? undefined,
-                source: "google",
-              };
-              localStorage.setItem("user", JSON.stringify(user));
-              dispatch(setCredentials({ token, user }));
-            }
+            const cleanUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
           }
-          const cleanUrl = window.location.pathname;
-          window.history.replaceState({}, document.title, cleanUrl);
-          router.push("/dashboard");
-        } catch (err) {
-          console.error("Error during Google login:", err);
-        } finally {
-          setGoogleLoading(false);
         }
-        return;
-      }
+      };
 
-      if (code) {
-        setGoogleLoading(true);
+      handleLinkedInCallback();
+    } else if (provider === "google") {
+      const handleGoogleCallback = async () => {
+        const code = safeSearchParams.get("code");
+        const token = safeSearchParams.get("token");
+        const state = safeSearchParams.get("state");
 
-        try {
-          const result = await dispatch(loginWithGoogle(code));
+        if (token) {
+          setGoogleLoading(true);
 
-          if (loginWithGoogle.fulfilled.match(result)) {
+          try {
+            const storedState = localStorage.getItem("google_oauth_state");
+            if (state && state !== storedState) {
+              console.error("Invalid state parameter - possible CSRF attack");
+              return;
+            }
+
+            // Clear the stored state
+            localStorage.removeItem("google_oauth_state");
+
+            const userParam = safeSearchParams.get("user");
+            if (userParam) {
+              try {
+                const user = JSON.parse(decodeURIComponent(userParam));
+                localStorage.setItem("token", token);
+                localStorage.setItem("user", JSON.stringify(user));
+                dispatch(setCredentials({ token, user }));
+              } catch (e) {
+                console.error("Failed to parse user data from callback:", e);
+                throw e;
+              }
+            } else {
+              const id = safeSearchParams.get("id");
+              const name = safeSearchParams.get("name");
+              const email = safeSearchParams.get("email");
+
+              localStorage.setItem("token", token);
+
+              if (id || name || email) {
+                const user = {
+                  id: id ? Number(id) : undefined,
+                  name: name ?? undefined,
+                  email: email ?? undefined,
+                  source: "google",
+                };
+                localStorage.setItem("user", JSON.stringify(user));
+                dispatch(setCredentials({ token, user }));
+              }
+            }
             const cleanUrl = window.location.pathname;
             window.history.replaceState({}, document.title, cleanUrl);
             router.push("/dashboard");
-          } else {
+          } catch (err) {
+            console.error("Error during Google login:", err);
+          } finally {
+            setGoogleLoading(false);
           }
-        } catch (err) {
-          console.error("Error during Google login:", err);
-        } finally {
-          setGoogleLoading(false);
+          return;
         }
-      }
-    };
 
-    handleGoogleCallback();
+        if (code) {
+          setGoogleLoading(true);
+
+          try {
+            const result = await dispatch(loginWithGoogle(code));
+
+            if (loginWithGoogle.fulfilled.match(result)) {
+              const cleanUrl = window.location.pathname;
+              window.history.replaceState({}, document.title, cleanUrl);
+              router.push("/dashboard");
+            } else {
+            }
+          } catch (err) {
+            console.error("Error during Google login:", err);
+          } finally {
+            setGoogleLoading(false);
+          }
+        }
+      };
+
+      handleGoogleCallback();
+    }
   }, [safeSearchParams, router, dispatch]);
+
+  // useEffect(() => {
+  //   const handleLinkedInCallback = async () => {
+  //     const code = safeSearchParams.get('code');
+  //     const state = safeSearchParams.get('state');
+
+  //     if (code && state) {
+  //       setLinkedInLoading(true);
+
+  //       const storedState = localStorage.getItem('linkedin_oauth_state');
+
+  //       if (state !== storedState) {
+  //         console.error('Invalid state parameter - possible CSRF attack');
+  //         setLinkedInLoading(false);
+
+  //         const cleanUrl = window.location.pathname;
+  //         window.history.replaceState({}, document.title, cleanUrl);
+  //         return;
+  //       }
+
+  //       localStorage.removeItem('linkedin_oauth_state');
+
+  //       try {
+  //         console.log('Calling loginWithLinkedIn with code:', code);
+  //         const result = await dispatch(loginWithLinkedIn(code));
+  //         console.log('LinkedIn login result:', result);
+
+  //         if (loginWithLinkedIn.fulfilled.match(result)) {
+  //           console.log('LinkedIn login successful');
+  //           console.log('User ID from backend:', result.payload.user.id);
+  //           console.log('Token in localStorage:', localStorage.getItem('token'));
+  //           console.log('User in localStorage:', localStorage.getItem('user'));
+
+  //           router.push('/dashboard');
+  //         } else {
+  //           console.error('LinkedIn login failed:', result.payload);
+  //         }
+  //       } catch (error) {
+  //         console.error('Error during LinkedIn authentication:', error);
+  //       } finally {
+  //         setLinkedInLoading(false);
+
+  //         const cleanUrl = window.location.pathname;
+  //         window.history.replaceState({}, document.title, cleanUrl);
+  //       }
+  //     }
+  //   };
+
+  //   handleLinkedInCallback();
+  // }, [safeSearchParams, router, dispatch]);
+
+
+  // useEffect(() => {
+  //   const handleGoogleCallback = async () => {
+  //     const code = safeSearchParams.get("code");
+  //     const token = safeSearchParams.get("token");
+  //     const state = safeSearchParams.get("state");
+
+  //     if (token) {
+  //       setGoogleLoading(true);
+
+  //       try {
+  //         const storedState = localStorage.getItem("google_oauth_state");
+  //         if (state && state !== storedState) {
+  //           console.error("Invalid state parameter - possible CSRF attack");
+  //           return;
+  //         }
+
+  //         // Clear the stored state
+  //         localStorage.removeItem("google_oauth_state");
+
+  //         const userParam = safeSearchParams.get("user");
+  //         if (userParam) {
+  //           try {
+  //             const user = JSON.parse(decodeURIComponent(userParam));
+  //             localStorage.setItem("token", token);
+  //             localStorage.setItem("user", JSON.stringify(user));
+  //             dispatch(setCredentials({ token, user }));
+  //           } catch (e) {
+  //             console.error("Failed to parse user data from callback:", e);
+  //             throw e;
+  //           }
+  //         } else {
+  //           const id = safeSearchParams.get("id");
+  //           const name = safeSearchParams.get("name");
+  //           const email = safeSearchParams.get("email");
+
+  //           localStorage.setItem("token", token);
+
+  //           if (id || name || email) {
+  //             const user = {
+  //               id: id ? Number(id) : undefined,
+  //               name: name ?? undefined,
+  //               email: email ?? undefined,
+  //               source: "google",
+  //             };
+  //             localStorage.setItem("user", JSON.stringify(user));
+  //             dispatch(setCredentials({ token, user }));
+  //           }
+  //         }
+  //         const cleanUrl = window.location.pathname;
+  //         window.history.replaceState({}, document.title, cleanUrl);
+  //         router.push("/dashboard");
+  //       } catch (err) {
+  //         console.error("Error during Google login:", err);
+  //       } finally {
+  //         setGoogleLoading(false);
+  //       }
+  //       return;
+  //     }
+
+  //     if (code) {
+  //       setGoogleLoading(true);
+
+  //       try {
+  //         const result = await dispatch(loginWithGoogle(code));
+
+  //         if (loginWithGoogle.fulfilled.match(result)) {
+  //           const cleanUrl = window.location.pathname;
+  //           window.history.replaceState({}, document.title, cleanUrl);
+  //           router.push("/dashboard");
+  //         } else {
+  //         }
+  //       } catch (err) {
+  //         console.error("Error during Google login:", err);
+  //       } finally {
+  //         setGoogleLoading(false);
+  //       }
+  //     }
+  //   };
+
+  //   handleGoogleCallback();
+  // }, [safeSearchParams, router, dispatch]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
