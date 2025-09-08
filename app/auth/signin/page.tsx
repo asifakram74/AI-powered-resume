@@ -82,10 +82,9 @@ export default function SignInPage() {
     const randomState = `secureRandom${Math.floor(Math.random() * 10000)}${Date.now()}`;
     localStorage.setItem('linkedin_oauth_state', randomState);
 
-    // Use consistent redirect URI (same as backend expects)
-    const redirectUri = window.location.hostname === 'localhost'
-      ? 'http://localhost:3000/auth/signin'
-      : 'https://ai-powered-resume-roan.vercel.app/auth/signin';
+    const redirectUri = window.location.hostname === "localhost"
+      ? "http://localhost:3000/auth/signin"
+      : `${window.location.origin}${window.location.pathname}`;
 
     const linkedInAuthUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=77980o5hpyil05&redirect_uri=${encodeURIComponent(redirectUri)}&scope=openid%20profile%20email&state=${randomState}`;
 
@@ -237,7 +236,7 @@ export default function SignInPage() {
   //   handleGoogleCallback();
   // }, [safeSearchParams, router, dispatch]);
 
-    const handleGoogleSignIn = () => {
+  const handleGoogleSignIn = () => {
     const randomState = `secureRandom${Math.floor(Math.random() * 10000)}${Date.now()}`;
     localStorage.setItem("google_oauth_state", randomState);
 
@@ -248,6 +247,7 @@ export default function SignInPage() {
 
     window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
   };
+
 
   useEffect(() => {
     const handleGoogleCallback = async () => {

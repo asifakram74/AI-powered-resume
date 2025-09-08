@@ -117,14 +117,27 @@ export const AuthService = {
   },
 
   // linkedinLogin: async (code: string): Promise<AuthResponse> => {
-  //   const response = await api.post("/linkedin/token", { code })
-  //   return response.data
+  //   const response = await api.post("/linkedin/token", { code });
+  //   return response.data;
   // },
 
-  linkedinLogin: async (code: string): Promise<AuthResponse> => {
-    const response = await api.post("/linkedin/token", { code });
-    return response.data;
-  },
+//   linkedinLogin: async (code: string): Promise<AuthResponse> => {
+//   const redirectUri = window.location.hostname === "localhost"
+//     ? "http://localhost:3000/auth/signin"
+//     : window.location.origin + window.location.pathname; // dynamically capture signin/signup
+
+//   const response = await api.post("/linkedin/token", { code, redirect_uri: redirectUri });
+//   return response.data;
+// },
+
+linkedinLogin: async (code: string): Promise<AuthResponse> => {
+  // Always use current location (works for localhost and prod)
+  const redirectUri = window.location.origin + window.location.pathname;
+
+  const response = await api.post("/linkedin/token", { code, redirect_uri: redirectUri });
+  return response.data;
+},
+
 
   googleLogin: async (code: string): Promise<AuthResponse> => {
     const response = await api.post("/google/token", { code });

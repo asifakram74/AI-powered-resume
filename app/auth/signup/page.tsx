@@ -35,7 +35,8 @@ export default function SignUpPage() {
 
   const router = useRouter()
   const dispatch = useAppDispatch()
-  const { loading, error } = useAppSelector((state) => state.auth)
+  const { loading, error, token } = useAppSelector((state) => state.auth)
+
   const searchParams = useSafeSearchParams()
   const safeSearchParams = searchParams || new URLSearchParams();
   useEffect(() => {
@@ -49,16 +50,50 @@ export default function SignUpPage() {
       setPasswordError("")
     }
   }, [password, confirmPassword])
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token')
+    const storedUser = localStorage.getItem('user')
+
+    if (storedToken && storedUser) {
+      try {
+        const user = JSON.parse(storedUser)
+        if (user.source && user.source !== 'website') {
+          router.push("/dashboard")
+        }
+      } catch (e) {
+        console.error('Error parsing stored user:', e)
+      }
+    }
+  }, [token, router])
+
+    useEffect(() => {
+      const interval = setInterval(() => {
+        const token = localStorage.getItem('token');
+        const userStr = localStorage.getItem('user');
+  
+        if (token && userStr) {
+          try {
+            const user = JSON.parse(userStr);
+            if (user && user.id && window.location.pathname !== '/dashboard') {
+              console.log('Force redirecting to dashboard');
+              router.push('/dashboard');
+            }
+          } catch (e) {
+            console.error('Error parsing user:', e);
+          }
+        }
+      }, 1000);
+  
+      return () => clearInterval(interval);
+    }, [router]);
+
   // For LinkedIn login
-  const handleLinkedInSignIn = () => {
+  const handleLinkedInSignUp = () => {
     const randomState = `secureRandom${Math.floor(Math.random() * 10000)}${Date.now()}`;
     localStorage.setItem('linkedin_oauth_state', randomState);
 
-    const redirectUri = window.location.hostname === 'localhost'
-      ? 'http://localhost:3000/auth/signup'
-      : window.location.hostname === 'ai-powered-resume-roan.vercel.app'
-        ? 'https://ai-powered-resume-roan.vercel.app/auth/signup'
-        : 'https://app.resumaic.com/auth/signup';
+    const redirectUri = window.location.origin + window.location.pathname;
 
     const linkedInAuthUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=77980o5hpyil05&redirect_uri=${encodeURIComponent(redirectUri)}&scope=openid%20profile%20email&state=${randomState}`;
 
@@ -73,20 +108,17 @@ export default function SignUpPage() {
       if (code && state) {
         setLinkedInLoading(true);
 
-        // Verify state parameter to prevent CSRF
         const storedState = localStorage.getItem('linkedin_oauth_state');
 
         if (state !== storedState) {
           console.error('Invalid state parameter - possible CSRF attack');
           setLinkedInLoading(false);
 
-          // Clean up URL even on error
           const cleanUrl = window.location.pathname;
           window.history.replaceState({}, document.title, cleanUrl);
           return;
         }
 
-        // Clear the stored state
         localStorage.removeItem('linkedin_oauth_state');
 
         try {
@@ -100,7 +132,6 @@ export default function SignUpPage() {
             console.log('Token in localStorage:', localStorage.getItem('token'));
             console.log('User in localStorage:', localStorage.getItem('user'));
 
-            // Force redirect to dashboard
             router.push('/dashboard');
           } else {
             console.error('LinkedIn login failed:', result.payload);
@@ -120,14 +151,14 @@ export default function SignUpPage() {
   }, [safeSearchParams, router, dispatch]);
 
   // For Google login
-  const handleGoogleSignIn = () => {
+  const handleGoogleSignUp = () => {
     const randomState = `secureRandom${Math.floor(Math.random() * 10000)}${Date.now()}`;
     localStorage.setItem("google_oauth_state", randomState);
 
     const redirectUri =
       window.location.hostname === "localhost"
-        ? "http://localhost:3000/auth/signin"
-        : "https://ai-powered-resume-seven.vercel.app/auth/signin";
+        ? "http://localhost:3000/auth/signup"
+        : "https://ai-powered-resume-seven.vercel.app/auth/signup";
 
     window.location.href = `https://backendcv.onlinetoolpot.com/api/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
   };
@@ -377,7 +408,7 @@ export default function SignUpPage() {
               <div className="grid grid-cols-2 gap-4">
                 <Button
                   variant="outline"
-                  onClick={handleGoogleSignIn}
+                  onClick={handleGoogleSignUp}
                   disabled={googleLoading}
                   className="w-full flex items-center justify-center gap-2"
                 >
@@ -397,7 +428,7 @@ export default function SignUpPage() {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={handleLinkedInSignIn}
+                  onClick={handleLinkedInSignUp}
                   className="w-full flex items-center justify-center gap-2"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
