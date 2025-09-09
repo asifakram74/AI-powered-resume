@@ -17,6 +17,11 @@ import { CreativeTemplate4 } from "../../components/templates/creative-template-
 import { MinimalTemplate2 } from "../../components/templates/minimal-template2";
 import { MinimalTemplate3 } from "../../components/templates/minimal-template3";
 import { MinimalTemplate4 } from "../../components/templates/minimal-template-4";
+import {ModernTemplate5}from "../../components/templates/modern-template-5";
+import {ModernTemplate6} from "../../components/templates/modern-template-6";
+import {ModernTemplate7} from "../../components/templates/modern-template-7";
+import {ModernTemplate8} from "../../components/templates/modern-template-8";
+import {ModernTemplate9} from "../../components/templates/modern-template-9";
 import { sampleCVData } from "../../lib/sample-cv-data";
 import { useRef } from "react";
 
@@ -79,6 +84,16 @@ export function CVPreview({
         return <CreativeTemplate4 data={data} />;
       case "minimal-4":
         return <MinimalTemplate4 data={data} />;
+      case "modern-5":
+        return <ModernTemplate5 data={data} />;
+      case "modern-6":
+        return <ModernTemplate6 data={data} />;
+      case "modern-7":
+        return <ModernTemplate7 data={data} />;
+      case "modern-8":
+        return <ModernTemplate8 data={data} />;
+      case "modern-9":
+        return <ModernTemplate9 data={data} />;
       default:
         return <ModernTemplate data={data} />;
     }
