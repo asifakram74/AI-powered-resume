@@ -108,7 +108,7 @@ export default function SignUpPage() {
     localStorage.setItem("google_oauth_state", randomState);
 
     const redirectUri = window.location.origin + window.location.pathname;
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    window.location.href = `https://backendcv.onlinetoolpot.com/api/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
   };
 
   useEffect(() => {
