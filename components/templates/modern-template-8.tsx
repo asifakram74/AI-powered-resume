@@ -222,7 +222,7 @@ export default function ModernTemplate8({ data }: ModernTemplate8Props) {
                       <div className="text-right">
                         <p className="text-sm text-blue-600 flex items-center">
                           <Calendar className="w-4 h-4 mr-1" />
-                          {edu.startDate} - {edu.endDate}
+                          {edu.graduationDate}
                         </p>
                         {edu.location && (
                           <p className="text-sm text-gray-500">{edu.location}</p>
@@ -249,12 +249,7 @@ export default function ModernTemplate8({ data }: ModernTemplate8Props) {
                   <div key={index} className="bg-blue-50 rounded-lg p-4">
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="text-lg font-semibold text-blue-900">{project.name}</h3>
-                      {project.date && (
-                        <p className="text-sm text-blue-600 flex items-center">
-                          <Calendar className="w-4 h-4 mr-1" />
-                          {project.date}
-                        </p>
-                      )}
+  
                     </div>
                     {project.description && (
                       <p className="text-gray-700 text-sm leading-relaxed mb-3">{project.description}</p>
@@ -291,13 +286,13 @@ export default function ModernTemplate8({ data }: ModernTemplate8Props) {
                   <div key={index} className="bg-blue-50 rounded-lg p-4">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h3 className="font-semibold text-blue-900">{cert.name}</h3>
-                        <p className="text-blue-700 text-sm">{cert.issuer}</p>
+                        <h3 className="font-semibold text-blue-900">{cert.title}</h3>
+                        <p className="text-blue-700 text-sm">{cert.issuingOrganization}</p>
                       </div>
-                      {cert.date && (
+                      {cert.dateObtained && (
                         <p className="text-sm text-blue-600 flex items-center">
                           <Calendar className="w-4 h-4 mr-1" />
-                          {cert.date}
+                          {cert.dateObtained}
                         </p>
                       )}
                     </div>
@@ -329,34 +324,8 @@ export default function ModernTemplate8({ data }: ModernTemplate8Props) {
                     </div>
                   </div>
                 )}
-                {data.additional.awards && data.additional.awards.length > 0 && (
-                  <div className="bg-blue-50 rounded-lg p-4">
-                    <h3 className="font-semibold text-blue-900 mb-3">Awards</h3>
-                    <div className="space-y-2">
-                      {data.additional.awards.map((award, index) => (
-                        <div key={index} className="flex justify-between items-center">
-                          <span className="text-gray-700">{award.title}</span>
-                          {award.date && (
-                            <span className="text-sm text-blue-600">{award.date}</span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {data.additional.publications && data.additional.publications.length > 0 && (
-                  <div className="bg-blue-50 rounded-lg p-4">
-                    <h3 className="font-semibold text-blue-900 mb-3">Publications</h3>
-                    <div className="space-y-2">
-                      {data.additional.publications.map((pub, index) => (
-                        <div key={index}>
-                          <p className="text-gray-700 font-medium">{pub.title}</p>
-                          <p className="text-sm text-blue-600">{pub.publisher} - {pub.date}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+
+
               </div>
             </div>
           )}

@@ -16,6 +16,7 @@ import {
 import Image from "next/image"
 
 import { Badge } from "../../components/ui/badge"
+
 import { Button } from "../../components/ui/button"
 import { Avatar, AvatarFallback } from "../../components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu"
@@ -174,16 +175,22 @@ export function Sidebar({
           
           {user && (
             <div className="mt-4 p-3 bg-gray-50 rounded-lg flex items-top gap-3">
-              <Avatar className="h-10 w-10">
-                <AvatarFallback className="bg-gradient-to-br resumaic-gradient-green text-2x text-white font-medium">
-                  {user?.name
-                    ?.split(" ")
-                    .map((n) => n[0])
-                    .join("")
-                    .slice(0, 2)
-                    .toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+              <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                              <AvatarFallback
+                                className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${user?.role === "admin"
+                                    ? ""
+                                    : "bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]"
+                                  }`}
+                              >
+                                {user?.role === "admin" ? (
+                                  <UserCircle className="h-5 w-5 text-[#EA580C]" />
+                                ) : user?.name ? (
+                                  user.name.charAt(0).toUpperCase()
+                                ) : (
+                                  <UserCircle className="h-5 w-5 text-[#70E4A8]" />
+                                )}
+                              </AvatarFallback>
+                            </Avatar>
               <div>
                 <p className="text-sm font-medium text-gray-900">{user.name}</p>
                 <p className="text-xs text-gray-500">{user.email}</p>
