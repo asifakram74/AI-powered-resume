@@ -1,11 +1,15 @@
-import { nodeApi } from '../api/index';
+import axios from 'axios';
 
 // Node.js Backend Configuration for app/api routes
-const NODEJS_API_BASE_URL = process.env.NEXT_PUBLIC_NODEJS_API_URL || "https://render-kweq.onrender.com"
-console.log("NODEJS_API_BASE_URL",NODEJS_API_BASE_URL)
+const NODEJS_API_BASE_URL = process.env.NEXT_PUBLIC_NODEJS_API_URL || "https://backendserver.resumaic.com";
+
+console.log("NODEJS_API_BASE_URL", NODEJS_API_BASE_URL);
 
 export const apiConfig = {
   baseURL: NODEJS_API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
   endpoints: {
     atsAnalysis: '/api/ats-analysis',
     coverLetterGeneration: '/api/cover-letter-generation',
@@ -15,6 +19,27 @@ export const apiConfig = {
     parseResume: '/api/parse-resume',
   },
 };
+
+// Create axios instance with baseURL configured
+export const nodeApi = axios.create({
+  baseURL: NODEJS_API_BASE_URL,
+  timeout: 30000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Add response interceptor for better error handling
+nodeApi.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('API Error:', error);
+    if (error.code === 'ECONNREFUSED' || error.message === 'Network Error') {
+      throw new Error('Cannot connect to the server. Please check if the backend is running.');
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Helper function to get full API URL for Node.js backend
 export const getApiUrl = (endpoint: string): string => {

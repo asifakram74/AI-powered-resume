@@ -33,7 +33,7 @@ A modern, full-stack application for creating professional resumes with AI optim
    NEXT_PUBLIC_API_URL=https://backendcv.onlinetoolpot.com/api
    
    # Node.js API URL for AI operations
-   NEXT_PUBLIC_NODEJS_API_URL=https://render-kweq.onrender.com
+   NEXT_PUBLIC_NODEJS_API_URL=https://backendserver.resumaic.com
    ```
 
 3. **Development Server**
@@ -172,7 +172,7 @@ A modern, full-stack application for creating professional resumes with AI optim
 1. **Update Frontend Environment** for production:
    ```env
    NEXT_PUBLIC_API_URL=https://backendcv.onlinetoolpot.com/api
-   NEXT_PUBLIC_NODEJS_API_URL=https://render-kweq.onrender.com
+   NEXT_PUBLIC_NODEJS_API_URL=https://backendserver.resumaic.com
    ```
 
 2. **Rebuild Frontend** with production URLs:
@@ -201,7 +201,7 @@ A modern, full-stack application for creating professional resumes with AI optim
 ### Frontend (.env.local)
 ```env
 NEXT_PUBLIC_API_URL=https://backendcv.onlinetoolpot.com/api
-NEXT_PUBLIC_NODEJS_API_URL=https://render-kweq.onrender.com
+NEXT_PUBLIC_NODEJS_API_URL=https://backendserver.resumaic.com
 ```
 
 ### Backend (.env)

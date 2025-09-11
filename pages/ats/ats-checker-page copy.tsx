@@ -74,14 +74,14 @@ export default function ATSCheckerPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const analysisRef = useRef<HTMLDivElement>(null);
 
-const handleAnalyze = async () => {
-  if (!extractedText || !jobDescription.trim()) {
-    setError("Please upload a resume and provide a job description");
-    return;
-  }
+  const handleAnalyze = async () => {
+    if (!extractedText || !jobDescription.trim()) {
+      setError("Please upload a resume and provide a job description");
+      return;
+    }
 
-  setIsAnalyzing(true);
-  setError(null);
+    setIsAnalyzing(true);
+    setError(null);
 console.log('Making request to:', 'https://backendserver.resumaic.com/api/ats-analysis');
 console.log('Request payload size:', JSON.stringify({ extractedText, jobDescription }).length);
 try {
@@ -90,44 +90,33 @@ try {
 } catch (testError) {
   console.error('Server not reachable:', testError);
 }
-  try {
-    const response = await fetch('https://backendserver.resumaic.com/api/ats-analysis', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    try {
+      const response = await callNodeApi.post('/api/ats-analysis', {
         extractedText,
         jobDescription,
-      }),
-    });
+      });
 
-    // Check if the response is OK
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const data = response.data;
+
+      // Check if the response contains an error
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      if (!data || typeof data !== "object" || !("score" in data)) {
+        throw new Error("Invalid response format from server");
+      }
+
+      setAnalysisResult(data);
+    } catch (err: any) {
+      console.error("ATS Analysis Error:", err);
+      setError(
+        err.message || "Failed to analyze resume. Please try again later."
+      );
+    } finally {
+      setIsAnalyzing(false);
     }
-
-    const data = await response.json();
-
-    // Check if the response contains an error
-    if (data.error) {
-      throw new Error(data.error);
-    }
-
-    if (!data || typeof data !== "object" || !("score" in data)) {
-      throw new Error("Invalid response format from server");
-    }
-
-    setAnalysisResult(data);
-  } catch (err: any) {
-    console.error("ATS Analysis Error:", err);
-    setError(
-      err.message || "Failed to analyze resume. Please try again later."
-    );
-  } finally {
-    setIsAnalyzing(false);
-  }
-};
+  };
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-[#70E4A8]";
