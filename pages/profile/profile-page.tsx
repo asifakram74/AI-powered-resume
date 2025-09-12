@@ -42,6 +42,7 @@ export function ProfilePage() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [showPasswordDialog, setShowPasswordDialog] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [isUpdating, setIsUpdating] = useState(false)
   const [loadingError, setLoadingError] = useState<string | null>(null)
   const hasLoaded = useRef(false)
 
@@ -58,65 +59,63 @@ export function ProfilePage() {
     }
   })
 
-  useEffect(() => {
-    const checkAndLoadProfile = async () => {
-      try {
-        // setIsLoading(true)
+ useEffect(() => { 
+  const checkAndLoadProfile = async () => {
+    try {
+      // setIsLoading(true)
 
-        if (profile && user && profile.email !== user.email) {
-          dispatch(clearProfile())
-          await dispatch(fetchProfile()).unwrap()
-        } else if (!profile) {
-          await dispatch(fetchProfile()).unwrap()
-        }
-
-        if (user?.id) {
-          const [personas, cvs, coverLetters, atsResumes] = await Promise.all([
-            getPersonas(user.id.toString()),
-            getCVs(user.id.toString()),
-            getCoverLetters(user.id.toString()),
-            getATSResumes(),
-          ])
-
-          setStats([
-            {
-              label: "Resumes Created",
-              value: cvs.length,
-              icon: FileText,
-              color: "text-blue-600",
-            },
-            {
-              label: "Cover Letters",
-              value: coverLetters.length,
-              icon: Mail,
-              color: "text-green-600",
-            },
-            {
-              label: "ATS Checks",
-              value: atsResumes.length,
-              icon: Target,
-              color: "text-orange-600",
-            },
-            {
-              label: "Personas Generated",
-              value: personas.length,
-              icon: UserCircle,
-              color: "text-purple-600",
-            },
-          ])
-        }
-
-        hasLoaded.current = true
-      } catch (error) {
-        setLoadingError("Failed to load profile data. Please try again.")
-        router.push('/login')
-      } finally {
-        setIsLoading(false)
+      if (profile && user && profile.email !== user.email) {
+        dispatch(clearProfile())
+        await dispatch(fetchProfile()).unwrap()
+      } else if (!profile) {
+        await dispatch(fetchProfile()).unwrap()
       }
-    }
 
-    checkAndLoadProfile()
-  }, [dispatch, user?.id, profile, router])
+      if (user?.id) {
+        const [personas, cvs, coverLetters, atsResumes] = await Promise.all([
+          getPersonas(user.id.toString()),
+          getCVs(user.id.toString()),
+          getCoverLetters(user.id.toString()),
+          getATSResumes(),
+        ])
+
+        setStats([
+          {
+            label: "Resumes Created",
+            value: cvs.length,
+            icon: FileText,
+            color: "text-blue-600",
+          },
+          {
+            label: "Cover Letters",
+            value: coverLetters.length,
+            icon: Mail,
+            color: "text-green-600",
+          },
+          {
+            label: "ATS Checks",
+            value: atsResumes.length,
+            icon: Target,
+            color: "text-orange-600",
+          },
+          {
+            label: "Personas Generated",
+            value: personas.length,
+            icon: UserCircle,
+            color: "text-purple-600",
+          },
+        ])
+      }
+
+      hasLoaded.current = true
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  checkAndLoadProfile()
+}, [profile, user, dispatch])
+
 
   useEffect(() => {
     if (profile) {
@@ -130,6 +129,7 @@ export function ProfilePage() {
 
   const onSubmit = async (data: ProfileFormData) => {
     try {
+      setIsUpdating(true)
       await dispatch(updateProfile({
         name: data.name,
       })).unwrap()
@@ -138,6 +138,8 @@ export function ProfilePage() {
       setShowEditModal(false)
     } catch (error: any) {
       showErrorToast("Failed to update profile", error || "Failed to update profile. Please try again.")
+    } finally {
+      setIsUpdating(false)
     }
   }
 
@@ -152,13 +154,24 @@ export function ProfilePage() {
     )
   }
 
-  if (loadingError || !profile) {
+  if (loadingError) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Alert variant="destructive" className="w-auto">
           <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{loadingError || "Failed to load profile data"}</AlertDescription>
+          <AlertDescription>{loadingError}</AlertDescription>
         </Alert>
+      </div>
+    )
+  }
+
+  if (!profile) {
+    return (
+      <div className="fixed inset-0 flex justify-center items-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+          <p className="text-gray-600">Loading your profile...</p>
+        </div>
       </div>
     )
   }
@@ -359,9 +372,16 @@ export function ProfilePage() {
               <Button
                 className="resumaic-gradient-green hover:opacity-90 button-press"
                 type="submit"
-                disabled={!isDirty}  // only disable if form has no changes
+                disabled={!isDirty || isUpdating}  // disable if no changes or updating
               >
-                Save Changes
+                {isUpdating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
               </Button>
 
             </DialogFooter>
