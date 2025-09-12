@@ -43,14 +43,29 @@ export function ClassicTemplate({
           <span>{data.personalInfo.email}</span>
           <span>•</span>
           <span>{data.personalInfo.phone}</span>
-          <span>•</span>
-          <span>
-            {data.personalInfo.city} {data.personalInfo.country}
-          </span>
+          {(data.personalInfo.city || data.personalInfo.country) && (
+            <>
+              <span>•</span>
+              <span>
+                {data.personalInfo.city && data.personalInfo.country
+                  ? `${data.personalInfo.city}, ${data.personalInfo.country}`
+                  : data.personalInfo.city || data.personalInfo.country}
+                {data.personalInfo.address && (
+                  <>
+                    {" "}
+                    {data.personalInfo.address}
+                  </>
+                )}
+              </span>
+            </>
+          )}
+          {!data.personalInfo.city && !data.personalInfo.country && data.personalInfo.address && (
+            <>
+              <span>•</span>
+              <span>{data.personalInfo.address}</span>
+            </>
+          )}
         </div>
-        {data.personalInfo.address && (
-          <div className="text-gray-600 mt-1">{data.personalInfo.address}</div>
-        )}
       </div>
 
       {/* Summary */}

@@ -95,23 +95,25 @@ export function CreativeTemplate({
                 <Phone className="w-5 h-5" />
                 <span>{data.personalInfo.phone}</span>
               </div>
-              <div className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 mt-0.5" />
-                <div>
-                  <span>
-                    {data.personalInfo.city}
-                    {data.personalInfo.city && data.personalInfo.country
-                      ? " "
-                      : ""}
-                    {data.personalInfo.country}
-                  </span>
-                  {data.personalInfo.address && (
-                    <div className="text-sm text-gray-100 mt-1">
-                      {data.personalInfo.address}
-                    </div>
-                  )}
+              {(data.personalInfo.city || data.personalInfo.country || data.personalInfo.address) && (
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-5 h-5 mt-0.5" />
+                  <div>
+                    {(data.personalInfo.city || data.personalInfo.country) && (
+                      <span>
+                        {data.personalInfo.city && data.personalInfo.country
+                          ? `${data.personalInfo.city}, ${data.personalInfo.country}`
+                          : data.personalInfo.city || data.personalInfo.country}
+                      </span>
+                    )}
+                    {data.personalInfo.address && (
+                      <div className={`text-sm text-gray-100 ${(data.personalInfo.city || data.personalInfo.country) ? 'mt-1' : ''}`}>
+                        {data.personalInfo.address}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

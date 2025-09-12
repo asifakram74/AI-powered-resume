@@ -47,12 +47,26 @@ export function CreativeTemplate4({ data, isPreview = false }: CreativeTemplate4
               <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
               <span className="text-sm">{data.personalInfo.phone}</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-pink-400 rounded-full"></div>
-              <span className="text-sm">
-                {data.personalInfo.city}, {data.personalInfo.country}
-              </span>
-            </div>
+            {(data.personalInfo.city || data.personalInfo.country || data.personalInfo.address) && (
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-pink-400 rounded-full"></div>
+                <span>
+                  {(data.personalInfo.city || data.personalInfo.country) && (
+                    <span>
+                      {data.personalInfo.city && data.personalInfo.country
+                        ? `${data.personalInfo.city}, ${data.personalInfo.country}`
+                        : data.personalInfo.city || data.personalInfo.country}
+                    </span>
+                  )}
+                  {data.personalInfo.address && (
+                    <>
+                      {/* <br /> */}
+                      {data.personalInfo.address}
+                    </>
+                  )}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 

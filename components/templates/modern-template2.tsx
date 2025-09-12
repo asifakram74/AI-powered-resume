@@ -43,12 +43,25 @@ export function ModernTemplate2({ data, isPreview = false }: ModernTemplate2Prop
                 <Phone className="w-5 h-5 text-indigo-600" />
                 <span>{data.personalInfo.phone}</span>
               </div>
-              <div className="flex items-center gap-3">
-                <MapPin className="w-5 h-5 text-indigo-600" />
-                <span>
-                  {data.personalInfo.city}, {data.personalInfo.country}
-                </span>
-              </div>
+              {(data.personalInfo.city || data.personalInfo.country || data.personalInfo.address) && (
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-5 h-5 text-indigo-600 mt-0.5" />
+                  <div>
+                    {(data.personalInfo.city || data.personalInfo.country) && (
+                      <div>
+                        {data.personalInfo.city && data.personalInfo.country
+                          ? `${data.personalInfo.city}, ${data.personalInfo.country}`
+                          : data.personalInfo.city || data.personalInfo.country}
+                      </div>
+                    )}
+                    {data.personalInfo.address && (
+                      <div className={`text-sm ${(data.personalInfo.city || data.personalInfo.country) ? 'mt-1' : ''}`}>
+                        {data.personalInfo.address}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -70,12 +70,25 @@ export function CreativeTemplate3({ data, isPreview = false }: CreativeTemplate3
               <Phone className="w-5 h-5 text-purple-400" />
               <span className="text-gray-300">{data.personalInfo.phone}</span>
             </div>
-            <div className="flex items-center gap-3 bg-gray-800/50 backdrop-blur-sm rounded-lg px-6 py-3 border border-pink-400/30">
-              <MapPin className="w-5 h-5 text-pink-400" />
-              <span className="text-gray-300">
-                {data.personalInfo.city}, {data.personalInfo.country}
-              </span>
-            </div>
+            {(data.personalInfo.city || data.personalInfo.country || data.personalInfo.address) && (
+              <div className="flex items-start gap-3 bg-gray-800/50 backdrop-blur-sm rounded-lg px-6 py-3 border border-pink-400/30">
+                <MapPin className="w-5 h-5 text-pink-400 mt-0.5" />
+                <div className="text-gray-300">
+                  {(data.personalInfo.city || data.personalInfo.country) && (
+                    <span>
+                      {data.personalInfo.city && data.personalInfo.country
+                        ? `${data.personalInfo.city}, ${data.personalInfo.country}`
+                        : data.personalInfo.city || data.personalInfo.country}
+                    </span>
+                  )}
+                  {data.personalInfo.address && (
+                    <div className={`text-sm ${(data.personalInfo.city || data.personalInfo.country) ? 'mt-1' : ''}`}>
+                      {data.personalInfo.address}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

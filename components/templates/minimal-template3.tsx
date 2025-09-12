@@ -27,10 +27,25 @@ export function MinimalTemplate3({ data, isPreview = false }: MinimalTemplate3Pr
           <span>{data.personalInfo.email}</span>
           <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
           <span>{data.personalInfo.phone}</span>
-          <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-          <span>
-            {data.personalInfo.city}, {data.personalInfo.country}
-          </span>
+          {(data.personalInfo.city || data.personalInfo.country || data.personalInfo.address) && (
+            <>
+              <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+              <span>
+                {(data.personalInfo.city || data.personalInfo.country) && (
+                  <span>
+                    {data.personalInfo.city && data.personalInfo.country
+                      ? `${data.personalInfo.city}, ${data.personalInfo.country}`
+                      : data.personalInfo.city || data.personalInfo.country}
+                  </span>
+                )}
+                {data.personalInfo.address && (
+                  <span className={`text-xs ${(data.personalInfo.city || data.personalInfo.country) ? 'block mt-1' : ''}`}>
+                    {data.personalInfo.address}
+                  </span>
+                )}
+              </span>
+            </>
+          )}
         </div>
       </div>
 

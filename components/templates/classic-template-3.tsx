@@ -31,11 +31,25 @@ export function ClassicTemplate3({ data, isPreview = false }: ClassicTemplate3Pr
             <br />
             {data.personalInfo.phone}
           </div>
-          <div>
-            <strong>Location:</strong>
-            <br />
-            {data.personalInfo.city}, {data.personalInfo.country}
-          </div>
+          {(data.personalInfo.city || data.personalInfo.country || data.personalInfo.address) && (
+            <div>
+              <strong>Location:</strong>
+              <br />
+              {(data.personalInfo.city || data.personalInfo.country) && (
+                <span>
+                  {data.personalInfo.city && data.personalInfo.country
+                    ? `${data.personalInfo.city}, ${data.personalInfo.country}`
+                    : data.personalInfo.city || data.personalInfo.country}
+                </span>
+              )}
+              {data.personalInfo.address && (
+                <>
+                  {(data.personalInfo.city || data.personalInfo.country) && <br />}
+                  {data.personalInfo.address}
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

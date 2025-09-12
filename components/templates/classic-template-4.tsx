@@ -37,12 +37,26 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
             <div className="font-semibold">PHONE</div>
             <div>{data.personalInfo.phone}</div>
           </div>
-          <div>
-            <div className="font-semibold">LOCATION</div>
+          {(data.personalInfo.city || data.personalInfo.country || data.personalInfo.address) && (
             <div>
-              {data.personalInfo.city}, {data.personalInfo.country}
+              <div className="font-semibold">LOCATION</div>
+              <div>
+                {(data.personalInfo.city || data.personalInfo.country) && (
+                  <span>
+                    {data.personalInfo.city && data.personalInfo.country
+                      ? `${data.personalInfo.city}, ${data.personalInfo.country}`
+                      : data.personalInfo.city || data.personalInfo.country}
+                  </span>
+                )}
+                {data.personalInfo.address && (
+                  <>
+                    {(data.personalInfo.city || data.personalInfo.country) && <br />}
+                    {data.personalInfo.address}
+                  </>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 

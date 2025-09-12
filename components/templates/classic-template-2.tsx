@@ -26,10 +26,28 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
           <span>{data.personalInfo.email}</span>
           <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
           <span>{data.personalInfo.phone}</span>
-          <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-          <span>
-            {data.personalInfo.city}, {data.personalInfo.country}
-          </span>
+          {(data.personalInfo.city || data.personalInfo.country) && (
+            <>
+              <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
+              <span>
+                {data.personalInfo.city && data.personalInfo.country
+                  ? `${data.personalInfo.city}, ${data.personalInfo.country}`
+                  : data.personalInfo.city || data.personalInfo.country}
+                {data.personalInfo.address && (
+                  <>
+                    {" "}
+                    {data.personalInfo.address}
+                  </>
+                )}
+              </span>
+            </>
+          )}
+          {!data.personalInfo.city && !data.personalInfo.country && data.personalInfo.address && (
+            <>
+              <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
+              <span>{data.personalInfo.address}</span>
+            </>
+          )}
         </div>
       </div>
 

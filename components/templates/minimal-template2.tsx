@@ -37,12 +37,25 @@ export function MinimalTemplate2({ data, isPreview = false }: MinimalTemplate2Pr
             <p className="font-medium text-gray-900 mb-1">Phone</p>
             <p>{data.personalInfo.phone}</p>
           </div>
-          <div>
-            <p className="font-medium text-gray-900 mb-1">Location</p>
-            <p>
-              {data.personalInfo.city}, {data.personalInfo.country}
-            </p>
-          </div>
+          {(data.personalInfo.city || data.personalInfo.country || data.personalInfo.address) && (
+            <div>
+              <p className="font-medium text-gray-900 mb-1">Location</p>
+              <div>
+                {(data.personalInfo.city || data.personalInfo.country) && (
+                  <p>
+                    {data.personalInfo.city && data.personalInfo.country
+                      ? `${data.personalInfo.city}, ${data.personalInfo.country}`
+                      : data.personalInfo.city || data.personalInfo.country}
+                  </p>
+                )}
+                {data.personalInfo.address && (
+                  <p className={`text-sm ${(data.personalInfo.city || data.personalInfo.country) ? 'mt-1' : ''}`}>
+                    {data.personalInfo.address}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

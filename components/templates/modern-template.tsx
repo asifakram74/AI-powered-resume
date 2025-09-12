@@ -81,7 +81,13 @@ export function ModernTemplate({
               <div className="flex items-center space-x-3">
                 <MapPin className="w-4 h-4 text-blue-300" />
                 <span>
-                  {data.personalInfo.city} {data.personalInfo.country}
+                  {(data.personalInfo.city || data.personalInfo.country) && (
+                    <span>
+                      {data.personalInfo.city && data.personalInfo.country
+                        ? `${data.personalInfo.city}, ${data.personalInfo.country}`
+                        : data.personalInfo.city || data.personalInfo.country}
+                    </span>
+                  )}
                   {data.personalInfo.address && (
                     <>
                       {/* <br /> */}

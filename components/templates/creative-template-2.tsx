@@ -68,12 +68,25 @@ export function CreativeTemplate2({ data, isPreview = false }: CreativeTemplate2
                 <Phone className="w-5 h-5" />
                 <span>{data.personalInfo.phone}</span>
               </div>
-              <div className="flex items-center gap-3 bg-white/10 rounded-lg px-4 py-2">
-                <MapPin className="w-5 h-5" />
-                <span>
-                  {data.personalInfo.city}, {data.personalInfo.country}
-                </span>
-              </div>
+              {(data.personalInfo.city || data.personalInfo.country || data.personalInfo.address) && (
+                <div className="flex items-start gap-3 bg-white/10 rounded-lg px-4 py-2">
+                  <MapPin className="w-5 h-5 mt-0.5" />
+                  <div>
+                    {(data.personalInfo.city || data.personalInfo.country) && (
+                      <span>
+                        {data.personalInfo.city && data.personalInfo.country
+                          ? `${data.personalInfo.city}, ${data.personalInfo.country}`
+                          : data.personalInfo.city || data.personalInfo.country}
+                      </span>
+                    )}
+                    {data.personalInfo.address && (
+                      <div className={`text-sm ${(data.personalInfo.city || data.personalInfo.country) ? 'mt-1' : ''}`}>
+                        {data.personalInfo.address}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -38,12 +38,25 @@ export function ModernTemplate4({ data, isPreview = false }: ModernTemplate4Prop
                 <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                 <span className="text-sm font-medium">{data.personalInfo.phone}</span>
               </div>
-              <div className="flex items-center space-x-2 bg-gray-100 rounded-full px-4 py-2">
-                <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                <span className="text-sm font-medium">
-                  {data.personalInfo.city}, {data.personalInfo.country}
-                </span>
-              </div>
+              {(data.personalInfo.city || data.personalInfo.country || data.personalInfo.address) && (
+                <div className="flex items-start space-x-2 bg-gray-100 rounded-full px-4 py-2">
+                  <div className="w-2 h-2 bg-purple-400 rounded-full mt-1"></div>
+                  <div className="text-sm font-medium">
+                    {(data.personalInfo.city || data.personalInfo.country) && (
+                      <div>
+                        {data.personalInfo.city && data.personalInfo.country
+                          ? `${data.personalInfo.city}, ${data.personalInfo.country}`
+                          : data.personalInfo.city || data.personalInfo.country}
+                      </div>
+                    )}
+                    {data.personalInfo.address && (
+                      <div className={`text-xs ${(data.personalInfo.city || data.personalInfo.country) ? 'mt-1' : ''}`}>
+                        {data.personalInfo.address}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
