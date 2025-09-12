@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "../../components/ui/button";
-import { callNodeApi } from "../../lib/config/api";
+
 import { Document, Packer, Paragraph } from "docx";
 import { Card, CardContent } from "../../components/ui/card";
 import { Zap } from "lucide-react";
@@ -607,14 +607,37 @@ export function CVPageClientContent() {
         // 3. Generate AI response only for new CVs
         if (!cvId) {
           const personaText = convertPersonaToText(personaData);
-          const response = await callNodeApi.post('/api/optimize-cv', {
-            extractedText: personaText,
+          
+          console.log('Making request to:', 'https://backendserver.resumaic.com/api/optimize-cv');
+          console.log('Request payload size:', JSON.stringify({ extractedText: personaText }).length);
+          
+          try {
+            const testResponse = await fetch('https://backendserver.resumaic.com', { method: 'HEAD' });
+            console.log('Server reachable:', testResponse.ok);
+          } catch (testError) {
+            console.error('Server not reachable:', testError);
+          }
+          
+          const response = await fetch('https://backendserver.resumaic.com/api/optimize-cv', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              extractedText: personaText,
+            }),
           });
 
-          if (response.status !== 200) {
-            throw new Error("Failed to optimize CV");
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
           }
-          const aiData = response.data;
+          
+          const aiData = await response.json();
+          
+          if (aiData.error) {
+            throw new Error(aiData.error);
+          }
+          
           setAiResponse(aiData);
         }
       } catch (err: any) {
@@ -806,15 +829,37 @@ export function CVPageClientContent() {
 
     try {
       const personaText = convertPersonaToText(persona);
-      const response = await callNodeApi.post('/api/optimize-cv', {
-        extractedText: personaText,
+      
+      console.log('Making request to:', 'https://backendserver.resumaic.com/api/optimize-cv');
+      console.log('Request payload size:', JSON.stringify({ extractedText: personaText }).length);
+      
+      try {
+        const testResponse = await fetch('https://backendserver.resumaic.com', { method: 'HEAD' });
+        console.log('Server reachable:', testResponse.ok);
+      } catch (testError) {
+        console.error('Server not reachable:', testError);
+      }
+      
+      const response = await fetch('https://backendserver.resumaic.com/api/optimize-cv', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          extractedText: personaText,
+        }),
       });
 
-      if (response.status !== 200) {
-        throw new Error("Failed to regenerate CV");
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-
-      const aiData = response.data;
+      
+      const aiData = await response.json();
+      
+      if (aiData.error) {
+        throw new Error(aiData.error);
+      }
+      
       setAiResponse(aiData);
       setHasUnsavedChanges(true);
 
@@ -1603,3 +1648,23 @@ export function CVPageClientContent() {
     </ProtectedRoute>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

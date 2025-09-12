@@ -2,7 +2,7 @@
  * Export utilities for CV downloads
  */
 
-import { callNodeApi } from '../../lib/config/api';
+
 
 // PDF Export using browser print API
 export const exportToPDF = async (elementId: string, filename: string = 'cv.pdf') => {
@@ -99,12 +99,28 @@ export const exportToPNG = async (elementId: string, filename: string = 'cv.png'
 // DOCX Export using server API
 export const exportToDOCX = async (htmlContent: string, filename: string = 'cv.docx') => {
   try {
-    const response = await callNodeApi.post('/api/export-docx', {
-      html: htmlContent,
+    console.log('Making request to:', 'https://backendserver.resumaic.com/api/export-docx');
+    console.log('Request payload size:', JSON.stringify({ html: htmlContent }).length);
+    
+    try {
+      const testResponse = await fetch('https://backendserver.resumaic.com', { method: 'HEAD' });
+      console.log('Server reachable:', testResponse.ok);
+    } catch (testError) {
+      console.error('Server not reachable:', testError);
+    }
+    
+    const response = await fetch('https://backendserver.resumaic.com/api/export-docx', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        html: htmlContent,
+      }),
     })
 
-    if (response.status !== 200) {
-      throw new Error('DOCX export failed')
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
 
     const result = await response.json()

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
-import { callNodeApi } from "../../lib/config/api";
+
 import { Input } from "../../components/ui/input"
 import { Label } from "../../components/ui/label"
 import { Textarea } from "../../components/ui/textarea"
@@ -174,16 +174,36 @@ export function CoverLetterPage({ user }: PageProps) {
       const cvContent = await getCVContentForAI(selectedCV)
 
       // Call DeepSeek AI for cover letter generation
-      const response = await callNodeApi.post('/api/cover-letter-generation', {
-        jobDescription,
-        tone,
-        cvContent,
-        cvData: selectedCV,
+      console.log('Making request to:', 'https://backendserver.resumaic.com/api/cover-letter-generation');
+      console.log('Request payload size:', JSON.stringify({ jobDescription, tone, cvContent, cvData: selectedCV }).length);
+      
+      try {
+        const testResponse = await fetch('https://backendserver.resumaic.com', { method: 'HEAD' });
+        console.log('Server reachable:', testResponse.ok);
+      } catch (testError) {
+        console.error('Server not reachable:', testError);
+      }
+      
+      const response = await fetch('https://backendserver.resumaic.com/api/cover-letter-generation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          jobDescription,
+          tone,
+          cvContent,
+          cvData: selectedCV,
+        }),
       })
 
-      const data = response.data
-
-      if (response.status !== 200) {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json()
+      
+      if (data.error) {
         throw new Error(data.error || "Generation failed")
       }
 
