@@ -8,10 +8,6 @@ import Head from "next/head";
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <ReduxProvider>
-      <Head>
-        {/* Favicon as your custom image */}
-        <link rel="icon" type="image/png" href="/Resumic.png" />
-      </Head>
       <HydrateAuth />
       <Toaster position="top-right" richColors />
       <Component {...pageProps} />

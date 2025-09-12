@@ -10,9 +10,9 @@ export const metadata: Metadata = {
   title: "Resumaic - AI-Powered Resume Builder",
   description: "Create professional resumes with AI technology",
   icons: {
-    icon: "/Resumic.png",          // favicon in browser tab
-    shortcut: "/1.png",      // legacy support
-    apple: "/1.png",         // iOS home screen icon
+    icon: "/favicon.png",          // favicon in browser tab
+    shortcut: "/favicon.png",      // legacy support
+    apple: "/favicon.png",         // iOS home screen icon
   },
 };
 
