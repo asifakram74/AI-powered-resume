@@ -70,6 +70,7 @@ export function CoverLetterPage({ user }: PageProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [analysisResult, setAnalysisResult] = useState<any>(null)
   const [isViewMode, setIsViewMode] = useState(false)
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
   const userId = user?.id
 
   const tones = [
@@ -129,6 +130,21 @@ export function CoverLetterPage({ user }: PageProps) {
   }, [userId, user?.role]);
 
   useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth)
+      // Force grid view on mobile/tablet
+      if (window.innerWidth < 1024) {
+        setViewMode("grid")
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    handleResize() // Call once on mount
+
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  useEffect(() => {
     const fetchCoverLetters = async () => {
       try {
         if (!user?.id && user?.role?.toLowerCase() !== 'admin') {
@@ -176,14 +192,14 @@ export function CoverLetterPage({ user }: PageProps) {
       // Call DeepSeek AI for cover letter generation
       console.log('Making request to:', 'https://backendserver.resumaic.com/api/cover-letter-generation');
       console.log('Request payload size:', JSON.stringify({ jobDescription, tone, cvContent, cvData: selectedCV }).length);
-      
+
       try {
         const testResponse = await fetch('https://backendserver.resumaic.com', { method: 'HEAD' });
         console.log('Server reachable:', testResponse.ok);
       } catch (testError) {
         console.error('Server not reachable:', testError);
       }
-      
+
       const response = await fetch('https://backendserver.resumaic.com/api/cover-letter-generation', {
         method: 'POST',
         headers: {
@@ -200,9 +216,9 @@ export function CoverLetterPage({ user }: PageProps) {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json()
-      
+
       if (data.error) {
         throw new Error(data.error || "Generation failed")
       }
@@ -359,27 +375,30 @@ export function CoverLetterPage({ user }: PageProps) {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg resumaic-gradient-green text-white">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0">
+        {/* Left Section */}
+        <div className="flex flex-col items-center sm:flex-row sm:items-center sm:gap-3 text-center sm:text-left">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg resumaic-gradient-green text-white mb-2 sm:mb-0">
             <Sparkles className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Create Cover Letters</h1>
-            <p className="text-gray-600">Generate professional cover letters with AI assistance</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Create Cover Letters</h1>
+            <p className="text-gray-600 text-sm sm:text-base mt-1 sm:mt-0">Generate professional cover letters with AI assistance</p>
           </div>
         </div>
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button
-              className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
-              onClick={handleOpenNewGenerator}
-            >
-              Create Cover Letter
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
+        {/* Button Section */}
+        <div className="flex justify-center sm:justify-end">
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button
+                className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
+                onClick={handleOpenNewGenerator}
+              >
+                Create Cover Letter
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
             <DialogHeader>
               <DialogTitle>
                 {isViewMode ? "View Cover Letter" : editingLetter ? "Edit Cover Letter" : "Generate AI Cover Letter"}
@@ -542,6 +561,7 @@ export function CoverLetterPage({ user }: PageProps) {
             )}
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Cover Letters Display */}
@@ -566,7 +586,7 @@ export function CoverLetterPage({ user }: PageProps) {
                     />
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="hidden lg:flex gap-2">
                     <Button
                       variant={viewMode === "grid" ? "default" : "outline"}
                       size="sm"
@@ -587,7 +607,7 @@ export function CoverLetterPage({ user }: PageProps) {
             </CardContent>
           </Card>
 
-          {viewMode === "table" ? (
+          {(viewMode === "table" && windowWidth >= 1024) ? (
             <Card>
               <CardContent className="p-0">
                 <Table>
