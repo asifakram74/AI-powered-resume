@@ -451,71 +451,77 @@ function CreatePersonaPage({ user }: PageProps) {
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg resumaic-gradient-green text-white">
-            <Sparkles className="h-6 w-6" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Create Personas
-            </h1>
-            <p className="text-gray-600">
-              Generate professional personas from complete CV information
-            </p>
-          </div>
-        </div>
+   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0">
+  {/* Left Section */}
+  <div className="flex flex-col items-center sm:flex-row sm:items-center sm:gap-3 text-center sm:text-left">
+    <div className="flex h-12 w-12 items-center justify-center rounded-lg resumaic-gradient-green text-white mb-2 sm:mb-0">
+      <Sparkles className="h-6 w-6" />
+    </div>
+    <div>
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+        Create Personas
+      </h1>
+      <p className="text-gray-600 text-sm sm:text-base mt-1 sm:mt-0">
+        Generate professional personas from complete CV information
+      </p>
+    </div>
+  </div>
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button
-              className="resumaic-gradient-green  hover:opacity-90  hover-lift button-press "
-              onClick={() => {
-                setShowForm(false);
-                setPrefilledData(null);
-                setEditingPersona(null);
-                setIsDialogOpen(true);
-              }}
-            >
-              Create Persona
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
-            <DialogHeader>
-              <DialogTitle>
-                {editingPersona ? 'Edit Persona' : 'Create New Persona'}
-              </DialogTitle>
-              <DialogDescription>
-                {editingPersona
-                  ? 'Update the persona details below.'
-                  : 'Create a new persona by filling in the details below.'}
-              </DialogDescription>
-            </DialogHeader>
-            {!showForm ? (
-              <PersonaCreationOptions onOptionSelect={handleOptionSelect} />
-            ) : (
-              <PersonaForm
-                prefilledData={prefilledData}
-                editingPersona={editingPersona}
-                onPersonaGenerated={handlePersonaGenerated}
-                onCancel={() => {
-                  setIsDialogOpen(false);
-                  setShowForm(false);
-                  setPrefilledData(null);
-                  setEditingPersona(null);
-                }}
-              />
-            )}
-          </DialogContent>
-        </Dialog>
-      </div>
+  {/* Button Section */}
+  <div className="flex justify-center sm:justify-end">
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <DialogTrigger asChild>
+        <Button
+          className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
+          onClick={() => {
+            setShowForm(false);
+            setPrefilledData(null);
+            setEditingPersona(null);
+            setIsDialogOpen(true);
+          }}
+        >
+          Create Persona
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
+        <DialogHeader>
+          <DialogTitle>
+            {editingPersona ? 'Edit Persona' : 'Create New Persona'}
+          </DialogTitle>
+          <DialogDescription>
+            {editingPersona
+              ? 'Update the persona details below.'
+              : 'Create a new persona by filling in the details below.'}
+          </DialogDescription>
+        </DialogHeader>
+
+        {!showForm ? (
+          <PersonaCreationOptions onOptionSelect={handleOptionSelect} />
+        ) : (
+          <PersonaForm
+            prefilledData={prefilledData}
+            editingPersona={editingPersona}
+            onPersonaGenerated={handlePersonaGenerated}
+            onCancel={() => {
+              setIsDialogOpen(false);
+              setShowForm(false);
+              setPrefilledData(null);
+              setEditingPersona(null);
+            }}
+          />
+        )}
+      </DialogContent>
+    </Dialog>
+  </div>
+</div>
 
       {personas.length > 0 && (
         <>
           <Card>
             <CardContent className="p-4">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
+              <div className="flex flex-col gap-4">
+                {/* Title section - always full width */}
+                <div className="w-full">
                   <h3 className="text-lg font-semibold">
                     Generated Personas ({filteredPersonas.length})
                   </h3>
@@ -524,8 +530,9 @@ function CreatePersonaPage({ user }: PageProps) {
                   </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
-                  <div className="relative w-full sm:w-80">
+                {/* Controls section - improved mobile layout */}
+                <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full">
+                  <div className="relative flex-1 min-w-0">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <Input
                       placeholder="Search personas by name, job title, skills..."
@@ -535,7 +542,8 @@ function CreatePersonaPage({ user }: PageProps) {
                     />
                   </div>
 
-                  <div className="flex gap-2">
+                  {/* Hide view mode controls on mobile and tablet, show only on large screens */}
+                  <div className="hidden lg:flex gap-2 flex-shrink-0">
                     <Button
                       variant={viewMode === "grid" ? "default" : "outline"}
                       size="sm"
@@ -556,8 +564,9 @@ function CreatePersonaPage({ user }: PageProps) {
             </CardContent>
           </Card>
 
-          {viewMode === "table" ? (
-            <Card>
+          {/* Show table view only on large screens, card view on mobile/tablet */}
+          {viewMode === "table" && (
+            <Card className="hidden lg:block">
               <CardContent className="p-0">
                 <Table>
                   <TableHeader>
@@ -694,97 +703,99 @@ function CreatePersonaPage({ user }: PageProps) {
                 </Table>
               </CardContent>
             </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredPersonas.map((persona) => (
-                <Card
-                  key={persona.id}
-                  className="hover:shadow-lg transition-shadow"
-                >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
-                          <AvatarFallback
-                            className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${user?.role === 'admin'
-                              ? ''
-                              : 'bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]'
-                              }`}
-                          >
-                            {user?.role === 'admin' ? (
-                              <Crown className="h-5 w-5 text-[#EA580C]" />
-                            ) : user?.name ? (
-                              user.name.charAt(0).toUpperCase()
-                            ) : (
-                              <UserCircle className="h-5 w-5 text-[#70E4A8]" />
-                            )}
-                          </AvatarFallback>
+          )}
 
-                        </Avatar>
-                        <div>
-                          <CardTitle className="text-lg">
-                            {persona.personalInfo.fullName}
-                          </CardTitle>
-                          <CardDescription>
-                            {persona.personalInfo.jobTitle}
-                          </CardDescription>
-                        </div>
+          {/* Card view - always show on mobile/tablet, conditionally on large screens */}
+          <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ${viewMode === "table" ? "lg:hidden" : ""}`}>
+            {filteredPersonas.map((persona) => (
+              <Card
+                key={persona.id}
+                className="hover:shadow-lg transition-shadow"
+              >
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                        <AvatarFallback
+                          className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${user?.role === 'admin'
+                            ? ''
+                            : 'bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]'
+                            }`}
+                        >
+                          {user?.role === 'admin' ? (
+                            <Crown className="h-5 w-5 text-[#EA580C]" />
+                          ) : user?.name ? (
+                            user.name.charAt(0).toUpperCase()
+                          ) : (
+                            <UserCircle className="h-5 w-5 text-[#70E4A8]" />
+                          )}
+                        </AvatarFallback>
+
+                      </Avatar>
+                      <div>
+                        <CardTitle className="text-lg">
+                          {persona.personalInfo.fullName}
+                        </CardTitle>
+                        <CardDescription>
+                          {persona.personalInfo.jobTitle}
+                        </CardDescription>
                       </div>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <Label className="text-sm font-medium">
-                          Experience
-                        </Label>
-                        <p className="text-sm text-gray-600">
-                          {persona.experience.length} positions
-                        </p>
-                      </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-sm font-medium">
+                        Experience
+                      </Label>
+                      <p className="text-sm text-gray-600">
+                        {persona.experience.length} positions
+                      </p>
+                    </div>
 
-                      <div>
-                        <Label className="text-sm font-medium">
-                          Top Skills
-                        </Label>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {persona.skills.technical.slice(0, 4).map((skill) => (
-                            <Badge
-                              key={skill}
-                              variant="secondary"
-                              className="text-xs"
-                            >
-                              {skill}
-                            </Badge>
-                          ))}
-                          {persona.skills.technical.length > 4 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{persona.skills.technical.length - 4}
-                            </Badge>
-                          )}
-                        </div>
+                    <div>
+                      <Label className="text-sm font-medium">
+                        Top Skills
+                      </Label>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {persona.skills.technical.slice(0, 4).map((skill) => (
+                          <Badge
+                            key={skill}
+                            variant="secondary"
+                            className="text-xs"
+                          >
+                            {skill}
+                          </Badge>
+                        ))}
+                        {persona.skills.technical.length > 4 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{persona.skills.technical.length - 4}
+                          </Badge>
+                        )}
                       </div>
+                    </div>
 
-                      <div>
-                        <Label className="text-sm font-medium">Education</Label>
-                        <p className="text-sm text-gray-600">
-                          {persona.education.length} degrees
-                        </p>
-                      </div>
+                    <div>
+                      <Label className="text-sm font-medium">Education</Label>
+                      <p className="text-sm text-gray-600">
+                        {persona.education.length} degrees
+                      </p>
+                    </div>
 
-                      <div>
-                        <Label className="text-sm font-medium">Languages</Label>
-                        <p className="text-sm text-gray-600">
-                          {persona.languages.length} languages
-                        </p>
-                      </div>
+                    <div>
+                      <Label className="text-sm font-medium">Languages</Label>
+                      <p className="text-sm text-gray-600">
+                        {persona.languages.length} languages
+                      </p>
+                    </div>
 
-                      <div className="text-xs text-gray-500">
-                        Created:{" "}
-                        {new Date(persona.createdAt).toLocaleDateString()}
-                      </div>
+                    <div className="text-xs text-gray-500">
+                      Created:{" "}
+                      {new Date(persona.createdAt).toLocaleDateString()}
+                    </div>
 
-                      {/* <div className="flex gap-2">
+                    {/* <div className="flex gap-2">
                         <Button
                           variant="outline"
                           size="sm"
@@ -805,7 +816,7 @@ function CreatePersonaPage({ user }: PageProps) {
                         </Button>
                       </div>*/}
 
-                      {/* <div className="flex gap-2">
+                    {/* <div className="flex gap-2">
                         <Button
                           variant="outline"
                           size="sm"
@@ -826,38 +837,37 @@ function CreatePersonaPage({ user }: PageProps) {
                         </Button>
                       </div> */}
 
-                      <div className="flex gap-2 items-center">
-                        <ConfirmDialog
-                          title={`Delete "${persona.personalInfo.fullName}"`}
-                          description={`Are you sure you want to delete the persona for ${persona.personalInfo.fullName}?`}
-                          confirmText="Delete"
-                          cancelText="Cancel"
-                          onConfirm={() => handleDelete(persona)}
-                          trigger={
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-red-600 hover:text-red-700 bg-transparent"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          }
-                        />
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(persona)}
-                          className="bg-transparent p-2"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </div>
+                    <div className="flex gap-2 items-center">
+                      <ConfirmDialog
+                        title={`Delete "${persona.personalInfo.fullName}"`}
+                        description={`Are you sure you want to delete the persona for ${persona.personalInfo.fullName}?`}
+                        confirmText="Delete"
+                        cancelText="Cancel"
+                        onConfirm={() => handleDelete(persona)}
+                        trigger={
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-red-600 hover:text-red-700 bg-transparent"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        }
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(persona)}
+                        className="bg-transparent p-2"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </>
       )}
 
