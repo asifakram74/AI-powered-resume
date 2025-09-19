@@ -163,45 +163,55 @@ export function ResumePage({ user }: PageProps) {
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg resumaic-gradient-green text-white">
-            <Sparkles className="h-6 w-6" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">My Resumes</h1>
-            <p className="text-gray-600">
-              View and manage your professional resumes
-            </p>
-          </div>
-        </div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0">
+  {/* Left Section */}
+  <div className="flex flex-col items-center sm:flex-row sm:items-center sm:gap-3 text-center sm:text-left">
+    <div className="flex h-12 w-12 items-center justify-center rounded-lg resumaic-gradient-green text-white mb-2 sm:mb-0">
+      <Sparkles className="h-6 w-6" />
+    </div>
+    <div>
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+        My Resumes
+      </h1>
+      <p className="text-gray-600 text-sm sm:text-base mt-1 sm:mt-0">
+        View and manage your professional resumes
+      </p>
+    </div>
+  </div>
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button
-              className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
-              onClick={() => {
-                setIsDialogOpen(true);
-              }}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Create Resume
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
-            <DialogHeader>
-              <DialogTitle>Create New Resume</DialogTitle>
-              <DialogDescription>
-                Create a new resume by filling in the details below.
-              </DialogDescription>
-            </DialogHeader>
-            <CVWizard
-              onSave={handleSaveCV}
-              onCancel={() => setIsDialogOpen(false)}
-            />
-          </DialogContent>
-        </Dialog>
-      </div>
+  {/* Button Section */}
+ <div className="flex justify-center sm:justify-end">
+  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+    <DialogTrigger asChild>
+      <Button
+        className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
+        onClick={() => setIsDialogOpen(true)}
+      >
+        <Plus className="h-4 w-4 mr-2" />
+        Create Resume
+      </Button>
+    </DialogTrigger>
+    <DialogContent
+      className="
+        w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] 
+        !max-w-none max-h-[90vh] overflow-x-auto
+      "
+    >
+      <DialogHeader>
+        <DialogTitle>Create New Resume</DialogTitle>
+        <DialogDescription>
+          Create a new resume by filling in the details below.
+        </DialogDescription>
+      </DialogHeader>
+      <CVWizard
+        onSave={handleSaveCV}
+        onCancel={() => setIsDialogOpen(false)}
+      />
+    </DialogContent>
+  </Dialog>
+  </div>
+</div>
+
 
       <Dialog open={isEditing} onOpenChange={setIsEditing}>
         <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
@@ -226,8 +236,9 @@ export function ResumePage({ user }: PageProps) {
         <>
           <Card>
             <CardContent className="p-4">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
+              <div className="flex flex-col gap-4">
+                {/* Title section - always full width */}
+                <div className="w-full">
                   <h3 className="text-lg font-semibold">
                     Your Resumes ({filteredCVs.length})
                   </h3>
@@ -236,8 +247,9 @@ export function ResumePage({ user }: PageProps) {
                   </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
-                  <div className="relative w-full sm:w-80">
+                {/* Controls section - improved mobile layout */}
+                <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full">
+                  <div className="relative flex-1 min-w-0">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <Input
                       placeholder="Search resumes by title, template..."
@@ -247,7 +259,8 @@ export function ResumePage({ user }: PageProps) {
                     />
                   </div>
 
-                  <div className="flex gap-2">
+                  {/* View mode controls - hidden on mobile/tablet, visible on lg screens */}
+                  <div className="hidden lg:flex gap-2 flex-shrink-0">
                     <Button
                       variant={viewMode === "grid" ? "default" : "outline"}
                       size="sm"
@@ -268,8 +281,9 @@ export function ResumePage({ user }: PageProps) {
             </CardContent>
           </Card>
 
+          {/* Table view - only visible on large screens */}
           {viewMode === "table" ? (
-            <Card>
+            <Card className="hidden lg:block">
               <CardContent className="p-0">
                 <Table>
                   <TableHeader>
@@ -358,8 +372,10 @@ export function ResumePage({ user }: PageProps) {
                 </Table>
               </CardContent>
             </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          ) : null}
+          
+          {/* Grid/Card view - always visible on mobile/tablet, conditionally visible on lg screens */}
+          <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ${viewMode === "table" ? "lg:hidden" : ""}`}>
               {filteredCVs.map((cv) => (
                 <Card
                   key={cv.id}
@@ -448,7 +464,6 @@ export function ResumePage({ user }: PageProps) {
                 </Card>
               ))}
             </div>
-          )}
         </>
       )}
 
