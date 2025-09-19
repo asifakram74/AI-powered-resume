@@ -110,6 +110,7 @@ export function UserList({ user }: PageProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [viewMode, setViewMode] = useState<"grid" | "table">("table")
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
 
   const getUsersArray = () => usersData?.users?.data || []
 
@@ -129,6 +130,19 @@ export function UserList({ user }: PageProps) {
 
     fetchUsers()
   }, [currentPage])
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth)
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // Force grid view on mobile/tablet
+  const isMobile = windowWidth < 1024
+  const currentViewMode = isMobile ? "grid" : viewMode
 
   const handleEdit = async (user: User) => {
     try {
@@ -268,67 +282,86 @@ export function UserList({ user }: PageProps) {
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg resumaic-gradient-green text-white hover:opacity-90  button-press">
-            <UserIcon className="h-6 w-6" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-[#2D3639] font-sans">User Management</h1>
-            <p className="text-gray-600 font-sans">Manage all system users</p>
-          </div>
-        </div>
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-0">
+  {/* Left Section (icon + title + description) */}
+  <div className="flex flex-col items-center lg:flex-row lg:items-center lg:gap-3 text-center lg:text-left">
+    <div className="flex h-12 w-12 items-center justify-center rounded-lg resumaic-gradient-green text-white hover:opacity-90 button-press mb-2 lg:mb-0">
+      <UserIcon className="h-6 w-6" />
+    </div>
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button
-              className="resumaic-gradient-green hover:opacity-90  button-press text-white"
-              onClick={() => {
-                setEditingUser(null)
-                setIsDialogOpen(true)
-              }}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add User
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
-            <DialogHeader>
-              <DialogTitle className="font-sans text-[#2D3639]">
-                {editingUser ? "Edit User" : "Create New User"}
-              </DialogTitle>
-              <DialogDescription className="font-sans">
-                {editingUser ? "Update user details below" : "Fill in the user details below"}
-              </DialogDescription>
-            </DialogHeader>
-            <UserForm
-              mode={editingUser ? "edit" : "create"}
-              userId={editingUser?.id}
-              initialData={
-                editingUser
-                  ? {
-                      name: editingUser.name,
-                      email: editingUser.email,
-                      role: editingUser.role,
-                      status: editingUser.status,
-                      plan: editingUser.plan,
-                      plan_type: editingUser.plan_type,
-                      dark_mode: editingUser.dark_mode,
-                      language: editingUser.language,
-                      push_notifications: editingUser.push_notifications,
-                      email_updates: editingUser.email_updates,
-                    }
-                  : undefined
+    <div>
+      <h1 className="text-2xl lg:text-3xl font-bold text-[#2D3639] font-sans">
+        User Management
+      </h1>
+      <p className="text-gray-600 font-sans text-sm lg:text-base mt-1 lg:mt-0">
+        Manage all system users
+      </p>
+    </div>
+  </div>
+
+  {/* Right Section (button) */}
+ <div className="flex justify-center lg:justify-end">
+  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+    <DialogTrigger asChild>
+      <Button
+        className="resumaic-gradient-green hover:opacity-90 button-press text-white"
+        onClick={() => {
+          setEditingUser(null);
+          setIsDialogOpen(true);
+        }}
+      >
+        <Plus className="h-4 w-4 mr-2" />
+        Add User
+      </Button>
+    </DialogTrigger>
+
+    <DialogContent
+      className="
+        w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw]
+        !max-w-none max-h-[90vh] overflow-x-auto
+      "
+    >
+      <DialogHeader>
+        <DialogTitle className="font-sans text-[#2D3639]">
+          {editingUser ? "Edit User" : "Create New User"}
+        </DialogTitle>
+        <DialogDescription className="font-sans">
+          {editingUser
+            ? "Update user details below"
+            : "Fill in the user details below"}
+        </DialogDescription>
+      </DialogHeader>
+
+      <UserForm
+        mode={editingUser ? "edit" : "create"}
+        userId={editingUser?.id}
+        initialData={
+          editingUser
+            ? {
+                name: editingUser.name,
+                email: editingUser.email,
+                role: editingUser.role,
+                status: editingUser.status,
+                plan: editingUser.plan,
+                plan_type: editingUser.plan_type,
+                dark_mode: editingUser.dark_mode,
+                language: editingUser.language,
+                push_notifications: editingUser.push_notifications,
+                email_updates: editingUser.email_updates,
               }
-              onSave={handleUserSaved}
-              onCancel={() => {
-                setIsDialogOpen(false)
-                setEditingUser(null)
-              }}
-            />
-          </DialogContent>
-        </Dialog>
-      </div>
+            : undefined
+        }
+        onSave={handleUserSaved}
+        onCancel={() => {
+          setIsDialogOpen(false);
+          setEditingUser(null);
+        }}
+      />
+    </DialogContent>
+  </Dialog>
+</div>
+
+</div>
 
       {/* Users Table/Grid */}
       {getUsersArray().length > 0 && (
@@ -354,30 +387,32 @@ export function UserList({ user }: PageProps) {
                     />
                   </div>
 
-                  <div className="flex gap-2">
-                    <Button
-                      variant={viewMode === "grid" ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setViewMode("grid")}
-                      className="border-[#70E4A8]/30 hover:border-[#70E4A8]/50"
-                    >
-                      <Grid className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant={viewMode === "table" ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setViewMode("table")}
-                      className="border-[#70E4A8]/30 hover:border-[#70E4A8]/50"
-                    >
-                      <List className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  {!isMobile && (
+                    <div className="flex gap-2">
+                      <Button
+                        variant={viewMode === "grid" ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setViewMode("grid")}
+                        className="border-[#70E4A8]/30 hover:border-[#70E4A8]/50"
+                      >
+                        <Grid className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant={viewMode === "table" ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setViewMode("table")}
+                        className="border-[#70E4A8]/30 hover:border-[#70E4A8]/50"
+                      >
+                        <List className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {viewMode === "table" ? (
+          {currentViewMode === "table" ? (
             <Card>
               <CardContent className="p-0">
                 <Table>
