@@ -73,27 +73,27 @@ export function ResumePage({ user }: PageProps) {
   const userId = user?.id;
 
   useEffect(() => {
-  const fetchCVs = async () => {
-    try {
-      setIsLoading(true);
-      
-      let data;
-      if (user?.role?.toLowerCase() === 'admin') {
-        data = await getAllCVs();
-      } else {
-        data = await getCVs(userId?.toString() || "");
-      }
-      
-      setCVs(data);
-    } catch (error) {
-      console.error("Error fetching CVs:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    const fetchCVs = async () => {
+      try {
+        setIsLoading(true);
 
-  fetchCVs();
-}, [userId, user?.role]);
+        let data;
+        if (user?.role?.toLowerCase() === 'admin') {
+          data = await getAllCVs();
+        } else {
+          data = await getCVs(userId?.toString() || "");
+        }
+
+        setCVs(data);
+      } catch (error) {
+        console.error("Error fetching CVs:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCVs();
+  }, [userId, user?.role]);
 
   const handleCreateAICV = (personaId: string) => {
     router.push(`/create-cv?personaId=${personaId}`);
@@ -164,53 +164,53 @@ export function ResumePage({ user }: PageProps) {
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0">
-  {/* Left Section */}
-  <div className="flex flex-col items-center sm:flex-row sm:items-center sm:gap-3 text-center sm:text-left">
-    <div className="flex h-12 w-12 items-center justify-center rounded-lg resumaic-gradient-green text-white mb-2 sm:mb-0">
-      <Sparkles className="h-6 w-6" />
-    </div>
-    <div>
-      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-        My Resumes
-      </h1>
-      <p className="text-gray-600 text-sm sm:text-base mt-1 sm:mt-0">
-        View and manage your professional resumes
-      </p>
-    </div>
-  </div>
+        {/* Left Section */}
+        <div className="flex flex-col items-center sm:flex-row sm:items-center sm:gap-3 text-center sm:text-left">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg resumaic-gradient-green text-white mb-2 sm:mb-0">
+            <Sparkles className="h-6 w-6" />
+          </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              My Resumes
+            </h1>
+            <p className="text-gray-600 text-sm sm:text-base mt-1 sm:mt-0">
+              View and manage your professional resumes
+            </p>
+          </div>
+        </div>
 
-  {/* Button Section */}
- <div className="flex justify-center sm:justify-end">
-  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-    <DialogTrigger asChild>
-      <Button
-        className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
-        onClick={() => setIsDialogOpen(true)}
-      >
-        <Plus className="h-4 w-4 mr-2" />
-        Create Resume
-      </Button>
-    </DialogTrigger>
-    <DialogContent
-      className="
+        {/* Button Section */}
+        <div className="flex justify-center sm:justify-end">
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button
+                className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
+                onClick={() => setIsDialogOpen(true)}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create Resume
+              </Button>
+            </DialogTrigger>
+            <DialogContent
+              className="
         w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] 
         !max-w-none max-h-[90vh] overflow-x-auto
       "
-    >
-      <DialogHeader>
-        <DialogTitle>Create New Resume</DialogTitle>
-        <DialogDescription>
-          Create a new resume by filling in the details below.
-        </DialogDescription>
-      </DialogHeader>
-      <CVWizard
-        onSave={handleSaveCV}
-        onCancel={() => setIsDialogOpen(false)}
-      />
-    </DialogContent>
-  </Dialog>
-  </div>
-</div>
+            >
+              <DialogHeader>
+                <DialogTitle>Create New Resume</DialogTitle>
+                <DialogDescription>
+                  Create a new resume by filling in the details below.
+                </DialogDescription>
+              </DialogHeader>
+              <CVWizard
+                onSave={handleSaveCV}
+                onCancel={() => setIsDialogOpen(false)}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
 
 
       <Dialog open={isEditing} onOpenChange={setIsEditing}>
@@ -303,8 +303,8 @@ export function ResumePage({ user }: PageProps) {
                             <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
                               <AvatarFallback
                                 className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${user?.role === "admin"
-                                    ? ""
-                                    : "bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]"
+                                  ? ""
+                                  : "bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]"
                                   }`}
                               >
                                 {user?.role === "admin" ? (
@@ -373,97 +373,97 @@ export function ResumePage({ user }: PageProps) {
               </CardContent>
             </Card>
           ) : null}
-          
+
           {/* Grid/Card view - always visible on mobile/tablet, conditionally visible on lg screens */}
           <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ${viewMode === "table" ? "lg:hidden" : ""}`}>
-              {filteredCVs.map((cv) => (
-                <Card
-                  key={cv.id}
-                  className="hover:shadow-lg transition-shadow"
-                >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
-                          <AvatarFallback
-                            className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${user?.role === "admin"
-                                ? ""
-                                : "bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]"
-                              }`}
-                          >
-                            {user?.role === "admin" ? (
-                              <Crown className="h-5 w-5 text-[#EA580C]" />
-                            ) : user?.name ? (
-                              user.name.charAt(0).toUpperCase()
-                            ) : (
-                              <UserCircle className="h-5 w-5 text-[#70E4A8]" />
-                            )}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <CardTitle className="text-lg">{cv.title}</CardTitle>
-                        </div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
+            {filteredCVs.map((cv) => (
+              <Card
+                key={cv.id}
+                className="hover:shadow-lg transition-shadow"
+              >
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                        <AvatarFallback
+                          className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${user?.role === "admin"
+                            ? ""
+                            : "bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]"
+                            }`}
+                        >
+                          {user?.role === "admin" ? (
+                            <Crown className="h-5 w-5 text-[#EA580C]" />
+                          ) : user?.name ? (
+                            user.name.charAt(0).toUpperCase()
+                          ) : (
+                            <UserCircle className="h-5 w-5 text-[#70E4A8]" />
+                          )}
+                        </AvatarFallback>
+                      </Avatar>
                       <div>
-                        <Label className="text-sm font-medium">Template</Label>
-                        <Badge variant="secondary" className="mt-1 capitalize">
-                          {cv.layout_id.replace("-", " ")}
-                        </Badge>
-                      </div>
-
-                      <div className="text-xs text-gray-500">
-                        <div>
-                          Created:{" "}
-                          {new Date(cv.created_at).toLocaleDateString()}
-                        </div>
-                        <div>
-                          Updated:{" "}
-                          {new Date(cv.updated_at).toLocaleDateString()}
-                        </div>
-                      </div>
-
-                      <div className="flex gap-2 items-center">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleView(cv)} className="bg-transparent p-2"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(cv)}
-                          className="bg-transparent p-2"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <ConfirmDialog
-                          title={`Delete "${cv.title}"`}
-                          description="Are you sure you want to delete this resume? This action cannot be undone."
-                          confirmText="Delete"
-                          cancelText="Cancel"
-                          onConfirm={() => handleDelete(cv)}
-                          trigger={
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-red-600 hover:text-red-700 bg-transparent p-2"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          }
-                        />
+                        <CardTitle className="text-lg">{cv.title}</CardTitle>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-sm font-medium">Template</Label>
+                      <Badge variant="secondary" className="mt-1 capitalize">
+                        {cv.layout_id.replace("-", " ")}
+                      </Badge>
+                    </div>
+
+                    <div className="text-xs text-gray-500">
+                      <div>
+                        Created:{" "}
+                        {new Date(cv.created_at).toLocaleDateString()}
+                      </div>
+                      <div>
+                        Updated:{" "}
+                        {new Date(cv.updated_at).toLocaleDateString()}
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 items-center">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleView(cv)} className="bg-transparent p-2"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(cv)}
+                        className="bg-transparent p-2"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <ConfirmDialog
+                        title={`Delete "${cv.title}"`}
+                        description="Are you sure you want to delete this resume? This action cannot be undone."
+                        confirmText="Delete"
+                        cancelText="Cancel"
+                        onConfirm={() => handleDelete(cv)}
+                        trigger={
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-red-600 hover:text-red-700 bg-transparent p-2"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        }
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </>
       )}
 

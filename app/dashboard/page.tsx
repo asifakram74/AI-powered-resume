@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { SidebarProvider } from "../../components/ui/sidebar"
+import { SidebarProvider, SidebarTrigger } from "../../components/ui/sidebar"
 import { Sidebar } from "../../components/dashboard/sidebar"
 import  CreatePersonaPage  from "../../pages/persona/PersonaList"
 import { ResumePage } from "../../pages/resume/ResumeList"
@@ -12,6 +12,7 @@ import { UserList } from "../../pages/UsersManagement/UserList"
 import ProtectedRoute from "../../components/auth/ProtectedRoute"
 import { useAppSelector } from "../../lib/redux/hooks"
 import { useRouter } from "next/navigation"
+import { Menu } from "lucide-react"
 // import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 
 export interface PageProps {
@@ -86,8 +87,27 @@ useEffect(() => {
             setActivePage={setActivePage}
             user={user}
           />
-          <main className="flex-1 p-6 bg-gray-50 relative">
-            {renderActivePage()}
+          <main className="flex-1 bg-gray-50 relative">
+            {/* Mobile Header with Sidebar Trigger */}
+            <div className="lg:hidden flex items-center justify-between p-4 bg-white border-b border-gray-200 sticky top-0 z-40">
+              <SidebarTrigger className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <Menu className="h-5 w-5" />
+              </SidebarTrigger>
+              <h1 className="text-lg font-semibold text-gray-900">
+                {activePage === "create-persona" && "Persona"}
+                {activePage === "resumes" && "Resumes"}
+                {activePage === "cover-letter" && "Cover Letters"}
+                {activePage === "ats-checker" && "ATS Checker"}
+                {activePage === "profile" && "Profile"}
+                {activePage === "users" && "User Management"}
+              </h1>
+              <div className="w-9" /> {/* Spacer for centering */}
+            </div>
+            
+            {/* Main Content */}
+            <div className="p-6">
+              {renderActivePage()}
+            </div>
           </main>
         </div>
       </SidebarProvider>

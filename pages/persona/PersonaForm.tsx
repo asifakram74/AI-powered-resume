@@ -100,6 +100,8 @@ export function PersonaForm({
     jobTitle: "",
     companyName: "",
     location: "",
+    employmentType: "",
+    industry: "",
     startDate: "",
     endDate: "",
     current: false,
@@ -219,6 +221,8 @@ export function PersonaForm({
         jobTitle: "",
         companyName: "",
         location: "",
+        employmentType: "",
+        industry: "",
         startDate: "",
         endDate: "",
         current: false,
@@ -418,14 +422,14 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
   };
 
   return (
-    <div className="space-y-6 max-h-[70vh] overflow-y-auto">
+    <div className="space-y-4 sm:space-y-6 max-h-[70vh] overflow-y-auto px-2 sm:px-0">
       {/* Personal Information */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Personal Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Full Name *</Label>
               <Input
@@ -460,7 +464,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Email *</Label>
               <Input
@@ -496,7 +500,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label>City</Label>
               <Input
@@ -529,7 +533,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                 placeholder="United States"
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 sm:col-span-2 lg:col-span-1">
               <Label>Address</Label>
               <Input
                 value={formData.personalInfo.address}
@@ -547,7 +551,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>LinkedIn</Label>
               <Input
@@ -645,7 +649,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label>Location</Label>
               <Input
@@ -659,6 +663,35 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                 placeholder="San Francisco, CA"
               />
             </div>
+            <div className="space-y-2">
+              <Label>Employment Type</Label>
+              <Input
+                value={currentExperience.employmentType}
+                onChange={(e) =>
+                  setCurrentExperience((prev) => ({
+                    ...prev,
+                    employmentType: e.target.value,
+                  }))
+                }
+                placeholder="Full-time"
+              />
+            </div>
+            <div className="space-y-2 sm:col-span-2 lg:col-span-1">
+              <Label>Industry</Label>
+              <Input
+                value={currentExperience.industry}
+                onChange={(e) =>
+                  setCurrentExperience((prev) => ({
+                    ...prev,
+                    industry: e.target.value,
+                  }))
+                }
+                placeholder="Technology"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Start Date</Label>
               <Input
@@ -701,7 +734,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
           <div className="space-y-2">
             <Label>Responsibilities</Label>
             {currentExperience.responsibilities.map((resp, index) => (
-              <div key={index} className="flex gap-2">
+              <div key={index} className="flex flex-col sm:flex-row gap-2">
                 <Input
                   value={resp}
                   onChange={(e) => {
@@ -713,40 +746,87 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                     }));
                   }}
                   placeholder="Describe your responsibility..."
+                  className="flex-1"
                 />
-                {index === currentExperience.responsibilities.length - 1 && (
+                <div className="flex gap-2 sm:flex-shrink-0">
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() =>
+                    onClick={() => {
+                      const newResp = [...currentExperience.responsibilities];
+                      newResp.splice(index, 1);
                       setCurrentExperience((prev) => ({
                         ...prev,
-                        responsibilities: [...prev.responsibilities, ""],
-                      }))
-                    }
+                        responsibilities: newResp,
+                      }));
+                    }}
+                    className="w-full sm:w-auto"
                   >
-                    <Plus className="h-4 w-4" />
+                    <X className="h-4 w-4" />
                   </Button>
-                )}
+                  {index === currentExperience.responsibilities.length - 1 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setCurrentExperience((prev) => ({
+                          ...prev,
+                          responsibilities: [...prev.responsibilities, ""],
+                        }))
+                      }
+                      className="w-full sm:w-auto"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
 
-          <Button onClick={addExperience} variant="outline" size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Experience
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button
+              type="button"
+              onClick={addExperience}
+              className="flex-1"
+              disabled={
+                !currentExperience.companyName ||
+                !currentExperience.jobTitle ||
+                !currentExperience.startDate
+              }
+            >
+              Add Experience
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setCurrentExperience({
+                 jobTitle: "",
+                 companyName: "",
+                 location: "",
+                 employmentType: "",
+                 industry: "",
+                 startDate: "",
+                 endDate: "",
+                 current: false,
+                 responsibilities: [""]
+               })}
+              className="flex-1"
+            >
+              Clear
+            </Button>
+          </div>
 
           {formData.experience.length > 0 && (
             <div className="space-y-2">
-              <Label>Added Experiences:</Label>
+              <Label>Added Experience:</Label>
               {formData.experience.map((exp) => (
                 <div key={exp.id} className="p-3 bg-gray-50 rounded-lg">
-                  <div className="font-medium">
-                    {exp.jobTitle} at {exp.companyName}
-                  </div>
-                  <div className="text-sm text-gray-600">
+                  <div className="font-medium">{exp.jobTitle}</div>
+                  <div className="text-sm text-gray-600">{exp.companyName}</div>
+                  <div className="text-sm text-gray-500">
                     {exp.startDate} - {exp.current ? "Present" : exp.endDate}
                   </div>
                 </div>
@@ -762,14 +842,9 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
           <CardTitle className="text-lg">Skills</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <Select
-              value={skillType}
-              onValueChange={(value: "technical" | "soft") =>
-                setSkillType(value)
-              }
-            >
-              <SelectTrigger className="w-40">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Select value={skillType} onValueChange={(value) => setSkillType(value as "technical" | "soft")}>
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -777,20 +852,23 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                 <SelectItem value="soft">Soft Skills</SelectItem>
               </SelectContent>
             </Select>
-            <Input
-              value={skillInput}
-              onChange={(e) => setSkillInput(e.target.value)}
-              placeholder="Add a skill..."
-              onKeyPress={(e) => e.key === "Enter" && addSkill()}
-            />
-            <Button onClick={addSkill} size="sm" variant="outline">
-              <Plus className="h-4 w-4" />
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-2 flex-1">
+              <Input
+                value={skillInput}
+                onChange={(e) => setSkillInput(e.target.value)}
+                placeholder="Add a skill..."
+                onKeyPress={(e) => e.key === "Enter" && addSkill()}
+                className="flex-1"
+              />
+              <Button onClick={addSkill} size="sm" variant="outline" className="flex-shrink-0 w-full sm:w-auto">
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
           <div className="space-y-3">
             <div>
-              <Label className="text-sm font-medium">Technical Skills</Label>
+              <Label className="text-sm font-medium">Technical Skills:</Label>
               <div className="flex flex-wrap gap-2 mt-2">
                 {formData.skills.technical.map((skill) => (
                   <Badge
@@ -809,12 +887,12 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             </div>
 
             <div>
-              <Label className="text-sm font-medium">Soft Skills</Label>
+              <Label className="text-sm font-medium">Soft Skills:</Label>
               <div className="flex flex-wrap gap-2 mt-2">
                 {formData.skills.soft.map((skill) => (
                   <Badge
                     key={skill}
-                    variant="outline"
+                    variant="secondary"
                     className="flex items-center gap-1"
                   >
                     {skill}
@@ -836,57 +914,64 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
           <CardTitle className="text-lg">Languages</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <Input
-              value={currentLanguage.name}
-              onChange={(e) =>
-                setCurrentLanguage((prev) => ({
-                  ...prev,
-                  name: e.target.value,
-                }))
-              }
-              placeholder="Language name"
-            />
-            <Select
-              value={currentLanguage.proficiency}
-              onValueChange={(value: any) =>
-                setCurrentLanguage((prev) => ({ ...prev, proficiency: value }))
-              }
-            >
-              <SelectTrigger className="w-40">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Native">Native</SelectItem>
-                <SelectItem value="Fluent">Fluent</SelectItem>
-                <SelectItem value="Advanced">Advanced</SelectItem>
-                <SelectItem value="Intermediate">Intermediate</SelectItem>
-                <SelectItem value="Basic">Basic</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button onClick={addLanguage} size="sm" variant="outline">
-              <Plus className="h-4 w-4" />
-            </Button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Language</Label>
+              <Input
+                value={currentLanguage.name}
+                onChange={(e) =>
+                  setCurrentLanguage((prev) => ({
+                    ...prev,
+                    name: e.target.value,
+                  }))
+                }
+                placeholder="Spanish"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Proficiency</Label>
+              <Select
+                value={currentLanguage.proficiency}
+                onValueChange={(value) =>
+                  setCurrentLanguage((prev) => ({
+                    ...prev,
+                    proficiency: value as any,
+                  }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Beginner">Beginner</SelectItem>
+                  <SelectItem value="Intermediate">Intermediate</SelectItem>
+                  <SelectItem value="Advanced">Advanced</SelectItem>
+                  <SelectItem value="Native">Native</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
+
+          <Button onClick={addLanguage} variant="outline" size="sm" className="w-full sm:w-auto">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Language
+          </Button>
 
           {formData.languages.length > 0 && (
             <div className="space-y-2">
               <Label>Added Languages:</Label>
               <div className="flex flex-wrap gap-2">
-                {formData.languages.map((lang, index) => (
-                  <Badge 
-                    key={`${lang.name}-${lang.proficiency}-${index}`} 
+                {formData.languages.map((lang) => (
+                  <Badge
+                    key={lang.id}
                     variant="secondary"
                     className="flex items-center gap-1"
                   >
                     {lang.name} ({lang.proficiency})
-                    <button
-                      type="button"
+                    <X
+                      className="h-3 w-3 cursor-pointer hover:text-red-500"
                       onClick={() => removeLanguage(lang.id)}
-                      className="ml-1.5 rounded-full bg-white/20 p-0.5 hover:bg-white/30"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
+                    />
                   </Badge>
                 ))}
               </div>
@@ -901,7 +986,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
           <CardTitle className="text-lg">Education</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Degree</Label>
               <Input
@@ -925,12 +1010,12 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                     institutionName: e.target.value,
                   }))
                 }
-                placeholder="Stanford University"
+                placeholder="University of Technology"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="space-y-2">
               <Label>Location</Label>
               <Input
@@ -941,7 +1026,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                     location: e.target.value,
                   }))
                 }
-                placeholder="Stanford, CA"
+                placeholder="San Francisco, CA"
               />
             </div>
             <div className="space-y-2">
@@ -970,20 +1055,19 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                 placeholder="3.8"
               />
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Honors & Awards</Label>
-            <Input
-              value={currentEducation.honors}
-              onChange={(e) =>
-                setCurrentEducation((prev) => ({
-                  ...prev,
-                  honors: e.target.value,
-                }))
-              }
-              placeholder="Summa Cum Laude, Dean's List"
-            />
+            <div className="space-y-2 sm:col-span-2 lg:col-span-1">
+              <Label>Honors</Label>
+              <Input
+                value={currentEducation.honors}
+                onChange={(e) =>
+                  setCurrentEducation((prev) => ({
+                    ...prev,
+                    honors: e.target.value,
+                  }))
+                }
+                placeholder="Magna Cum Laude"
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -996,12 +1080,12 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                   additionalInfo: e.target.value,
                 }))
               }
-              placeholder="Relevant coursework, extracurricular activities, etc."
+              placeholder="Relevant coursework, projects, etc..."
               className="min-h-[80px]"
             />
           </div>
 
-          <Button onClick={addEducation} variant="outline" size="sm">
+          <Button onClick={addEducation} variant="outline" size="sm" className="w-full sm:w-auto">
             <Plus className="h-4 w-4 mr-2" />
             Add Education
           </Button>
@@ -1030,7 +1114,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
           <CardTitle className="text-lg">Certifications</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Certification Title</Label>
               <Input
@@ -1059,7 +1143,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Date Obtained</Label>
               <Input
@@ -1089,7 +1173,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             </div>
           </div>
 
-          <Button onClick={addCertification} variant="outline" size="sm">
+          <Button onClick={addCertification} variant="outline" size="sm" className="w-full sm:w-auto">
             <Plus className="h-4 w-4 mr-2" />
             Add Certification
           </Button>
@@ -1116,7 +1200,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
           <CardTitle className="text-lg">Projects</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Project Name</Label>
               <Input
@@ -1146,7 +1230,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
           </div>
 
           <div className="space-y-2">
-            <Label>Project Description</Label>
+            <Label>Description</Label>
             <Textarea
               value={currentProject.description}
               onChange={(e) =>
@@ -1155,8 +1239,8 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                   description: e.target.value,
                 }))
               }
-              placeholder="Describe the project, its objectives, and your contributions..."
-              className="min-h-[100px]"
+              placeholder="Brief description of the project..."
+              className="min-h-[80px]"
             />
           </div>
 
@@ -1195,7 +1279,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             ))}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Live Demo Link</Label>
               <Input
@@ -1226,7 +1310,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             </div>
           </div>
 
-          <Button onClick={addProject} variant="outline" size="sm">
+          <Button onClick={addProject} variant="outline" size="sm" className="w-full sm:w-auto">
             <Plus className="h-4 w-4 mr-2" />
             Add Project
           </Button>
@@ -1254,15 +1338,17 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
           <CardTitle className="text-lg">Interests</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Input
               value={interestInput}
               onChange={(e) => setInterestInput(e.target.value)}
               placeholder="Add an interest..."
               onKeyPress={(e) => e.key === "Enter" && addInterest()}
+              className="flex-1"
             />
-            <Button onClick={addInterest} size="sm" variant="outline">
-              <Plus className="h-4 w-4" />
+            <Button onClick={addInterest} size="sm" variant="outline" className="w-full sm:w-auto">
+              <Plus className="h-4 w-4 sm:mr-0 mr-2" />
+              <span className="sm:hidden">Add Interest</span>
             </Button>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -1284,8 +1370,8 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
       </Card>
 
       {/* Generate Button */}
-      <div className="flex justify-end gap-2 pt-4 border-t">
-        <Button variant="outline" onClick={onCancel}>
+      <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4 border-t">
+        <Button variant="outline" onClick={onCancel} className="w-full sm:w-auto order-2 sm:order-1">
           Cancel
         </Button>
         <Button
@@ -1295,7 +1381,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             !formData.personalInfo.jobTitle ||
             isGenerating
           }
-          className="resumaic-gradient-green hover:opacity-90  button-press"
+          className="resumaic-gradient-green hover:opacity-90 button-press w-full sm:w-auto order-1 sm:order-2"
         >
           {isGenerating ? (
             <>
