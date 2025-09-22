@@ -11,6 +11,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../..
 import { User, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "../../../lib/redux/hooks"
 import { registerUser, clearError, loginWithLinkedIn, loginWithGoogle, setCredentials } from "../../../lib/redux/slices/authSlice"
+import { validateEmailAPI } from "../../../lib/utils/email-validation"
+import { showErrorToast } from "../../../components/ui/toast"
 import Image from "next/image"
 function useSafeSearchParams() {
   try {
@@ -254,6 +256,20 @@ export default function SignUpPage() {
 
     if (password !== confirmPassword) {
       setPasswordError("Passwords do not match")
+      return
+    }
+
+    // Validate email before proceeding with registration
+    try {
+      const emailValidation = await validateEmailAPI(email)
+      
+      if (!emailValidation.success) {
+        showErrorToast(emailValidation.error || "Email validation failed")
+        return
+      }
+    } catch (error) {
+      console.error("Email validation error:", error)
+      showErrorToast("Unable to verify email. Please try again.")
       return
     }
 
