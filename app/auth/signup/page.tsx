@@ -30,6 +30,7 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [passwordError, setPasswordError] = useState("")
+  const [emailError, setEmailError] = useState("")
   const [apiError, setApiError] = useState("")
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({})
   const [linkedInLoading, setLinkedInLoading] = useState(false)
@@ -208,7 +209,7 @@ export default function SignUpPage() {
                   source: "google",
                 };
                 localStorage.setItem("user", JSON.stringify(user));
-                dispatch(setCredentials({ token, user }));
+                dispatch(setCredentials({ token,user }));
               }
             }
             const cleanUrl = window.location.pathname;
@@ -264,11 +265,13 @@ export default function SignUpPage() {
       const emailValidation = await validateEmailAPI(email)
       
       if (!emailValidation.success) {
-        showErrorToast(emailValidation.error || "Email validation failed")
+        setEmailError("Please enter a valid email address")
+        showErrorToast("Email validation failed. Please enter your valid email address.")
         return
       }
     } catch (error) {
       console.error("Email validation error:", error)
+      setEmailError("Unable to verify email")
       showErrorToast("Unable to verify email. Please try again.")
       return
     }
@@ -339,12 +342,16 @@ export default function SignUpPage() {
                       id="email"
                       type="email"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => {
+                        setEmail(e.target.value)
+                        if (emailError) setEmailError("")
+                      }}
                       placeholder="john@example.com"
-                      className="pl-10"
+                      className={`pl-10 ${emailError ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
                       required
                     />
                   </div>
+                 
                 </div>
 
                 <div className="space-y-2">

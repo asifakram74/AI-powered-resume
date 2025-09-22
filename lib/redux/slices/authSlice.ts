@@ -149,8 +149,7 @@ export const deleteAccount = createAsyncThunk(
 
 const authSlice = createSlice({
   name: "auth",
-  initialState,
-  reducers: {
+  initialState,  reducers: {
     clearAuth: (state) => {
       localStorage.removeItem("token")
       localStorage.removeItem("user")
