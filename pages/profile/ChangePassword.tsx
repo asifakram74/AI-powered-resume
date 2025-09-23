@@ -71,7 +71,7 @@ export function ChangePassword({
     }
     onOpenChange(open)
   }
-const handleCancel = () => {
+  const handleCancel = () => {
     resetForm()
     onOpenChange(false) // This will close the dialog
     onCancel?.() // Optional callback if provided
@@ -236,9 +236,9 @@ const handleCancel = () => {
             >
               Cancel
             </Button>
-            <Button 
-            className="resumaic-gradient-green hover:opacity-90  button-press"
-            type="submit" disabled={isLoading}>
+            <Button
+              className="resumaic-gradient-green hover:opacity-90  button-press"
+              type="submit" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />

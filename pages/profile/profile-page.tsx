@@ -59,62 +59,62 @@ export function ProfilePage() {
     }
   })
 
- useEffect(() => { 
-  const checkAndLoadProfile = async () => {
-    try {
-      // setIsLoading(true)
+  useEffect(() => {
+    const checkAndLoadProfile = async () => {
+      try {
+        // setIsLoading(true)
 
-      if (profile && user && profile.email !== user.email) {
-        dispatch(clearProfile())
-        await dispatch(fetchProfile()).unwrap()
-      } else if (!profile) {
-        await dispatch(fetchProfile()).unwrap()
+        if (profile && user && profile.email !== user.email) {
+          dispatch(clearProfile())
+          await dispatch(fetchProfile()).unwrap()
+        } else if (!profile) {
+          await dispatch(fetchProfile()).unwrap()
+        }
+
+        if (user?.id) {
+          const [personas, cvs, coverLetters, atsResumes] = await Promise.all([
+            getPersonas(user.id.toString()),
+            getCVs(user.id.toString()),
+            getCoverLetters(user.id.toString()),
+            getATSResumes(),
+          ])
+
+          setStats([
+            {
+              label: "Resumes Created",
+              value: cvs.length,
+              icon: FileText,
+              color: "text-blue-600",
+            },
+            {
+              label: "Cover Letters",
+              value: coverLetters.length,
+              icon: Mail,
+              color: "text-green-600",
+            },
+            {
+              label: "ATS Checks",
+              value: atsResumes.length,
+              icon: Target,
+              color: "text-orange-600",
+            },
+            {
+              label: "Personas Generated",
+              value: personas.length,
+              icon: UserCircle,
+              color: "text-purple-600",
+            },
+          ])
+        }
+
+        hasLoaded.current = true
+      } finally {
+        setIsLoading(false)
       }
-
-      if (user?.id) {
-        const [personas, cvs, coverLetters, atsResumes] = await Promise.all([
-          getPersonas(user.id.toString()),
-          getCVs(user.id.toString()),
-          getCoverLetters(user.id.toString()),
-          getATSResumes(),
-        ])
-
-        setStats([
-          {
-            label: "Resumes Created",
-            value: cvs.length,
-            icon: FileText,
-            color: "text-blue-600",
-          },
-          {
-            label: "Cover Letters",
-            value: coverLetters.length,
-            icon: Mail,
-            color: "text-green-600",
-          },
-          {
-            label: "ATS Checks",
-            value: atsResumes.length,
-            icon: Target,
-            color: "text-orange-600",
-          },
-          {
-            label: "Personas Generated",
-            value: personas.length,
-            icon: UserCircle,
-            color: "text-purple-600",
-          },
-        ])
-      }
-
-      hasLoaded.current = true
-    } finally {
-      setIsLoading(false)
     }
-  }
 
-  checkAndLoadProfile()
-}, [profile, user, dispatch])
+    checkAndLoadProfile()
+  }, [profile, user, dispatch])
 
 
   useEffect(() => {

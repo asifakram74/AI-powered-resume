@@ -21,7 +21,7 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
         router.push("/auth/signin")
         return
       }
-      
+
       // Redirect if doesn't have required role
       if (requiredRole && user.role !== requiredRole) {
         router.push("/dashboard")

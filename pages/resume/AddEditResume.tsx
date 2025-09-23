@@ -93,44 +93,44 @@ export function CVWizard({
 
   const currentPersonaId = watch("personas_id");
 
-useEffect(() => {
-  const loadPersonas = async () => {
-    // For admin users, we don't need user.id to fetch all personas
-    if (!user?.id && user?.role?.toLowerCase() !== 'admin') return;
-    
-    setIsLoading(true);
-    try {
-      let data;
-      
-      // Conditionally call different APIs based on user role
-      if (user?.role?.toLowerCase() === 'admin') {
-        data = await getAllPersonas(); // API for admin users
-      } else {
-        data = await getPersonas(user.id.toString()); // API for regular users
-      }
-      
-      console.log("Fetched personas:", data);
-      setPersonas(data);
-      setApiError(null);
+  useEffect(() => {
+    const loadPersonas = async () => {
+      // For admin users, we don't need user.id to fetch all personas
+      if (!user?.id && user?.role?.toLowerCase() !== 'admin') return;
 
-      if (personaId || editingCV?.personas_id) {
-        const personaExists = data.some(
-          (p) => p.id.toString() === (personaId || editingCV?.personas_id)
-        );
-        if (!personaExists) {
-          console.warn("Specified persona not found in fetched list");
+      setIsLoading(true);
+      try {
+        let data;
+
+        // Conditionally call different APIs based on user role
+        if (user?.role?.toLowerCase() === 'admin') {
+          data = await getAllPersonas(); // API for admin users
+        } else {
+          data = await getPersonas(user.id.toString()); // API for regular users
         }
+
+        console.log("Fetched personas:", data);
+        setPersonas(data);
+        setApiError(null);
+
+        if (personaId || editingCV?.personas_id) {
+          const personaExists = data.some(
+            (p) => p.id.toString() === (personaId || editingCV?.personas_id)
+          );
+          if (!personaExists) {
+            console.warn("Specified persona not found in fetched list");
+          }
+        }
+      } catch (error) {
+        console.error("Error loading personas:", error);
+        setApiError("Failed to load personas. Please try again.");
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Error loading personas:", error);
-      setApiError("Failed to load personas. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  loadPersonas();
-}, [user?.id, user?.role, personaId, editingCV?.personas_id]);
+    };
+
+    loadPersonas();
+  }, [user?.id, user?.role, personaId, editingCV?.personas_id]);
 
   const handleTemplateSelect = (template: CVTemplate) => {
     setSelectedTemplate(template);
@@ -315,45 +315,45 @@ useEffect(() => {
               </div>
             </div>
             <div className="space-y-2">
-  <Label htmlFor="job_description">Job Description *</Label>
-  <Textarea
-    id="job_description"
-    {...register("job_description", {
-      required: "Job description is required",
-      validate: (value) => {
-        // Trim spaces
-        const input = value.trim();
+              <Label htmlFor="job_description">Job Description *</Label>
+              <Textarea
+                id="job_description"
+                {...register("job_description", {
+                  required: "Job description is required",
+                  validate: (value) => {
+                    // Trim spaces
+                    const input = value.trim();
 
-        // Minimum length check
-        if (input.length < 30) {
-          return "Job description must be at least 30 characters long.";
-        }
+                    // Minimum length check
+                    if (input.length < 30) {
+                      return "Job description must be at least 30 characters long.";
+                    }
 
-        // Word count check
-        if (input.split(/\s+/).length < 3) {
-          return "Please provide a more detailed job description (at least 3 words).";
-        }
+                    // Word count check
+                    if (input.split(/\s+/).length < 3) {
+                      return "Please provide a more detailed job description (at least 3 words).";
+                    }
 
-        // Regex: reject ONLY numbers or ONLY special chars
-        const onlyNumbers = /^[0-9\s]+$/.test(input);
-        const onlySymbols = /^[^a-zA-Z0-9]+$/.test(input);
-        if (onlyNumbers || onlySymbols) {
-          return "Invalid job description. Please provide meaningful text.";
-        }
+                    // Regex: reject ONLY numbers or ONLY special chars
+                    const onlyNumbers = /^[0-9\s]+$/.test(input);
+                    const onlySymbols = /^[^a-zA-Z0-9]+$/.test(input);
+                    if (onlyNumbers || onlySymbols) {
+                      return "Invalid job description. Please provide meaningful text.";
+                    }
 
-        return true; // ✅ valid input
-      },
-    })}
-    placeholder="Enter the job description..."
-    className="min-h-[200px]"
-    rows={10}
-  />
-  {errors.job_description && (
-    <p className="text-sm text-red-600">
-      {errors.job_description.message}
-    </p>
-  )}
-</div>
+                    return true; // ✅ valid input
+                  },
+                })}
+                placeholder="Enter the job description..."
+                className="min-h-[200px]"
+                rows={10}
+              />
+              {errors.job_description && (
+                <p className="text-sm text-red-600">
+                  {errors.job_description.message}
+                </p>
+              )}
+            </div>
 
           </CardContent>
         </Card>

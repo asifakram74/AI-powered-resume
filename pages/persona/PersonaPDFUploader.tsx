@@ -70,14 +70,14 @@ const PDFUploader = ({ onDataExtracted }: PDFUploaderProps) => {
     try {
       console.log('Making request to:', 'https://backendserver.resumaic.com/api/parse-resume');
       console.log('Request payload size:', JSON.stringify({ extractedText: text }).length);
-      
+
       try {
         const testResponse = await fetch('https://backendserver.resumaic.com', { method: 'HEAD' });
         console.log('Server reachable:', testResponse.ok);
       } catch (testError) {
         console.error('Server not reachable:', testError);
       }
-      
+
       const response = await fetch('https://backendserver.resumaic.com/api/parse-resume', {
         method: 'POST',
         headers: {
@@ -87,20 +87,20 @@ const PDFUploader = ({ onDataExtracted }: PDFUploaderProps) => {
           extractedText: text,
         }),
       });
-  
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-  
+
       const result = await response.json();
-      
+
       if (result.error) {
         throw new Error(result.error);
       }
-      
+
       // Log the raw DeepSeek response
       console.log('Raw DeepSeek Response:', JSON.stringify(result, null, 2));
-      
+
       // Transform the API response into our CVData format
       const transformedData: Partial<Omit<CVData, "id" | "createdAt">> = {
         personalInfo: {
@@ -116,73 +116,73 @@ const PDFUploader = ({ onDataExtracted }: PDFUploaderProps) => {
           linkedin: result.personalInfo?.linkedin || "",
           github: result.personalInfo?.github || "",
         },
-        experience: Array.isArray(result.experience) 
+        experience: Array.isArray(result.experience)
           ? result.experience.map((exp: any, index: number) => ({
-              id: index.toString(),
-              jobTitle: exp.jobTitle || "",
-              companyName: exp.companyName || "",
-              location: exp.location || "",
-              startDate: exp.startDate || "",
-              endDate: exp.endDate || "",
-              current: exp.current || false,
-              responsibilities: exp.responsibilities || [],
-            }))
+            id: index.toString(),
+            jobTitle: exp.jobTitle || "",
+            companyName: exp.companyName || "",
+            location: exp.location || "",
+            startDate: exp.startDate || "",
+            endDate: exp.endDate || "",
+            current: exp.current || false,
+            responsibilities: exp.responsibilities || [],
+          }))
           : [],
         education: Array.isArray(result.education)
           ? result.education.map((edu: any, index: number) => ({
-              id: index.toString(),
-              degree: edu.degree || "",
-              institutionName: edu.institutionName || "",
-              location: edu.location || "",
-              graduationDate: edu.graduationDate || "",
-              gpa: edu.gpa || "",
-              honors: edu.honors || "",
-              additionalInfo: edu.additionalInfo || "",
-            }))
+            id: index.toString(),
+            degree: edu.degree || "",
+            institutionName: edu.institutionName || "",
+            location: edu.location || "",
+            graduationDate: edu.graduationDate || "",
+            gpa: edu.gpa || "",
+            honors: edu.honors || "",
+            additionalInfo: edu.additionalInfo || "",
+          }))
           : [],
         skills: {
-          technical: Array.isArray(result.skills?.technical) 
-            ? removeDuplicates(result.skills.technical) 
+          technical: Array.isArray(result.skills?.technical)
+            ? removeDuplicates(result.skills.technical)
             : [],
-          soft: Array.isArray(result.skills?.soft) 
-            ? removeDuplicates(result.skills.soft) 
+          soft: Array.isArray(result.skills?.soft)
+            ? removeDuplicates(result.skills.soft)
             : [],
         },
         languages: Array.isArray(result.languages)
           ? result.languages.map((lang: any, index: number) => ({
-              id: index.toString(),
-              name: lang.name || "",
-              proficiency: lang.proficiency || "Intermediate",
-            }))
+            id: index.toString(),
+            name: lang.name || "",
+            proficiency: lang.proficiency || "Intermediate",
+          }))
           : [],
         certifications: Array.isArray(result.certifications)
           ? result.certifications.map((cert: any, index: number) => ({
-              id: index.toString(),
-              title: cert.title || "",
-              issuingOrganization: cert.issuingOrganization || "",
-              dateObtained: cert.dateObtained || "",
-              verificationLink: cert.verificationLink || "",
-            }))
+            id: index.toString(),
+            title: cert.title || "",
+            issuingOrganization: cert.issuingOrganization || "",
+            dateObtained: cert.dateObtained || "",
+            verificationLink: cert.verificationLink || "",
+          }))
           : [],
         projects: Array.isArray(result.projects)
           ? result.projects.map((project: any, index: number) => ({
-              id: index.toString(),
-              name: project.name || "",
-              role: project.role || "Developer",
-              description: project.description || "",
-              technologies: Array.isArray(project.technologies) ? project.technologies : [],
-              liveDemoLink: project.liveDemoLink || "",
-              githubLink: project.githubLink || "",
-            }))
+            id: index.toString(),
+            name: project.name || "",
+            role: project.role || "Developer",
+            description: project.description || "",
+            technologies: Array.isArray(project.technologies) ? project.technologies : [],
+            liveDemoLink: project.liveDemoLink || "",
+            githubLink: project.githubLink || "",
+          }))
           : [],
         additional: {
           interests: Array.isArray(result.additional?.interests) ? result.additional.interests : [],
         },
       };
-  
+
       // Log the transformed data
       console.log('Transformed Data:', JSON.stringify(transformedData, null, 2));
-      
+
       return transformedData;
     } catch (error) {
       console.error("DeepSeek analysis error:", error);

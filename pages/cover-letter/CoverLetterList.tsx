@@ -399,168 +399,168 @@ export function CoverLetterPage({ user }: PageProps) {
               </Button>
             </DialogTrigger>
             <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
-            <DialogHeader>
-              <DialogTitle>
-                {isViewMode ? "View Cover Letter" : editingLetter ? "Edit Cover Letter" : "Generate AI Cover Letter"}
-              </DialogTitle>
-              <DialogDescription>
-                {showGenerator
-                  ? "Provide job details to generate a personalized cover letter with AI"
-                  : isViewMode
-                    ? "Review your AI-generated cover letter"
-                    : "Review and edit your AI-generated cover letter"}
-              </DialogDescription>
-            </DialogHeader>
+              <DialogHeader>
+                <DialogTitle>
+                  {isViewMode ? "View Cover Letter" : editingLetter ? "Edit Cover Letter" : "Generate AI Cover Letter"}
+                </DialogTitle>
+                <DialogDescription>
+                  {showGenerator
+                    ? "Provide job details to generate a personalized cover letter with AI"
+                    : isViewMode
+                      ? "Review your AI-generated cover letter"
+                      : "Review and edit your AI-generated cover letter"}
+                </DialogDescription>
+              </DialogHeader>
 
-            {showGenerator ? (
-              <CoverLetterGenerator onGenerate={handleGenerate} isGenerating={isGenerating} cvs={cvs} />
-            ) : (
-              <div className="space-y-6">
-                {analysisResult && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Sparkles className="h-5 w-5" />
-                        AI Analysis Results
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                          <Label className="text-sm font-medium">Score</Label>
-                          <Badge variant="default" className="ml-2">
-                            {analysisResult.score}/100
-                          </Badge>
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium">Keywords</Label>
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {analysisResult.keywords?.map((keyword: string) => (
-                              <Badge key={keyword} variant="secondary" className="text-xs">
-                                {keyword}
-                              </Badge>
-                            ))}
+              {showGenerator ? (
+                <CoverLetterGenerator onGenerate={handleGenerate} isGenerating={isGenerating} cvs={cvs} />
+              ) : (
+                <div className="space-y-6">
+                  {analysisResult && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Sparkles className="h-5 w-5" />
+                          AI Analysis Results
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <Label className="text-sm font-medium">Score</Label>
+                            <Badge variant="default" className="ml-2">
+                              {analysisResult.score}/100
+                            </Badge>
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium">Keywords</Label>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {analysisResult.keywords?.map((keyword: string) => (
+                                <Badge key={keyword} variant="secondary" className="text-xs">
+                                  {keyword}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium">Tone</Label>
+                            <Badge variant="outline" className="ml-2">
+                              {analysisResult.tone}
+                            </Badge>
                           </div>
                         </div>
-                        <div>
-                          <Label className="text-sm font-medium">Tone</Label>
-                          <Badge variant="outline" className="ml-2">
-                            {analysisResult.tone}
-                          </Badge>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-                <div className="space-y-4">
-                  <div>
-                    <Label className="text-sm font-medium">Tone</Label>
-                    {isViewMode ? (
-                      <Badge variant="outline" className="ml-2">
-                        {currentTone}
-                      </Badge>
-                    ) : (
-                      <Select value={currentTone} onValueChange={setCurrentTone} disabled={isViewMode}>
-                        <SelectTrigger className="w-[180px] mt-1">
-                          <SelectValue placeholder="Select tone" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {tones.map(
-                            (tone: {
-                              id: string
-                              name: string
-                              description: string
-                              example: string
-                            }) => (
-                              <SelectItem key={tone.id} value={tone.id}>
-                                {tone.name}
-                              </SelectItem>
-                            ),
-                          )}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </div>
-                  <div>
-                    <Label className="text-sm font-medium">{isViewMode ? "Cover Letter" : "Edit Cover Letter"}</Label>
-                    <Textarea
-                      value={generatedLetter}
-                      rows={10}
-
-                      onChange={(e) => !isViewMode && setGeneratedLetter(e.target.value)}
-                      className="min-h-[400px] mt-2"
-                      placeholder="Your cover letter will appear here..."
-                      readOnly={isViewMode}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex justify-end items-center space-x-1">
-                  {(!editingLetter || isViewMode) && (
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        if (isViewMode) {
-                          setIsDialogOpen(false)
-                          setViewingLetter(null)
-                          setIsViewMode(false)
-                        } else {
-                          setShowGenerator(true)
-                          setGeneratedLetter("")
-                          setAnalysisResult(null)
-                          setEditingLetter(null)
-                        }
-                      }}
-                    >
-                      {isViewMode ? "Close" : "Back to Generator"}
-                    </Button>
+                      </CardContent>
+                    </Card>
                   )}
 
-                  {!isViewMode && (
-                    <div className="flex gap-2">
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-sm font-medium">Tone</Label>
+                      {isViewMode ? (
+                        <Badge variant="outline" className="ml-2">
+                          {currentTone}
+                        </Badge>
+                      ) : (
+                        <Select value={currentTone} onValueChange={setCurrentTone} disabled={isViewMode}>
+                          <SelectTrigger className="w-[180px] mt-1">
+                            <SelectValue placeholder="Select tone" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {tones.map(
+                              (tone: {
+                                id: string
+                                name: string
+                                description: string
+                                example: string
+                              }) => (
+                                <SelectItem key={tone.id} value={tone.id}>
+                                  {tone.name}
+                                </SelectItem>
+                              ),
+                            )}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium">{isViewMode ? "Cover Letter" : "Edit Cover Letter"}</Label>
+                      <Textarea
+                        value={generatedLetter}
+                        rows={10}
+
+                        onChange={(e) => !isViewMode && setGeneratedLetter(e.target.value)}
+                        className="min-h-[400px] mt-2"
+                        placeholder="Your cover letter will appear here..."
+                        readOnly={isViewMode}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end items-center space-x-1">
+                    {(!editingLetter || isViewMode) && (
                       <Button
                         variant="outline"
                         onClick={() => {
-                          const tempLetter = {
-                            ...(editingLetter || {}),
-                            generated_letter: generatedLetter,
-                            job_description: currentJobDescription,
-                            tone: currentTone,
-                          } as CoverLetter
-                          handleDownload(tempLetter)
+                          if (isViewMode) {
+                            setIsDialogOpen(false)
+                            setViewingLetter(null)
+                            setIsViewMode(false)
+                          } else {
+                            setShowGenerator(true)
+                            setGeneratedLetter("")
+                            setAnalysisResult(null)
+                            setEditingLetter(null)
+                          }
                         }}
                       >
-                        <Download className="h-4 w-4 mr-2" />
-                        Download
+                        {isViewMode ? "Close" : "Back to Generator"}
                       </Button>
-                      <Button onClick={handleSaveLetter} className="resumaic-gradient-green hover:opacity-90  button-press">
-                        <FileText className="h-4 w-4 mr-2" />
-                        {editingLetter ? "Update Cover Letter" : "Save Cover Letter"}
-                      </Button>
-                    </div>
-                  )}
+                    )}
 
-                  {isViewMode && viewingLetter && (
-                    <div className="flex gap-2">
-                      <Button variant="outline" onClick={() => handleDownload(viewingLetter)}>
-                        <Download className="h-4 w-4 mr-2" />
-                        Download
-                      </Button>
-                      <Button
-                        onClick={() => handleEdit(viewingLetter)}
-                        className="resumaic-gradient-green hover:opacity-90  button-press"
-                      >
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
-                      </Button>
-                    </div>
-                  )}
+                    {!isViewMode && (
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            const tempLetter = {
+                              ...(editingLetter || {}),
+                              generated_letter: generatedLetter,
+                              job_description: currentJobDescription,
+                              tone: currentTone,
+                            } as CoverLetter
+                            handleDownload(tempLetter)
+                          }}
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Download
+                        </Button>
+                        <Button onClick={handleSaveLetter} className="resumaic-gradient-green hover:opacity-90  button-press">
+                          <FileText className="h-4 w-4 mr-2" />
+                          {editingLetter ? "Update Cover Letter" : "Save Cover Letter"}
+                        </Button>
+                      </div>
+                    )}
+
+                    {isViewMode && viewingLetter && (
+                      <div className="flex gap-2">
+                        <Button variant="outline" onClick={() => handleDownload(viewingLetter)}>
+                          <Download className="h-4 w-4 mr-2" />
+                          Download
+                        </Button>
+                        <Button
+                          onClick={() => handleEdit(viewingLetter)}
+                          className="resumaic-gradient-green hover:opacity-90  button-press"
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
+              )}
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 

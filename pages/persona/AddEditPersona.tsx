@@ -19,7 +19,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import type { CVData } from "../../types/cv-data";
-import PDFUploader  from "./PersonaPDFUploader";
+import PDFUploader from "./PersonaPDFUploader";
 
 interface PersonaCreationOptionsProps {
   onOptionSelect: (
@@ -58,12 +58,11 @@ export function PersonaCreationOptions({
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Manual Entry Option */}
-        <Card 
-          className={`cursor-pointer hover:shadow-lg transition-shadow border-2 ${
-            selectedOption === "manual" 
-              ? "border-[#70E4A8]" 
+        <Card
+          className={`cursor-pointer hover:shadow-lg transition-shadow border-2 ${selectedOption === "manual"
+              ? "border-[#70E4A8]"
               : "hover:border-[#70E4A8]/50 border-gray-200"
-          }`}
+            }`}
           onClick={() => setSelectedOption("manual")}
         >
           <CardHeader className="text-center">
@@ -78,7 +77,7 @@ export function PersonaCreationOptions({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button 
+            <Button
               className="w-full resumaic-gradient-green hover:opacity-90 hover-lift button-press"
               onClick={() => onOptionSelect("manual")}
             >
@@ -91,12 +90,11 @@ export function PersonaCreationOptions({
         </Card>
 
         {/* PDF Upload Option */}
-        <Card 
-          className={`cursor-pointer hover:shadow-lg transition-shadow border-2 ${
-            selectedOption === "pdf" 
-              ? "border-[#70E4A8]" 
+        <Card
+          className={`cursor-pointer hover:shadow-lg transition-shadow border-2 ${selectedOption === "pdf"
+              ? "border-[#70E4A8]"
               : "hover:border-[#70E4A8]/50 border-gray-200"
-          }`}
+            }`}
           onClick={() => setSelectedOption("pdf")}
         >
           <CardHeader className="text-center">
@@ -115,7 +113,7 @@ export function PersonaCreationOptions({
               <>
                 <PDFUploader onDataExtracted={handleDataExtracted} />
                 {extractedData && (
-                  <Button 
+                  <Button
                     className="w-full resumaic-gradient-green hover:opacity-90 hover-lift button-press"
                     onClick={handleContinueWithPDF}
                   >
@@ -124,7 +122,7 @@ export function PersonaCreationOptions({
                 )}
               </>
             ) : (
-              <Button 
+              <Button
                 className="w-full resumaic-gradient-green hover:opacity-90 hover-lift button-press"
                 onClick={() => setSelectedOption("pdf")}
               >
@@ -144,7 +142,7 @@ export function PersonaCreationOptions({
               Coming Soon
             </span>
           </div>
-          
+
           <CardHeader className="text-center">
             <div className="mx-auto w-12 h-12 bg-[#EA580C]/20 rounded-lg flex items-center justify-center mb-3">
               <Linkedin className="h-6 w-6 text-[#EA580C]" />

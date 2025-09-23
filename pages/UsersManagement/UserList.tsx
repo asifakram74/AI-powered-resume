@@ -161,13 +161,13 @@ export function UserList({ user }: PageProps) {
       setUsersData((prev) =>
         prev
           ? {
-              ...prev,
-              users: {
-                ...prev.users,
-                data: prev.users.data.filter((u) => u.id !== user.id),
-                total: prev.users.total - 1,
-              },
-            }
+            ...prev,
+            users: {
+              ...prev.users,
+              data: prev.users.data.filter((u) => u.id !== user.id),
+              total: prev.users.total - 1,
+            },
+          }
           : null,
       )
       toast.success("User deleted successfully")
@@ -183,12 +183,12 @@ export function UserList({ user }: PageProps) {
       setUsersData((prev) =>
         prev
           ? {
-              ...prev,
-              users: {
-                ...prev.users,
-                data: prev.users.data.map((u) => (u.id === userId ? updatedUser : u)),
-              },
-            }
+            ...prev,
+            users: {
+              ...prev.users,
+              data: prev.users.data.map((u) => (u.id === userId ? updatedUser : u)),
+            },
+          }
           : null,
       )
       toast.success("Email verified successfully")
@@ -201,18 +201,18 @@ export function UserList({ user }: PageProps) {
   const handleUserSaved = async (userData: CreateUserData | UpdateUserData) => {
     try {
       setIsLoading(true)
-  
+
       if (editingUser) {
         // Just update local state after successful update
         setUsersData((prev) =>
           prev
             ? {
-                ...prev,
-                users: {
-                  ...prev.users,
-                  data: prev.users.data.map((u) => (u.id === editingUser.id ? { ...u, ...userData } : u)),
-                },
-              }
+              ...prev,
+              users: {
+                ...prev.users,
+                data: prev.users.data.map((u) => (u.id === editingUser.id ? { ...u, ...userData } : u)),
+              },
+            }
             : null,
         )
         toast.success("User updated successfully")
@@ -222,7 +222,7 @@ export function UserList({ user }: PageProps) {
         setUsersData(refreshedData)
         toast.success("User created successfully")
       }
-  
+
       setIsDialogOpen(false)
       setEditingUser(null)
     } catch (error) {
@@ -232,7 +232,7 @@ export function UserList({ user }: PageProps) {
       setIsLoading(false)
     }
   }
-  
+
 
   const toggleUserStatus = async (user: User) => {
     const newStatus = user.status === "active" ? "inactive" : "active"
@@ -241,12 +241,12 @@ export function UserList({ user }: PageProps) {
       setUsersData((prev) =>
         prev
           ? {
-              ...prev,
-              users: {
-                ...prev.users,
-                data: prev.users.data.map((u) => (u.id === user.id ? updatedUser : u)),
-              },
-            }
+            ...prev,
+            users: {
+              ...prev.users,
+              data: prev.users.data.map((u) => (u.id === user.id ? updatedUser : u)),
+            },
+          }
           : null,
       )
       toast.success(`User status updated to ${newStatus}`)
@@ -283,85 +283,85 @@ export function UserList({ user }: PageProps) {
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-0">
-  {/* Left Section (icon + title + description) */}
-  <div className="flex flex-col items-center lg:flex-row lg:items-center lg:gap-3 text-center lg:text-left">
-    <div className="flex h-12 w-12 items-center justify-center rounded-lg resumaic-gradient-green text-white hover:opacity-90 button-press mb-2 lg:mb-0">
-      <UserIcon className="h-6 w-6" />
-    </div>
+        {/* Left Section (icon + title + description) */}
+        <div className="flex flex-col items-center lg:flex-row lg:items-center lg:gap-3 text-center lg:text-left">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg resumaic-gradient-green text-white hover:opacity-90 button-press mb-2 lg:mb-0">
+            <UserIcon className="h-6 w-6" />
+          </div>
 
-    <div>
-      <h1 className="text-2xl lg:text-3xl font-bold text-[#2D3639] font-sans">
-        User Management
-      </h1>
-      <p className="text-gray-600 font-sans text-sm lg:text-base mt-1 lg:mt-0">
-        Manage all system users
-      </p>
-    </div>
-  </div>
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold text-[#2D3639] font-sans">
+              User Management
+            </h1>
+            <p className="text-gray-600 font-sans text-sm lg:text-base mt-1 lg:mt-0">
+              Manage all system users
+            </p>
+          </div>
+        </div>
 
-  {/* Right Section (button) */}
- <div className="flex justify-center lg:justify-end">
-  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-    <DialogTrigger asChild>
-      <Button
-        className="resumaic-gradient-green hover:opacity-90 button-press text-white"
-        onClick={() => {
-          setEditingUser(null);
-          setIsDialogOpen(true);
-        }}
-      >
-        <Plus className="h-4 w-4 mr-2" />
-        Add User
-      </Button>
-    </DialogTrigger>
+        {/* Right Section (button) */}
+        <div className="flex justify-center lg:justify-end">
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button
+                className="resumaic-gradient-green hover:opacity-90 button-press text-white"
+                onClick={() => {
+                  setEditingUser(null);
+                  setIsDialogOpen(true);
+                }}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add User
+              </Button>
+            </DialogTrigger>
 
-    <DialogContent
-      className="
+            <DialogContent
+              className="
         w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw]
         !max-w-none max-h-[90vh] overflow-x-auto
       "
-    >
-      <DialogHeader>
-        <DialogTitle className="font-sans text-[#2D3639]">
-          {editingUser ? "Edit User" : "Create New User"}
-        </DialogTitle>
-        <DialogDescription className="font-sans">
-          {editingUser
-            ? "Update user details below"
-            : "Fill in the user details below"}
-        </DialogDescription>
-      </DialogHeader>
+            >
+              <DialogHeader>
+                <DialogTitle className="font-sans text-[#2D3639]">
+                  {editingUser ? "Edit User" : "Create New User"}
+                </DialogTitle>
+                <DialogDescription className="font-sans">
+                  {editingUser
+                    ? "Update user details below"
+                    : "Fill in the user details below"}
+                </DialogDescription>
+              </DialogHeader>
 
-      <UserForm
-        mode={editingUser ? "edit" : "create"}
-        userId={editingUser?.id}
-        initialData={
-          editingUser
-            ? {
-                name: editingUser.name,
-                email: editingUser.email,
-                role: editingUser.role,
-                status: editingUser.status,
-                plan: editingUser.plan,
-                plan_type: editingUser.plan_type,
-                dark_mode: editingUser.dark_mode,
-                language: editingUser.language,
-                push_notifications: editingUser.push_notifications,
-                email_updates: editingUser.email_updates,
-              }
-            : undefined
-        }
-        onSave={handleUserSaved}
-        onCancel={() => {
-          setIsDialogOpen(false);
-          setEditingUser(null);
-        }}
-      />
-    </DialogContent>
-  </Dialog>
-</div>
+              <UserForm
+                mode={editingUser ? "edit" : "create"}
+                userId={editingUser?.id}
+                initialData={
+                  editingUser
+                    ? {
+                      name: editingUser.name,
+                      email: editingUser.email,
+                      role: editingUser.role,
+                      status: editingUser.status,
+                      plan: editingUser.plan,
+                      plan_type: editingUser.plan_type,
+                      dark_mode: editingUser.dark_mode,
+                      language: editingUser.language,
+                      push_notifications: editingUser.push_notifications,
+                      email_updates: editingUser.email_updates,
+                    }
+                    : undefined
+                }
+                onSave={handleUserSaved}
+                onCancel={() => {
+                  setIsDialogOpen(false);
+                  setEditingUser(null);
+                }}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
 
-</div>
+      </div>
 
       {/* Users Table/Grid */}
       {getUsersArray().length > 0 && (
@@ -573,11 +573,10 @@ export function UserList({ user }: PageProps) {
                         <Label className="text-sm font-medium font-sans text-[#2D3639]">Status</Label>
                         <Badge
                           variant={user.status === "active" ? "default" : "destructive"}
-                          className={`cursor-pointer font-sans ${
-                            user.status === "active"
+                          className={`cursor-pointer font-sans ${user.status === "active"
                               ? "bg-[#70E4A8]/20 text-[#2D3639] hover:bg-[#70E4A8]/30"
                               : "bg-[#EA580C]/20 text-[#EA580C] hover:bg-[#EA580C]/30"
-                          }`}
+                            }`}
                           onClick={() => toggleUserStatus(user)}
                         >
                           {user.status}

@@ -164,7 +164,7 @@ const dashboardMenuItems = [
     icon: UserCircle,
     href: "/dashboard?page=profile",
   },
-   {
+  {
     id: "users",
     label: "Users",
     icon: UserCircle,
@@ -248,9 +248,8 @@ export function CVTemplates({
               return (
                 <Card
                   key={template.id}
-                  className={`cursor-pointer h-full w-full transition-all duration-200 hover:shadow-lg ${
-                    isSelected ? "ring-2 ring-blue-900 border-blue-900" : ""
-                  }`}
+                  className={`cursor-pointer h-full w-full transition-all duration-200 hover:shadow-lg ${isSelected ? "ring-2 ring-blue-900 border-blue-900" : ""
+                    }`}
                   onClick={() => onTemplateSelect(template)}
                 >
                   <CardHeader className="p-4">

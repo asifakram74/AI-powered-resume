@@ -340,7 +340,7 @@ export function PersonaForm({
 
     // Validate URLs
     if (formData.personalInfo.linkedin && !isValidUrl(formattedLinkedIn)) {
-    toast("Please enter a valid LinkedIn URL or leave it empty");
+      toast("Please enter a valid LinkedIn URL or leave it empty");
       setIsGenerating(false);
       return;
     }
@@ -367,45 +367,41 @@ export function PersonaForm({
 
     // Simulate API call
     setTimeout(() => {
-      const persona = `Professional Summary for ${
-        updatedFormData.personalInfo.fullName
-      }:
+      const persona = `Professional Summary for ${updatedFormData.personalInfo.fullName
+        }:
 
-As a ${updatedFormData.personalInfo.jobTitle} with ${
-        updatedFormData.experience.length
-      } years of professional experience, you bring a unique combination of technical expertise and leadership skills to drive organizational success.
+As a ${updatedFormData.personalInfo.jobTitle} with ${updatedFormData.experience.length
+        } years of professional experience, you bring a unique combination of technical expertise and leadership skills to drive organizational success.
 
 Professional Experience:
 ${updatedFormData.experience
-  .map(
-    (exp) =>
-      `• ${exp.jobTitle} at ${exp.companyName} (${exp.startDate} - ${
-        exp.current ? "Present" : exp.endDate
-      })`
-  )
-  .join("\n")}
+          .map(
+            (exp) =>
+              `• ${exp.jobTitle} at ${exp.companyName} (${exp.startDate} - ${exp.current ? "Present" : exp.endDate
+              })`
+          )
+          .join("\n")}
 
 Education:
 ${updatedFormData.education
-  .map((edu) => `• ${edu.degree} from ${edu.institutionName}`)
-  .join("\n")}
+          .map((edu) => `• ${edu.degree} from ${edu.institutionName}`)
+          .join("\n")}
 
 Core Technical Skills: ${updatedFormData.skills.technical.join(", ")}
 Soft Skills: ${updatedFormData.skills.soft.join(", ")}
 
 Languages: ${updatedFormData.languages
-        .map((lang) => `${lang.name} (${lang.proficiency})`)
-        .join(", ")}
+          .map((lang) => `${lang.name} (${lang.proficiency})`)
+          .join(", ")}
 
 Key Projects:
 ${updatedFormData.projects
-  .map((project) => `• ${project.name} - ${project.role}`)
-  .join("\n")}
+          .map((project) => `• ${project.name} - ${project.role}`)
+          .join("\n")}
 
 Career Objective:
-Seeking to leverage extensive experience in ${
-        updatedFormData.personalInfo.jobTitle
-      } to contribute to innovative projects and drive business growth in a dynamic technology environment.
+Seeking to leverage extensive experience in ${updatedFormData.personalInfo.jobTitle
+        } to contribute to innovative projects and drive business growth in a dynamic technology environment.
 
 Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
 
@@ -803,16 +799,16 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
               type="button"
               variant="outline"
               onClick={() => setCurrentExperience({
-                 jobTitle: "",
-                 companyName: "",
-                 location: "",
-                 employmentType: "",
-                 industry: "",
-                 startDate: "",
-                 endDate: "",
-                 current: false,
-                 responsibilities: [""]
-               })}
+                jobTitle: "",
+                companyName: "",
+                location: "",
+                employmentType: "",
+                industry: "",
+                startDate: "",
+                endDate: "",
+                current: false,
+                responsibilities: [""]
+              })}
               className="flex-1"
             >
               Clear

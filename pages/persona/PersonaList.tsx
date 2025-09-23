@@ -451,69 +451,69 @@ function CreatePersonaPage({ user }: PageProps) {
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
-   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0">
-  {/* Left Section */}
-  <div className="flex flex-col items-center sm:flex-row sm:items-center sm:gap-3 text-center sm:text-left">
-    <div className="flex h-12 w-12 items-center justify-center rounded-lg resumaic-gradient-green text-white mb-2 sm:mb-0">
-      <Sparkles className="h-6 w-6" />
-    </div>
-    <div>
-      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-        Create Personas
-      </h1>
-      <p className="text-gray-600 text-sm sm:text-base mt-1 sm:mt-0">
-        Generate professional personas from complete CV information
-      </p>
-    </div>
-  </div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0">
+        {/* Left Section */}
+        <div className="flex flex-col items-center sm:flex-row sm:items-center sm:gap-3 text-center sm:text-left">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg resumaic-gradient-green text-white mb-2 sm:mb-0">
+            <Sparkles className="h-6 w-6" />
+          </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              Create Personas
+            </h1>
+            <p className="text-gray-600 text-sm sm:text-base mt-1 sm:mt-0">
+              Generate professional personas from complete CV information
+            </p>
+          </div>
+        </div>
 
-  {/* Button Section */}
-  <div className="flex justify-center sm:justify-end">
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogTrigger asChild>
-        <Button
-          className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
-          onClick={() => {
-            setShowForm(false);
-            setPrefilledData(null);
-            setEditingPersona(null);
-            setIsDialogOpen(true);
-          }}
-        >
-          Create Persona
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {editingPersona ? 'Edit Persona' : 'Create New Persona'}
-          </DialogTitle>
-          <DialogDescription>
-            {editingPersona
-              ? 'Update the persona details below.'
-              : 'Create a new persona by filling in the details below.'}
-          </DialogDescription>
-        </DialogHeader>
+        {/* Button Section */}
+        <div className="flex justify-center sm:justify-end">
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button
+                className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
+                onClick={() => {
+                  setShowForm(false);
+                  setPrefilledData(null);
+                  setEditingPersona(null);
+                  setIsDialogOpen(true);
+                }}
+              >
+                Create Persona
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingPersona ? 'Edit Persona' : 'Create New Persona'}
+                </DialogTitle>
+                <DialogDescription>
+                  {editingPersona
+                    ? 'Update the persona details below.'
+                    : 'Create a new persona by filling in the details below.'}
+                </DialogDescription>
+              </DialogHeader>
 
-        {!showForm ? (
-          <PersonaCreationOptions onOptionSelect={handleOptionSelect} />
-        ) : (
-          <PersonaForm
-            prefilledData={prefilledData}
-            editingPersona={editingPersona}
-            onPersonaGenerated={handlePersonaGenerated}
-            onCancel={() => {
-              setIsDialogOpen(false);
-              setShowForm(false);
-              setPrefilledData(null);
-              setEditingPersona(null);
-            }}
-          />
-        )}
-      </DialogContent>
-    </Dialog>
-  </div>
-</div>
+              {!showForm ? (
+                <PersonaCreationOptions onOptionSelect={handleOptionSelect} />
+              ) : (
+                <PersonaForm
+                  prefilledData={prefilledData}
+                  editingPersona={editingPersona}
+                  onPersonaGenerated={handlePersonaGenerated}
+                  onCancel={() => {
+                    setIsDialogOpen(false);
+                    setShowForm(false);
+                    setPrefilledData(null);
+                    setEditingPersona(null);
+                  }}
+                />
+              )}
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
 
       {personas.length > 0 && (
         <>

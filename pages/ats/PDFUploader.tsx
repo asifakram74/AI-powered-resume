@@ -14,10 +14,10 @@ interface PDFUploaderProps {
   className?: string;
 }
 
-export const PDFUploader = ({ 
-  onExtractedText, 
+export const PDFUploader = ({
+  onExtractedText,
   onFileUploaded,
-  className 
+  className
 }: PDFUploaderProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -36,7 +36,7 @@ export const PDFUploader = ({
 
   const extractTextFromPDF = async (pdfFile: File) => {
     if (!pdfjs) return "";
-    
+
     try {
       const arrayBuffer = await pdfFile.arrayBuffer();
       const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;

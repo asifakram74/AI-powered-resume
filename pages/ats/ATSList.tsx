@@ -205,11 +205,10 @@ export function ATSListPage() {
                             <div className="flex items-center gap-3">
                               <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
                                 <AvatarFallback
-                                  className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${
-                                    user?.role === "admin"
+                                  className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${user?.role === "admin"
                                       ? ""
                                       : "bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]"
-                                  }`}
+                                    }`}
                                 >
                                   {user?.role === "admin" ? (
                                     <Crown className="h-5 w-5 text-[#EA580C]" />
@@ -302,11 +301,10 @@ export function ATSListPage() {
                         <div className="flex items-center gap-3">
                           <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
                             <AvatarFallback
-                              className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${
-                                user?.role === "admin"
+                              className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${user?.role === "admin"
                                   ? ""
                                   : "bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]"
-                              }`}
+                                }`}
                             >
                               {user?.role === "admin" ? (
                                 <Crown className="h-5 w-5 text-[#EA580C]" />

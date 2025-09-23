@@ -35,7 +35,7 @@ import * as htmlToImage from "html-to-image";
 import { jsPDF } from "jspdf";
 import { SidebarProvider } from "../../components/ui/sidebar";
 import { Sidebar } from "../../components/dashboard/sidebar";
-import  CreatePersonaPage  from "../../pages/persona/PersonaList";
+import CreatePersonaPage from "../../pages/persona/PersonaList";
 import { ResumePage } from "../../pages/resume/ResumeList";
 import { CoverLetterPage } from "../../pages/cover-letter/CoverLetterList";
 import ATSCheckerPage from "../../pages/ats/ats-checker-page";
@@ -499,9 +499,9 @@ export function CVPageClientContent() {
       case "cover-letter":
         return <CoverLetterPage user={user} />;
       case "ats-checker":
-        return <ATSCheckerPage  />;
+        return <ATSCheckerPage />;
       case "profile":
-        return <ProfilePage  />;
+        return <ProfilePage />;
       default:
         return <CreatePersonaPage user={user} />;
     }
@@ -599,7 +599,7 @@ export function CVPageClientContent() {
         if (!selectedTemplate) {
           const templateToUse = templateIdFromUrl
             ? templates.find((t) => t.id === templateIdFromUrl) ||
-              defaultTemplate
+            defaultTemplate
             : defaultTemplate;
           setSelectedTemplate(templateToUse);
         }
@@ -607,17 +607,17 @@ export function CVPageClientContent() {
         // 3. Generate AI response only for new CVs
         if (!cvId) {
           const personaText = convertPersonaToText(personaData);
-          
+
           console.log('Making request to:', 'https://backendserver.resumaic.com/api/optimize-cv');
           console.log('Request payload size:', JSON.stringify({ extractedText: personaText }).length);
-          
+
           try {
             const testResponse = await fetch('https://backendserver.resumaic.com', { method: 'HEAD' });
             console.log('Server reachable:', testResponse.ok);
           } catch (testError) {
             console.error('Server not reachable:', testError);
           }
-          
+
           const response = await fetch('https://backendserver.resumaic.com/api/optimize-cv', {
             method: 'POST',
             headers: {
@@ -631,13 +631,13 @@ export function CVPageClientContent() {
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
-          
+
           const aiData = await response.json();
-          
+
           if (aiData.error) {
             throw new Error(aiData.error);
           }
-          
+
           setAiResponse(aiData);
         }
       } catch (err: any) {
@@ -829,17 +829,17 @@ export function CVPageClientContent() {
 
     try {
       const personaText = convertPersonaToText(persona);
-      
+
       console.log('Making request to:', 'https://backendserver.resumaic.com/api/optimize-cv');
       console.log('Request payload size:', JSON.stringify({ extractedText: personaText }).length);
-      
+
       try {
         const testResponse = await fetch('https://backendserver.resumaic.com', { method: 'HEAD' });
         console.log('Server reachable:', testResponse.ok);
       } catch (testError) {
         console.error('Server not reachable:', testError);
       }
-      
+
       const response = await fetch('https://backendserver.resumaic.com/api/optimize-cv', {
         method: 'POST',
         headers: {
@@ -853,13 +853,13 @@ export function CVPageClientContent() {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const aiData = await response.json();
-      
+
       if (aiData.error) {
         throw new Error(aiData.error);
       }
-      
+
       setAiResponse(aiData);
       setHasUnsavedChanges(true);
 
@@ -890,12 +890,12 @@ export function CVPageClientContent() {
         );
         return;
       }
-  
+
       const loadingToastId = showLoadingToast(
         `Preparing ${format.toUpperCase()} export...`,
         "Processing your CV for download"
       );
-  
+
       switch (format) {
         case "pdf":
           const printWindow = window.open("", "_blank");
@@ -907,7 +907,7 @@ export function CVPageClientContent() {
             );
             return;
           }
-          
+
           const clonedContent = cvElement.cloneNode(true) as HTMLElement;
           const styles = Array.from(document.styleSheets)
             .map((sheet) => {
@@ -920,7 +920,7 @@ export function CVPageClientContent() {
               }
             })
             .join("");
-  
+
           printWindow.document.write(`
             <!DOCTYPE html>
             <html>
@@ -979,7 +979,7 @@ export function CVPageClientContent() {
             </html>
           `);
           printWindow.document.close();
-  
+
           // Dismiss loading toast after a short delay to allow print dialog to appear
           setTimeout(() => {
             toast.dismiss(loadingToastId);
@@ -989,12 +989,12 @@ export function CVPageClientContent() {
             );
           }, 1000);
           break;
-  
+
         case "png":
           await exportAsPNG();
           toast.dismiss(loadingToastId);
           break;
-        
+
         case "docx":
           await handleDocxExport();
           toast.dismiss(loadingToastId);
@@ -1008,7 +1008,7 @@ export function CVPageClientContent() {
       );
     }
   };
-  
+
   const exportAsPNG = async () => {
     try {
       const cvElement = document.getElementById("cv-preview-content");
@@ -1019,19 +1019,19 @@ export function CVPageClientContent() {
         );
         return;
       }
-  
+
       const dataUrl = await htmlToImage.toPng(cvElement, {
         quality: 1.0,
         pixelRatio: 2,
         backgroundColor: "#ffffff",
       });
-  
+
       // Create download link
       const link = document.createElement("a");
       link.download = `${persona?.full_name || "resume"}-cv.png`;
       link.href = dataUrl;
       link.click();
-      
+
       showSuccessToast(
         "PNG Downloaded! 📸",
         "Your CV has been downloaded as PNG"
@@ -1041,18 +1041,18 @@ export function CVPageClientContent() {
       showErrorToast("Export Failed", "PNG export failed. Please try again.");
     }
   };
-  
+
   const handleDocxExport = async () => {
     try {
       if (!aiResponse || !persona) {
         showErrorToast("Export Failed", "No CV data available for export.");
         return;
       }
-  
+
       // Import docx dynamically to avoid SSR issues
       const { Document, Paragraph, TextRun, HeadingLevel, Packer } =
         await import("docx");
-  
+
       // Create document sections
       const sections = [
         // Personal Info
@@ -1099,7 +1099,7 @@ export function CVPageClientContent() {
           ],
         }),
         new Paragraph({ text: "" }), // Empty paragraph for spacing
-  
+
         // Summary
         new Paragraph({
           heading: HeadingLevel.HEADING_2,
@@ -1120,7 +1120,7 @@ export function CVPageClientContent() {
           ],
         }),
         new Paragraph({ text: "" }),
-  
+
         // Work Experience
         new Paragraph({
           heading: HeadingLevel.HEADING_2,
@@ -1161,7 +1161,7 @@ export function CVPageClientContent() {
           }),
           new Paragraph({ text: "" }),
         ]),
-  
+
         // Education
         new Paragraph({
           heading: HeadingLevel.HEADING_2,
@@ -1193,7 +1193,7 @@ export function CVPageClientContent() {
           }),
           new Paragraph({ text: "" }),
         ]),
-  
+
         // Skills
         new Paragraph({
           heading: HeadingLevel.HEADING_2,
@@ -1214,7 +1214,7 @@ export function CVPageClientContent() {
           ],
         }),
         new Paragraph({ text: "" }),
-  
+
         // Projects
         new Paragraph({
           heading: HeadingLevel.HEADING_2,
@@ -1254,19 +1254,19 @@ export function CVPageClientContent() {
           }),
           new Paragraph({ text: "" }),
         ]),
-  
+
         // Certifications
         aiResponse.optimizedCV.certifications.length > 0
           ? new Paragraph({
-              heading: HeadingLevel.HEADING_2,
-              children: [
-                new TextRun({
-                  text: "Certifications",
-                  bold: true,
-                  size: 24,
-                }),
-              ],
-            })
+            heading: HeadingLevel.HEADING_2,
+            children: [
+              new TextRun({
+                text: "Certifications",
+                bold: true,
+                size: 24,
+              }),
+            ],
+          })
           : null,
         ...aiResponse.optimizedCV.certifications.flatMap((cert) => [
           new Paragraph({
@@ -1279,12 +1279,12 @@ export function CVPageClientContent() {
           }),
         ]),
       ].filter(Boolean); // Remove null sections
-  
+
       // Filter out any null values from sections and ensure they are Paragraph objects
       const validSections = sections.filter(
         (section): section is InstanceType<typeof Paragraph> => section !== null
       );
-  
+
       const doc = new Document({
         sections: [
           {
@@ -1293,20 +1293,19 @@ export function CVPageClientContent() {
           },
         ],
       });
-  
+
       // Generate blob and download
       const blob = await Packer.toBlob(doc);
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${persona.full_name || "CV"}_${
-        new Date().toISOString().split("T")[0]
-      }.docx`;
+      link.download = `${persona.full_name || "CV"}_${new Date().toISOString().split("T")[0]
+        }.docx`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      
+
       showSuccessToast(
         "DOCX Downloaded! 📝",
         "Your CV has been downloaded as DOCX"
@@ -1561,8 +1560,8 @@ export function CVPageClientContent() {
                         {isSaving
                           ? "Saving..."
                           : existingCV
-                          ? "Update CV"
-                          : "Save CV"}
+                            ? "Update CV"
+                            : "Save CV"}
                       </Button>
                     )}
                   </div>
@@ -1579,11 +1578,10 @@ export function CVPageClientContent() {
                         {templates.map((template) => (
                           <div
                             key={template.id}
-                            className={`p-3 border rounded-lg cursor-pointer transition-all ${
-                              selectedTemplate?.id === template.id
+                            className={`p-3 border rounded-lg cursor-pointer transition-all ${selectedTemplate?.id === template.id
                                 ? "border-blue-500 bg-blue-50"
                                 : "border-gray-200 hover:border-gray-300"
-                            }`}
+                              }`}
                             onClick={() => handleTemplateSelect(template)}
                           >
                             <h4 className="font-medium text-sm">
