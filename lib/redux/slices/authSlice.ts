@@ -7,6 +7,9 @@ import {
   type RegisterData,
   type RegisterResponse,
   type ProfileResponse,
+  type ForgotPasswordResponse,
+  type VerifyOTPResponse,
+  type ResetPasswordData,
 } from "../service/authService"
 
 interface AuthState {
@@ -35,6 +38,10 @@ export const loginUser = createAsyncThunk<AuthResponse, LoginCredentials>(
       localStorage.setItem("user", JSON.stringify(response.user))
       return response
     } catch (error: any) {
+      // Check for specific error status codes to provide clear messages
+      if (error.response?.status === 401 || error.response?.status === 422) {
+        return rejectWithValue("Invalid username or password")
+      }
       return rejectWithValue(error.response?.data?.message || "Login failed")
     }
   },
@@ -143,6 +150,43 @@ export const deleteAccount = createAsyncThunk(
       await AuthService.deleteAccount()
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || "Account deletion failed")
+    }
+  }
+)
+
+// Forgot Password Flow
+export const verifyEmailForReset = createAsyncThunk<ForgotPasswordResponse, string>(
+  "auth/verifyEmailForReset",
+  async (email, { rejectWithValue }) => {
+    try {
+      const response = await AuthService.verifyEmail(email)
+      return response
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || "Failed to send verification code")
+    }
+  }
+)
+
+export const verifyOTPForReset = createAsyncThunk<VerifyOTPResponse, { email: string; otp: string }>(
+  "auth/verifyOTPForReset",
+  async ({ email, otp }, { rejectWithValue }) => {
+    try {
+      const response = await AuthService.verifyOTP(email, otp)
+      return response
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || "Invalid OTP code")
+    }
+  }
+)
+
+export const resetPasswordWithToken = createAsyncThunk<ForgotPasswordResponse, ResetPasswordData>(
+  "auth/resetPasswordWithToken",
+  async (resetData, { rejectWithValue }) => {
+    try {
+      const response = await AuthService.resetPassword(resetData)
+      return response
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || "Failed to reset password")
     }
   }
 )
@@ -335,6 +379,48 @@ const authSlice = createSlice({
         state.loading = false
       })
       .addCase(logoutUser.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+
+      // Verify Email for Reset
+      .addCase(verifyEmailForReset.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(verifyEmailForReset.fulfilled, (state) => {
+        state.loading = false
+        state.error = null
+      })
+      .addCase(verifyEmailForReset.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+
+      // Verify OTP for Reset
+      .addCase(verifyOTPForReset.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(verifyOTPForReset.fulfilled, (state) => {
+        state.loading = false
+        state.error = null
+      })
+      .addCase(verifyOTPForReset.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+
+      // Reset Password with Token
+      .addCase(resetPasswordWithToken.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(resetPasswordWithToken.fulfilled, (state) => {
+        state.loading = false
+        state.error = null
+      })
+      .addCase(resetPasswordWithToken.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload as string
       })

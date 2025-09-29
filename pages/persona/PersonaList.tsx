@@ -493,6 +493,14 @@ function CreatePersonaPage({ user }: PageProps) {
                     ? 'Update the persona details below.'
                     : 'Create a new persona by filling in the details below.'}
                 </DialogDescription>
+                {!showForm && (
+                  <div className="flex justify-end hidden lg:flex">
+                    <span className="inline-flex items-center rounded-md bg-[#EA580C]/20 px-2.5 py-0.5 text-xs font-medium text-[#EA580C] font-inter">
+                      Coming Soon
+                    </span>
+                  </div>
+                )}
+
               </DialogHeader>
 
               {!showForm ? (
@@ -568,139 +576,154 @@ function CreatePersonaPage({ user }: PageProps) {
           {viewMode === "table" && (
             <Card className="hidden lg:block">
               <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Profile</TableHead>
-                      <TableHead>Job Title</TableHead>
-                      <TableHead>Experience</TableHead>
-                      <TableHead>Skills</TableHead>
-                      <TableHead>Education</TableHead>
-                      <TableHead>Created</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredPersonas.map((persona) => (
-                      <TableRow key={persona.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
-                              <AvatarFallback
-                                className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${user?.role === 'admin'
-                                  ? ''
-                                  : 'bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]'
-                                  }`}
-                              >
-                                {user?.role === 'admin' ? (
-                                  <Crown className="h-5 w-5 text-[#EA580C]" /> // Orange crown for admin
-                                ) : user?.name ? (
-                                  user.name.charAt(0).toUpperCase()
-                                ) : (
-                                  <UserCircle className="h-5 w-5 text-[#70E4A8]" />
-                                )}
-                              </AvatarFallback>
-
-                            </Avatar>
-                            <div>
-                              <div className="font-medium">
-                                {persona.personalInfo.fullName}
-                              </div>
-                              <div className="text-sm text-gray-600">
-                                {persona.personalInfo.email}
+                <div className="overflow-x-auto">
+                  <Table className="table-fixed w-full">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[20%] px-4">Profile</TableHead>
+                        <TableHead className="w-[15%] px-4">Job Title</TableHead>
+                        <TableHead className="w-[12%] px-4">Experience</TableHead>
+                        <TableHead className="w-[20%] px-4">Skills</TableHead>
+                        <TableHead className="w-[12%] px-4">Education</TableHead>
+                        <TableHead className="w-[11%] px-4">Created</TableHead>
+                        <TableHead className="w-[10%] px-4">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredPersonas.map((persona) => (
+                        <TableRow key={persona.id}>
+                          <TableCell className="w-[20%] px-4">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors flex-shrink-0">
+                                <AvatarFallback
+                                  className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${user?.role === 'admin'
+                                    ? ''
+                                    : 'bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]'
+                                    }`}
+                                >
+                                  {user?.role === 'admin' ? (
+                                    <Crown className="h-5 w-5 text-[#EA580C]" /> // Orange crown for admin
+                                  ) : user?.name ? (
+                                    user.name.charAt(0).toUpperCase()
+                                  ) : (
+                                    <UserCircle className="h-5 w-5 text-[#70E4A8]" />
+                                  )}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="min-w-0 flex-1">
+                                <div 
+                                  className="font-medium truncate cursor-help" 
+                                  title={persona.personalInfo.fullName}
+                                >
+                                  {persona.personalInfo.fullName}
+                                </div>
+                                <div 
+                                  className="text-sm text-gray-600 truncate cursor-help"
+                                  title={persona.personalInfo.email}
+                                >
+                                  {persona.personalInfo.email}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>{persona.personalInfo.jobTitle}</TableCell>
-                        <TableCell>
-                          {persona.experience.length} positions
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-1">
-                            {(Array.isArray(persona.skills.technical)
-                              ? persona.skills.technical.slice(0, 3)
-                              : []
-                            ).map((skill) => (
-                              <Badge
-                                key={skill}
-                                variant="secondary"
-                                className="text-xs"
-                              >
-                                {skill}
-                              </Badge>
-                            ))}
-                            {Array.isArray(persona.skills.technical) &&
-                              persona.skills.technical.length > 3 && (
-                                <Badge variant="outline" className="text-xs">
-                                  +{persona.skills.technical.length - 3}
-                                </Badge>
-                              )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {persona.education.length} degrees
-                        </TableCell>
-                        <TableCell>
-                          {new Date(persona.createdAt).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-1">
-                            {/* <Button
-                              className="cursor-pointer"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleView(persona)}
+                          </TableCell>
+                          <TableCell className="w-[15%] px-4">
+                            <div 
+                              className="truncate cursor-help" 
+                              title={persona.personalInfo.jobTitle}
                             >
-                              <Eye className="h-4 w-4" />
-                            </Button> */}
-                            <Button
-                              variant="ghost"
-                              className="cursor-pointer"
-                              size="sm"
-                              onClick={() => handleEdit(persona)}
+                              {persona.personalInfo.jobTitle}
+                            </div>
+                          </TableCell>
+                          <TableCell className="w-[12%] px-4">
+                            <div 
+                              className="truncate cursor-help" 
+                              title={`${persona.experience.length} positions`}
                             >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            {/* <Button
-                              variant="ghost"
-                              className="cursor-pointer"
-                              size="sm"
-                              onClick={() => handleCreateAICV(persona)}
-                              title="Create AI CV"
-                            >
-                              <Bot className="h-4 w-4" />
-                            </Button> */}
-                            {/* <Button
-                              variant="ghost"
-                              className="cursor-pointer"
-                              size="sm"
-                              onClick={() => handleDownload(persona)}
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button> */}
-                            <ConfirmDialog
-                              title={`Delete "${persona.personalInfo.fullName}"`}
-                              description={`Are you sure you want to delete the persona for ${persona.personalInfo.fullName}?`}
-                              confirmText="Delete"
-                              cancelText="Cancel"
-                              onConfirm={() => handleDelete(persona)}
-                              trigger={
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-red-600 hover:text-red-700 cursor-pointer"
+                              {persona.experience.length} positions
+                            </div>
+                          </TableCell>
+                          <TableCell className="w-[20%] px-4">
+                            <div className="flex flex-wrap gap-1 max-h-16 overflow-hidden">
+                              {(Array.isArray(persona.skills.technical)
+                                ? persona.skills.technical.slice(0, 2)
+                                : []
+                              ).map((skill) => (
+                                <Badge
+                                  key={skill}
+                                  variant="secondary"
+                                  className="text-xs truncate max-w-20"
+                                  title={skill}
                                 >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              }
-                            />
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                                  {skill}
+                                </Badge>
+                              ))}
+                              {Array.isArray(persona.skills.technical) &&
+                                persona.skills.technical.length > 2 && (
+                                  <Badge 
+                                    variant="outline" 
+                                    className="text-xs cursor-help"
+                                    title={`Additional skills: ${persona.skills.technical.slice(2).join(', ')}`}
+                                  >
+                                    +{persona.skills.technical.length - 2}
+                                  </Badge>
+                                )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="w-[12%] px-4">
+                            <div 
+                              className="truncate cursor-help" 
+                              title={`${persona.education.length} degrees`}
+                            >
+                              {persona.education.length} degrees
+                            </div>
+                          </TableCell>
+                          <TableCell className="w-[11%] px-4">
+                            <div 
+                              className="truncate cursor-help text-sm" 
+                              title={new Date(persona.createdAt).toLocaleDateString('en-US', { 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric' 
+                              })}
+                            >
+                              {new Date(persona.createdAt).toLocaleDateString()}
+                            </div>
+                          </TableCell>
+                          <TableCell className="w-[10%] px-4">
+                            <div className="flex gap-1 justify-center">
+                              <Button
+                                variant="ghost"
+                                className="cursor-pointer h-8 w-8 p-0"
+                                size="sm"
+                                onClick={() => handleEdit(persona)}
+                                title="Edit persona"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <ConfirmDialog
+                                title="Delete Persona"
+                                description="Are you sure you want to delete this persona? This action cannot be undone."
+                                confirmText="Delete"
+                                cancelText="Cancel"
+                                onConfirm={() => handleDelete(persona)}
+                                trigger={
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-red-600 hover:text-red-700 cursor-pointer h-8 w-8 p-0"
+                                    title="Delete persona"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                }
+                              />
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </CardContent>
             </Card>
           )}
@@ -839,8 +862,8 @@ function CreatePersonaPage({ user }: PageProps) {
 
                     <div className="flex gap-2 items-center">
                       <ConfirmDialog
-                        title={`Delete "${persona.personalInfo.fullName}"`}
-                        description={`Are you sure you want to delete the persona for ${persona.personalInfo.fullName}?`}
+                        title="Delete Persona"
+                        description="Are you sure you want to delete this persona? This action cannot be undone."
                         confirmText="Delete"
                         cancelText="Cancel"
                         onConfirm={() => handleDelete(persona)}

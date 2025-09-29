@@ -21,6 +21,11 @@ export type User = {
   source?: string
   provider_name?: string
   provider_id?: string
+  is_verified?: boolean
+  reset_token?: string | null
+  reset_token_expiry?: string | null
+  last_login?: string
+  is_active?: boolean
 }
 
 export type ProfileResponse = {
@@ -81,6 +86,21 @@ export type UpdateProfileData = {
   plan_type?: string
 }
 
+export type ForgotPasswordResponse = {
+  message: string
+}
+
+export type VerifyOTPResponse = {
+  message: string
+  token: string
+}
+
+export type ResetPasswordData = {
+  email: string
+  token: string
+  password: string
+}
+
 export const AuthService = {
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
     const response = await api.post("/login", credentials)
@@ -124,8 +144,35 @@ linkedinLogin: async (code: string): Promise<AuthResponse> => {
 
 
   googleLogin: async (code: string): Promise<AuthResponse> => {
-    const response = await api.post("/google/token", { code });
-    return response.data;
+    const response = await api.post("/google-login", { code })
+    return response.data
   },
 
+  // Forgot Password Flow
+  verifyEmail: async (email: string): Promise<ForgotPasswordResponse> => {
+    const response = await api.post("/verify-email", { email })
+    return response.data
+  },
+
+  verifyOTP: async (email: string, otp: string): Promise<VerifyOTPResponse> => {
+    const response = await api.post("/verify-otp", { email, otp })
+    return response.data
+  },
+
+  resetPassword: async (data: ResetPasswordData): Promise<ForgotPasswordResponse> => {
+    console.log("AuthService resetPassword called with:", data)
+    console.log("Token value in service:", data.token)
+    console.log("Token type in service:", typeof data.token)
+    
+    const payload = {
+      email: data.email,
+      token: data.token,
+      password: data.password
+    }
+    
+    console.log("Sending payload to API:", payload)
+    
+    const response = await api.post("/reset-password", payload)
+    return response.data
+  },
 }

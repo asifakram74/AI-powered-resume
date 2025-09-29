@@ -137,15 +137,15 @@ export function PersonaCreationOptions({
 
         {/* LinkedIn Import Option - Upcoming Feature */}
         <Card className="cursor-not-allowed relative overflow-hidden border-2 border-gray-200">
-          <div className="absolute top-4 right-4 z-20">
+          <div className="absolute top-2 right-2 z-20 lg:hidden ">
             <span className="inline-flex items-center rounded-md bg-[#EA580C]/20 px-2.5 py-0.5 text-xs font-medium text-[#EA580C] font-inter">
               Coming Soon
             </span>
           </div>
 
           <CardHeader className="text-center">
-            <div className="mx-auto w-12 h-12 bg-[#EA580C]/20 rounded-lg flex items-center justify-center mb-3">
-              <Linkedin className="h-6 w-6 text-[#EA580C]" />
+            <div className="mx-auto w-12 h-12 bg-[#0067c2]/20 rounded-lg flex items-center justify-center mb-3">
+              <Linkedin className="h-6 w-6 text-[#0067c2]" />
             </div>
             <CardTitle className="text-lg font-rubik text-[#2D3639]">
               Import from LinkedIn
