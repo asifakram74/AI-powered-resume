@@ -44,7 +44,7 @@ export interface User {
   push_notifications: number
   email_updates: number
    source: string 
-  
+  is_verified?: boolean
   
   
 }

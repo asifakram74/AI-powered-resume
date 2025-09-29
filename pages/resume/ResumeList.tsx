@@ -349,7 +349,7 @@ export function ResumePage({ user }: PageProps) {
                               <Edit className="h-4 w-4" />
                             </Button>
                             <ConfirmDialog
-                              title={`Delete "${cv.title}"`}
+                              title="Delete Resume"
                               description="Are you sure you want to delete this resume? This action cannot be undone."
                               confirmText="Delete"
                               cancelText="Cancel"
@@ -443,7 +443,7 @@ export function ResumePage({ user }: PageProps) {
                         <Edit className="h-4 w-4" />
                       </Button>
                       <ConfirmDialog
-                        title={`Delete "${cv.title}"`}
+                        title="Delete Resume"
                         description="Are you sure you want to delete this resume? This action cannot be undone."
                         confirmText="Delete"
                         cancelText="Cancel"

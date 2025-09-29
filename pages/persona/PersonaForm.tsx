@@ -172,12 +172,12 @@ export function PersonaForm({
     }
   };
 
-  const removeSkill = (type: "technical" | "soft", skillToRemove: string) => {
+  const removeSkill = (type: "technical" | "soft", indexToRemove: number) => {
     setFormData((prev) => ({
       ...prev,
       skills: {
         ...prev.skills,
-        [type]: prev.skills[type].filter((skill) => skill !== skillToRemove),
+        [type]: prev.skills[type].filter((_, index) => index !== indexToRemove),
       },
     }));
   };
@@ -226,9 +226,16 @@ export function PersonaForm({
         startDate: "",
         endDate: "",
         current: false,
-        responsibilities: [""],
+        responsibilities: [],
       });
     }
+  };
+
+  const removeExperience = (id: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      experience: prev.experience.filter((exp) => exp.id !== id),
+    }));
   };
 
   const addEducation = () => {
@@ -253,6 +260,13 @@ export function PersonaForm({
         additionalInfo: "",
       });
     }
+  };
+
+  const removeEducation = (id: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      education: prev.education.filter((edu) => edu.id !== id),
+    }));
   };
 
   const removeLanguage = (id: string) => {
@@ -305,6 +319,13 @@ export function PersonaForm({
     }
   };
 
+  const removeCertification = (id: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      certifications: prev.certifications.filter((cert) => cert.id !== id),
+    }));
+  };
+
   const addProject = () => {
     if (currentProject.name && currentProject.role) {
       setFormData((prev) => ({
@@ -329,6 +350,13 @@ export function PersonaForm({
         githubLink: "",
       });
     }
+  };
+
+  const removeProject = (id: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      projects: prev.projects.filter((project) => project.id !== id),
+    }));
   };
 
   const generatePersona = async () => {
@@ -691,6 +719,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             <div className="space-y-2">
               <Label>Start Date</Label>
               <Input
+                className="text-gray-500"
                 type="date"
                 value={currentExperience.startDate}
                 onChange={(e) =>
@@ -704,6 +733,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             <div className="space-y-2">
               <Label>End Date</Label>
               <Input
+                className="text-gray-500"
                 type="date"
                 value={currentExperience.endDate}
                 onChange={(e) =>
@@ -729,57 +759,74 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
 
           <div className="space-y-2">
             <Label>Responsibilities</Label>
-            {currentExperience.responsibilities.map((resp, index) => (
-              <div key={index} className="flex flex-col sm:flex-row gap-2">
-                <Input
-                  value={resp}
-                  onChange={(e) => {
-                    const newResp = [...currentExperience.responsibilities];
-                    newResp[index] = e.target.value;
-                    setCurrentExperience((prev) => ({
-                      ...prev,
-                      responsibilities: newResp,
-                    }));
-                  }}
-                  placeholder="Describe your responsibility..."
-                  className="flex-1"
-                />
-                <div className="flex gap-2 sm:flex-shrink-0">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
+            {currentExperience.responsibilities.length === 0 ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() =>
+                  setCurrentExperience((prev) => ({
+                    ...prev,
+                    responsibilities: [""],
+                  }))
+                }
+                className="w-full"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Responsibility
+              </Button>
+            ) : (
+              currentExperience.responsibilities.map((resp, index) => (
+                <div key={index} className="flex flex-col sm:flex-row gap-2">
+                  <Input
+                    value={resp}
+                    onChange={(e) => {
                       const newResp = [...currentExperience.responsibilities];
-                      newResp.splice(index, 1);
+                      newResp[index] = e.target.value;
                       setCurrentExperience((prev) => ({
                         ...prev,
                         responsibilities: newResp,
                       }));
                     }}
-                    className="w-full sm:w-auto"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                  {index === currentExperience.responsibilities.length - 1 && (
+                    placeholder="Describe your responsibility..."
+                    className="flex-1"
+                  />
+                  <div className="flex gap-2 sm:flex-shrink-0">
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() =>
+                      onClick={() => {
+                        const newResp = [...currentExperience.responsibilities];
+                        newResp.splice(index, 1);
                         setCurrentExperience((prev) => ({
                           ...prev,
-                          responsibilities: [...prev.responsibilities, ""],
-                        }))
-                      }
+                          responsibilities: newResp,
+                        }));
+                      }}
                       className="w-full sm:w-auto"
                     >
-                      <Plus className="h-4 w-4" />
+                      <X className="h-4 w-4" />
                     </Button>
-                  )}
+                    {index === currentExperience.responsibilities.length - 1 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          setCurrentExperience((prev) => ({
+                            ...prev,
+                            responsibilities: [...prev.responsibilities, ""],
+                          }))
+                        }
+                        className="w-full sm:w-auto"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
           <div className="flex flex-col sm:flex-row gap-2">
@@ -789,8 +836,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
               className="flex-1"
               disabled={
                 !currentExperience.companyName ||
-                !currentExperience.jobTitle ||
-                !currentExperience.startDate
+                !currentExperience.jobTitle
               }
             >
               Add Experience
@@ -807,7 +853,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                 startDate: "",
                 endDate: "",
                 current: false,
-                responsibilities: [""]
+                responsibilities: []
               })}
               className="flex-1"
             >
@@ -819,12 +865,23 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             <div className="space-y-2">
               <Label>Added Experience:</Label>
               {formData.experience.map((exp) => (
-                <div key={exp.id} className="p-3 bg-gray-50 rounded-lg">
-                  <div className="font-medium">{exp.jobTitle}</div>
-                  <div className="text-sm text-gray-600">{exp.companyName}</div>
-                  <div className="text-sm text-gray-500">
-                    {exp.startDate} - {exp.current ? "Present" : exp.endDate}
+                <div key={exp.id} className="p-3 bg-gray-50 rounded-lg flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="font-medium">{exp.jobTitle}</div>
+                    <div className="text-sm text-gray-600">{exp.companyName}</div>
+                    <div className="text-sm text-gray-500">
+                      {exp.startDate} - {exp.current ? "Present" : exp.endDate}
+                    </div>
                   </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => removeExperience(exp.id)}
+                    className="ml-2 flex-shrink-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
                 </div>
               ))}
             </div>
@@ -866,17 +923,20 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             <div>
               <Label className="text-sm font-medium">Technical Skills:</Label>
               <div className="flex flex-wrap gap-2 mt-2">
-                {formData.skills.technical.map((skill) => (
+                {formData.skills.technical.map((skill, index) => (
                   <Badge
-                    key={skill}
+                    key={`technical-${skill}-${index}`}
                     variant="secondary"
                     className="flex items-center gap-1"
                   >
                     {skill}
-                    <X
-                      className="h-3 w-3 cursor-pointer hover:text-red-500"
-                      onClick={() => removeSkill("technical", skill)}
-                    />
+                    <button
+                      type="button"
+                      onClick={() => removeSkill("technical", index)}
+                      className="hover:text-red-500"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
                   </Badge>
                 ))}
               </div>
@@ -885,17 +945,20 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             <div>
               <Label className="text-sm font-medium">Soft Skills:</Label>
               <div className="flex flex-wrap gap-2 mt-2">
-                {formData.skills.soft.map((skill) => (
+                {formData.skills.soft.map((skill, index) => (
                   <Badge
-                    key={skill}
+                    key={`soft-${skill}-${index}`}
                     variant="secondary"
                     className="flex items-center gap-1"
                   >
                     {skill}
-                    <X
-                      className="h-3 w-3 cursor-pointer hover:text-red-500"
-                      onClick={() => removeSkill("soft", skill)}
-                    />
+                    <button
+                      type="button"
+                      onClick={() => removeSkill("soft", index)}
+                      className="hover:text-red-500"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
                   </Badge>
                 ))}
               </div>
@@ -964,10 +1027,13 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                     className="flex items-center gap-1"
                   >
                     {lang.name} ({lang.proficiency})
-                    <X
-                      className="h-3 w-3 cursor-pointer hover:text-red-500"
+                    <button
+                      type="button"
                       onClick={() => removeLanguage(lang.id)}
-                    />
+                      className="hover:text-red-500"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
                   </Badge>
                 ))}
               </div>
@@ -1029,6 +1095,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
               <Label>Graduation Date</Label>
               <Input
                 type="date"
+                className="text-gray-500"
                 value={currentEducation.graduationDate}
                 onChange={(e) =>
                   setCurrentEducation((prev) => ({
@@ -1039,7 +1106,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
               />
             </div>
             <div className="space-y-2">
-              <Label>GPA</Label>
+              <Label>CGPA</Label>
               <Input
                 value={currentEducation.gpa}
                 onChange={(e) =>
@@ -1061,7 +1128,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                     honors: e.target.value,
                   }))
                 }
-                placeholder="Magna Cum Laude"
+                placeholder="Best Research Paper Award"
               />
             </div>
           </div>
@@ -1090,13 +1157,24 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             <div className="space-y-2">
               <Label>Added Education:</Label>
               {formData.education.map((edu) => (
-                <div key={edu.id} className="p-3 bg-gray-50 rounded-lg">
-                  <div className="font-medium">
-                    {edu.degree} - {edu.institutionName}
+                <div key={edu.id} className="p-3 bg-gray-50 rounded-lg flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="font-medium">
+                      {edu.degree} - {edu.institutionName}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {edu.location} | {edu.graduationDate}
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-600">
-                    {edu.location} | {edu.graduationDate}
-                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => removeEducation(edu.id)}
+                    className="ml-2 flex-shrink-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
                 </div>
               ))}
             </div>
@@ -1143,6 +1221,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             <div className="space-y-2">
               <Label>Date Obtained</Label>
               <Input
+                className="text-gray-500"
                 type="date"
                 value={currentCertification.dateObtained}
                 onChange={(e) =>
@@ -1178,11 +1257,22 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             <div className="space-y-2">
               <Label>Added Certifications:</Label>
               {formData.certifications.map((cert) => (
-                <div key={cert.id} className="p-3 bg-gray-50 rounded-lg">
-                  <div className="font-medium">{cert.title}</div>
-                  <div className="text-sm text-gray-600">
-                    {cert.issuingOrganization} | {cert.dateObtained}
+                <div key={cert.id} className="p-3 bg-gray-50 rounded-lg flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="font-medium">{cert.title}</div>
+                    <div className="text-sm text-gray-600">
+                      {cert.issuingOrganization} | {cert.dateObtained}
+                    </div>
                   </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => removeCertification(cert.id)}
+                    className="ml-2 flex-shrink-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
                 </div>
               ))}
             </div>
@@ -1226,7 +1316,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
           </div>
 
           <div className="space-y-2">
-            <Label>Description</Label>
+            <Label>Project Description</Label>
             <Textarea
               value={currentProject.description}
               onChange={(e) =>
@@ -1235,44 +1325,81 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                   description: e.target.value,
                 }))
               }
-              placeholder="Brief description of the project..."
-              className="min-h-[80px]"
+              placeholder="Describe the project, your contributions, and key achievements..."
+              className="min-h-[100px]"
             />
           </div>
 
           <div className="space-y-2">
             <Label>Technologies Used</Label>
-            {currentProject.technologies.map((tech, index) => (
-              <div key={index} className="flex gap-2">
-                <Input
-                  value={tech}
-                  onChange={(e) => {
-                    const newTech = [...currentProject.technologies];
-                    newTech[index] = e.target.value;
-                    setCurrentProject((prev) => ({
-                      ...prev,
-                      technologies: newTech,
-                    }));
-                  }}
-                  placeholder="React, Node.js, MongoDB..."
-                />
-                {index === currentProject.technologies.length - 1 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
+            {currentProject.technologies.length === 0 ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() =>
+                  setCurrentProject((prev) => ({
+                    ...prev,
+                    technologies: [""],
+                  }))
+                }
+                className="w-full"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Technology
+              </Button>
+            ) : (
+              currentProject.technologies.map((tech, index) => (
+                <div key={index} className="flex flex-col sm:flex-row gap-2">
+                  <Input
+                    value={tech}
+                    onChange={(e) => {
+                      const newTech = [...currentProject.technologies];
+                      newTech[index] = e.target.value;
                       setCurrentProject((prev) => ({
                         ...prev,
-                        technologies: [...prev.technologies, ""],
-                      }))
-                    }
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            ))}
+                        technologies: newTech,
+                      }));
+                    }}
+                    placeholder="Technology used..."
+                    className="flex-1"
+                  />
+                  <div className="flex gap-2 sm:flex-shrink-0">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const newTech = [...currentProject.technologies];
+                        newTech.splice(index, 1);
+                        setCurrentProject((prev) => ({
+                          ...prev,
+                          technologies: newTech,
+                        }));
+                      }}
+                      className="w-full sm:w-auto"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                    {index === currentProject.technologies.length - 1 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          setCurrentProject((prev) => ({
+                            ...prev,
+                            technologies: [...prev.technologies, ""],
+                          }))
+                        }
+                        className="w-full sm:w-auto"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1286,12 +1413,12 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                     liveDemoLink: e.target.value,
                   }))
                 }
-                placeholder="https://your-project-demo.com"
+                placeholder="https://demo-project.com"
                 type="url"
               />
             </div>
             <div className="space-y-2">
-              <Label>GitHub Link</Label>
+              <Label>GitHub Repository</Label>
               <Input
                 value={currentProject.githubLink}
                 onChange={(e) =>
@@ -1315,12 +1442,25 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             <div className="space-y-2">
               <Label>Added Projects:</Label>
               {formData.projects.map((project) => (
-                <div key={project.id} className="p-3 bg-gray-50 rounded-lg">
-                  <div className="font-medium">{project.name}</div>
-                  <div className="text-sm text-gray-600">{project.role}</div>
-                  <div className="text-sm text-gray-500">
-                    {project.technologies.join(", ")}
+                <div key={project.id} className="p-3 bg-gray-50 rounded-lg flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="font-medium">{project.name}</div>
+                    <div className="text-sm text-gray-600">
+                      {project.role}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {project.technologies.join(", ")}
+                    </div>
                   </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => removeProject(project.id)}
+                    className="ml-2 flex-shrink-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
                 </div>
               ))}
             </div>
@@ -1342,30 +1482,38 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
               onKeyPress={(e) => e.key === "Enter" && addInterest()}
               className="flex-1"
             />
-            <Button onClick={addInterest} size="sm" variant="outline" className="w-full sm:w-auto">
-              <Plus className="h-4 w-4 sm:mr-0 mr-2" />
-              <span className="sm:hidden">Add Interest</span>
+            <Button onClick={addInterest} size="sm" variant="outline" className="flex-shrink-0 w-full sm:w-auto">
+              <Plus className="h-4 w-4" />
             </Button>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {formData.additional.interests.map((interest) => (
-              <Badge
-                key={interest}
-                variant="secondary"
-                className="flex items-center gap-1"
-              >
-                {interest}
-                <X
-                  className="h-3 w-3 cursor-pointer hover:text-red-500"
-                  onClick={() => removeInterest(interest)}
-                />
-              </Badge>
-            ))}
-          </div>
+
+          {formData.additional.interests.length > 0 && (
+            <div className="space-y-2">
+              <Label>Added Interests:</Label>
+              <div className="flex flex-wrap gap-2">
+                {formData.additional.interests.map((interest) => (
+                  <Badge
+                    key={interest}
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
+                    {interest}
+                    <button
+                      type="button"
+                      onClick={() => removeInterest(interest)}
+                      className="hover:text-red-500"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Generate Button */}
+      {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4 border-t">
         <Button variant="outline" onClick={onCancel} className="w-full sm:w-auto order-2 sm:order-1">
           Cancel
@@ -1395,5 +1543,3 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
     </div>
   );
 }
-
-export default PersonaForm;

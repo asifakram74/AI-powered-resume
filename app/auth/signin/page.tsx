@@ -8,9 +8,10 @@ import { Button } from "../../../components/ui/button"
 import { Input } from "../../../components/ui/input"
 import { Label } from "../../../components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card"
-import { Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock, Loader2, AlertCircle } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "../../../lib/redux/hooks"
 import { loginUser, clearError, loginWithLinkedIn, loginWithGoogle, setCredentials } from "../../../lib/redux/slices/authSlice"
+import { Alert, AlertDescription } from "../../../components/ui/alert"
 import Image from "next/image"
 
 function useSafeSearchParams() {
@@ -195,7 +196,7 @@ export default function SignInPage() {
                   source: "google",
                 };
                 localStorage.setItem("user", JSON.stringify(user));
-                dispatch(setCredentials({ token, user }));
+                dispatch(setCredentials({ token, user: { ...user, otp: null, otp_expiry: null, otp_count: 0, role: 'user', created_at: new Date().toISOString(), updated_at: new Date().toISOString(), is_verified: true, reset_token: null, reset_token_expiry: null, last_login: new Date().toISOString(), is_active: true, status: 'active', plan: 'free', email_verified_at: new Date().toISOString(), plan_type: 'monthly', trial_ends_at: null, subscription_ends_at: null, is_trial: false, is_premium: false } }));
               }
             }
             const cleanUrl = window.location.pathname;
@@ -252,7 +253,7 @@ export default function SignInPage() {
               <Image src="/Resumic.png" alt="Logo" width={200} height={90} className="cursor-pointer" />
             </Link>
           </div>
-          <CardTitle className="text-2xl font-bold text-gray-900">Welcome Back</CardTitle>
+          <CardTitle className="text-2xl font-bold text-gray-900">Welcome to Resumaic</CardTitle>
           <CardDescription>Sign in to your CV Builder AI account</CardDescription>
         </CardHeader>
         <CardContent>
@@ -264,6 +265,14 @@ export default function SignInPage() {
           ) : (
             <>
               <form onSubmit={handleSubmit} className="space-y-4">
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      {error}
+                    </AlertDescription>
+                  </Alert>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address</Label>
@@ -317,7 +326,7 @@ export default function SignInPage() {
                       Remember me
                     </Label>
                   </div>
-                  <Link href="/auth/forgot-password" className="text-sm text-blue-600 hover:text-blue-500">
+                  <Link href="/auth/verify-email" className="text-sm text-blue-600 hover:text-blue-500">
                     Forgot password?
                   </Link>
                 </div>
