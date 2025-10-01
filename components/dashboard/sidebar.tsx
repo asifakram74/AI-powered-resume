@@ -127,6 +127,7 @@ export function Sidebar({
   const [isMounted, setIsMounted] = useState(false)
   const dispatch = useAppDispatch()
   const router = useRouter()
+  const { profile } = useAppSelector((state) => state.auth)
   const { resumeCount, loading } = useResumeCount(user?.id)
 
   useEffect(() => {
@@ -172,17 +173,20 @@ export function Sidebar({
             </div> */}
         </div>
 
-        {user && (
+        {(user || profile) && (
           <div className="mt-4 p-3 bg-gray-50 rounded-lg flex items-top gap-3">
             <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
               <AvatarFallback
-                className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${user?.role === "admin"
+                className={`font-semibold ${
+                  user?.role === "admin"
                   ? ""
                   : "bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8]"
                   }`}
               >
                 {user?.role === "admin" ? (
                   <UserCircle className="h-5 w-5 text-[#EA580C]" />
+                ) : profile?.name ? (
+                  profile.name.charAt(0).toUpperCase()
                 ) : user?.name ? (
                   user.name.charAt(0).toUpperCase()
                 ) : (
@@ -191,10 +195,10 @@ export function Sidebar({
               </AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-sm font-medium text-gray-900">{user.name}</p>
-              <p className="text-xs text-gray-500">{user.email}</p>
+              <p className="text-sm font-medium text-gray-900">{profile?.name || user?.name}</p>
+              <p className="text-xs text-gray-500">{profile?.email || user?.email}</p>
               {
-                user.role?.toLowerCase() === 'admin' && (
+                user?.role?.toLowerCase() === 'admin' && (
                   <Badge className="bg-gradient-to-br resumaic-gradient-green text-white text-xs">
                     Administrator
                   </Badge>
