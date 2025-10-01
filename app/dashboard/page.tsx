@@ -22,6 +22,10 @@ export interface PageProps {
     name?: string;
     email?: string;
     source?: string;
+    plan?: string;
+    profile?: {
+      cvs_count?: number;
+    };
   } | null;
 }
 

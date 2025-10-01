@@ -85,9 +85,14 @@ export default function VerifyOTPPage() {
       
       if (verifyOTPForReset.fulfilled.match(result)) {
         toast.success("OTP verified successfully")
-        console.log("Navigating to reset-password with token:", result.payload.token)
+        
+        // Check if backend returned a token, otherwise use the OTP code as token
+        const resetToken = result.payload.token || otpCode
+        console.log("Backend response:", result.payload)
+        console.log("Using token for reset:", resetToken)
+        
         // Navigate to reset password page with email and token
-        router.push(`/auth/reset-password?email=${encodeURIComponent(email)}&token=${result.payload.token}`)
+        router.push(`/auth/reset-password?email=${encodeURIComponent(email)}&token=${resetToken}`)
       } else {
         console.log("OTP verification failed:", result)
         toast.error(error || "Invalid OTP code")

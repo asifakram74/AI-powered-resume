@@ -70,8 +70,16 @@ export const createCV = async (cvData: CreateCVData): Promise<CV> => {
     const response = await api.post("/cvs", cvData)
     console.log("Received CV response from API:", JSON.stringify(response.data, null, 2))
     return response.data
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating CV:", error)
+    
+    // Extract the actual error message from the response
+    if (error.response?.data?.message) {
+      const customError = new Error(error.response.data.message);
+      (customError as any).response = error.response;
+      throw customError;
+    }
+    
     throw error
   }
 }

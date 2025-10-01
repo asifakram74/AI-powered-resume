@@ -306,6 +306,12 @@ function CreatePersonaPage({ user }: PageProps) {
   };
 
   const handleCreateAICV = (persona: CVData) => {
+    // Check CV limit for free plan users
+    if (user?.plan === 'free' && user?.profile?.cvs_count !== undefined && user.profile.cvs_count >= 3) {
+      toast.error("Free plan users can only create up to 3 CVs. Please upgrade your plan to create more.");
+      return;
+    }
+    
     window.open(`/create-cv?personaId=${persona.id}`, '_blank')
   }
 

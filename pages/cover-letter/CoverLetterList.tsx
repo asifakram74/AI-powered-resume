@@ -190,17 +190,17 @@ export function CoverLetterPage({ user }: PageProps) {
       const cvContent = await getCVContentForAI(selectedCV)
 
       // Call DeepSeek AI for cover letter generation
-      console.log('Making request to:', 'https://backendserver.resumaic.com/api/cover-letter-generation');
+      console.log('Making request to:', 'https://render-kweq.onrender.com/om/api/cover-letter-generation');
       console.log('Request payload size:', JSON.stringify({ jobDescription, tone, cvContent, cvData: selectedCV }).length);
 
       try {
-        const testResponse = await fetch('https://backendserver.resumaic.com', { method: 'HEAD' });
+        const testResponse = await fetch('https://render-kweq.onrender.com/om', { method: 'HEAD' });
         console.log('Server reachable:', testResponse.ok);
       } catch (testError) {
         console.error('Server not reachable:', testError);
       }
 
-      const response = await fetch('https://backendserver.resumaic.com/api/cover-letter-generation', {
+      const response = await fetch('https://render-kweq.onrender.com/om/api/cover-letter-generation', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

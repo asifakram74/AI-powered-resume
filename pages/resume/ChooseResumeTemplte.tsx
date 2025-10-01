@@ -252,7 +252,7 @@ export function CVTemplates({
                     }`}
                   onClick={() => onTemplateSelect(template)}
                 >
-                  <CardHeader className="p-4">
+                  <CardHeader className="">
                     <div className="relative">
                       <div className="w-full overflow-hidden rounded-lg">
                         <div className="flex items-center justify-center">
@@ -263,7 +263,7 @@ export function CVTemplates({
                                 alt={`${template.name} Template Preview`}
                                 width={300}
                                 height={450}
-                                className="object-contain w-full h-full shadow-md"
+                                className="object-contain w-full h-full shadow-md border border-blue-900"
                               />
                             </div>
                           </div>

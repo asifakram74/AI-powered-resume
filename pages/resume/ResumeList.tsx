@@ -100,14 +100,22 @@ export function ResumePage({ user }: PageProps) {
   };
 
   const handleSaveCV = async (cvData: CreateCVData) => {
+    // Check CV limit for free plan users
+    if ((user as any)?.plan === 'free' && cvs.length >= 3) {
+      toast.error("Free plan users can only create up to 3 CVs. Please upgrade your plan to create more.");
+      return;
+    }
+
     try {
       const response = await createCV(cvData);
       setCVs((prev) => [response, ...prev]);
       setIsDialogOpen(false);
       toast.success("Resume created successfully");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating CV:", error);
-      toast.error("Failed to create resume");
+      // Display the actual error message from the backend
+      const errorMessage = error.message || "Failed to create resume";
+      toast.error(errorMessage);
     }
   };
 
@@ -185,10 +193,22 @@ export function ResumePage({ user }: PageProps) {
             <DialogTrigger asChild>
               <Button
                 className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
-                onClick={() => setIsDialogOpen(true)}
+                onClick={() => {
+                  // Check CV limit for free plan users before opening dialog
+                  if ((user as any)?.plan === 'free' && cvs.length >= 3) {
+                    toast.error("Free plan limit reached! You can create up to 3 CVs. Upgrade to create more.");
+                    return;
+                  }
+                  setIsDialogOpen(true);
+                }}
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Create Resume
+                {(user as any)?.plan === 'free' && (
+                  <Badge variant="secondary" className="ml-2 text-xs">
+                    {cvs.length}/3
+                  </Badge>
+                )}
               </Button>
             </DialogTrigger>
             <DialogContent

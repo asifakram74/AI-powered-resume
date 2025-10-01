@@ -276,23 +276,33 @@ export default function SignUpPage() {
       return
     }
 
-    try {
-      const result = await dispatch(registerUser({
-        name,
-        email,
-        password,
-        source: "Webiste"
-      }))
+    const result = await dispatch(registerUser({
+      name,
+      email,
+      password,
+      source: "Webiste"
+    }))
 
-      if (registerUser.fulfilled.match(result)) {
-        router.push("/auth/signin")
-      }
-    } catch (error: any) {
-      if (error.response?.data?.errors) {
-        setFieldErrors(error.response.data.errors)
-        setApiError("Please fix the validation errors below")
+    if (registerUser.fulfilled.match(result)) {
+      router.push("/auth/signin")
+    } else if (registerUser.rejected.match(result)) {
+      // Handle validation errors from backend
+      if (result.payload && typeof result.payload === 'object' && 'errors' in result.payload) {
+        const payload = result.payload as { message: string; errors: Record<string, string[]> }
+        setFieldErrors(payload.errors)
+        
+        // Handle specific email error with user-friendly message
+        if (payload.errors.email && payload.errors.email.includes("The email has already been taken.")) {
+          setEmailError("This email is already registered. Please log in instead.")
+          showErrorToast("This email is already registered. Please log in instead.")
+        } else {
+          setApiError("Please fix the validation errors below")
+        }
       } else {
-        setApiError(error.response?.data?.message || "Registration failed")
+        // Handle other errors
+        const errorMessage = typeof result.payload === 'string' ? result.payload : 'Registration failed'
+        setApiError(errorMessage)
+        showErrorToast(errorMessage)
       }
     }
   }
@@ -351,7 +361,9 @@ export default function SignUpPage() {
                       required
                     />
                   </div>
-                 
+                  {emailError && (
+                    <p className="text-sm text-red-500">{emailError}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">

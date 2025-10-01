@@ -608,17 +608,18 @@ export function CVPageClientContent() {
         if (!cvId) {
           const personaText = convertPersonaToText(personaData);
 
-          console.log('Making request to:', 'https://backendserver.resumaic.com/api/optimize-cv');
+          console.log('Making request to:', 'https://render-kweq.onrender.com/om/api/optimize-cv');
           console.log('Request payload size:', JSON.stringify({ extractedText: personaText }).length);
 
           try {
-            const testResponse = await fetch('https://backendserver.resumaic.com', { method: 'HEAD' });
+            const testResponse = await fetch('https://render-kweq.onrender.com/', { method: 'HEAD' });
+        
             console.log('Server reachable:', testResponse.ok);
           } catch (testError) {
             console.error('Server not reachable:', testError);
           }
 
-          const response = await fetch('https://backendserver.resumaic.com/api/optimize-cv', {
+          const response = await fetch('https://render-kweq.onrender.com/api/optimize-cv', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -830,17 +831,17 @@ export function CVPageClientContent() {
     try {
       const personaText = convertPersonaToText(persona);
 
-      console.log('Making request to:', 'https://backendserver.resumaic.com/api/optimize-cv');
+      console.log('Making request to:', 'https://render-kweq.onrender.com/om/api/optimize-cv');
       console.log('Request payload size:', JSON.stringify({ extractedText: personaText }).length);
 
       try {
-        const testResponse = await fetch('https://backendserver.resumaic.com', { method: 'HEAD' });
+        const testResponse = await fetch('https://render-kweq.onrender.com/om', { method: 'HEAD' });
         console.log('Server reachable:', testResponse.ok);
       } catch (testError) {
         console.error('Server not reachable:', testError);
       }
 
-      const response = await fetch('https://backendserver.resumaic.com/api/optimize-cv', {
+      const response = await fetch('https://render-kweq.onrender.com/om/api/optimize-cv', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1323,6 +1324,15 @@ export function CVPageClientContent() {
       showErrorToast(
         "Save Failed",
         "Missing required data. Please regenerate your CV and try again."
+      );
+      return;
+    }
+
+    // Check CV limit for free plan users (only for new CVs)
+    if (!existingCV && user?.plan === 'free' && (user as any)?.profile?.cvs_count >= 3) {
+      showErrorToast(
+        "CV Limit Reached",
+        "Free plan users can only create up to 3 CVs. Please upgrade your plan to create more."
       );
       return;
     }
