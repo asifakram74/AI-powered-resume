@@ -177,121 +177,245 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
-        <div className="flex items-top gap-4">
-          <Avatar className="h-16 w-16">
-            <AvatarFallback className="resumaic-gradient-green hover:opacity-90  button-press text-white text-2xl font-medium">
-              {profile?.name
-                ?.split(" ")
-                .map((n) => n[0])
-                .join("")
-                .slice(0, 2)
-                .toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <div className="flex gap-2 item-center">
-              <div className="flex items-center gap-4">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{profile.name}</h1>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge
-                  variant={profile.plan_type === 'Premium' ? 'default' : 'secondary'}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full ${profile.plan_type === 'Premium'
-                    ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
-                    : "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200"
-                    }`}
-                >
-                  {profile.plan_type === 'Premium' ? (
-                    <>
-                      <Star className="h-4 w-4 fill-blue-200 text-blue-200" />
-                      <span>Premium Member</span>
-                    </>
-                  ) : (
-                    <span>Free Member</span>
-                  )}
-                </Badge>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      {/* Hero Section with Profile Header */}
+      <div className="relative overflow-hidden bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20"></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-8">
+            {/* Profile Info */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+              <Avatar className="h-20 w-20 sm:h-24 sm:w-24 ring-4 ring-white dark:ring-gray-700 shadow-lg">
+                <AvatarFallback className="resumaic-gradient-green hover:opacity-90 button-press text-white text-2xl sm:text-3xl font-bold">
+                  {profile?.name
+                    ?.split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .slice(0, 2)
+                    .toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-2">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white truncate">
+                    {profile.name}
+                  </h1>
+                  
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge
+                      variant={profile.plan_type === 'Premium' ? 'default' : 'secondary'}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium ${
+                        profile.plan_type === 'Premium'
+                          ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md"
+                          : "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700"
+                      }`}
+                    >
+                      {profile.plan_type === 'Premium' ? (
+                        <>
+                          <Star className="h-4 w-4 fill-current" />
+                          <span>Premium</span>
+                        </>
+                      ) : (
+                        <span>Free Plan</span>
+                      )}
+                    </Badge>
 
-                {profile.status === 'verified' && (
-                  <Badge
-                    className="flex items-center gap-1.5 px-3 py-1 rounded-full 
-                bg-blue-50 dark:bg-blue-900/30 
-                border border-blue-200 dark:border-blue-700
-                text-blue-600 dark:text-blue-300"
-                  >
-                    <BadgeCheck className="h-4 w-4 text-blue-500 dark:text-blue-400" />
-                    <span>Verified</span>
-                  </Badge>
-                )}
+                    {profile.status === 'verified' && (
+                      <Badge className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 text-green-700 dark:text-green-300 font-medium">
+                        <BadgeCheck className="h-4 w-4" />
+                        <span>Verified</span>
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                
+                <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base max-w-md">
+                  Manage your account settings and preferences
+                </p>
               </div>
             </div>
-            <p className="text-gray-600 dark:text-gray-400">Manage your account settings and preferences</p>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
+              <Button 
+                variant="outline" 
+                className="flex-1 sm:flex-none sm:min-w-[140px] h-11 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" 
+                onClick={() => setShowEditModal(true)}
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                Edit Profile
+              </Button>
+              <Button 
+                className="flex-1 sm:flex-none sm:min-w-[160px] h-11 resumaic-gradient-green hover:opacity-90 button-press shadow-md transition-all" 
+                onClick={() => setShowPasswordDialog(true)}
+              >
+                <Shield className="h-4 w-4 mr-2" />
+                Change Password
+              </Button>
+            </div>
           </div>
-        </div>
-        <div className="flex gap-3">
-          <Button variant="outline" className="w-50" onClick={() => setShowEditModal(true)}>
-            <Edit className="h-4 w-4 mr-2" />
-            Edit Profile
-          </Button>
-          <Button className="w-50 resumaic-gradient-green hover:opacity-90  button-press" onClick={() => setShowPasswordDialog(true)}>
-            <Shield className="h-4 w-4 mr-2" />
-            Change Password
-          </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <Card className="border-0 shadow-sm">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">Personal Information</CardTitle>
-              <CardDescription>
-                Your personal details and account information
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-900 dark:text-white">Full Name</Label>
-                  <p className="text-sm text-gray-500">{profile.name}</p>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-900 dark:text-white">Email Address</Label>
-                  <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-gray-400" />
-                    <p className="text-sm text-gray-500">{profile.email}</p>
+      {/* Statistics Overview */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+          {stats.map((stat, index) => (
+            <Card key={index} className="relative overflow-hidden border-0 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`p-2 sm:p-3 rounded-xl bg-gradient-to-br ${
+                    stat.color === 'text-blue-600' ? 'from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30' :
+                    stat.color === 'text-green-600' ? 'from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30' :
+                    stat.color === 'text-orange-600' ? 'from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/30' :
+                    'from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30'
+                  }`}>
+                    <stat.icon className={`h-5 w-5 sm:h-6 sm:w-6 ${stat.color} dark:opacity-90`} />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-900 dark:text-white">Account Type</Label>
-                  <p className="text-sm capitalize text-gray-500">{profile.plan_type || 'Free'}</p>
+                <div className="space-y-1">
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+                    {stat.value}
+                  </p>
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium">
+                    {stat.label}
+                  </p>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-gray-900 dark:text-white" />
-                Usage Statistics
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                {stats.map((stat, index) => (
-                  <div key={index} className="text-center p-3 bg-gray-50 rounded-lg">
-                    <stat.icon className={`h-6 w-6 mx-auto mb-2 ${stat.color}`} />
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</h3>
-                    <p className="text-sm text-gray-500">{stat.label}</p>
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
+          {/* Personal Information Card */}
+          <div className="xl:col-span-2">
+            <Card className="border-0 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <CardHeader className="pb-4 sm:pb-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30">
+                    <UserCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  <div>
+                    <CardTitle className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                      Personal Information
+                    </CardTitle>
+                    <CardDescription className="text-sm sm:text-base">
+                      Your personal details and account information
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <Label className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <UserCircle className="h-4 w-4 text-gray-500" />
+                      Full Name
+                    </Label>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                      <p className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">
+                        {profile.name}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <Label className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-gray-500" />
+                      Email Address
+                    </Label>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                      <p className="text-sm sm:text-base font-medium text-gray-900 dark:text-white break-all">
+                        {profile.email}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3 sm:col-span-2">
+                    <Label className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <Star className="h-4 w-4 text-gray-500" />
+                      Account Type
+                    </Label>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm sm:text-base font-medium text-gray-900 dark:text-white capitalize">
+                          {profile.plan_type || 'Free'} Plan
+                        </p>
+                        {profile.plan_type === 'Premium' && (
+                          <Badge className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
+                            <Star className="h-3 w-3 mr-1 fill-current" />
+                            Premium
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Quick Actions Card */}
+          <div className="xl:col-span-1">
+            <Card className="border-0 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-green-50 dark:bg-green-900/30">
+                    <TrendingUp className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  </div>
+                  <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
+                    Quick Actions
+                  </CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start h-12 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  onClick={() => setShowEditModal(true)}
+                >
+                  <Edit className="h-4 w-4 mr-3 text-blue-600" />
+                  <div className="text-left">
+                    <p className="font-medium">Edit Profile</p>
+                    <p className="text-xs text-gray-500">Update your information</p>
+                  </div>
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start h-12 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  onClick={() => setShowPasswordDialog(true)}
+                >
+                  <Shield className="h-4 w-4 mr-3 text-green-600" />
+                  <div className="text-left">
+                    <p className="font-medium">Change Password</p>
+                    <p className="text-xs text-gray-500">Update your security</p>
+                  </div>
+                </Button>
+                
+                <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <div className="text-center space-y-2">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">Account Status</p>
+                    <div className="flex items-center justify-center gap-2">
+                      {profile.status === 'verified' ? (
+                        <>
+                          <BadgeCheck className="h-4 w-4 text-green-500" />
+                          <span className="text-sm text-green-600 dark:text-green-400 font-medium">Verified Account</span>
+                        </>
+                      ) : (
+                        <>
+                          <div className="h-4 w-4 rounded-full bg-yellow-400"></div>
+                          <span className="text-sm text-yellow-600 dark:text-yellow-400 font-medium">Pending Verification</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
 
