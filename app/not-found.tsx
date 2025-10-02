@@ -13,7 +13,6 @@ import {
   faArrowLeft
 } from '@fortawesome/free-solid-svg-icons';
 
-
 interface FloatingElement {
   id: number;
   x: number;
