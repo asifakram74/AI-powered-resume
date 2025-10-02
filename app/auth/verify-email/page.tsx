@@ -9,10 +9,12 @@ import { Button } from "../../../components/ui/button"
 import { Input } from "../../../components/ui/input"
 import { Label } from "../../../components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card"
-import { Mail, ArrowLeft, Loader2 } from "lucide-react"
+import { Mail, ArrowLeft, Loader2, AlertCircle } from "lucide-react"
 import { toast } from "sonner"
 import { verifyEmailForReset } from "../../../lib/redux/slices/authSlice"
 import type { RootState, AppDispatch } from "../../../lib/redux/store"
+import { Alert, AlertDescription } from "../../../components/ui/alert"
+import Image from "next/image"
 
 export default function VerifyEmailPage() {
   const [email, setEmail] = useState("")
@@ -49,16 +51,21 @@ export default function VerifyEmailPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <div className="flex items-center gap-2 mb-2">
+        <CardHeader className="text-center">
+          <div className="flex items-center mx-auto mb-4">
+            <Link href="/">
+              <Image src="/Resumic.png" alt="Logo" width={200} height={90} className="cursor-pointer" />
+            </Link>
+          </div>
+          <div className="flex items-center gap-2 mb-2 justify-center">
             <Link href="/auth/signin">
-              <Button variant="ghost" size="sm" className="p-2">
+              <Button variant="ghost" size="sm" className="p-2 hover:bg-gray-100">
                 <ArrowLeft className="h-4 w-4" />
               </Button>
             </Link>
-            <CardTitle className="text-2xl font-bold">Forgot Password</CardTitle>
+            <CardTitle className="text-2xl font-bold text-gray-900">Forgot Password</CardTitle>
           </div>
           <CardDescription>
             Enter your email address and we'll send you a verification code to reset your password.
@@ -66,14 +73,23 @@ export default function VerifyEmailPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  {error}
+                </AlertDescription>
+              </Alert>
+            )}
+
             <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="email" className="text-gray-700">Email Address</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
                   id="email"
                   type="email"
-                  placeholder="Enter your email address"
+                  placeholder="john@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10"
@@ -84,7 +100,7 @@ export default function VerifyEmailPage() {
             
             <Button 
               type="submit" 
-              className="w-full" 
+              className="w-full resumaic-gradient-green text-white hover:opacity-90"
               disabled={loading}
             >
               {loading ? (
@@ -99,9 +115,9 @@ export default function VerifyEmailPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-600">
               Remember your password?{" "}
-              <Link href="/auth/signin" className="text-primary hover:underline">
+              <Link href="/auth/signin" className="text-blue-600 hover:text-blue-500 font-medium">
                 Sign in
               </Link>
             </p>
