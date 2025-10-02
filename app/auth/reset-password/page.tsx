@@ -24,6 +24,7 @@ export default function ResetPasswordPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [email, setEmail] = useState("")
   const [otp, setOtp] = useState("")
+  const [hasValidParams, setHasValidParams] = useState(false)
   
   const dispatch = useDispatch<AppDispatch>()
   const { loading, error } = useSelector((state: RootState) => state.auth)
@@ -31,7 +32,8 @@ export default function ResetPasswordPage() {
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    if (searchParams) {
+    // Check if searchParams is available
+    if (typeof window !== 'undefined' && searchParams) {
       const emailParam = searchParams.get("email") || ""
       const otpParam = searchParams.get("opt") || searchParams.get("otp") || ""
       
@@ -39,7 +41,11 @@ export default function ResetPasswordPage() {
       setOtp(otpParam)
       setIsLoading(false)
 
-      if (!emailParam || !otpParam) {
+      if (emailParam && otpParam) {
+        setHasValidParams(true)
+      } else {
+        setHasValidParams(false)
+        toast.error("Invalid or missing reset parameters")
         router.push("/auth/verify-email")
       }
     }
@@ -126,7 +132,7 @@ export default function ResetPasswordPage() {
   }
 
   // Show redirect state or invalid params
-  if (!email || !otp) {
+  if (!hasValidParams) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
