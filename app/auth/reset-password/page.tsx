@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useDispatch, useSelector } from "react-redux"
 import { Button } from "../../../components/ui/button"
@@ -29,11 +29,11 @@ export default function ResetPasswordPage() {
   const dispatch = useDispatch<AppDispatch>()
   const { loading, error } = useSelector((state: RootState) => state.auth)
   const router = useRouter()
-  const searchParams = useSearchParams()
 
   useEffect(() => {
-    // Check if searchParams is available
-    if (typeof window !== 'undefined' && searchParams) {
+    // Client-side only approach using window.location
+    if (typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search)
       const emailParam = searchParams.get("email") || ""
       const otpParam = searchParams.get("opt") || searchParams.get("otp") || ""
       
@@ -49,7 +49,7 @@ export default function ResetPasswordPage() {
         router.push("/auth/verify-email")
       }
     }
-  }, [searchParams, router])
+  }, [router])
 
   const validatePassword = (password: string) => {
     const minLength = 8
