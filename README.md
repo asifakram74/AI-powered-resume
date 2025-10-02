@@ -29,8 +29,11 @@ A modern, full-stack application for creating professional resumes with AI optim
 2. **Environment Configuration**
    Create `.env.local` file:
    ```env
-   # Laravel API URL for authentication
+   # Laravel API URL for authentication on production
    NEXT_PUBLIC_API_URL=https://backendcv.onlinetoolpot.com/api
+   
+   # Laravel API URL for authentication on staging
+   NEXT_PUBLIC_API_URL=https://stagingbackend.resumaic.com/api
    
    # Node.js API URL for AI operations
    NEXT_PUBLIC_NODEJS_API_URL=https://render-kweq.onrender.com/om
@@ -172,6 +175,11 @@ A modern, full-stack application for creating professional resumes with AI optim
 1. **Update Frontend Environment** for production:
    ```env
    NEXT_PUBLIC_API_URL=https://backendcv.onlinetoolpot.com/api
+
+   # Laravel API URL for authentication on staging
+   NEXT_PUBLIC_API_URL=https://stagingbackend.resumaic.com/api
+
+   # for ai on render
    NEXT_PUBLIC_NODEJS_API_URL=https://render-kweq.onrender.com/om
    ```
 
@@ -200,7 +208,10 @@ A modern, full-stack application for creating professional resumes with AI optim
 
 ### Frontend (.env.local)
 ```env
+# Laravel API URL for authentication on production
 NEXT_PUBLIC_API_URL=https://backendcv.onlinetoolpot.com/api
+# Laravel API URL for authentication on staging
+NEXT_PUBLIC_API_URL=https://stagingbackend.resumaic.com/api
 NEXT_PUBLIC_NODEJS_API_URL=https://render-kweq.onrender.com/om
 ```
 
