@@ -45,7 +45,7 @@ export function CreativeTemplate({
   };
 
   return (
-    <div className="min-h-screen bg-white print:min-h-0 print:shadow-none">
+    <div className="max-w-full mx-auto min-h-screen bg-white print:min-h-0 print:shadow-none">
       <style jsx global>{`
         @media print {
           @page {

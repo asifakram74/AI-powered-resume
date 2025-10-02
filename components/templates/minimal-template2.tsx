@@ -13,7 +13,7 @@ export function MinimalTemplate2({ data, isPreview = false }: MinimalTemplate2Pr
   }
 
   return (
-    <div className="max-w-3xl mx-auto bg-white p-8 min-h-screen font-light">
+    <div className="max-w-full mx-auto bg-white p-8 min-h-screen font-light">
       {/* Header */}
       <div className="mb-20">
         <div className="text-left">

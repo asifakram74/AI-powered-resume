@@ -91,8 +91,8 @@ export default function VerifyOTPPage() {
         console.log("Backend response:", result.payload)
         console.log("Using token for reset:", resetToken)
         
-        // Navigate to reset password page with email and token
-        router.push(`/auth/reset-password?email=${encodeURIComponent(email)}&token=${resetToken}`)
+        // Navigate to reset password page with email and otp
+        router.push(`/auth/reset-password?email=${encodeURIComponent(email)}&otp=${resetToken}`)
       } else {
         console.log("OTP verification failed:", result)
         toast.error(error || "Invalid OTP code")

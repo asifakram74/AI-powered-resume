@@ -33,7 +33,7 @@ export function ModernTemplate({
   };
 
   return (
-    <div className="flex min-h-screen bg-white print:min-h-0 print:shadow-none">
+    <div className="flex max-w-full mx-auto min-h-screen bg-white print:min-h-0 print:shadow-none">
       <style jsx global>{`
         @media print {
           @page {

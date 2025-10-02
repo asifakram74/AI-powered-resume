@@ -24,14 +24,14 @@ export default function ResetPasswordPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const email = searchParams?.get("email") || ""
-  const token = searchParams?.get("token") || searchParams?.get("otp") || ""
+  const otp = searchParams?.get("opt") || searchParams?.get("otp") || ""
 
   useEffect(() => {
-    if (!email || !token) {
+    if (!email || !otp) {
       router.push("/auth/verify-email")
       return
     }
-  }, [email, token, router])
+  }, [email, otp, router])
 
   const validatePassword = (password: string) => {
     const minLength = 8
@@ -73,14 +73,14 @@ export default function ResetPasswordPage() {
     try {
       const resetData = { 
         email, 
-        token, 
+        otp, 
         password: newPassword 
       }
       
       console.log("Reset Password Payload:", resetData)
-      console.log("Token value:", token)
-      console.log("Token type:", typeof token)
-      console.log("Token length:", token?.length)
+      console.log("OTP value:", otp)
+      console.log("OTP type:", typeof otp)
+      console.log("OTP length:", otp?.length)
       
       const result = await dispatch(resetPasswordWithToken(resetData))
       

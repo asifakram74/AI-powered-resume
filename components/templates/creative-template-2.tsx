@@ -30,7 +30,7 @@ export function CreativeTemplate2({ data, isPreview = false }: CreativeTemplate2
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+    <div className="max-w-full bg-white  min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
       {/* Floating Header */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-red-500 opacity-90"></div>

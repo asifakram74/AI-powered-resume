@@ -13,7 +13,7 @@ export function MinimalTemplate3({ data, isPreview = false }: MinimalTemplate3Pr
   }
 
   return (
-    <div className="max-w-4xl mx-auto bg-white p-16 min-h-screen">
+    <div className="max-w-full mx-auto bg-white p-16 min-h-screen">
       {/* Header */}
       <div className="text-center mb-24">
         <h1 className="text-7xl font-thin text-gray-900 mb-6 tracking-wider">{data.personalInfo.fullName}</h1>

@@ -97,7 +97,7 @@ export type VerifyOTPResponse = {
 
 export type ResetPasswordData = {
   email: string
-  token: string
+  otp: string
   password: string
 }
 
@@ -161,12 +161,12 @@ linkedinLogin: async (code: string): Promise<AuthResponse> => {
 
   resetPassword: async (data: ResetPasswordData): Promise<ForgotPasswordResponse> => {
     console.log("AuthService resetPassword called with:", data)
-    console.log("Token value in service:", data.token)
-    console.log("Token type in service:", typeof data.token)
+    console.log("OTP value in service:", data.otp)
+    console.log("OTP type in service:", typeof data.otp)
     
     const payload = {
       email: data.email,
-      token: data.token,
+      otp: data.otp,
       password: data.password
     }
     

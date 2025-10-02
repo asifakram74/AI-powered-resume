@@ -30,7 +30,7 @@ export function ClassicTemplate({
   };
 
   return (
-    <div className="max-w-4xl mx-auto bg-white p-12 min-h-screen">
+    <div className="max-w-full mx-auto bg-white p-12 min-h-screen">
       {/* Header */}
       <div className="text-center border-b-2 border-gray-800 pb-6 mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">

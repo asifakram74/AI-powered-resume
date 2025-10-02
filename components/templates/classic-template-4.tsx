@@ -14,7 +14,7 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
   }
 
   return (
-    <div className="max-w-4xl mx-auto bg-white min-h-screen font-serif">
+    <div className="max-w-full mx-auto bg-white min-h-screen font-serif">
       {/* Newspaper-style header with border */}
       <div className="border-4 border-gray-900 p-8 mb-8">
         <div className="text-center border-b-2 border-gray-900 pb-6 mb-6">

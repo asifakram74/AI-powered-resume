@@ -17,7 +17,7 @@ export function ModernTemplate2({ data, isPreview = false }: ModernTemplate2Prop
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50 print:min-h-0 print:shadow-none">
+    <div className="flex max-w-full mx-auto min-h-screen bg-gray-50 print:min-h-0 print:shadow-none">
       <style jsx global>{`
         @media print {
           @page {

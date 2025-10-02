@@ -14,7 +14,7 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
   }
 
   return (
-    <div className="max-w-4xl mx-auto bg-white p-10 min-h-screen font-serif">
+    <div className="max-w-full mx-auto bg-white p-12 min-h-screen font-serif">
       {/* Header with underline */}
       <div className="text-center mb-10">
         <h1 className="text-4xl font-bold text-gray-900 mb-3 tracking-wide">

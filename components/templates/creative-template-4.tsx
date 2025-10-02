@@ -14,7 +14,7 @@ export function CreativeTemplate4({ data, isPreview = false }: CreativeTemplate4
   }
 
   return (
-    <div className="max-w-4xl mx-auto bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen font-sans text-white relative overflow-hidden">
+    <div className="max-w-full mx-auto bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen font-sans text-white relative overflow-hidden">
       {/* Geometric background elements */}
       <div className="absolute top-0 left-0 w-64 h-64 bg-gradient-to-br from-cyan-400/20 to-blue-600/20 rounded-full blur-3xl"></div>
       <div className="absolute top-32 right-0 w-48 h-48 bg-gradient-to-br from-purple-400/20 to-pink-600/20 rounded-full blur-2xl"></div>

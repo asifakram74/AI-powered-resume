@@ -14,7 +14,7 @@ export function MinimalTemplate4({ data, isPreview = false }: MinimalTemplate4Pr
   }
 
   return (
-    <div className="max-w-3xl mx-auto bg-white p-16 min-h-screen font-light">
+    <div className="max-w-full mx-auto min-h-screen bg-white p-16 font-light">
       {/* Ultra-minimal header */}
       <div className="text-center mb-20">
         <h1 className="text-5xl font-extralight text-gray-900 mb-8 tracking-[0.2em] leading-tight">

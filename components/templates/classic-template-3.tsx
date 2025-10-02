@@ -13,7 +13,7 @@ export function ClassicTemplate3({ data, isPreview = false }: ClassicTemplate3Pr
   }
 
   return (
-    <div className="max-w-4xl mx-auto bg-white p-12 min-h-screen">
+    <div className="max-w-full mx-auto bg-white p-12 min-h-screen">
       {/* Header */}
       <div className="border-b-4 border-double border-gray-800 pb-8 mb-10">
         <div className="text-center">

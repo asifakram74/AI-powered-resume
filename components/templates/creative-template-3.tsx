@@ -29,7 +29,7 @@ export function CreativeTemplate3({ data, isPreview = false }: CreativeTemplate3
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="max-w-full mx-auto min-h-screen bg-gray-900 text-white">
       {/* Neon Header */}
       <div className="relative bg-black overflow-hidden">
         <div className="absolute inset-0">
