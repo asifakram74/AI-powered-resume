@@ -608,18 +608,18 @@ export function CVPageClientContent() {
         if (!cvId) {
           const personaText = convertPersonaToText(personaData);
 
-          console.log('Making request to:', 'https://render-kweq.onrender.com/om/api/optimize-cv');
+          console.log('Making request to:', 'http://localhost:3001/om/api/optimize-cv');
           console.log('Request payload size:', JSON.stringify({ extractedText: personaText }).length);
 
           try {
-            const testResponse = await fetch('https://render-kweq.onrender.com/', { method: 'HEAD' });
+            const testResponse = await fetch('http://localhost:3001/', { method: 'HEAD' });
         
             console.log('Server reachable:', testResponse.ok);
           } catch (testError) {
             console.error('Server not reachable:', testError);
           }
 
-          const response = await fetch('https://render-kweq.onrender.com/api/optimize-cv', {
+          const response = await fetch('http://localhost:3001/api/optimize-cv', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -831,17 +831,17 @@ export function CVPageClientContent() {
     try {
       const personaText = convertPersonaToText(persona);
 
-      console.log('Making request to:', 'https://render-kweq.onrender.com/om/api/optimize-cv');
+      console.log('Making request to:', 'http://localhost:3001/om/api/optimize-cv');
       console.log('Request payload size:', JSON.stringify({ extractedText: personaText }).length);
 
       try {
-        const testResponse = await fetch('https://render-kweq.onrender.com/om', { method: 'HEAD' });
+        const testResponse = await fetch('http://localhost:3001/om', { method: 'HEAD' });
         console.log('Server reachable:', testResponse.ok);
       } catch (testError) {
         console.error('Server not reachable:', testError);
       }
 
-      const response = await fetch('https://render-kweq.onrender.com/om/api/optimize-cv', {
+      const response = await fetch('http://localhost:3001/om/api/optimize-cv', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -897,110 +897,65 @@ export function CVPageClientContent() {
         "Processing your CV for download"
       );
 
-      switch (format) {
-        case "pdf":
-          const printWindow = window.open("", "_blank");
-          if (!printWindow) {
-            toast.dismiss(loadingToastId);
-            showErrorToast(
-              "Export Blocked",
-              "Please allow popups for PDF export"
-            );
-            return;
-          }
+      try {
+        // Get HTML content and CV data for backend processing
+        const htmlContent = cvElement.outerHTML;
+        const cvData = aiResponse?.optimizedCV;
+        const filename = `${persona?.full_name || "resume"}-cv.${format}`;
 
-          const clonedContent = cvElement.cloneNode(true) as HTMLElement;
-          const styles = Array.from(document.styleSheets)
-            .map((sheet) => {
-              try {
-                return Array.from(sheet.cssRules)
-                  .map((rule) => rule.cssText)
-                  .join("");
-              } catch (e) {
-                return "";
-              }
-            })
-            .join("");
+        // Call the new backend API
+        const response = await fetch(`http://localhost:3001/api/cv-export/${format}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            html: htmlContent,
+            cvData: cvData,
+            filename: filename,
+            options: format === 'pdf' ? {
+              format: 'A4',
+              printBackground: true,
+           
+            } : format === 'png' ? {
+              type: 'png',
+              fullPage: true,
+              omitBackground: false
+            } : {}
+          })
+        });
 
-          printWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-              <head>
-                <title>${persona?.full_name || "Resume"} - CV</title>
-                <style>${styles}</style>
-                <style>
-                  body { 
-                    margin: 0; 
-                    padding: 15px; 
-                    font-family: Arial, sans-serif; 
-                    background-color: white;
-                  }
-                  @media print { 
-                    body { 
-                      margin: 0; 
-                      padding: 0; 
-                    } 
-                    .no-print {
-                      display: none !important;
-                    }
-                  }
-                  .print-button {
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    padding: 10px 15px;
-                    background-color: #007bff;
-                    color: white;
-                    border: none;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    z-index: 1000;
-                  }
-                </style>
-              </head>
-              <body>
-                ${clonedContent.outerHTML}
-                <button class="print-button no-print" onclick="window.print()">Print / Save as PDF</button>
-                <script>
-                  // Auto-print after page loads
-                  window.onload = function() {
-                    setTimeout(function() {
-                      window.print();
-                    }, 500);
-                  };
-                  
-                  // Close window after printing
-                  window.onafterprint = function() {
-                    setTimeout(function() {
-                      window.close();
-                    }, 500);
-                  };
-                </script>
-              </body>
-            </html>
-          `);
-          printWindow.document.close();
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || `Failed to export ${format.toUpperCase()}`);
+        }
 
-          // Dismiss loading toast after a short delay to allow print dialog to appear
-          setTimeout(() => {
-            toast.dismiss(loadingToastId);
-            showSuccessToast(
-              "PDF Ready! 📄",
-              "Use the print dialog to save as PDF or print"
-            );
-          }, 1000);
-          break;
+        // Get the file as blob and download it
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
 
-        case "png":
-          await exportAsPNG();
-          toast.dismiss(loadingToastId);
-          break;
+        toast.dismiss(loadingToastId);
+        showSuccessToast(
+          `${format.toUpperCase()} Downloaded! 📄`,
+          `Your CV has been downloaded as ${format.toUpperCase()}`
+        );
 
-        case "docx":
-          await handleDocxExport();
-          toast.dismiss(loadingToastId);
-          break;
+      } catch (error) {
+        console.error(`Error exporting as ${format}:`, error);
+        toast.dismiss(loadingToastId);
+        showErrorToast(
+          "Export Failed", 
+          `${format.toUpperCase()} export failed. Please try again.`
+        );
       }
+
     } catch (error: any) {
       console.error("Export error:", error);
       showErrorToast(
@@ -1011,313 +966,11 @@ export function CVPageClientContent() {
   };
 
   const exportAsPNG = async () => {
-    try {
-      const cvElement = document.getElementById("cv-preview-content");
-      if (!cvElement) {
-        showErrorToast(
-          "Export Failed",
-          "CV preview not found. Please refresh and try again."
-        );
-        return;
-      }
-
-      const dataUrl = await htmlToImage.toPng(cvElement, {
-        quality: 1.0,
-        pixelRatio: 2,
-        backgroundColor: "#ffffff",
-      });
-
-      // Create download link
-      const link = document.createElement("a");
-      link.download = `${persona?.full_name || "resume"}-cv.png`;
-      link.href = dataUrl;
-      link.click();
-
-      showSuccessToast(
-        "PNG Downloaded! 📸",
-        "Your CV has been downloaded as PNG"
-      );
-    } catch (error) {
-      console.error("Error exporting as PNG:", error);
-      showErrorToast("Export Failed", "PNG export failed. Please try again.");
-    }
+    await handleExport('png');
   };
 
   const handleDocxExport = async () => {
-    try {
-      if (!aiResponse || !persona) {
-        showErrorToast("Export Failed", "No CV data available for export.");
-        return;
-      }
-
-      // Import docx dynamically to avoid SSR issues
-      const { Document, Paragraph, TextRun, HeadingLevel, Packer } =
-        await import("docx");
-
-      // Create document sections
-      const sections = [
-        // Personal Info
-        new Paragraph({
-          heading: HeadingLevel.HEADING_1,
-          children: [
-            new TextRun({
-              text: aiResponse.optimizedCV.personalInfo.name,
-              bold: true,
-              size: 28,
-            }),
-          ],
-        }),
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: aiResponse.optimizedCV.personalInfo.email,
-              size: 22,
-            }),
-          ],
-        }),
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: aiResponse.optimizedCV.personalInfo.phone,
-              size: 22,
-            }),
-          ],
-        }),
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: aiResponse.optimizedCV.personalInfo.location,
-              size: 22,
-            }),
-          ],
-        }),
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: aiResponse.optimizedCV.personalInfo.linkedin,
-              size: 22,
-            }),
-          ],
-        }),
-        new Paragraph({ text: "" }), // Empty paragraph for spacing
-
-        // Summary
-        new Paragraph({
-          heading: HeadingLevel.HEADING_2,
-          children: [
-            new TextRun({
-              text: "Professional Summary",
-              bold: true,
-              size: 24,
-            }),
-          ],
-        }),
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: aiResponse.optimizedCV.summary,
-              size: 22,
-            }),
-          ],
-        }),
-        new Paragraph({ text: "" }),
-
-        // Work Experience
-        new Paragraph({
-          heading: HeadingLevel.HEADING_2,
-          children: [
-            new TextRun({
-              text: "Work Experience",
-              bold: true,
-              size: 24,
-            }),
-          ],
-        }),
-        ...aiResponse.optimizedCV.workExperience.flatMap((exp) => [
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `${exp.title} at ${exp.company}`,
-                bold: true,
-                size: 22,
-              }),
-            ],
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: exp.duration,
-                italics: true,
-                size: 20,
-              }),
-            ],
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: exp.description,
-                size: 22,
-              }),
-            ],
-          }),
-          new Paragraph({ text: "" }),
-        ]),
-
-        // Education
-        new Paragraph({
-          heading: HeadingLevel.HEADING_2,
-          children: [
-            new TextRun({
-              text: "Education",
-              bold: true,
-              size: 24,
-            }),
-          ],
-        }),
-        ...aiResponse.optimizedCV.education.flatMap((edu) => [
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `${edu.degree} - ${edu.institution}`,
-                bold: true,
-                size: 22,
-              }),
-            ],
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `${edu.year} | GPA: ${edu.gpa}`,
-                size: 20,
-              }),
-            ],
-          }),
-          new Paragraph({ text: "" }),
-        ]),
-
-        // Skills
-        new Paragraph({
-          heading: HeadingLevel.HEADING_2,
-          children: [
-            new TextRun({
-              text: "Skills",
-              bold: true,
-              size: 24,
-            }),
-          ],
-        }),
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: aiResponse.optimizedCV.skills.join(", "),
-              size: 22,
-            }),
-          ],
-        }),
-        new Paragraph({ text: "" }),
-
-        // Projects
-        new Paragraph({
-          heading: HeadingLevel.HEADING_2,
-          children: [
-            new TextRun({
-              text: "Projects",
-              bold: true,
-              size: 24,
-            }),
-          ],
-        }),
-        ...aiResponse.optimizedCV.projects.flatMap((proj) => [
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: proj.name,
-                bold: true,
-                size: 22,
-              }),
-            ],
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: proj.description,
-                size: 22,
-              }),
-            ],
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `Technologies: ${proj.technologies.join(", ")}`,
-                size: 20,
-              }),
-            ],
-          }),
-          new Paragraph({ text: "" }),
-        ]),
-
-        // Certifications
-        aiResponse.optimizedCV.certifications.length > 0
-          ? new Paragraph({
-            heading: HeadingLevel.HEADING_2,
-            children: [
-              new TextRun({
-                text: "Certifications",
-                bold: true,
-                size: 24,
-              }),
-            ],
-          })
-          : null,
-        ...aiResponse.optimizedCV.certifications.flatMap((cert) => [
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: cert,
-                size: 22,
-              }),
-            ],
-          }),
-        ]),
-      ].filter(Boolean); // Remove null sections
-
-      // Filter out any null values from sections and ensure they are Paragraph objects
-      const validSections = sections.filter(
-        (section): section is InstanceType<typeof Paragraph> => section !== null
-      );
-
-      const doc = new Document({
-        sections: [
-          {
-            properties: {},
-            children: validSections,
-          },
-        ],
-      });
-
-      // Generate blob and download
-      const blob = await Packer.toBlob(doc);
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${persona.full_name || "CV"}_${new Date().toISOString().split("T")[0]
-        }.docx`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      showSuccessToast(
-        "DOCX Downloaded! 📝",
-        "Your CV has been downloaded as DOCX"
-      );
-    } catch (error) {
-      console.error("Error generating DOCX:", error);
-      showErrorToast(
-        "Export Failed",
-        "Unable to generate DOCX file. Please try again."
-      );
-    }
+    await handleExport('docx');
   };
   const handleSaveCV = async () => {
     if (!aiResponse || !selectedTemplate || !persona || !user?.id) {

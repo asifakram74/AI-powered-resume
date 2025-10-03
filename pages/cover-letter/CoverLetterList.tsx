@@ -34,6 +34,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../../components/ui/dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
 import { CoverLetterGenerator } from "./AddEditCoverLetter"
 import {
@@ -190,27 +196,40 @@ export function CoverLetterPage({ user }: PageProps) {
       const cvContent = await getCVContentForAI(selectedCV)
 
       // Call DeepSeek AI for cover letter generation
-      console.log('Making request to:', 'https://render-kweq.onrender.com/om/api/cover-letter-generation');
-      console.log('Request payload size:', JSON.stringify({ jobDescription, tone, cvContent, cvData: selectedCV }).length);
+      console.log('Making request to:', 'http://localhost:3001/om/api/cover-letter-generation');
+      console.log('Selected tone:', tone);
+      console.log('Tone type:', typeof tone);
+      
+      // Find the full tone data to get name and description
+      const selectedToneData = tones.find(t => t.id === tone);
+      console.log('Selected tone data:', selectedToneData);
+      
+      const requestPayload = {
+        jobDescription,
+        tone,
+        toneName: selectedToneData?.name || tone,
+        toneDescription: selectedToneData?.description || '',
+        toneExample: selectedToneData?.example || '',
+        cvContent,
+        cvData: selectedCV,
+      };
+      
+      console.log('Request payload:', requestPayload);
+      console.log('Request payload size:', JSON.stringify(requestPayload).length);
 
       try {
-        const testResponse = await fetch('https://render-kweq.onrender.com/om', { method: 'HEAD' });
+        const testResponse = await fetch('http://localhost:3001/', { method: 'HEAD' });
         console.log('Server reachable:', testResponse.ok);
       } catch (testError) {
         console.error('Server not reachable:', testError);
       }
 
-      const response = await fetch('https://render-kweq.onrender.com/om/api/cover-letter-generation', {
+      const response = await fetch('http://localhost:3001/api/cover-letter-generation', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          jobDescription,
-          tone,
-          cvContent,
-          cvData: selectedCV,
-        }),
+        body: JSON.stringify(requestPayload),
       })
 
       if (!response.ok) {
@@ -330,6 +349,52 @@ export function CoverLetterPage({ user }: PageProps) {
     toast.success("Cover letter downloaded!", {
       description: "The file has been saved to your downloads folder.",
     })
+  }
+
+  const handleExportCoverLetter = async (letter: CoverLetter, format: 'pdf' | 'docx' | 'png') => {
+    try {
+      const filename = `cover_letter_${letter.id}.${format}`
+      
+      const response = await fetch(`http://localhost:3001/api/cover-letter-export/${format}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: letter.generated_letter,
+          filename: filename,
+          letterData: {
+            jobDescription: letter.job_description,
+            tone: letter.tone,
+            generatedLetter: letter.generated_letter
+          }
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to export ${format.toUpperCase()}`)
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.style.display = 'none'
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      toast.success(`Cover letter exported as ${format.toUpperCase()}!`, {
+        description: "The file has been saved to your downloads folder.",
+      })
+    } catch (error) {
+      console.error(`Error exporting ${format}:`, error)
+      toast.error(`Failed to export ${format.toUpperCase()}`, {
+        description: "Please try again or contact support if the issue persists.",
+      })
+    }
   }
 
   const handleDelete = async (letter: CoverLetter) => {
@@ -454,7 +519,7 @@ export function CoverLetterPage({ user }: PageProps) {
                   )}
 
                   <div className="space-y-4">
-                    <div>
+                    {/* <div>
                       <Label className="text-sm font-medium">Tone</Label>
                       {isViewMode ? (
                         <Badge variant="outline" className="ml-2">
@@ -481,7 +546,7 @@ export function CoverLetterPage({ user }: PageProps) {
                           </SelectContent>
                         </Select>
                       )}
-                    </div>
+                    </div> */}
                     <div>
                       <Label className="text-sm font-medium">{isViewMode ? "Cover Letter" : "Edit Cover Letter"}</Label>
                       <Textarea
@@ -543,10 +608,32 @@ export function CoverLetterPage({ user }: PageProps) {
 
                     {isViewMode && viewingLetter && (
                       <div className="flex gap-2">
-                        <Button variant="outline" onClick={() => handleDownload(viewingLetter)}>
-                          <Download className="h-4 w-4 mr-2" />
-                          Download
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline">
+                              <Download className="h-4 w-4 mr-2" />
+                              Download
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            <DropdownMenuItem onClick={() => handleDownload(viewingLetter)}>
+                              <FileText className="h-4 w-4 mr-2" />
+                              Text (.txt)
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleExportCoverLetter(viewingLetter, 'pdf')}>
+                              <FileText className="h-4 w-4 mr-2" />
+                              PDF (.pdf)
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleExportCoverLetter(viewingLetter, 'docx')}>
+                              <FileText className="h-4 w-4 mr-2" />
+                              Word (.docx)
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleExportCoverLetter(viewingLetter, 'png')}>
+                              <FileText className="h-4 w-4 mr-2" />
+                              Image (.png)
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                         <Button
                           onClick={() => handleEdit(viewingLetter)}
                           className="resumaic-gradient-green hover:opacity-90  button-press"
@@ -688,6 +775,37 @@ export function CoverLetterPage({ user }: PageProps) {
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="cursor-pointer"
+                                  title="Download"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <Download className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent>
+                                <DropdownMenuItem onClick={() => handleDownload(letter)}>
+                                  <FileText className="h-4 w-4 mr-2" />
+                                  Text (.txt)
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleExportCoverLetter(letter, 'pdf')}>
+                                  <FileText className="h-4 w-4 mr-2" />
+                                  PDF (.pdf)
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleExportCoverLetter(letter, 'docx')}>
+                                  <FileText className="h-4 w-4 mr-2" />
+                                  Word (.docx)
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleExportCoverLetter(letter, 'png')}>
+                                  <FileText className="h-4 w-4 mr-2" />
+                                  Image (.png)
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                             <ConfirmDialog
                               title="Delete Cover Letter"
                               description={`Are you sure you want to delete this cover letter? This action cannot be undone.`}
