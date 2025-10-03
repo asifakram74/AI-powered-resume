@@ -8,7 +8,7 @@ const LARAVEL_API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://staging
 // Node.js Backend URL for app/api routes
 const NODEJS_API_BASE_URL = process.env.NEXT_PUBLIC_NODEJS_API_URL || "https://render-kweq.onrender.com/om"
 
-// Laravel API client for authentication and services
+// Laravel API client for authentication and services 
 export const api = axios.create({
   baseURL: LARAVEL_API_BASE_URL,
   headers: {
