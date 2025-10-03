@@ -7,8 +7,8 @@ import { Toaster } from "sonner";
 import HydrateAuth from "../components/auth/HydrateAuth";
 
 export const metadata: Metadata = {
-  title: "Resumaic - AI-Powered Resume Builder",
-  description: "Create professional resumes with AI technology",
+  title: "Resumaic – AI-Powered Resume Builder Online",
+  description: "Build professional resumes in minutes with Resumaic, the AI-powered resume builder. Create tailored CVs that stand out and boost your career success.",
   icons: {
     icon: "/favicon.png",          // favicon in browser tab
     shortcut: "/favicon.png",      // legacy support
