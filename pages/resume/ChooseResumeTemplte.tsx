@@ -129,6 +129,36 @@ const templates: CVTemplate[] = [
     description: "Premium creative design for professionals",
     category: "creative",
   },
+  {
+    id: "modern-5",
+    name: "Modern JAY",
+    description: "Gray sidebar with clean white main content",
+    category: "modern",
+  },
+  {
+    id: "modern-6",
+    name: "Modern MIKE",
+    description: "Blue sidebar with professional white layout",
+    category: "modern",
+  },
+  {
+    id: "modern-7",
+    name: "Modern LOREN",
+    description: "Dark blue curved sidebar with elegant design",
+    category: "modern",
+  },
+  {
+    id: "modern-8",
+    name: "Modern LILLY",
+    description: "Light blue sidebar with rounded contact section",
+    category: "modern",
+  },
+  {
+    id: "modern-9",
+    name: "Modern SOFIA",
+    description: "Clean layout with name positioned on left side",
+    category: "modern",
+  },
 ];
 
 const dashboardMenuItems = [

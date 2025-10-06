@@ -16,6 +16,7 @@ import {
 import Image from "next/image"
 
 import { Badge } from "../../components/ui/badge"
+
 import { Button } from "../../components/ui/button"
 import { Avatar, AvatarFallback } from "../../components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu"
