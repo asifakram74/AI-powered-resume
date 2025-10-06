@@ -259,7 +259,7 @@ export function CVTemplates({
                           <div className="h-64 w-full">
                             <div className="relative w-full h-full flex items-center justify-center p-2">
                               <Image
-                                src={`/templates/${template.id}-preview.png`}
+                                src={`/templates/${template.id}.png`}
                                 alt={`${template.name} Template Preview`}
                                 width={300}
                                 height={450}
