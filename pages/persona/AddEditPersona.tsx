@@ -1,6 +1,4 @@
-"use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../../components/ui/button";
 import {
   Card,
@@ -35,22 +33,99 @@ export function PersonaCreationOptions({
   const [linkedInConnected, setLinkedInConnected] = useState(false);
   const [selectedOption, setSelectedOption] = useState<"manual" | "pdf" | "linkedin">("manual");
   const [extractedData, setExtractedData] = useState<Partial<Omit<CVData, "id" | "createdAt">> | null>(null);
+  const [linkedInError, setLinkedInError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Handle LinkedIn OAuth callback - only if we're in a proper routing context
+  useEffect(() => {
+    // Check if we're in a browser environment and have access to URL parameters
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      const source = urlParams.get('source');
+      const error = urlParams.get('error');
+      
+      if (source === 'linkedin' && token) {
+        handleLinkedInCallback(token);
+      } else if (error === 'auth_failed') {
+        setLinkedInError('LinkedIn authentication failed. Please try again.');
+        setIsConnectingLinkedIn(false);
+      }
+    }
+  }, []);
 
   const handleLinkedInConnect = async () => {
     setIsConnectingLinkedIn(true);
-    setTimeout(() => {
-      setLinkedInConnected(true);
+    setLinkedInError(null);
+    
+    // Redirect to LinkedIn OAuth
+    const apiUrl = process.env.NEXT_PUBLIC_NODEJS_API_URL || 'http://localhost:3001';
+    window.location.href = `${apiUrl}/api/linkedin/auth`;
+  };
+
+  // Handle LinkedIn callback and convert profile data
+  const handleLinkedInCallback = async (token: string) => {
+    try {
+      setIsConnectingLinkedIn(true);
+      const apiUrl = process.env.NEXT_PUBLIC_NODEJS_API_URL || 'http://localhost:3001';
+      
+      const response = await fetch(`${apiUrl}/api/linkedin/convert-profile`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token }),
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setLinkedInConnected(true);
+        setExtractedData(result.data);
+        setSelectedOption('linkedin');
+        
+        // Auto-proceed with LinkedIn data after a brief delay
+        setTimeout(() => {
+          onOptionSelect('linkedin', result.data);
+        }, 1000);
+      } else {
+        setLinkedInError(result.error || 'Failed to convert LinkedIn profile');
+      }
+    } catch (error) {
+      console.error('LinkedIn callback error:', error);
+      setLinkedInError('Failed to process LinkedIn data. Please try again.');
+    } finally {
       setIsConnectingLinkedIn(false);
-    }, 2000);
+      
+      // Clean up URL parameters if we're in a browser environment
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('token');
+        url.searchParams.delete('source');
+        url.searchParams.delete('error');
+        window.history.replaceState({}, '', url.toString());
+      }
+    }
   };
 
   const handleDataExtracted = (data: Partial<Omit<CVData, "id" | "createdAt">>) => {
     setExtractedData(data);
+    setIsProcessing(false);
+  };
+
+  const handleProcessingStart = () => {
+    setIsProcessing(true);
   };
 
   const handleContinueWithPDF = () => {
     if (extractedData) {
       onOptionSelect("pdf", extractedData);
+    }
+  };
+
+  const handleContinueWithLinkedIn = () => {
+    if (extractedData) {
+      onOptionSelect("linkedin", extractedData);
     }
   };
 
@@ -101,17 +176,24 @@ export function PersonaCreationOptions({
             <div className="mx-auto w-12 h-12 bg-[#70E4A8]/20 rounded-lg flex items-center justify-center mb-3">
               <Upload className="h-6 w-6 text-[#70E4A8]" />
             </div>
-            <CardTitle className="text-lg font-rubik text-[#2D3639]">
-              Upload PDF Resume
-            </CardTitle>
-            <CardDescription className="font-inter text-gray-600">
-              Extract information automatically from your existing resume
-            </CardDescription>
+            {!isProcessing && (
+              <>
+                <CardTitle className="text-lg font-rubik text-[#2D3639]">
+                  Upload PDF Resume
+                </CardTitle>
+                <CardDescription className="font-inter text-gray-600">
+                  Extract information automatically from your existing resume
+                </CardDescription>
+              </>
+            )}
           </CardHeader>
           <CardContent className="space-y-4">
             {selectedOption === "pdf" ? (
               <>
-                <PDFUploader onDataExtracted={handleDataExtracted} />
+                <PDFUploader 
+                  onDataExtracted={handleDataExtracted}
+                  onProcessingStart={handleProcessingStart}
+                />
                 {extractedData && (
                   <Button
                     className="w-full resumaic-gradient-green hover:opacity-90 hover-lift button-press"
@@ -135,14 +217,15 @@ export function PersonaCreationOptions({
           </CardContent>
         </Card>
 
-        {/* LinkedIn Import Option - Upcoming Feature */}
-        <Card className="cursor-not-allowed relative overflow-hidden border-2 border-gray-200">
-          <div className="absolute top-2 right-2 z-20 lg:hidden ">
-            <span className="inline-flex items-center rounded-md bg-[#EA580C]/20 px-2.5 py-0.5 text-xs font-medium text-[#EA580C] font-inter">
-              Coming Soon
-            </span>
-          </div>
-
+        {/* LinkedIn Import Option - Now Functional */}
+        <Card 
+          className={`cursor-pointer hover:shadow-lg transition-shadow border-2 ${
+            selectedOption === "linkedin"
+              ? "border-[#0067c2]"
+              : "hover:border-[#0067c2]/50 border-gray-200"
+          } ${isConnectingLinkedIn ? 'opacity-75' : ''}`}
+          onClick={() => !isConnectingLinkedIn && setSelectedOption("linkedin")}
+        >
           <CardHeader className="text-center">
             <div className="mx-auto w-12 h-12 bg-[#0067c2]/20 rounded-lg flex items-center justify-center mb-3">
               <Linkedin className="h-6 w-6 text-[#0067c2]" />
@@ -155,21 +238,48 @@ export function PersonaCreationOptions({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center gap-2 text-sm text-gray-500 font-inter">
-              <AlertCircle className="h-4 w-4" />
-              Currently in development
-            </div>
+            {linkedInError && (
+              <div className="flex items-center gap-2 text-sm text-red-600 font-inter bg-red-50 p-2 rounded">
+                <AlertCircle className="h-4 w-4" />
+                {linkedInError}
+              </div>
+            )}
 
-            <Button
-              className="w-full"
-              variant="outline"
-              disabled={true}
-            >
-              Connect LinkedIn
-            </Button>
+            {linkedInConnected && extractedData ? (
+              <>
+                <div className="flex items-center gap-2 text-sm text-green-600 font-inter bg-green-50 p-2 rounded">
+                  <CheckCircle className="h-4 w-4" />
+                  LinkedIn profile imported successfully!
+                </div>
+                <Button
+                  className="w-full bg-[#0067c2] hover:bg-[#0067c2]/90 text-white"
+                  onClick={handleContinueWithLinkedIn}
+                >
+                  Continue with LinkedIn Data
+                </Button>
+              </>
+            ) : (
+              <Button
+                className="w-full bg-[#0067c2] hover:bg-[#0067c2]/90 text-white"
+                onClick={handleLinkedInConnect}
+                disabled={isConnectingLinkedIn}
+              >
+                {isConnectingLinkedIn ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Connecting...
+                  </>
+                ) : (
+                  <>
+                    <Linkedin className="mr-2 h-4 w-4" />
+                    Connect LinkedIn
+                  </>
+                )}
+              </Button>
+            )}
 
             <div className="mt-3 text-xs text-gray-500 text-center font-inter">
-              Secure OAuth connection coming soon
+              {linkedInConnected ? 'Data imported and ready to use' : 'Secure OAuth connection'}
             </div>
           </CardContent>
         </Card>

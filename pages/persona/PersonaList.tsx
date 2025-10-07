@@ -315,7 +315,7 @@ function CreatePersonaPage({ user }: PageProps) {
     window.open(`/create-cv?personaId=${persona.id}`, '_blank')
   }
 
-  const handlePersonaGenerated = async (newPersona: CVData) => {
+  const handlePersonaGenerated = async (newPersona: CVData, profilePictureFile?: File) => {
     setIsLoading(true);
 
     try {
@@ -355,9 +355,9 @@ function CreatePersonaPage({ user }: PageProps) {
 
       let response: PersonaResponse;
       if (editingPersona) {
-        response = await updatePersona(Number.parseInt(editingPersona.id), personaData);
+        response = await updatePersona(Number.parseInt(editingPersona.id), personaData, profilePictureFile);
       } else {
-        response = await createPersona(personaData);
+        response = await createPersona(personaData, profilePictureFile);
       }
 
       const updatedPersona: CVData = {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -14,9 +14,10 @@ import {
   SelectValue,
 } from "../../components/ui/select";
 import { Badge } from "../../components/ui/badge";
-import { Sparkles, X, Plus } from "lucide-react";
+import { Sparkles, X, Plus, Upload, User } from "lucide-react";
 import { Textarea } from "../../components/ui/textarea";
 import { Switch } from "../../components/ui/switch";
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import type { CVData } from "../../types/cv-data";
 
 // Helper function to validate and format URLs
@@ -54,7 +55,7 @@ const isValidUrl = (url: string): boolean => {
 interface PersonaFormProps {
   prefilledData: Partial<Omit<CVData, "id" | "createdAt">> | null;
   editingPersona: CVData | null;
-  onPersonaGenerated: (persona: CVData) => void;
+  onPersonaGenerated: (persona: CVData, profilePictureFile?: File) => void;
   onCancel: () => void;
 }
 
@@ -143,6 +144,65 @@ export function PersonaForm({
   const [skillType, setSkillType] = useState<"technical" | "soft">("technical");
   const [interestInput, setInterestInput] = useState("");
 
+  // Profile picture upload state
+  const [profilePictureFile, setProfilePictureFile] = useState<File | null>(null);
+  const [profilePicturePreview, setProfilePicturePreview] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Handle profile picture upload
+  const handleProfilePictureUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select an image file');
+        return;
+      }
+
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size should be less than 5MB');
+        return;
+      }
+
+      // Store the file object
+      setProfilePictureFile(file);
+
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setProfilePicturePreview(previewUrl);
+
+      // Clear the profilePicture field in formData since we'll send the file separately
+      setFormData((prev) => ({
+        ...prev,
+        personalInfo: {
+          ...prev.personalInfo,
+          profilePicture: "",
+        },
+      }));
+    }
+  };
+
+  const removeProfilePicture = () => {
+    // Revoke the object URL to free memory
+    if (profilePicturePreview && profilePicturePreview.startsWith('blob:')) {
+      URL.revokeObjectURL(profilePicturePreview);
+    }
+    
+    setProfilePictureFile(null);
+    setProfilePicturePreview("");
+    setFormData((prev) => ({
+      ...prev,
+      personalInfo: {
+        ...prev.personalInfo,
+        profilePicture: "",
+      },
+    }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   // Load prefilled data when component mounts or prefilledData changes
   useEffect(() => {
     if (prefilledData) {
@@ -156,6 +216,10 @@ export function PersonaForm({
         projects: prefilledData.projects || prev.projects,
         additional: { ...prev.additional, ...prefilledData.additional },
       }));
+      // Set profile picture preview if it exists
+      if (prefilledData.personalInfo?.profilePicture) {
+        setProfilePicturePreview(prefilledData.personalInfo.profilePicture);
+      }
     }
   }, [prefilledData]);
 
@@ -441,7 +505,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
       };
 
       setIsGenerating(false);
-      onPersonaGenerated(newPersona);
+      onPersonaGenerated(newPersona, profilePictureFile || undefined);
     }, 3000);
   };
 
@@ -453,6 +517,8 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
           <CardTitle className="text-lg">Personal Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Profile Picture Upload */}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Full Name *</Label>
@@ -634,6 +700,66 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
               placeholder="Brief professional summary..."
               className="min-h-[100px]"
             />
+          </div>
+
+          {/* Profile Picture Upload - Responsive Design */}
+          <div className="space-y-3">
+            <Label className="text-base font-medium">Profile Picture</Label>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 border border-gray-200 rounded-lg bg-gray-50/50">
+              {/* Avatar Section */}
+              <div className="flex-shrink-0">
+                <Avatar className="w-24 h-24 sm:w-20 sm:h-20 border-2 border-gray-200">
+                  <AvatarImage
+                    src={profilePicturePreview || formData.personalInfo.profilePicture}
+                    alt="Profile picture"
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="bg-gray-100">
+                    <User className="w-8 h-8 text-gray-400" />
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+              
+              {/* Controls Section */}
+              <div className="flex-1 w-full sm:w-auto">
+                <div className="flex flex-col sm:flex-row gap-2 mb-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center justify-center gap-2 w-full sm:w-auto bg-white hover:bg-gray-50"
+                  >
+                    <Upload className="w-4 h-4" />
+                    Upload Photo
+                  </Button>
+                  {(profilePicturePreview || formData.personalInfo.profilePicture) && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={removeProfilePicture}
+                      className="flex items-center justify-center gap-2 w-full sm:w-auto text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                    >
+                      <X className="w-4 h-4" />
+                      Remove
+                    </Button>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  Upload a professional photo (JPG, PNG, max 5MB). Recommended size: 400x400px for best quality.
+                </p>
+              </div>
+              
+              {/* Hidden File Input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleProfilePictureUpload}
+                className="hidden"
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
