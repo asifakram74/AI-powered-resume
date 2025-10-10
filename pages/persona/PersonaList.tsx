@@ -54,6 +54,7 @@ import {
   createPersona,
   updatePersona,
   deletePersona,
+  uploadPersonaProfilePicture,
   type PersonaData,
   type PersonaResponse,
 } from "../../lib/redux/service/pasonaService";
@@ -152,6 +153,13 @@ function CreatePersonaPage({ user }: PageProps) {
   const handleEdit = async (persona: CVData) => {
     try {
       const data = await getPersonaById(Number.parseInt(persona.id));
+      console.log('Raw persona data from API:', data);
+      console.log('Profile picture from API:', data.profile_picture);
+      
+      // The profile picture URL is now constructed in the service layer
+      const profilePictureUrl = data.profile_picture || "";
+      console.log('Profile picture URL:', profilePictureUrl);
+      
       setEditingPersona({
         ...persona,
         personalInfo: {
@@ -162,7 +170,7 @@ function CreatePersonaPage({ user }: PageProps) {
           address: data.address || "",
           city: data.city || "",
           country: data.country || "",
-          profilePicture: data.profile_picture || "",
+          profilePicture: profilePictureUrl,
           summary: data.summary || "",
           linkedin: data.linkedin || "",
           github: data.github || "",
@@ -178,8 +186,8 @@ function CreatePersonaPage({ user }: PageProps) {
           soft: Array.isArray(data.skills?.soft) ? data.skills.soft : [],
         },
         languages: Array.isArray(data.languages)
-          ? data.languages.map((lang: any) => ({
-            id: lang.id || Date.now().toString(),
+          ? data.languages.map((lang: any, index: number) => ({
+            id: lang.id || `lang-${Date.now()}-${index}`,
             name: typeof lang === "string" ? lang : lang.name || "",
             proficiency:
               typeof lang === "object" &&
@@ -220,7 +228,7 @@ function CreatePersonaPage({ user }: PageProps) {
           address: data.address || "",
           city: data.city || "",
           country: data.country || "",
-          profilePicture: data.profile_picture || "",
+          profilePicture: profilePictureUrl, // Use the constructed URL instead of data.profile_picture
           summary: data.summary || "",
           linkedin: data.linkedin || "",
           github: data.github || "",
@@ -236,8 +244,8 @@ function CreatePersonaPage({ user }: PageProps) {
           soft: Array.isArray(data.skills?.soft) ? data.skills.soft : [],
         },
         languages: Array.isArray(data.languages)
-          ? data.languages.map((lang: any) => ({
-            id: lang.id || Date.now().toString(),
+          ? data.languages.map((lang: any, index: number) => ({
+            id: lang.id || `lang-${Date.now()}-${index}`,
             name: typeof lang === "string" ? lang : lang.name || "",
             proficiency:
               typeof lang === "object" &&
@@ -315,7 +323,15 @@ function CreatePersonaPage({ user }: PageProps) {
     window.open(`/create-cv?personaId=${persona.id}`, '_blank')
   }
 
-  const handlePersonaGenerated = async (newPersona: CVData, profilePictureFile?: File) => {
+  const handlePersonaGenerated = async (newPersona: CVData, profilePictureFile?: File | null) => {
+    console.log("handlePersonaGenerated called with:", { 
+      newPersona: newPersona.personalInfo.fullName,
+      profilePictureFile: profilePictureFile ? {
+        name: profilePictureFile.name,
+        size: profilePictureFile.size,
+        type: profilePictureFile.type
+      } : null
+    });
     setIsLoading(true);
 
     try {
@@ -355,14 +371,36 @@ function CreatePersonaPage({ user }: PageProps) {
 
       let response: PersonaResponse;
       if (editingPersona) {
-        response = await updatePersona(Number.parseInt(editingPersona.id), personaData, profilePictureFile);
+        response = await updatePersona(Number.parseInt(editingPersona.id), personaData);
       } else {
-        response = await createPersona(personaData, profilePictureFile);
+        // Step 1: Create persona without profile picture (profilePicture will be null)
+        console.log("Creating persona with data:", personaData);
+        response = await createPersona(personaData);
+        console.log("Create persona response:", response);
+        
+        // Validate response has required fields
+        if (!response || !response.id) {
+          console.error("Invalid response from createPersona:", response);
+          throw new Error("Failed to create persona: Invalid response from server");
+        }
+        
+        // Step 2: Upload profile picture if one exists
+        if (profilePictureFile) {
+          try {
+            console.log("Uploading profile picture for persona ID:", response.id);
+            const updatedResponse = await uploadPersonaProfilePicture(response.id, profilePictureFile);
+            console.log("Profile picture upload response:", updatedResponse);
+            response = updatedResponse;
+          } catch (profilePictureError) {
+            console.error("Error uploading profile picture:", profilePictureError);
+            toast("Persona created successfully, but failed to upload profile picture");
+          }
+        }
       }
 
       const updatedPersona: CVData = {
         ...newPersona,
-        id: response.id.toString(),
+        id: response.id?.toString() || Date.now().toString(),
         personalInfo: {
           ...newPersona.personalInfo,
           fullName: response.full_name || newPersona.personalInfo.fullName,
@@ -413,6 +451,8 @@ function CreatePersonaPage({ user }: PageProps) {
       setShowForm(false);
       setPrefilledData(null);
       setEditingPersona(null);
+      
+      toast.success(editingPersona ? "Persona updated successfully" : "Persona created successfully");
     } catch (error) {
       console.error("Error saving persona:", error);
       toast(`Failed to save persona: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -601,6 +641,12 @@ function CreatePersonaPage({ user }: PageProps) {
                           <TableCell className="w-[20%] px-4">
                             <div className="flex items-center gap-3 min-w-0">
                               <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors flex-shrink-0">
+                                {persona.personalInfo.profilePicture && (
+                                  <AvatarImage 
+                                    src={persona.personalInfo.profilePicture} 
+                                    alt={persona.personalInfo.fullName}
+                                  />
+                                )}
                                 <AvatarFallback
                                   className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${user?.role === 'admin'
                                     ? ''
@@ -609,8 +655,8 @@ function CreatePersonaPage({ user }: PageProps) {
                                 >
                                   {user?.role === 'admin' ? (
                                     <Crown className="h-5 w-5 text-[#EA580C]" /> // Orange crown for admin
-                                  ) : user?.name ? (
-                                    user.name.charAt(0).toUpperCase()
+                                  ) : persona.personalInfo.fullName ? (
+                                    persona.personalInfo.fullName.charAt(0).toUpperCase()
                                   ) : (
                                     <UserCircle className="h-5 w-5 text-[#70E4A8]" />
                                   )}
@@ -745,6 +791,12 @@ function CreatePersonaPage({ user }: PageProps) {
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                        {persona.personalInfo.profilePicture && (
+                          <AvatarImage 
+                            src={persona.personalInfo.profilePicture} 
+                            alt={persona.personalInfo.fullName}
+                          />
+                        )}
                         <AvatarFallback
                           className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${user?.role === 'admin'
                             ? ''
@@ -753,8 +805,8 @@ function CreatePersonaPage({ user }: PageProps) {
                         >
                           {user?.role === 'admin' ? (
                             <Crown className="h-5 w-5 text-[#EA580C]" />
-                          ) : user?.name ? (
-                            user.name.charAt(0).toUpperCase()
+                          ) : persona.personalInfo.fullName ? (
+                            persona.personalInfo.fullName.charAt(0).toUpperCase()
                           ) : (
                             <UserCircle className="h-5 w-5 text-[#70E4A8]" />
                           )}
