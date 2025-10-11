@@ -196,8 +196,8 @@ export function CoverLetterPage({ user }: PageProps) {
       const cvContent = await getCVContentForAI(selectedCV)
 
       // Call DeepSeek AI for cover letter generation
-      // console.log('Making request to:', 'https://backendserver.resumaic.com/api/cover-letter-generation');
-      console.log('Making request to:', 'https://stagingbackendserver.resumaic.com/api/cover-letter-generation');
+      console.log('Making request to:', 'https://backendserver.resumaic.com/api/cover-letter-generation');
+      // console.log('Making request to:', 'https://stagingbackendserver.resumaic.com/api/cover-letter-generation');
       console.log('Selected tone:', tone);
       console.log('Tone type:', typeof tone);
       
