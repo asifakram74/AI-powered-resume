@@ -68,17 +68,17 @@ const PDFUploader = ({ onDataExtracted }: PDFUploaderProps) => {
 
   const sendToDeepSeek = async (text: string): Promise<Partial<Omit<CVData, "id" | "createdAt">>> => {
     try {
-      console.log('Making request to:', 'https://render-kweq.onrender.com/api/parse-resume');
+      console.log('Making request to:', 'http://localhost:3001/api/parse-resume');
       console.log('Request payload size:', JSON.stringify({ extractedText: text }).length);
 
       try {
-        const testResponse = await fetch('https://render-kweq.onrender.com', { method: 'HEAD' });
+        const testResponse = await fetch('http://localhost:3001/', { method: 'HEAD' });
         console.log('Server reachable:', testResponse.ok);
       } catch (testError) {
         console.error('Server not reachable:', testError);
       }
 
-      const response = await fetch('https://render-kweq.onrender.com/api/parse-resume', {
+      const response = await fetch('http://localhost:3001/api/parse-resume', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
