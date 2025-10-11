@@ -67,6 +67,7 @@ const constructProfilePictureUrl = (profilePicture: string | null | undefined): 
   // If it's a relative path, construct the full URL
   if (profilePicture.startsWith('media/')) {
     return `https://backendcv.onlinetoolpot.com/storage/app/public/${profilePicture}`;
+    // return `https://stagingbackend.onlinetoolpot.com/storage/app/public/${profilePicture}`;
   }
   
   return profilePicture;
