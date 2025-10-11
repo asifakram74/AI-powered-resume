@@ -72,7 +72,7 @@ const PDFUploader = ({ onDataExtracted }: PDFUploaderProps) => {
       console.log('Request payload size:', JSON.stringify({ extractedText: text }).length);
 
       try {
-        const testResponse = await fetch('https://render-kweq.onrender.com', { method: 'HEAD' });
+        const testResponse = await fetch('http://localhost:3001/', { method: 'HEAD' });
         console.log('Server reachable:', testResponse.ok);
       } catch (testError) {
         console.error('Server not reachable:', testError);

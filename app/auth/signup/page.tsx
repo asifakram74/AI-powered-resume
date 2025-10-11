@@ -12,7 +12,7 @@ import { User, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "../../../lib/redux/hooks"
 import { registerUser, clearError, loginWithLinkedIn, loginWithGoogle, setCredentials } from "../../../lib/redux/slices/authSlice"
 import { validateEmailAPI } from "../../../lib/utils/email-validation"
-import { showErrorToast } from "../../../components/ui/toast"
+import { showSuccessToast, showErrorToast } from "../../../components/ui/toast"
 import Image from "next/image"
 function useSafeSearchParams() {
   try {
@@ -147,7 +147,8 @@ export default function SignUpPage() {
               console.log('User ID from backend:', result.payload.user.id);
               console.log('Token in localStorage:', localStorage.getItem('token'));
               console.log('User in localStorage:', localStorage.getItem('user'));
-
+              // Show success toast for LinkedIn registration
+              showSuccessToast("Registration successful", "Signed up with LinkedIn");
               router.push('/dashboard');
             } else {
               console.error('LinkedIn login failed:', result.payload);
@@ -214,6 +215,8 @@ export default function SignUpPage() {
             }
             const cleanUrl = window.location.pathname;
             window.history.replaceState({}, document.title, cleanUrl);
+            // Show success toast for Google registration via token callback
+            showSuccessToast("Registration successful", "Signed up with Google");
             router.push("/dashboard");
           } catch (err) {
             console.error("Error during Google login:", err);
@@ -232,6 +235,8 @@ export default function SignUpPage() {
             if (loginWithGoogle.fulfilled.match(result)) {
               const cleanUrl = window.location.pathname;
               window.history.replaceState({}, document.title, cleanUrl);
+              // Show success toast for Google registration via code exchange
+              showSuccessToast("Registration successful", "Signed up with Google");
               router.push("/dashboard");
             } else {
             }
@@ -284,6 +289,8 @@ export default function SignUpPage() {
     }))
 
     if (registerUser.fulfilled.match(result)) {
+      // Show success toast for browser registration
+      showSuccessToast("Registration successful", "Please sign in to continue");
       router.push("/auth/signin")
     } else if (registerUser.rejected.match(result)) {
       // Handle validation errors from backend

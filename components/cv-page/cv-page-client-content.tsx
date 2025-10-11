@@ -638,7 +638,7 @@ export function CVPageClientContent() {
         if (!cvId) {
           const personaText = convertPersonaToText(personaData);
 
-          console.log('Making request to:', 'http://localhost:3001/om/api/optimize-cv');
+          console.log('Making request to:', 'http://localhost:3001/api/optimize-cv');
           console.log('Request payload size:', JSON.stringify({ extractedText: personaText }).length);
 
           try {
@@ -861,17 +861,17 @@ export function CVPageClientContent() {
     try {
       const personaText = convertPersonaToText(persona);
 
-      console.log('Making request to:', 'http://localhost:3001/om/api/optimize-cv');
+      console.log('Making request to:', 'http://localhost:3001/api/optimize-cv');
       console.log('Request payload size:', JSON.stringify({ extractedText: personaText }).length);
 
       try {
-        const testResponse = await fetch('http://localhost:3001/om', { method: 'HEAD' });
+        const testResponse = await fetch('http://localhost:3001/', { method: 'HEAD' });
         console.log('Server reachable:', testResponse.ok);
       } catch (testError) {
         console.error('Server not reachable:', testError);
       }
 
-      const response = await fetch('http://localhost:3001/om/api/optimize-cv', {
+      const response = await fetch('http://localhost:3001/api/optimize-cv', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
