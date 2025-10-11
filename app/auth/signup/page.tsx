@@ -111,7 +111,8 @@ export default function SignUpPage() {
     localStorage.setItem("google_oauth_state", randomState);
 
     const redirectUri = window.location.origin + window.location.pathname;
-    window.location.href = `https://stagingbackend.resumaic.com/api/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://cffdcbd648f6.ngrok-free.app/api";
+    window.location.href = `${API_BASE}/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
   };
 
   useEffect(() => {

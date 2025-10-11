@@ -88,7 +88,8 @@ function CreatePersonaPage({ user }: PageProps) {
           data = await getPersonas(userId?.toString() || "");
         }
 
-        const formattedPersonas = data.map((persona: PersonaResponse) => ({
+        const safeData: PersonaResponse[] = Array.isArray(data) ? data : [];
+        const formattedPersonas = safeData.map((persona: PersonaResponse) => ({
           id: persona.id.toString(),
           personalInfo: {
             fullName: persona.full_name || "",

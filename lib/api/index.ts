@@ -2,7 +2,7 @@
 import axios from "axios";
 
 // Laravel Backend URL for authentication and services
-const LARAVEL_API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://stagingbackend.resumaic.com/api"
+const LARAVEL_API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://cffdcbd648f6.ngrok-free.app/api"
 
 // Node.js Backend URL for app/api routes
 const NODEJS_API_BASE_URL = process.env.NEXT_PUBLIC_NODEJS_API_URL || "http://localhost:3001/"
@@ -13,6 +13,8 @@ export const api = axios.create({
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
+    // Prevent ngrok warning page when using free ngrok domains
+    ...(LARAVEL_API_BASE_URL.includes("ngrok") ? { "ngrok-skip-browser-warning": "true" } : {}),
   },
   timeout: 10000,
 })
@@ -23,6 +25,7 @@ export const nodeApi = axios.create({
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
+    ...(NODEJS_API_BASE_URL.includes("ngrok") ? { "ngrok-skip-browser-warning": "true" } : {}),
   },
   timeout: 120000, // 2 minutes for AI operations
 })

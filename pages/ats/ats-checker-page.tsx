@@ -78,19 +78,21 @@ export default function ATSCheckerPage() {
 
     setIsAnalyzing(true);
     setError(null);
-    console.log('Making request to:', 'http://localhost:3001/api/ats-analysis');
+    const NODE_API = process.env.NEXT_PUBLIC_NODEJS_API_URL || 'http://localhost:3001';
+    console.log('Making request to:', `${NODE_API}/api/ats-analysis`);
     console.log('Request payload size:', JSON.stringify({ extractedText, jobDescription }).length);
     try {
-      const testResponse = await fetch('http://localhost:3001/', { method: 'HEAD' });
+      const testResponse = await fetch(`${NODE_API}/`, { method: 'HEAD', headers: { 'ngrok-skip-browser-warning': 'true' } });
       console.log('Server reachable:', testResponse.ok);
     } catch (testError) {
       console.error('Server not reachable:', testError);
     }
     try {
-      const response = await fetch('http://localhost:3001/api/ats-analysis', {
+      const response = await fetch(`${NODE_API}/api/ats-analysis`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
         },
         body: JSON.stringify({
           extractedText,

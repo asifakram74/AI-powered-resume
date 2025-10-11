@@ -98,8 +98,8 @@ export default function SignInPage() {
 
     const redirectUri = window.location.origin + window.location.pathname;
     console.log("redirectUri",redirectUri)
-    window.location.href = `https://stagingbackend.resumaic.com/api/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
-    // window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://cffdcbd648f6.ngrok-free.app/api";
+    window.location.href = `${API_BASE}/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
   };
 
   useEffect(() => {

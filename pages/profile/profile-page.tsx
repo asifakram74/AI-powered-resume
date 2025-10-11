@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../..
 import { Label } from "../../components/ui/label"
 import { Input } from "../../components/ui/input"
 import { Loader2, Edit, Shield, Mail, Star, BadgeCheck, FileText, Target, UserCircle, TrendingUp } from "lucide-react"
+import { Crown } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "../../components/ui/dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
 import { Badge } from "../../components/ui/badge"
@@ -20,6 +21,7 @@ import { getCoverLetters } from "../../lib/redux/service/coverLetterService"
 import { getATSResumes } from "../../lib/redux/service/atsResumeService"
 import { showSuccessToast, showErrorToast } from "../../components/ui/toast"
 import { useRouter } from "next/navigation"
+import { createCheckoutSession } from "../../lib/redux/service/paymentService"
 
 interface StatItem {
   label: string
@@ -45,6 +47,7 @@ export function ProfilePage() {
   const [isUpdating, setIsUpdating] = useState(false)
   const [loadingError, setLoadingError] = useState<string | null>(null)
   const hasLoaded = useRef(false)
+  const [isSubscribing, setIsSubscribing] = useState(false)
 
   const {
     register,
@@ -394,6 +397,36 @@ export function ProfilePage() {
                     <p className="text-xs text-gray-500">Update your security</p>
                   </div>
                 </Button>
+
+                {profile.plan_type !== 'Premium' && (
+                  <Button
+                    className="w-full justify-start h-12 resumaic-gradient-green hover:opacity-90 button-press"
+                    onClick={async () => {
+                      try {
+                        setIsSubscribing(true)
+                        const data = await createCheckoutSession()
+                        if (data?.url) {
+                          window.location.href = data.url
+                        } else {
+                          showErrorToast("Failed to start checkout. Try again.")
+                        }
+                      } catch (err: any) {
+                        console.error("Checkout error:", err)
+                        const message = err?.response?.data?.message || "Unable to create checkout session"
+                        showErrorToast(message)
+                      } finally {
+                        setIsSubscribing(false)
+                      }
+                    }}
+                    disabled={isSubscribing}
+                  >
+                    <Crown className="h-4 w-4 mr-3 text-white" />
+                    <div className="text-left">
+                      <p className="font-medium text-white">Upgrade to Premium</p>
+                      <p className="text-xs text-white/80">Unlock all features for $9.99/month</p>
+                    </div>
+                  </Button>
+                )}
                 
                 <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                   <div className="text-center space-y-2">
