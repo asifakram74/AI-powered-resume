@@ -196,8 +196,8 @@ export function CoverLetterPage({ user }: PageProps) {
       const cvContent = await getCVContentForAI(selectedCV)
 
       // Call DeepSeek AI for cover letter generation
-      console.log('Making request to:', 'https://backendserver.resumaic.com/api/cover-letter-generation');
-      // console.log('Making request to:', 'https://stagingbackendserver.resumaic.com/api/cover-letter-generation');
+      // console.log('Making request to:', 'https://backendserver.resumaic.com/api/cover-letter-generation');
+      console.log('Making request to:', 'https://stagingbackendserver.resumaic.com/api/cover-letter-generation');
       console.log('Selected tone:', tone);
       console.log('Tone type:', typeof tone);
       
@@ -219,15 +219,15 @@ export function CoverLetterPage({ user }: PageProps) {
       console.log('Request payload size:', JSON.stringify(requestPayload).length);
 
       try {
-        const testResponse = await fetch('https://backendserver.resumaic.com/', { method: 'HEAD' });
-        // const testResponse = await fetch('https://stagingbackendserver.resumaic.com/', { method: 'HEAD' });
+        // const testResponse = await fetch('https://backendserver.resumaic.com/', { method: 'HEAD' });
+        const testResponse = await fetch('https://stagingbackendserver.resumaic.com/', { method: 'HEAD' });
         console.log('Server reachable:', testResponse.ok);
       } catch (testError) {
         console.error('Server not reachable:', testError);
       }
 
-      const response = await fetch('https://backendserver.resumaic.com/api/cover-letter-generation', {
-      // const response = await fetch('https://stagingbackendserver.resumaic.com/api/cover-letter-generation', {
+      // const response = await fetch('https://backendserver.resumaic.com/api/cover-letter-generation', {
+      const response = await fetch('https://stagingbackendserver.resumaic.com/api/cover-letter-generation', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -358,8 +358,8 @@ export function CoverLetterPage({ user }: PageProps) {
     try {
       const filename = `cover_letter_${letter.id}.${format}`
       
-      const response = await fetch(`https://backendserver.resumaic.com/api/cover-letter-export/${format}`, {
-      // const response = await fetch(`https://stagingbackendserver.resumaic.com/api/cover-letter-export/${format}`, {
+      // const response = await fetch(`https://backendserver.resumaic.com/api/cover-letter-export/${format}`, {
+      const response = await fetch(`https://stagingbackendserver.resumaic.com/api/cover-letter-export/${format}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

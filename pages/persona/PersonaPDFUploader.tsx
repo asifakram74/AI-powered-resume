@@ -124,8 +124,8 @@ const PDFUploader = ({ onDataExtracted, onProcessingStart }: PDFUploaderProps) =
       const formData = new FormData();
       formData.append('pdf', file);
 
-      const extractResponse = await fetch('`https://backendserver.resumaic.com/api/extract-pdf-text', {
-      // const extractResponse = await fetch('`https://stagingbackendserver.resumaic.com/api/extract-pdf-text', {
+      // const extractResponse = await fetch('https://backendserver.resumaic.com/api/extract-pdf-text', {
+      const extractResponse = await fetch('https://stagingbackendserver.resumaic.com/api/extract-pdf-text', {
         method: 'POST',
         body: formData,
       });
@@ -154,8 +154,8 @@ const PDFUploader = ({ onDataExtracted, onProcessingStart }: PDFUploaderProps) =
       setProcessingStep("Analyzing with AI...");
       setProgress(60);
       
-      const parseResponse = await fetch('https://backendserver.resumaic.com/api/parse-resume', {
-      // const parseResponse = await fetch('https://stagingbackendserver.resumaic.com/api/parse-resume', {
+      // const parseResponse = await fetch('https://backendserver.resumaic.com/api/parse-resume', {
+      const parseResponse = await fetch('https://stagingbackendserver.resumaic.com/api/parse-resume', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

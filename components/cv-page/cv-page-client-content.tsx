@@ -638,21 +638,21 @@ export function CVPageClientContent() {
         if (!cvId) {
           const personaText = convertPersonaToText(personaData);
 
-          console.log('Making request to:', 'https://backendserver.resumaic.com/api/optimize-cv');
-          // console.log('Making request to:', 'https://stagingbackendserver.resumaic.com/api/optimize-cv');
+          // console.log('Making request to:', 'https://backendserver.resumaic.com/api/optimize-cv');
+          console.log('Making request to:', 'https://stagingbackendserver.resumaic.com/api/optimize-cv');
           console.log('Request payload size:', JSON.stringify({ extractedText: personaText }).length);
 
           try {
-            const testResponse = await fetch('https://backendserver.resumaic.com/', { method: 'HEAD' });
-            // const testResponse = await fetch('https://stagingbackendserver.resumaic.com/', { method: 'HEAD' });
+            // const testResponse = await fetch('https://backendserver.resumaic.com/', { method: 'HEAD' });
+            const testResponse = await fetch('https://stagingbackendserver.resumaic.com/', { method: 'HEAD' });
         
             console.log('Server reachable:', testResponse.ok);
           } catch (testError) {
             console.error('Server not reachable:', testError);
           }
 
-          const response = await fetch('https://backendserver.resumaic.com/api/optimize-cv', {
-          // const response = await fetch('https://stagingbackendserver.resumaic.com/api/optimize-cv', {
+          // const response = await fetch('https://backendserver.resumaic.com/api/optimize-cv', {
+          const response = await fetch('https://stagingbackendserver.resumaic.com/api/optimize-cv', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -864,20 +864,20 @@ export function CVPageClientContent() {
     try {
       const personaText = convertPersonaToText(persona);
 
-      console.log('Making request to:', 'https://backendserver.resumaic.com/api/optimize-cv');
-      // console.log('Making request to:', 'https://stagingbackendserver.resumaic.com/api/optimize-cv');
+      // console.log('Making request to:', 'https://backendserver.resumaic.com/api/optimize-cv');
+      console.log('Making request to:', 'https://stagingbackendserver.resumaic.com/api/optimize-cv');
       console.log('Request payload size:', JSON.stringify({ extractedText: personaText }).length);
 
       try {
-        const testResponse = await fetch('https://backendserver.resumaic.com', { method: 'HEAD' });
-        // const testResponse = await fetch('https://stagingbackendserver.resumaic.com', { method: 'HEAD' });
+        // const testResponse = await fetch('https://backendserver.resumaic.com', { method: 'HEAD' });
+        const testResponse = await fetch('https://stagingbackendserver.resumaic.com', { method: 'HEAD' });
         console.log('Server reachable:', testResponse.ok);
       } catch (testError) {
         console.error('Server not reachable:', testError);
       }
 
-      const response = await fetch('https://backendserver.resumaic.com/api/optimize-cv', {
-      // const response = await fetch('https://stagingbackendserver.resumaic.com/api/optimize-cv', {
+      // const response = await fetch('https://backendserver.resumaic.com/api/optimize-cv', {
+      const response = await fetch('https://stagingbackendserver.resumaic.com/api/optimize-cv', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -940,8 +940,8 @@ export function CVPageClientContent() {
         const filename = `${persona?.full_name || "resume"}-cv.${format}`;
 
         // Call the new backend API
-        const response = await fetch(`https://backendserver.resumaic.com/api/cv-export/${format}`, {
-        // const response = await fetch(`https://stagingbackendserver.resumaic.com/api/cv-export/${format}`, {
+        // const response = await fetch(`https://backendserver.resumaic.com/api/cv-export/${format}`, {
+        const response = await fetch(`https://stagingbackendserver.resumaic.com/api/cv-export/${format}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
