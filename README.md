@@ -35,12 +35,11 @@ A modern, full-stack application for creating professional resumes with AI optim
    # Laravel API URL for authentication on staging
    NEXT_PUBLIC_API_URL=https://stagingbackend.resumaic.com/api
    
-   # Node.js API URL for AI operations
-<<<<<<< HEAD
-   NEXT_PUBLIC_NODEJS_API_URL=http://localhost:3001/om
-=======
-   NEXT_PUBLIC_NODEJS_API_URL=http://localhost:3001//om
->>>>>>> extra-code
+   # Node.js API URL for AI operations on production
+   NEXT_PUBLIC_NODEJS_API_URL=https://backendserver.resumaic.com
+
+   # Node.js API URL for AI operations on staging
+   NEXT_PUBLIC_NODEJS_API_URL=https://stagingbackendserver.resumaic.com
    ```
 
 3. **Development Server**
@@ -179,7 +178,15 @@ A modern, full-stack application for creating professional resumes with AI optim
 1. **Update Frontend Environment** for production:
    ```env
    NEXT_PUBLIC_API_URL=https://backendcv.onlinetoolpot.com/api
-   NEXT_PUBLIC_NODEJS_API_URL=http://localhost:3001//om
+
+   # Laravel API URL for authentication on staging
+   NEXT_PUBLIC_API_URL=https://stagingbackend.resumaic.com/api
+
+   # Node.js API URL for AI operations on production
+   NEXT_PUBLIC_NODEJS_API_URL=https://backendserver.resumaic.com
+
+   # Node.js API URL for AI operations on staging
+   NEXT_PUBLIC_NODEJS_API_URL=https://stagingbackendserver.resumaic.com
    ```
 
 2. **Rebuild Frontend** with production URLs:
@@ -207,8 +214,17 @@ A modern, full-stack application for creating professional resumes with AI optim
 
 ### Frontend (.env.local)
 ```env
+# Laravel API URL for authentication on staging
 NEXT_PUBLIC_API_URL=https://backendcv.onlinetoolpot.com/api
-NEXT_PUBLIC_NODEJS_API_URL=http://localhost:3001//om
+
+# Laravel API URL for authentication on staging
+NEXT_PUBLIC_API_URL=https://stagingbackend.resumaic.com/api
+
+# Node.js API URL for AI operations on production
+NEXT_PUBLIC_NODEJS_API_URL=https://backendserver.resumaic.com
+
+# Node.js API URL for AI operations on staging
+NEXT_PUBLIC_NODEJS_API_URL=https://stagingbackendserver.resumaic.com
 ```
 
 ### Backend (.env)

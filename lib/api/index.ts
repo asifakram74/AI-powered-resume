@@ -5,8 +5,9 @@ import axios from "axios";
 // const LARAVEL_API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://backendcv.onlinetoolpot.com/api"
 const LARAVEL_API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://stagingbackend.resumaic.com/api"
 
-// Node.js Backend URL for app/api routes
-const NODEJS_API_BASE_URL = process.env.NEXT_PUBLIC_NODEJS_API_URL || "http://localhost:3001/"
+// Node.js Backend URL for app/api routes 
+// const NODEJS_API_BASE_URL = process.env.NEXT_PUBLIC_NODEJS_API_URL || "https://backendserver.resumaic.com"
+const NODEJS_API_BASE_URL = process.env.NEXT_PUBLIC_NODEJS_API_URL || "https://stagingbackendserver.resumaic.com"
 
 // Laravel API client for authentication and services 
 export const api = axios.create({
