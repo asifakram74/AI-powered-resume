@@ -16,6 +16,11 @@ import { CreativeTemplate4 } from "../../components/templates/creative-template-
 import { MinimalTemplate2 } from "../../components/templates/minimal-template2";
 import { MinimalTemplate3 } from "../../components/templates/minimal-template3";
 import { MinimalTemplate4 } from "../../components/templates/minimal-template-4";
+import {ModernTemplate5} from "../../components/templates/modern-template-5";
+import {ModernTemplate6} from "../../components/templates/modern-template-6";
+import {ModernTemplate7} from "../../components/templates/modern-template-7";
+import {ModernTemplate8} from "../../components/templates/modern-template-8";
+import {ModernTemplate9} from "../../components/templates/modern-template-9";
 import type { CVData } from "../../types/cv-data";
 
 interface ResumeTemplateProps {
@@ -41,6 +46,11 @@ export default function ResumeTemplate({
     "modern-2": ModernTemplate2,
     "modern-3": ModernTemplate3,
     "modern-4": ModernTemplate4,
+    "modern-5": ModernTemplate5,
+    "modern-6": ModernTemplate6,
+    "modern-7": ModernTemplate7,
+    "modern-8": ModernTemplate8,
+    "modern-9": ModernTemplate9,
     "classic-2": ClassicTemplate2,
     "classic-3": ClassicTemplate3,
     "classic-4": ClassicTemplate4,

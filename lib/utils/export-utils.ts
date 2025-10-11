@@ -99,17 +99,17 @@ export const exportToPNG = async (elementId: string, filename: string = 'cv.png'
 // DOCX Export using server API
 export const exportToDOCX = async (htmlContent: string, filename: string = 'cv.docx') => {
   try {
-    console.log('Making request to:', 'http://localhost:3001/om/api/export-docx');
+    console.log('Making request to:', 'http://localhost:3001/api/export-docx');
     console.log('Request payload size:', JSON.stringify({ html: htmlContent }).length);
     
     try {
-      const testResponse = await fetch('http://localhost:3001/om', { method: 'HEAD' });
+      const testResponse = await fetch('http://localhost:3001/', { method: 'HEAD' });
       console.log('Server reachable:', testResponse.ok);
     } catch (testError) {
       console.error('Server not reachable:', testError);
     }
     
-    const response = await fetch('http://localhost:3001/om/api/export-docx', {
+    const response = await fetch('http://localhost:3001/api/export-docx', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

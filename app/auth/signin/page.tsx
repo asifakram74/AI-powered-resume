@@ -12,6 +12,7 @@ import { Eye, EyeOff, Mail, Lock, Loader2, AlertCircle } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "../../../lib/redux/hooks"
 import { loginUser, clearError, loginWithLinkedIn, loginWithGoogle, setCredentials } from "../../../lib/redux/slices/authSlice"
 import { Alert, AlertDescription } from "../../../components/ui/alert"
+import { showSuccessToast, showErrorToast } from "../../../components/ui/toast"
 import Image from "next/image"
 
 function useSafeSearchParams() {
@@ -135,13 +136,18 @@ export default function SignInPage() {
               console.log('User ID from backend:', result.payload.user.id);
               console.log('Token in localStorage:', localStorage.getItem('token'));
               console.log('User in localStorage:', localStorage.getItem('user'));
+              showSuccessToast("Signed in with LinkedIn", "Welcome back!");
 
               router.push('/dashboard');
             } else {
               console.error('LinkedIn login failed:', result.payload);
+              const message = typeof result.payload === 'string' ? result.payload : 'LinkedIn sign-in failed';
+              showErrorToast("LinkedIn Sign-in Error", message);
             }
           } catch (error) {
             console.error('Error during LinkedIn authentication:', error);
+            const message = error instanceof Error ? error.message : 'Unexpected error during LinkedIn sign-in';
+            showErrorToast("LinkedIn Sign-in Error", message);
           } finally {
             setLinkedInLoading(false);
 
@@ -202,9 +208,12 @@ export default function SignInPage() {
             }
             const cleanUrl = window.location.pathname;
             window.history.replaceState({}, document.title, cleanUrl);
+            showSuccessToast("Signed in with Google", "Welcome back!");
             router.push("/dashboard");
           } catch (err) {
             console.error("Error during Google login:", err);
+            const message = err instanceof Error ? err.message : 'Unexpected error during Google sign-in';
+            showErrorToast("Google Sign-in Error", message);
           } finally {
             setGoogleLoading(false);
           }
@@ -220,11 +229,16 @@ export default function SignInPage() {
             if (loginWithGoogle.fulfilled.match(result)) {
               const cleanUrl = window.location.pathname;
               window.history.replaceState({}, document.title, cleanUrl);
+              showSuccessToast("Signed in with Google", "Welcome back!");
               router.push("/dashboard");
             } else {
+              const message = typeof result.payload === 'string' ? result.payload : 'Google sign-in failed';
+              showErrorToast("Google Sign-in Error", message);
             }
           } catch (err) {
             console.error("Error during Google login:", err);
+            const message = err instanceof Error ? err.message : 'Unexpected error during Google sign-in';
+            showErrorToast("Google Sign-in Error", message);
           } finally {
             setGoogleLoading(false);
           }
@@ -241,7 +255,11 @@ export default function SignInPage() {
 
     const result = await dispatch(loginUser({ email, password }))
     if (loginUser.fulfilled.match(result)) {
+      showSuccessToast("Signed in successfully", "Welcome back!")
       router.push("/dashboard")
+    } else if (loginUser.rejected.match(result)) {
+      const message = typeof result.payload === 'string' ? result.payload : 'Invalid credentials'
+      showErrorToast("Sign-in Error", message)
     }
   }
 

@@ -7,12 +7,40 @@ import { Toaster } from "sonner";
 import HydrateAuth from "../components/auth/HydrateAuth";
 
 export const metadata: Metadata = {
-  title: "Resumaic – AI-Powered Resume Builder Online",
+ title: "Resumaic – AI-Powered Resume Builder Online",
   description: "Build professional resumes in minutes with Resumaic, the AI-powered resume builder. Create tailored CVs that stand out and boost your career success.",
+
   icons: {
-    icon: "/favicon.png",          // favicon in browser tab
-    shortcut: "/favicon.png",      // legacy support
-    apple: "/favicon.png",         // iOS home screen icon
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
+  },
+
+  openGraph: {
+    title: "Resumaic – AI-Powered Resume Builder Online",
+    description:
+      "Create beautiful, job-ready resumes instantly with AI. Resumaic helps you design, optimize, and export professional CVs that get noticed.",
+    url: "https://app.resumaic.com",
+    siteName: "Resumaic",
+    images: [
+      {
+        url: "https://app.resumaic.com/resumic.png", // image in /public folder
+        width: 1200,
+        height: 630,
+        alt: "Resumaic App Preview",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "Resumaic – AI-Powered Resume Builder Online",
+    description:
+      "Design your perfect resume with AI assistance. Resumaic helps you stand out and land your dream job faster.",
+    images: ["https://app.resumaic.com/resumic.png"],
+    creator: "@resumaic", // optional — if you have a Twitter/X handle
   },
 };
 

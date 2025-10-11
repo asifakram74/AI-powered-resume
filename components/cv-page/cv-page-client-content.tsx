@@ -196,6 +196,36 @@ const templates: CVTemplate[] = [
     description: "Premium creative design for professionals",
     category: "creative",
   },
+  {
+    id: "modern-5",
+    name: "Modern JAY",
+    description: "Gray sidebar with clean white main content",
+    category: "modern",
+  },
+  {
+    id: "modern-6",
+    name: "Modern MIKE",
+    description: "Blue sidebar with professional white layout",
+    category: "modern",
+  },
+  {
+    id: "modern-7",
+    name: "Modern LOREN",
+    description: "Dark blue curved sidebar with elegant design",
+    category: "modern",
+  },
+  {
+    id: "modern-8",
+    name: "Modern LILLY",
+    description: "Light blue sidebar with rounded contact section",
+    category: "modern",
+  },
+  {
+    id: "modern-9",
+    name: "Modern SOFIA",
+    description: "Clean layout with name positioned on left side",
+    category: "modern",
+  },
 ];
 
 const showSuccessToast = (message: string, description?: string) => {
@@ -608,7 +638,7 @@ export function CVPageClientContent() {
         if (!cvId) {
           const personaText = convertPersonaToText(personaData);
 
-          console.log('Making request to:', 'http://localhost:3001/om/api/optimize-cv');
+          console.log('Making request to:', 'http://localhost:3001/api/optimize-cv');
           console.log('Request payload size:', JSON.stringify({ extractedText: personaText }).length);
 
           try {
@@ -831,17 +861,17 @@ export function CVPageClientContent() {
     try {
       const personaText = convertPersonaToText(persona);
 
-      console.log('Making request to:', 'http://localhost:3001/om/api/optimize-cv');
+      console.log('Making request to:', 'http://localhost:3001/api/optimize-cv');
       console.log('Request payload size:', JSON.stringify({ extractedText: personaText }).length);
 
       try {
-        const testResponse = await fetch('http://localhost:3001/om', { method: 'HEAD' });
+        const testResponse = await fetch('http://localhost:3001/', { method: 'HEAD' });
         console.log('Server reachable:', testResponse.ok);
       } catch (testError) {
         console.error('Server not reachable:', testError);
       }
 
-      const response = await fetch('http://localhost:3001/om/api/optimize-cv', {
+      const response = await fetch('http://localhost:3001/api/optimize-cv', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

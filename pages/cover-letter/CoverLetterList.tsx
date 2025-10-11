@@ -196,26 +196,8 @@ export function CoverLetterPage({ user }: PageProps) {
       const cvContent = await getCVContentForAI(selectedCV)
 
       // Call DeepSeek AI for cover letter generation
-      console.log('Making request to:', 'http://localhost:3001/om/api/cover-letter-generation');
-      console.log('Selected tone:', tone);
-      console.log('Tone type:', typeof tone);
-      
-      // Find the full tone data to get name and description
-      const selectedToneData = tones.find(t => t.id === tone);
-      console.log('Selected tone data:', selectedToneData);
-      
-      const requestPayload = {
-        jobDescription,
-        tone,
-        toneName: selectedToneData?.name || tone,
-        toneDescription: selectedToneData?.description || '',
-        toneExample: selectedToneData?.example || '',
-        cvContent,
-        cvData: selectedCV,
-      };
-      
-      console.log('Request payload:', requestPayload);
-      console.log('Request payload size:', JSON.stringify(requestPayload).length);
+      console.log('Making request to:', 'http://localhost:3001/api/cover-letter-generation');
+      console.log('Request payload size:', JSON.stringify({ jobDescription, tone, cvContent, cvData: selectedCV }).length);
 
       try {
         const testResponse = await fetch('http://localhost:3001/', { method: 'HEAD' });
@@ -229,7 +211,7 @@ export function CoverLetterPage({ user }: PageProps) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(requestPayload),
+        body: JSON.stringify({ jobDescription, tone, cvContent, cvData: selectedCV }),
       })
 
       if (!response.ok) {
