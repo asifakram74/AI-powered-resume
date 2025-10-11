@@ -92,7 +92,7 @@ A modern, full-stack application for creating professional resumes with AI optim
    ```bash
    npm run dev
    ```
-   Backend runs on: `http://localhost:3001`
+   Backend runs on: https://backendcv.onlinetoolpot.com
 
 ### Production Build
 
