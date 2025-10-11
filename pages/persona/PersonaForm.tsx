@@ -1035,7 +1035,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                     <button
                       type="button"
                       onClick={() => removeSkill("technical", index)}
-                      className="hover:text-red-500"
+                      className="hover:text-red-500 cursor-pointer"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -1057,7 +1057,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                     <button
                       type="button"
                       onClick={() => removeSkill("soft", index)}
-                      className="hover:text-red-500"
+                      className="hover:text-red-500 cursor-pointer"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -1132,7 +1132,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                     <button
                       type="button"
                       onClick={() => removeLanguage(lang.id)}
-                      className="hover:text-red-500"
+                      className="hover:text-red-500 cursor-pointer"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -1603,7 +1603,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                     <button
                       type="button"
                       onClick={() => removeInterest(interest)}
-                      className="hover:text-red-500"
+                      className="hover:text-red-500 cursor-pointer"
                     >
                       <X className="h-3 w-3" />
                     </button>
