@@ -124,7 +124,7 @@ const PDFUploader = ({ onDataExtracted, onProcessingStart }: PDFUploaderProps) =
       const formData = new FormData();
       formData.append('pdf', file);
 
-      const extractResponse = await fetch('`https://backendserver.resumaic.com/api/extract-pdf-text', {
+      const extractResponse = await fetch('https://backendserver.resumaic.com/api/extract-pdf-text', {
       // const extractResponse = await fetch('`https://stagingbackendserver.resumaic.com/api/extract-pdf-text', {
         method: 'POST',
         body: formData,
