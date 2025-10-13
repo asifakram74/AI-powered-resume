@@ -42,6 +42,14 @@ export const metadata: Metadata = {
     images: ["https://app.resumaic.com/resumic.png"],
     creator: "@resumaic", // optional — if you have a Twitter/X handle
   },
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: {
+      index: false,
+      follow: false,
+    },
+  },
 };
 
 export default function RootLayout({

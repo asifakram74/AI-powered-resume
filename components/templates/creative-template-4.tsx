@@ -14,16 +14,9 @@ export function CreativeTemplate4({ data, isPreview = false }: CreativeTemplate4
   }
 
   return (
-    <div className="max-w-full mx-auto bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen font-sans text-white relative overflow-hidden">
+    <div className="max-w-full mx-auto bg-gradient-to-br from-slate-900 via-purple-00 to-slate-900 min-h-screen font-sans text-white relative overflow-hidden">
       {/* Geometric background elements */}
-      <div className="absolute top-0 left-0 w-64 h-64 bg-gradient-to-br from-cyan-400/20 to-blue-600/20 rounded-full blur-3xl"></div>
-      <div className="absolute top-32 right-0 w-48 h-48 bg-gradient-to-br from-purple-400/20 to-pink-600/20 rounded-full blur-2xl"></div>
-      <div className="absolute bottom-0 left-1/3 w-56 h-56 bg-gradient-to-br from-emerald-400/20 to-teal-600/20 rounded-full blur-3xl"></div>
-
-      {/* Geometric shapes */}
-      <div className="absolute top-20 right-20 w-16 h-16 border-2 border-cyan-400/50 rotate-45"></div>
-      <div className="absolute bottom-40 left-10 w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"></div>
-      <div className="absolute top-1/2 left-5 w-8 h-20 bg-gradient-to-b from-emerald-400 to-teal-400 transform -rotate-12"></div>
+     
 
       <div className="relative z-10 p-10">
         {/* Futuristic Header */}
