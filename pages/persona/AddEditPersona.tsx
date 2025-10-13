@@ -57,7 +57,7 @@ export function PersonaCreationOptions({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
         {/* Manual Entry Option */}
         <Card
           className={`cursor-pointer hover:shadow-lg transition-shadow border-2 ${selectedOption === "manual"
@@ -138,8 +138,8 @@ export function PersonaCreationOptions({
 
         {/* LinkedIn Import Option - Upcoming Feature */}
         <Card className="cursor-not-allowed relative overflow-hidden border-2 border-gray-200">
-          <div className="absolute top-2 right-2 z-20 lg:hidden ">
-            <span className="inline-flex items-center rounded-md bg-[#EA580C]/20 px-2.5 py-0.5 text-xs font-medium text-[#EA580C] font-inter">
+          <div className="absolute top-1 right-1 sm:top-2 sm:right-2 md:top-1 md:right-1 lg:top-2 lg:right-2 z-20">
+            <span className="inline-flex items-center rounded-md bg-[#EA580C]/20 px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs font-medium text-[#EA580C] font-inter">
               Coming Soon
             </span>
           </div>
@@ -177,11 +177,11 @@ export function PersonaCreationOptions({
       </div>
 
       <div className="bg-[#70E4A8]/20 border border-[#70E4A8]/30 rounded-lg p-4 animate-fade-in">
-        <div className="flex items-start gap-3">
-          <div className="rounded-full bg-[#70E4A8]/30 p-2">
+        <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-start">
+          <div className="rounded-full bg-[#70E4A8]/30 p-2 mx-auto sm:mx-0">
             <Sparkles className="h-4 w-4 text-[#70E4A8]" />
           </div>
-          <div>
+          <div className="text-center sm:text-left">
             <h4 className="font-medium text-[#2D3639] mb-1 font-rubik">
               What happens next?
             </h4>

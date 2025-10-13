@@ -539,13 +539,13 @@ function CreatePersonaPage({ user }: PageProps) {
                     ? 'Update the persona details below.'
                     : 'Create a new persona by filling in the details below.'}
                 </DialogDescription>
-                {!showForm && (
+                {/* {!showForm && (
                   <div className="flex justify-end hidden lg:flex">
                     <span className="inline-flex items-center rounded-md bg-[#EA580C]/20 px-2.5 py-0.5 text-xs font-medium text-[#EA580C] font-inter">
                       Coming Soon
                     </span>
                   </div>
-                )}
+                )} */}
 
               </DialogHeader>
 
@@ -754,7 +754,7 @@ function CreatePersonaPage({ user }: PageProps) {
                               </Button>
                               <ConfirmDialog
                                 title="Delete Persona"
-                                description="Are you sure you want to delete this persona? This action cannot be undone."
+                                description={`Are you sure you want to delete the persona ${persona.personalInfo.fullName}? This action is irreversible and cannot be undone.`}
                                 confirmText="Delete"
                                 cancelText="Cancel"
                                 onConfirm={() => handleDelete(persona)}
@@ -921,7 +921,7 @@ function CreatePersonaPage({ user }: PageProps) {
                     <div className="flex gap-2 items-center">
                       <ConfirmDialog
                         title="Delete Persona"
-                        description="Are you sure you want to delete this persona? This action cannot be undone."
+                        description={`Are you sure you want to delete the persona ${persona.personalInfo.fullName}? This action is irreversible and cannot be undone.`}
                         confirmText="Delete"
                         cancelText="Cancel"
                         onConfirm={() => handleDelete(persona)}
