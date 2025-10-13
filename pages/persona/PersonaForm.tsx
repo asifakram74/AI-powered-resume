@@ -873,7 +873,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                 }
                 className="w-full"
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4 mr-1" />
                 Add Responsibility
               </Button>
             ) : (
@@ -922,7 +922,8 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                         }
                         className="w-full sm:w-auto"
                       >
-                        <Plus className="h-4 w-4" />
+                        <span className="h-4 w-4 mr-1" />
+                        Add
                       </Button>
                     )}
                   </div>
@@ -1016,7 +1017,8 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                 className="flex-1"
               />
               <Button onClick={addSkill} size="sm" variant="outline" className="flex-shrink-0 w-full sm:w-auto">
-                <Plus className="h-4 w-4" />
+                <span className="h-4 w-4 mr-1" />
+                Add
               </Button>
             </div>
           </div>
@@ -1114,7 +1116,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
           </div>
 
           <Button onClick={addLanguage} variant="outline" size="sm" className="w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 mr-1" />
             Add Language
           </Button>
 
@@ -1251,7 +1253,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
           </div>
 
           <Button onClick={addEducation} variant="outline" size="sm" className="w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 mr-1" />
             Add Education
           </Button>
 
@@ -1351,7 +1353,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
           </div>
 
           <Button onClick={addCertification} variant="outline" size="sm" className="w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 mr-1" />
             Add Certification
           </Button>
 
@@ -1446,7 +1448,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                 }
                 className="w-full"
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4 mr-1" />
                 Add Technology
               </Button>
             ) : (
@@ -1495,7 +1497,8 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                         }
                         className="w-full sm:w-auto"
                       >
-                        <Plus className="h-4 w-4" />
+                        <Plus className="h-4 w-4 mr-1" />
+                        Add
                       </Button>
                     )}
                   </div>
@@ -1536,7 +1539,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
           </div>
 
           <Button onClick={addProject} variant="outline" size="sm" className="w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 mr-1" />
             Add Project
           </Button>
 
@@ -1585,7 +1588,8 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
               className="flex-1"
             />
             <Button onClick={addInterest} size="sm" variant="outline" className="flex-shrink-0 w-full sm:w-auto">
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4 mr-1" />
+              Add
             </Button>
           </div>
 
@@ -1636,7 +1640,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             </>
           ) : (
             <>
-              <Sparkles className="h-4 w-4 mr-2" />
+              <Sparkles className="h-4 w-4 mr-1" />
               Generate Persona
             </>
           )}
