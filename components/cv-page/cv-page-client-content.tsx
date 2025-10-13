@@ -135,42 +135,42 @@ const templates: CVTemplate[] = [
     description: "Another variation of the classic format",
     category: "classic",
   },
-  {
-    id: "creative-2",
-    name: "Creative Designer 2",
-    description: "A new creative design for professionals",
-    category: "creative",
-  },
-  {
-    id: "creative-3",
-    name: "Creative Designer 3",
-    description: "Another creative design option",
-    category: "creative",
-  },
-  {
-    id: "minimal-2",
-    name: "Minimal Clean 2",
-    description: "An updated minimal layout focusing on content",
-    category: "minimal",
-  },
-  {
-    id: "minimal-3",
-    name: "Minimal Clean 3",
-    description: "Another variation of the minimal layout",
-    category: "minimal",
-  },
-  {
-    id: "modern-2",
-    name: "Modern Professional 2",
-    description: "An updated modern design for professionals",
-    category: "modern",
-  },
-  {
-    id: "modern-3",
-    name: "Modern Professional 3",
-    description: "Another modern design option",
-    category: "modern",
-  },
+  // {
+  //   id: "creative-2",
+  //   name: "Creative Designer 2",
+  //   description: "A new creative design for professionals",
+  //   category: "creative",
+  // },
+  // {
+  //   id: "creative-3",
+  //   name: "Creative Designer 3",
+  //   description: "Another creative design option",
+  //   category: "creative",
+  // },
+  // {
+  //   id: "minimal-2",
+  //   name: "Minimal Clean 2",
+  //   description: "An updated minimal layout focusing on content",
+  //   category: "minimal",
+  // },
+  // {
+  //   id: "minimal-3",
+  //   name: "Minimal Clean 3",
+  //   description: "Another variation of the minimal layout",
+  //   category: "minimal",
+  // },
+  // {
+  //   id: "modern-2",
+  //   name: "Modern Professional 2",
+  //   description: "An updated modern design for professionals",
+  //   category: "modern",
+  // },
+  // {
+  //   id: "modern-3",
+  //   name: "Modern Professional 3",
+  //   description: "Another modern design option",
+  //   category: "modern",
+  // },
   // New template 4 versions
   {
     id: "classic-4",
@@ -202,24 +202,24 @@ const templates: CVTemplate[] = [
     description: "Gray sidebar with clean white main content",
     category: "modern",
   },
-  {
-    id: "modern-6",
-    name: "Modern MIKE",
-    description: "Blue sidebar with professional white layout",
-    category: "modern",
-  },
-  {
-    id: "modern-7",
-    name: "Modern LOREN",
-    description: "Dark blue curved sidebar with elegant design",
-    category: "modern",
-  },
-  {
-    id: "modern-8",
-    name: "Modern LILLY",
-    description: "Light blue sidebar with rounded contact section",
-    category: "modern",
-  },
+  // {
+  //   id: "modern-6",
+  //   name: "Modern MIKE",
+  //   description: "Blue sidebar with professional white layout",
+  //   category: "modern",
+  // },
+  // {
+  //   id: "modern-7",
+  //   name: "Modern LOREN",
+  //   description: "Dark blue curved sidebar with elegant design",
+  //   category: "modern",
+  // },
+  // {
+  //   id: "modern-8",
+  //   name: "Modern LILLY",
+  //   description: "Light blue sidebar with rounded contact section",
+  //   category: "modern",
+  // },
   {
     id: "modern-9",
     name: "Modern SOFIA",
@@ -227,6 +227,7 @@ const templates: CVTemplate[] = [
     category: "modern",
   },
 ];
+
 
 const showSuccessToast = (message: string, description?: string) => {
   toast.success(message, {
