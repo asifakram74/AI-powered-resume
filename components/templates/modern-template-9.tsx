@@ -173,7 +173,7 @@ export function ModernTemplate9({ data, isPreview = false }: ModernTemplate9Prop
 
           {/* Interests */}
           {data.additional.interests.length > 0 && (
-            <div className="bg-blue-100 rounded-2xl p-6 print:break-inside-avoid">
+            <div className="bg-blue-100 rounded-2xl p-6 print:break-inside-avoid mb-8">
               <h2 className="text-xl font-bold mb-4 text-slate-700 border-b-2 border-slate-700 pb-2">INTERESTS</h2>
               <div className="flex flex-wrap gap-2">
                 {data.additional.interests.map((interest, index) => (
@@ -295,10 +295,10 @@ export function ModernTemplate9({ data, isPreview = false }: ModernTemplate9Prop
               </div>
             </div>
 
-            {/* Description — now plain paragraph instead of bullets */}
+            {/* Description — plain text, no bullets */}
             {project.description && (
               <p className="text-gray-700 text-sm mb-3 whitespace-pre-line">
-                {project.description.replace(/^•\s*/gm, "")}
+                {project.description}
               </p>
             )}
 
@@ -319,6 +319,7 @@ export function ModernTemplate9({ data, isPreview = false }: ModernTemplate9Prop
     </div>
   </div>
 )}
+
 
 
           {/* Certifications & Awards */}
