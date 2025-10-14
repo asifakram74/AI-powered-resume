@@ -78,19 +78,16 @@ export default function ATSCheckerPage() {
 
     setIsAnalyzing(true);
     setError(null);
-    console.log('Making request to:', 'http://localhost:3001/api/ats-analysis');
-    // console.log('Making request to:', 'https://stagingbackendserver.resumaic.com/api/ats-analysis');
+    console.log('Making request to:', 'https://backendserver.resumaic.com/api/ats-analysis');
     console.log('Request payload size:', JSON.stringify({ extractedText, jobDescription }).length);
     try {
-      const testResponse = await fetch('http://localhost:3001', { method: 'HEAD' });
-      // const testResponse = await fetch('https://stagingbackendserver.resumaic.com', { method: 'HEAD' });
+      const testResponse = await fetch('https://backendserver.resumaic.com', { method: 'HEAD' });
       console.log('Server reachable:', testResponse.ok);
     } catch (testError) {
       console.error('Server not reachable:', testError);
     }
     try {
-      const response = await fetch('http://localhost:3001/api/ats-analysis', {
-      // const response = await fetch('https://stagingbackendserver.resumaic.com/api/ats-analysis', {
+      const response = await fetch('https://backendserver.resumaic.com/api/ats-analysis', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

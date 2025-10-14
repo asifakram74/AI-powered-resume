@@ -30,16 +30,16 @@ A modern, full-stack application for creating professional resumes with AI optim
    Create `.env.local` file:
    ```env
    # Laravel API URL for authentication on production
-   NEXT_PUBLIC_API_URL=https://backendcv.onlinetoolpot.com/api
+   NEXT_PUBLIC_API_URL=https://backendcv.onlinetoolpot.com
    
    # Laravel API URL for authentication on staging
-   NEXT_PUBLIC_API_URL=https://stagingbackend.resumaic.com/api
+   NEXT_PUBLIC_API_URL=https://stagingbackend.resumaic.com
    
    # Node.js API URL for AI operations on production
    NEXT_PUBLIC_NODEJS_API_URL=http://localhost:3001
 
    # Node.js API URL for AI operations on staging
-   NEXT_PUBLIC_NODEJS_API_URL=https://stagingbackendserver.resumaic.com
+   NEXT_PUBLIC_NODEJS_API_URL=https://stagingnode.resumaic.com
    ```
 
 3. **Development Server**
@@ -92,7 +92,7 @@ A modern, full-stack application for creating professional resumes with AI optim
    ```bash
    npm run dev
    ```
-   Backend runs on: `http://localhost:3001`
+   Backend runs on: `https://backendserver.resumaic.com`
 
 ### Production Build
 
@@ -186,7 +186,7 @@ A modern, full-stack application for creating professional resumes with AI optim
    NEXT_PUBLIC_NODEJS_API_URL=http://localhost:3001
 
    # Node.js API URL for AI operations on staging
-   NEXT_PUBLIC_NODEJS_API_URL=https://stagingbackendserver.resumaic.com
+   NEXT_PUBLIC_NODEJS_API_URL=https://stagingnode.resumaic.com
    ```
 
 2. **Rebuild Frontend** with production URLs:
@@ -224,7 +224,7 @@ NEXT_PUBLIC_API_URL=https://stagingbackend.resumaic.com/api
 NEXT_PUBLIC_NODEJS_API_URL=http://localhost:3001
 
 # Node.js API URL for AI operations on staging
-NEXT_PUBLIC_NODEJS_API_URL=https://stagingbackendserver.resumaic.com
+NEXT_PUBLIC_NODEJS_API_URL=https://stagingnode.resumaic.com
 ```
 
 ### Backend (.env)
