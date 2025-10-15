@@ -36,7 +36,7 @@ A modern, full-stack application for creating professional resumes with AI optim
    NEXT_PUBLIC_API_URL=https://stagingbackend.resumaic.com
    
    # Node.js API URL for AI operations on production
-   NEXT_PUBLIC_NODEJS_API_URL=http://localhost:3001
+   NEXT_PUBLIC_NODEJS_API_URL=https://backendserver.resumaic.com
 
    # Node.js API URL for AI operations on staging
    NEXT_PUBLIC_NODEJS_API_URL=https://stagingnode.resumaic.com
@@ -183,7 +183,7 @@ A modern, full-stack application for creating professional resumes with AI optim
    NEXT_PUBLIC_API_URL=https://stagingbackend.resumaic.com/api
 
    # Node.js API URL for AI operations on production
-   NEXT_PUBLIC_NODEJS_API_URL=http://localhost:3001
+   NEXT_PUBLIC_NODEJS_API_URL=https://backendserver.resumaic.com
 
    # Node.js API URL for AI operations on staging
    NEXT_PUBLIC_NODEJS_API_URL=https://stagingnode.resumaic.com
@@ -221,7 +221,7 @@ NEXT_PUBLIC_API_URL=https://backendcv.onlinetoolpot.com/api
 NEXT_PUBLIC_API_URL=https://stagingbackend.resumaic.com/api
 
 # Node.js API URL for AI operations on production
-NEXT_PUBLIC_NODEJS_API_URL=http://localhost:3001
+NEXT_PUBLIC_NODEJS_API_URL=https://backendserver.resumaic.com
 
 # Node.js API URL for AI operations on staging
 NEXT_PUBLIC_NODEJS_API_URL=https://stagingnode.resumaic.com
