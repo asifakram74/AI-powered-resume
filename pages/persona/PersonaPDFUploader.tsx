@@ -66,19 +66,75 @@ const PDFUploader = ({ onDataExtracted }: PDFUploaderProps) => {
     setIsDragOver(false);
   };
 
-  const sendToDeepSeek = async (text: string): Promise<Partial<Omit<CVData, "id" | "createdAt">>> => {
-    try {
-      console.log('Making request to:', 'http://localhost:3001/api/parse-resume');
-      console.log('Request payload size:', JSON.stringify({ extractedText: text }).length);
+  const getStepDescription = (step: string) => {
+    const stepDescriptions: { [key: string]: string } = {
+      "Uploading file...": "Securely transferring your resume to our servers...",
+      "Extracting text...": "Reading and extracting text content from your PDF...",
+      "Analyzing with AI...": "Our AI is analyzing your skills, experience, and qualifications...",
+      "Organizing data...": "Structuring your information into a professional format...",
+      "Finalizing...": "Almost done! Preparing your resume data..."
+    };
+    return stepDescriptions[step] || "Processing your resume...";
+  };
 
-      try {
-        const testResponse = await fetch('http://localhost:3001/', { method: 'HEAD' });
-        console.log('Server reachable:', testResponse.ok);
-      } catch (testError) {
-        console.error('Server not reachable:', testError);
+  const getFriendlyMessage = (progress: number) => {
+    if (progress < 25) return "Getting started with your resume...";
+    if (progress < 50) return "Reading through your experience and skills...";
+    if (progress < 75) return "Analyzing your qualifications in detail...";
+    if (progress < 90) return "Putting the final touches...";
+    return "Almost there!";
+  };
+
+  // Ensure progress never exceeds 100%
+  const safeProgress = Math.min(100, Math.max(0, progress));
+
+  const processFile = async (file: File) => {
+    setIsProcessing(true);
+    setProgress(5); // Start with 5% immediately
+    
+    // Notify parent that processing has started
+    if (onProcessingStart) {
+      onProcessingStart();
+    }
+    
+    try {
+      // Step 1: Upload file and extract text
+      setProcessingStep("Uploading file...");
+      setProgress(15);
+      
+      const formData = new FormData();
+      formData.append('pdf', file);
+
+      const extractResponse = await fetch('http://localhost:3001/api/extract-pdf-text', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!extractResponse.ok) {
+        throw new Error(`Upload failed: ${extractResponse.status}`);
       }
 
-      const response = await fetch('http://localhost:3001/api/parse-resume', {
+      const extractResult = await extractResponse.json();
+      
+      if (extractResult.error) {
+        throw new Error(extractResult.error);
+      }
+
+      console.log('Text extraction successful:', {
+        textLength: extractResult.text.length,
+        pages: extractResult.metadata?.pages,
+        truncated: extractResult.metadata?.truncated
+      });
+
+      // Step 2: Extract text from PDF
+      setProcessingStep("Extracting text...");
+      setProgress(40);
+      
+      // Step 3: Analyze with AI
+      setProcessingStep("Analyzing with AI...");
+      setProgress(60);
+      
+      const parseResponse = await fetch('http://localhost:3001/api/parse-resume', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
