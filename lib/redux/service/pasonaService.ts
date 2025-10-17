@@ -58,17 +58,12 @@ export interface PersonaResponse {
 // Helper function to construct full profile picture URL
 const constructProfilePictureUrl = (profilePicture: string | null | undefined): string | null => {
   if (!profilePicture) return null;
-  
-  // If it's already a full URL, return as is
   if (profilePicture.startsWith('http://') || profilePicture.startsWith('https://')) {
     return profilePicture;
   }
-  
-  // If it's a relative path, construct the full URL
   if (profilePicture.startsWith('media/')) {
     return `https://backendcv.onlinetoolpot.com/storage/app/public/${profilePicture}`;
   }
-  
   return profilePicture;
 };
 
@@ -76,8 +71,6 @@ export const getAllPersonas = async (): Promise<PersonaResponse[]> => {
   try {
     const response = await api.get(`/personas`);
     const personas = response.data.data;
-    
-    // Add full profile picture URLs
     return personas.map((persona: PersonaResponse) => ({
       ...persona,
       profile_picture: constructProfilePictureUrl(persona.profile_picture)
@@ -90,12 +83,8 @@ export const getAllPersonas = async (): Promise<PersonaResponse[]> => {
 
 export const getPersonas = async (userId: string): Promise<PersonaResponse[]> => {
   try {
-    const response = await api.get(`/personas?user_id=${userId}`, {
-      timeout: 10000
-    });
+    const response = await api.get(`/personas?user_id=${userId}`, { timeout: 10000 });
     const personas = response.data.data;
-    
-    // Add full profile picture URLs
     return personas.map((persona: PersonaResponse) => ({
       ...persona,
       profile_picture: constructProfilePictureUrl(persona.profile_picture)
@@ -110,8 +99,6 @@ export const getPersonaById = async (id: number): Promise<PersonaResponse> => {
   try {
     const response = await api.get(`/personas/${id}`)
     const persona = response.data;
-    
-    // Add full profile picture URL
     return {
       ...persona,
       profile_picture: constructProfilePictureUrl(persona.profile_picture)
@@ -126,7 +113,6 @@ export const createPersona = async (personaData: PersonaData): Promise<PersonaRe
   try {
     const validateUrl = (url: string, fieldName: string) => {
       if (!url || url.trim() === "") return ""
-
       try {
         new URL(url)
         return url
@@ -166,10 +152,20 @@ export const createPersona = async (personaData: PersonaData): Promise<PersonaRe
     const response = await api.post("/personas", payload)
     return response.data
   } catch (error) {
-    console.error("Error creating persona:", error)
     if (axios.isAxiosError(error)) {
-      if (error.response?.status === 500) {
-        const errorMessage = error.response?.data?.message || "Server error occurred"
+      const status = error.response?.status
+      const data = error.response?.data as any
+      const backendMessage = data?.error || data?.message
+
+      // For expected business/validation errors (4xx), do not log to console
+      if (status && status >= 400 && status < 500) {
+        throw new Error(backendMessage || "Request failed")
+      }
+
+      // Log only unexpected/server-side issues
+      console.error("Error creating persona:", error)
+      if (status && status >= 500) {
+        const errorMessage = backendMessage || "Server error occurred"
         throw new Error(`Server Error: ${errorMessage}`)
       }
     }
@@ -224,8 +220,6 @@ export const getPersonaProfilePicture = async (personaId: string): Promise<strin
     const response = await api.get(`/personas/${personaId}/profile-picture`, {
       responseType: 'blob',
     })
-    
-    // Convert blob to URL for display
     const imageUrl = URL.createObjectURL(response.data)
     return imageUrl
   } catch (error) {

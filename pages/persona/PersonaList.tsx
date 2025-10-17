@@ -58,6 +58,7 @@ import {
   type PersonaData,
   type PersonaResponse,
 } from "../../lib/redux/service/pasonaService";
+import { createCheckoutSession } from "../../lib/redux/service/paymentService";
 import { toast } from "sonner";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { Crown, UserCircle } from "lucide-react";
@@ -455,8 +456,8 @@ function CreatePersonaPage({ user }: PageProps) {
       
       toast.success(editingPersona ? "Persona updated successfully" : "Persona created successfully");
     } catch (error) {
-      console.error("Error saving persona:", error);
-      toast(`Failed to save persona: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -520,7 +521,19 @@ function CreatePersonaPage({ user }: PageProps) {
             <DialogTrigger asChild>
               <Button
                 className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
-                onClick={() => {
+                onClick={async (e) => {
+                  if ((user as any)?.plan === "free" && personas.length >= 3) {
+                    e.preventDefault();
+                    toast.error(
+                      "Free plan allows only 3 personas. Upgrade to pro for unlimited."
+                    );
+                    try {
+                      await createCheckoutSession();
+                    } catch (err) {
+                      console.error("Checkout error:", err);
+                    }
+                    return;
+                  }
                   setShowForm(false);
                   setPrefilledData(null);
                   setEditingPersona(null);

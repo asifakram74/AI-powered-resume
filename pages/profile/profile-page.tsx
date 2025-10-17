@@ -404,12 +404,7 @@ export function ProfilePage() {
                     onClick={async () => {
                       try {
                         setIsSubscribing(true)
-                        const data = await createCheckoutSession()
-                        if (data?.url) {
-                          window.location.href = data.url
-                        } else {
-                          showErrorToast("Failed to start checkout. Try again.")
-                        }
+                        await createCheckoutSession()
                       } catch (err: any) {
                         console.error("Checkout error:", err)
                         const message = err?.response?.data?.message || "Unable to create checkout session"

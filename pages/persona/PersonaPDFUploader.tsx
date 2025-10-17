@@ -6,6 +6,7 @@ import { Upload, FileText, Loader2, CheckCircle2, AlertCircle } from "lucide-rea
 import { cn } from "../../lib/utils";
 import type { CVData } from "../../types/cv-data";
 import { toast } from "sonner";
+import { nodeApi } from "../../lib/api/index";
 
 // Helper function to remove duplicates from an array
 const removeDuplicates = (arr: string[]): string[] => {
@@ -124,16 +125,11 @@ const PDFUploader = ({ onDataExtracted, onProcessingStart }: PDFUploaderProps) =
       const formData = new FormData();
       formData.append('pdf', file);
 
-      const extractResponse = await fetch(' http://localhost:3001/api/extract-pdf-text', {
-        method: 'POST',
-        body: formData,
+      const extractResponse = await nodeApi.post('/api/extract-pdf-text', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      if (!extractResponse.ok) {
-        throw new Error(`Upload failed: ${extractResponse.status}`);
-      }
-
-      const extractResult = await extractResponse.json();
+      const extractResult = extractResponse.data;
       
       if (extractResult.error) {
         throw new Error(extractResult.error);
@@ -153,22 +149,11 @@ const PDFUploader = ({ onDataExtracted, onProcessingStart }: PDFUploaderProps) =
       setProcessingStep("Analyzing with AI...");
       setProgress(60);
       
-      const parseResponse = await fetch(' http://localhost:3001/api/parse-resume', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          extractedText: extractResult.text,
-        }),
+      const parseResponse = await nodeApi.post('/api/parse-resume', {
+        extractedText: extractResult.text,
       });
 
-      if (!parseResponse.ok) {
-        const errorText = await parseResponse.text();
-        throw new Error(`Analysis failed: ${parseResponse.status} - ${errorText}`);
-      }
-
-      const parseResult = await parseResponse.json();
+      const parseResult = parseResponse.data;
 
       if (parseResult.error) {
         throw new Error(parseResult.error);
@@ -282,6 +267,8 @@ const PDFUploader = ({ onDataExtracted, onProcessingStart }: PDFUploaderProps) =
           toast.error("Failed to upload PDF. Please check file size and format.");
         } else if (error.message.includes('Analysis failed')) {
           toast.error("AI analysis failed. Please try again.");
+        } else if (error.message.includes('Network Error')) {
+          toast.error("Cannot connect to resume analysis server. Please start the backend.");
         } else {
           toast.error(`Error: ${error.message}`);
         }

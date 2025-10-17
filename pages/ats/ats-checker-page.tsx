@@ -79,8 +79,7 @@ export default function ATSCheckerPage() {
       if (!planType || String(planType).toLowerCase() === "free") {
         toast.error("ATS checker is a Pro feature. Upgrade to continue.");
         try {
-          const session = await createCheckoutSession();
-          window.location.href = session.url;
+          await createCheckoutSession();
         } catch (err) {
           toast.error("Failed to start checkout. Please try again.");
         }

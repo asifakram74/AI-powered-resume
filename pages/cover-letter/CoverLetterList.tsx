@@ -58,6 +58,7 @@ import {
 } from "../../lib/redux/service/resumeService"
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog"
 import { PageProps } from "../../app/dashboard/page";
+import { createCheckoutSession } from "../../lib/redux/service/paymentService";
 
 export function CoverLetterPage({ user }: PageProps) {
   const [cvs, setCVs] = useState<CV[]>([])
@@ -196,7 +197,7 @@ export function CoverLetterPage({ user }: PageProps) {
       const cvContent = await getCVContentForAI(selectedCV)
 
       // Call DeepSeek AI for cover letter generation
-      console.log('Making request to:', 'https://backendserver.resumaic.com/api/cover-letter-generation');
+      console.log('Making request to:', ' http://localhost:3001/api/cover-letter-generation');
       console.log('Selected tone:', tone);
       console.log('Tone type:', typeof tone);
       
@@ -218,13 +219,13 @@ export function CoverLetterPage({ user }: PageProps) {
       console.log('Request payload size:', JSON.stringify(requestPayload).length);
 
       try {
-        const testResponse = await fetch('https://backendserver.resumaic.com/', { method: 'HEAD' });
+        const testResponse = await fetch(' http://localhost:3001/', { method: 'HEAD' });
         console.log('Server reachable:', testResponse.ok);
       } catch (testError) {
         console.error('Server not reachable:', testError);
       }
 
-      const response = await fetch('https://backendserver.resumaic.com/api/cover-letter-generation', {
+      const response = await fetch(' http://localhost:3001/api/cover-letter-generation', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -270,6 +271,17 @@ export function CoverLetterPage({ user }: PageProps) {
       return
     }
 
+    // Enforce free plan limit for creating new cover letters
+    if (!editingLetter && (user as any)?.plan === 'free' && coverLetters.length >= 3) {
+      toast.error("Free plan allows only 3 cover letters. Upgrade to pro for unlimited.");
+      try {
+        await createCheckoutSession();
+      } catch (_err) {
+        // Ignore checkout errors here; UI already informed user
+      }
+      return;
+    }
+
     try {
       setIsLoading(true)
       const letterData: CreateCoverLetterData = {
@@ -306,8 +318,7 @@ export function CoverLetterPage({ user }: PageProps) {
       setAnalysisResult(null)
       setIsViewMode(false)
     } catch (error) {
-      console.error("Error saving cover letter:", error)
-      toast.error("Failed to save cover letter", {
+      toast.error(error instanceof Error ? error.message : "Failed to save cover letter", {
         description: "Please try again or contact support if the issue persists.",
       })
     } finally {
@@ -375,7 +386,7 @@ export function CoverLetterPage({ user }: PageProps) {
     try {
       const filename = getCoverLetterFilename(letter, format)
       
-      const response = await fetch(`https://backendserver.resumaic.com/api/cover-letter-export/${format}`, {
+      const response = await fetch(` http://localhost:3001/api/cover-letter-export/${format}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -478,7 +489,19 @@ export function CoverLetterPage({ user }: PageProps) {
             <DialogTrigger asChild>
               <Button
                 className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
-                onClick={handleOpenNewGenerator}
+                onClick={async (e) => {
+                  if ((user as any)?.plan === 'free' && coverLetters.length >= 3) {
+                    e.preventDefault();
+                    toast.error("Free plan allows only 3 cover letters. Upgrade to pro for unlimited.");
+                    try {
+                      await createCheckoutSession();
+                    } catch (err) {
+                      console.error("Checkout error:", err);
+                    }
+                    return;
+                  }
+                  handleOpenNewGenerator();
+                }}
               >
                 Create Cover Letter
               </Button>

@@ -60,6 +60,7 @@ import { toast } from "sonner";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { Crown, UserCircle } from "lucide-react";
 import { PageProps } from "../../app/dashboard/page";
+import { createCheckoutSession } from "../../lib/redux/service/paymentService";
 
 export function ResumePage({ user }: PageProps) {
   const router = useRouter();
@@ -102,7 +103,13 @@ export function ResumePage({ user }: PageProps) {
   const handleSaveCV = async (cvData: CreateCVData) => {
     // Check CV limit for free plan users
     if ((user as any)?.plan === 'free' && cvs.length >= 3) {
-      toast.error("Free plan users can only create up to 3 CVs. Please upgrade your plan to create more.");
+      // e.preventDefault(); // removed: no event object in scope
+      toast.error("Free plan allows only 3 resumes. Upgrade to pro for unlimited.");
+      try {
+        await createCheckoutSession();
+      } catch (err) {
+        console.error("Checkout error:", err);
+      }
       return;
     }
 
@@ -112,7 +119,6 @@ export function ResumePage({ user }: PageProps) {
       setIsDialogOpen(false);
       toast.success("Resume created successfully");
     } catch (error: any) {
-      console.error("Error creating CV:", error);
       // Display the actual error message from the backend
       const errorMessage = error.message || "Failed to create resume";
       toast.error(errorMessage);
@@ -130,7 +136,6 @@ export function ResumePage({ user }: PageProps) {
       setSelectedCV(null);
       toast.success("Resume updated successfully");
     } catch (error) {
-      console.error("Error updating CV:", error);
       toast.error("Failed to update resume");
     }
   };
@@ -148,7 +153,6 @@ export function ResumePage({ user }: PageProps) {
       setCVs((prev) => prev.filter((c) => c.id !== cv.id));
       toast.success("Resume deleted successfully");
     } catch (error) {
-      console.error("Error deleting resume:", error);
       toast.error("Failed to delete resume");
     }
   };
@@ -193,10 +197,16 @@ export function ResumePage({ user }: PageProps) {
             <DialogTrigger asChild>
               <Button
                 className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
-                onClick={() => {
+                onClick={async (e) => {
                   // Check CV limit for free plan users before opening dialog
                   if ((user as any)?.plan === 'free' && cvs.length >= 3) {
-                    toast.error("Free plan limit reached! You can create up to 3 CVs. Upgrade to create more.");
+                    e.preventDefault();
+                    toast.error("Free plan allows only 3 resumes. Upgrade to pro for unlimited.");
+                    try {
+                      await createCheckoutSession();
+                    } catch (err) {
+                      console.error("Checkout error:", err);
+                    }
                     return;
                   }
                   setIsDialogOpen(true);
