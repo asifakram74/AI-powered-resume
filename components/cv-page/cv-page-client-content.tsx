@@ -769,7 +769,7 @@ export function CVPageClientContent() {
     if (!existingCV && user?.plan === "free" && (user as any)?.profile?.cvs_count >= 3) {
       showErrorToast(
         "CV Limit Reached",
-        "Free plan users can only create up to 3 CVs. Please upgrade your plan to create more.",
+        "Free plan allows only 3 resumes. Upgrade to pro for unlimited.",
       )
       return
     }
@@ -816,9 +816,8 @@ export function CVPageClientContent() {
         )
       }
     } catch (saveError: any) {
-      console.error("Error saving CV:", saveError)
       toast.dismiss(loadingToastId)
-      showErrorToast("Save Failed", saveError.message || "Unable to save CV. Please try again.")
+      showErrorToast("Save Failed", saveError?.message || "Unable to save CV. Please try again.")
     } finally {
       setIsSaving(false)
     }

@@ -1,4 +1,5 @@
 import { api } from "../../api"
+import axios from "axios"
 
 export interface CV {
   id: string
@@ -71,15 +72,21 @@ export const createCV = async (cvData: CreateCVData): Promise<CV> => {
     console.log("Received CV response from API:", JSON.stringify(response.data, null, 2))
     return response.data
   } catch (error: any) {
-    console.error("Error creating CV:", error)
-    
-    // Extract the actual error message from the response
-    if (error.response?.data?.message) {
-      const customError = new Error(error.response.data.message);
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status ?? 0;
+      const data = error.response?.data as any;
+      const backendMsg = data?.message || data?.error || error.message;
+
+      if (status >= 500) {
+        console.error("Server error creating CV:", error);
+      }
+
+      const customError = new Error(backendMsg || "Failed to create resume");
       (customError as any).response = error.response;
       throw customError;
     }
-    
+
+    console.error("Unexpected error creating CV:", error);
     throw error
   }
 }

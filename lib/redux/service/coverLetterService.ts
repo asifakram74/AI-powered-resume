@@ -1,4 +1,5 @@
 import { api } from "../../api"
+import axios from "axios"
 
 export interface CoverLetter {
   id: string
@@ -61,8 +62,22 @@ export const createCoverLetter = async (data: CreateCoverLetterData): Promise<Co
       generated_letter: data.generated_letter
     })
     return response.data
-  } catch (error) {
-    console.error("Error creating cover letter:", error)
+  } catch (error: any) {
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status ?? 0;
+      const data = error.response?.data as any;
+      const backendMsg = data?.message || data?.error || error.message;
+
+      if (status >= 500) {
+        console.error("Server error creating cover letter:", error);
+      }
+
+      const customError = new Error(backendMsg || "Failed to create cover letter");
+      (customError as any).response = error.response;
+      throw customError;
+    }
+
+    console.error("Unexpected error creating cover letter:", error);
     throw error
   }
 }
