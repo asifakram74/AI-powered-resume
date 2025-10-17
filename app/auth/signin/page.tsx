@@ -98,8 +98,7 @@ export default function SignInPage() {
 
     const redirectUri = window.location.origin + window.location.pathname;
     console.log("redirectUri",redirectUri)
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://cffdcbd648f6.ngrok-free.app/api";
-    window.location.href = `${API_BASE}/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    window.location.href = `https://backendcv.onlinetoolpot.com/api/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
   };
 
   useEffect(() => {
@@ -205,6 +204,7 @@ export default function SignInPage() {
                 dispatch(setCredentials({ token, user: { ...user, otp: null, otp_expiry: null, otp_count: 0, role: 'user', created_at: new Date().toISOString(), updated_at: new Date().toISOString(), is_verified: true, reset_token: null, reset_token_expiry: null, last_login: new Date().toISOString(), is_active: true, status: 'active', plan: 'free', email_verified_at: new Date().toISOString(), plan_type: 'monthly', trial_ends_at: null, subscription_ends_at: null, is_trial: false, is_premium: false } }));
               }
             }
+            
             const cleanUrl = window.location.pathname;
             window.history.replaceState({}, document.title, cleanUrl);
             showSuccessToast("Signed in with Google", "Welcome back!");

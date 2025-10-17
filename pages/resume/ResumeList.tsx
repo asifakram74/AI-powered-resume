@@ -370,7 +370,7 @@ export function ResumePage({ user }: PageProps) {
                             </Button>
                             <ConfirmDialog
                               title="Delete Resume"
-                              description="Are you sure you want to delete this resume? This action cannot be undone."
+                              description={`Are you sure you want to delete the resume ${((cv as any).title || (cv as any).name || cv.layout_id)}? This action is irreversible and cannot be undone.`}
                               confirmText="Delete"
                               cancelText="Cancel"
                               onConfirm={() => handleDelete(cv)}
@@ -464,7 +464,7 @@ export function ResumePage({ user }: PageProps) {
                       </Button>
                       <ConfirmDialog
                         title="Delete Resume"
-                        description="Are you sure you want to delete this resume? This action cannot be undone."
+                        description={`Are you sure you want to delete the resume ${((cv as any).title || (cv as any).name || cv.layout_id)}? This action is irreversible and cannot be undone.`}
                         confirmText="Delete"
                         cancelText="Cancel"
                         onConfirm={() => handleDelete(cv)}

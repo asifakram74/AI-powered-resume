@@ -40,6 +40,8 @@ import * as htmlToImage from "html-to-image";
 import { jsPDF } from "jspdf";
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
 import { createATSResume, CreateATSResumeData } from "../../lib/redux/service/atsResumeService";
+import { useAppSelector } from "../../lib/redux/hooks";
+import { createCheckoutSession } from "../../lib/redux/service/paymentService";
 
 interface ATSAnalysisResult {
   score: number;
@@ -69,6 +71,24 @@ export default function ATSCheckerPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const analysisRef = useRef<HTMLDivElement>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const planType = useAppSelector((state) => state.auth.profile?.plan_type || state.auth.user?.plan_type);
+
+  const handleDialogOpenChange = async (open: boolean) => {
+    if (open) {
+      // Gate ATS checker to Pro plan users only
+      if (!planType || String(planType).toLowerCase() === "free") {
+        toast.error("ATS checker is a Pro feature. Upgrade to continue.");
+        try {
+          const session = await createCheckoutSession();
+          window.location.href = session.url;
+        } catch (err) {
+          toast.error("Failed to start checkout. Please try again.");
+        }
+        return; // Prevent opening the dialog for free users
+      }
+    }
+    setIsDialogOpen(open);
+  };
 
   const handleAnalyze = async () => {
     if (!extractedText || !jobDescription.trim()) {
@@ -78,17 +98,16 @@ export default function ATSCheckerPage() {
 
     setIsAnalyzing(true);
     setError(null);
-    const NODE_API = process.env.NEXT_PUBLIC_NODEJS_API_URL || 'http://localhost:3001';
-    console.log('Making request to:', `${NODE_API}/api/ats-analysis`);
+    console.log('Making request to:', ' http://localhost:3001/api/ats-analysis');
     console.log('Request payload size:', JSON.stringify({ extractedText, jobDescription }).length);
     try {
-      const testResponse = await fetch(`${NODE_API}/`, { method: 'HEAD', headers: { 'ngrok-skip-browser-warning': 'true' } });
+      const testResponse = await fetch(' http://localhost:3001', { method: 'HEAD' });
       console.log('Server reachable:', testResponse.ok);
     } catch (testError) {
       console.error('Server not reachable:', testError);
     }
     try {
-      const response = await fetch(`${NODE_API}/api/ats-analysis`, {
+      const response = await fetch(' http://localhost:3001/api/ats-analysis', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -361,7 +380,7 @@ export default function ATSCheckerPage() {
           </p>
 
           <div className="flex justify-center">
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
               <DialogTrigger asChild>
                 <Button
                   size="lg"

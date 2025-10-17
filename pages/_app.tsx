@@ -7,10 +7,16 @@ import Head from "next/head";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <ReduxProvider>
-      <HydrateAuth />
-      <Toaster position="top-right" richColors />
-      <Component {...pageProps} />
-    </ReduxProvider>
+    <>
+      <Head>
+        <meta name="robots" content="noindex,nofollow" />
+        <meta name="googlebot" content="noindex,nofollow" />
+      </Head>
+      <ReduxProvider>
+        <HydrateAuth />
+        <Toaster position="top-right" richColors />
+        <Component {...pageProps} />
+      </ReduxProvider>
+    </>
   );
 }

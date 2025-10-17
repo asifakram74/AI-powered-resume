@@ -13,6 +13,7 @@ import {
 import { ScrollArea } from "../../components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Plus, Trash2, Save, X } from "lucide-react";
+import { uploadPersonaProfilePicture } from "../../lib/redux/service/pasonaService";
 
 interface OptimizedCV {
   personalInfo: {
@@ -53,6 +54,9 @@ interface CVEditPopupProps {
   isOpen: boolean;
   onClose: () => void;
   isLoading?: boolean;
+  personaId?: string;
+  currentImageUrl?: string;
+  onProfilePictureUpdated?: (newUrl: string) => void;
 }
 
 export function CVEditPopup({
@@ -61,9 +65,17 @@ export function CVEditPopup({
   isOpen,
   onClose,
   isLoading = false,
+  personaId,
+  currentImageUrl,
+  onProfilePictureUpdated,
 }: CVEditPopupProps) {
   const [editingData, setEditingData] = useState<OptimizedCV>(cvData);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [profileImagePreview, setProfileImagePreview] = useState<string | undefined>(currentImageUrl);
+  useEffect(() => {
+    setProfileImagePreview(currentImageUrl);
+  }, [currentImageUrl]);
 
   // Update editing data when cvData changes
   useEffect(() => {
@@ -81,6 +93,27 @@ export function CVEditPopup({
         [field]: value,
       },
     });
+  };
+
+  const handleImageFileChange = async (file?: File) => {
+    if (!file) return;
+    // Local preview
+    const localUrl = URL.createObjectURL(file);
+    setProfileImagePreview(localUrl);
+
+    // Upload to backend (persona owns the profile picture)
+    if (!personaId) return; // if persona not available, just preview locally
+    try {
+      setIsUploadingImage(true);
+      const updatedPersona = await uploadPersonaProfilePicture(personaId, file);
+      const newUrl = updatedPersona.profile_picture || localUrl;
+      setProfileImagePreview(newUrl);
+      onProfilePictureUpdated?.(newUrl);
+    } catch (err) {
+      console.error("Failed to upload profile image:", err);
+    } finally {
+      setIsUploadingImage(false);
+    }
   };
 
   const addWorkExperience = () => {
@@ -221,6 +254,44 @@ export function CVEditPopup({
                   <CardTitle>Personal Information</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* Profile Image Upload */}
+                  <div className="flex items-center gap-4">
+                    <div className="w-20 h-20 rounded-full overflow-hidden border">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={profileImagePreview || currentImageUrl || "/placeholder-user.jpg"}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = "/placeholder-user.jpg";
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="profile-image-input">
+                        <input
+                          id="profile-image-input"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => handleImageFileChange(e.target.files?.[0])}
+                        />
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          onClick={() => {
+                            const input = document.getElementById("profile-image-input") as HTMLInputElement | null;
+                            input?.click();
+                          }}
+                          disabled={isUploadingImage}
+                        >
+                          {isUploadingImage ? "Uploading..." : "Upload Image"}
+                        </Button>
+                      </label>
+                      <p className="text-xs text-gray-500 mt-1">Supported: JPG, PNG. Updates persona image used in templates.</p>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     <Input
                       placeholder="Full Name"

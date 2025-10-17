@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "../../components/ui/select";
 import { Badge } from "../../components/ui/badge";
-import { Sparkles, X, Plus } from "lucide-react";
+import { Sparkles, X, Plus, Upload, User } from "lucide-react";
 import { Textarea } from "../../components/ui/textarea";
 import { Switch } from "../../components/ui/switch";
 import type { CVData } from "../../types/cv-data";
@@ -54,7 +54,7 @@ const isValidUrl = (url: string): boolean => {
 interface PersonaFormProps {
   prefilledData: Partial<Omit<CVData, "id" | "createdAt">> | null;
   editingPersona: CVData | null;
-  onPersonaGenerated: (persona: CVData) => void;
+  onPersonaGenerated: (persona: CVData, profilePictureFile?: File | null) => void;
   onCancel: () => void;
 }
 
@@ -143,6 +143,11 @@ export function PersonaForm({
   const [skillType, setSkillType] = useState<"technical" | "soft">("technical");
   const [interestInput, setInterestInput] = useState("");
 
+  // Profile picture state
+  const [profilePictureFile, setProfilePictureFile] = useState<File | null>(null);
+  const [profilePicturePreview, setProfilePicturePreview] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   // Load prefilled data when component mounts or prefilledData changes
   useEffect(() => {
     if (prefilledData) {
@@ -158,6 +163,17 @@ export function PersonaForm({
       }));
     }
   }, [prefilledData]);
+
+  // Load editing persona data when component mounts or editingPersona changes
+  useEffect(() => {
+    if (editingPersona) {
+      setFormData(editingPersona);
+      // Set profile picture preview if it exists
+      if (editingPersona.personalInfo.profilePicture) {
+        setProfilePicturePreview(editingPersona.personalInfo.profilePicture);
+      }
+    }
+  }, [editingPersona]);
 
   const addSkill = () => {
     if (skillInput.trim()) {
@@ -191,6 +207,41 @@ export function PersonaForm({
         },
       }));
       setInterestInput("");
+    }
+  };
+
+  // Profile picture handlers
+  const handleProfilePictureChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select a valid image file');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File size must be less than 5MB');
+        return;
+      }
+
+      setProfilePictureFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setProfilePicturePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeProfilePicture = () => {
+    setProfilePictureFile(null);
+    setProfilePicturePreview("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -438,10 +489,11 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
         id: editingPersona?.id || Date.now().toString(),
         createdAt: editingPersona?.createdAt || new Date().toISOString(),
         generatedPersona: persona,
+        // profile picture file is passed separately via onPersonaGenerated
       };
 
       setIsGenerating(false);
-      onPersonaGenerated(newPersona);
+      onPersonaGenerated(newPersona, profilePictureFile);
     }, 3000);
   };
 
@@ -618,6 +670,56 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             </div>
           </div>
 
+          {/* Profile Picture Upload */}
+          <div className="space-y-2">
+            <Label>Profile Picture</Label>
+            <div className="flex items-center gap-4">
+              {profilePicturePreview ? (
+                <div className="relative">
+                  <img
+                    src={profilePicturePreview}
+                    alt="Profile preview"
+                    className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="absolute -top-2 -right-2 w-6 h-6 rounded-full p-0"
+                    onClick={removeProfilePicture}
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center">
+                  <User className="w-8 h-8 text-gray-400" />
+                </div>
+              )}
+              <div className="flex-1">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProfilePictureChange}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full"
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  {profilePictureFile ? 'Change Picture' : 'Upload Picture'}
+                </Button>
+                <p className="text-xs text-gray-500 mt-1">
+                  Supported formats: JPG, PNG, GIF (max 5MB)
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label>Professional Summary</Label>
             <Textarea
@@ -771,7 +873,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                 }
                 className="w-full"
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4 mr-1" />
                 Add Responsibility
               </Button>
             ) : (
@@ -820,7 +922,8 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                         }
                         className="w-full sm:w-auto"
                       >
-                        <Plus className="h-4 w-4" />
+                        <span className="h-4 w-4 mr-1" />
+                        Add
                       </Button>
                     )}
                   </div>
@@ -914,7 +1017,8 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                 className="flex-1"
               />
               <Button onClick={addSkill} size="sm" variant="outline" className="flex-shrink-0 w-full sm:w-auto">
-                <Plus className="h-4 w-4" />
+                <span className="h-4 w-4 mr-1" />
+                Add
               </Button>
             </div>
           </div>
@@ -933,7 +1037,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                     <button
                       type="button"
                       onClick={() => removeSkill("technical", index)}
-                      className="hover:text-red-500"
+                      className="hover:text-red-500 cursor-pointer"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -955,7 +1059,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                     <button
                       type="button"
                       onClick={() => removeSkill("soft", index)}
-                      className="hover:text-red-500"
+                      className="hover:text-red-500 cursor-pointer"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -1012,7 +1116,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
           </div>
 
           <Button onClick={addLanguage} variant="outline" size="sm" className="w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 mr-1" />
             Add Language
           </Button>
 
@@ -1030,7 +1134,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                     <button
                       type="button"
                       onClick={() => removeLanguage(lang.id)}
-                      className="hover:text-red-500"
+                      className="hover:text-red-500 cursor-pointer"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -1149,7 +1253,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
           </div>
 
           <Button onClick={addEducation} variant="outline" size="sm" className="w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 mr-1" />
             Add Education
           </Button>
 
@@ -1249,7 +1353,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
           </div>
 
           <Button onClick={addCertification} variant="outline" size="sm" className="w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 mr-1" />
             Add Certification
           </Button>
 
@@ -1344,7 +1448,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                 }
                 className="w-full"
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4 mr-1" />
                 Add Technology
               </Button>
             ) : (
@@ -1393,7 +1497,8 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                         }
                         className="w-full sm:w-auto"
                       >
-                        <Plus className="h-4 w-4" />
+                        <Plus className="h-4 w-4 mr-1" />
+                        Add
                       </Button>
                     )}
                   </div>
@@ -1434,7 +1539,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
           </div>
 
           <Button onClick={addProject} variant="outline" size="sm" className="w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 mr-1" />
             Add Project
           </Button>
 
@@ -1483,7 +1588,8 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
               className="flex-1"
             />
             <Button onClick={addInterest} size="sm" variant="outline" className="flex-shrink-0 w-full sm:w-auto">
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4 mr-1" />
+              Add
             </Button>
           </div>
 
@@ -1501,7 +1607,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                     <button
                       type="button"
                       onClick={() => removeInterest(interest)}
-                      className="hover:text-red-500"
+                      className="hover:text-red-500 cursor-pointer"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -1534,7 +1640,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             </>
           ) : (
             <>
-              <Sparkles className="h-4 w-4 mr-2" />
+              <Sparkles className="h-4 w-4 mr-1" />
               Generate Persona
             </>
           )}
@@ -1543,3 +1649,4 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
     </div>
   );
 }
+export default PersonaForm;

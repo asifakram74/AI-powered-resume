@@ -2,11 +2,10 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Card } from "../../components/ui/card";
-import { Upload, FileText, Loader2 } from "lucide-react";
+import { Upload, FileText, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { cn } from "../../lib/utils";
 import type { CVData } from "../../types/cv-data";
-import { toast } from "sonner"
-
+import { toast } from "sonner";
 
 // Helper function to remove duplicates from an array
 const removeDuplicates = (arr: string[]): string[] => {
@@ -15,35 +14,55 @@ const removeDuplicates = (arr: string[]): string[] => {
 
 interface PDFUploaderProps {
   onDataExtracted: (data: Partial<Omit<CVData, "id" | "createdAt">>) => void;
+  onProcessingStart?: () => void;
 }
 
-const PDFUploader = ({ onDataExtracted }: PDFUploaderProps) => {
+const PDFUploader = ({ onDataExtracted, onProcessingStart }: PDFUploaderProps) => {
   const [file, setFile] = useState<File | null>(null);
-  const [isExtracting, setIsExtracting] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [pdfjs, setPdfjs] = useState<any>(null);
+  const [processingStep, setProcessingStep] = useState<string>("");
+  const [progress, setProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      import("pdfjs-dist").then((pdfjsLib) => {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.js";
-        setPdfjs(pdfjsLib);
-      });
-    }
-  }, []);
+  // Fixed height for consistent layout
+  const cardHeight = "h-32"; // Fixed height for all states
 
+  // Simulate progress updates with proper limits
   useEffect(() => {
-    if (file && pdfjs) {
-      extractDataFromPDF();
+    let progressInterval: NodeJS.Timeout;
+    
+    if (isProcessing && progress < 95) { // Stop at 95% until final completion
+      progressInterval = setInterval(() => {
+        setProgress(prev => {
+          // Slow down progress as it gets closer to 95%
+          if (prev >= 85) return prev + 0.3;
+          if (prev >= 70) return prev + 0.8;
+          if (prev >= 50) return prev + 1.2;
+          return prev + 2;
+        });
+      }, 500);
     }
-  }, [file, pdfjs]);
+
+    return () => {
+      if (progressInterval) clearInterval(progressInterval);
+    };
+  }, [isProcessing, progress]);
+
+  const resetState = () => {
+    setProgress(0);
+    setError(null);
+    setProcessingStep("");
+  };
 
   const handleFileSelect = (selectedFile: File) => {
     if (selectedFile.type === "application/pdf") {
       setFile(selectedFile);
+      resetState();
+      processFile(selectedFile);
     } else {
-      toast("Please select a PDF file");
+      toast.error("Please select a PDF file");
     }
   };
 
@@ -105,7 +124,7 @@ const PDFUploader = ({ onDataExtracted }: PDFUploaderProps) => {
       const formData = new FormData();
       formData.append('pdf', file);
 
-      const extractResponse = await fetch('http://localhost:3001/api/extract-pdf-text', {
+      const extractResponse = await fetch(' http://localhost:3001/api/extract-pdf-text', {
         method: 'POST',
         body: formData,
       });
@@ -134,46 +153,48 @@ const PDFUploader = ({ onDataExtracted }: PDFUploaderProps) => {
       setProcessingStep("Analyzing with AI...");
       setProgress(60);
       
-      const parseResponse = await fetch('http://localhost:3001/api/parse-resume', {
+      const parseResponse = await fetch(' http://localhost:3001/api/parse-resume', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          extractedText: text,
+          extractedText: extractResult.text,
         }),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (!parseResponse.ok) {
+        const errorText = await parseResponse.text();
+        throw new Error(`Analysis failed: ${parseResponse.status} - ${errorText}`);
       }
 
-      const result = await response.json();
+      const parseResult = await parseResponse.json();
 
-      if (result.error) {
-        throw new Error(result.error);
+      if (parseResult.error) {
+        throw new Error(parseResult.error);
       }
 
-      // Log the raw DeepSeek response
-      console.log('Raw DeepSeek Response:', JSON.stringify(result, null, 2));
+      // Step 4: Organizing data
+      setProcessingStep("Organizing data...");
+      setProgress(85);
 
       // Transform the API response into our CVData format
       const transformedData: Partial<Omit<CVData, "id" | "createdAt">> = {
         personalInfo: {
-          fullName: result.personalInfo?.fullName || "",
-          jobTitle: result.personalInfo?.jobTitle || "",
-          email: result.personalInfo?.email || "",
-          phone: result.personalInfo?.phone || "",
-          address: result.personalInfo?.address || "",
-          city: result.personalInfo?.city || "",
-          country: result.personalInfo?.country || "",
-          profilePicture: result.personalInfo?.profilePicture || "",
-          summary: result.personalInfo?.summary || "",
-          linkedin: result.personalInfo?.linkedin || "",
-          github: result.personalInfo?.github || "",
+          fullName: parseResult.personalInfo?.fullName || "",
+          jobTitle: parseResult.personalInfo?.jobTitle || "",
+          email: parseResult.personalInfo?.email || "",
+          phone: parseResult.personalInfo?.phone || "",
+          address: parseResult.personalInfo?.address || "",
+          city: parseResult.personalInfo?.city || "",
+          country: parseResult.personalInfo?.country || "",
+          profilePicture: parseResult.personalInfo?.profilePicture || "",
+          summary: parseResult.personalInfo?.summary || "",
+          linkedin: parseResult.personalInfo?.linkedin || "",
+          github: parseResult.personalInfo?.github || "",
         },
-        experience: Array.isArray(result.experience)
-          ? result.experience.map((exp: any, index: number) => ({
+        experience: Array.isArray(parseResult.experience)
+          ? parseResult.experience.map((exp: any, index: number) => ({
             id: index.toString(),
             jobTitle: exp.jobTitle || "",
             companyName: exp.companyName || "",
@@ -184,8 +205,8 @@ const PDFUploader = ({ onDataExtracted }: PDFUploaderProps) => {
             responsibilities: exp.responsibilities || [],
           }))
           : [],
-        education: Array.isArray(result.education)
-          ? result.education.map((edu: any, index: number) => ({
+        education: Array.isArray(parseResult.education)
+          ? parseResult.education.map((edu: any, index: number) => ({
             id: index.toString(),
             degree: edu.degree || "",
             institutionName: edu.institutionName || "",
@@ -197,22 +218,22 @@ const PDFUploader = ({ onDataExtracted }: PDFUploaderProps) => {
           }))
           : [],
         skills: {
-          technical: Array.isArray(result.skills?.technical)
-            ? removeDuplicates(result.skills.technical)
+          technical: Array.isArray(parseResult.skills?.technical)
+            ? removeDuplicates(parseResult.skills.technical)
             : [],
-          soft: Array.isArray(result.skills?.soft)
-            ? removeDuplicates(result.skills.soft)
+          soft: Array.isArray(parseResult.skills?.soft)
+            ? removeDuplicates(parseResult.skills.soft)
             : [],
         },
-        languages: Array.isArray(result.languages)
-          ? result.languages.map((lang: any, index: number) => ({
+        languages: Array.isArray(parseResult.languages)
+          ? parseResult.languages.map((lang: any, index: number) => ({
             id: index.toString(),
             name: lang.name || "",
             proficiency: lang.proficiency || "Intermediate",
           }))
           : [],
-        certifications: Array.isArray(result.certifications)
-          ? result.certifications.map((cert: any, index: number) => ({
+        certifications: Array.isArray(parseResult.certifications)
+          ? parseResult.certifications.map((cert: any, index: number) => ({
             id: index.toString(),
             title: cert.title || "",
             issuingOrganization: cert.issuingOrganization || "",
@@ -220,8 +241,8 @@ const PDFUploader = ({ onDataExtracted }: PDFUploaderProps) => {
             verificationLink: cert.verificationLink || "",
           }))
           : [],
-        projects: Array.isArray(result.projects)
-          ? result.projects.map((project: any, index: number) => ({
+        projects: Array.isArray(parseResult.projects)
+          ? parseResult.projects.map((project: any, index: number) => ({
             id: index.toString(),
             name: project.name || "",
             role: project.role || "Developer",
@@ -232,64 +253,64 @@ const PDFUploader = ({ onDataExtracted }: PDFUploaderProps) => {
           }))
           : [],
         additional: {
-          interests: Array.isArray(result.additional?.interests) ? result.additional.interests : [],
+          interests: Array.isArray(parseResult.additional?.interests) ? parseResult.additional.interests : [],
         },
       };
 
-      // Log the transformed data
-      console.log('Transformed Data:', JSON.stringify(transformedData, null, 2));
-
-      return transformedData;
-    } catch (error) {
-      console.error("DeepSeek analysis error:", error);
-      throw error;
-    }
-  };
-  const extractDataFromPDF = async () => {
-    if (!file || !pdfjs) return;
-
-    setIsExtracting(true);
-    try {
-      const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
-      let fullText = "";
-
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const textContent = await page.getTextContent();
-        const pageText = textContent.items
-          .map((item: any) => item.str)
-          .join(" ");
-        fullText += pageText + "\n";
-      }
-
-      // Log the extracted PDF text
-      console.log('Extracted PDF Text:', fullText);
-
-      // Send to DeepSeek for advanced parsing
-      const deepSeekData = await sendToDeepSeek(fullText);
-      onDataExtracted(deepSeekData);
-      toast.success("Data extracted and analyzed successfully!");
+      console.log('Data transformation successful:', transformedData);
+      
+      // Final step - set to 100% directly to avoid overshooting
+      setProcessingStep("Finalizing...");
+      setProgress(100);
+      
+      // Small delay to show 100% completion
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      onDataExtracted(transformedData);
+      toast.success("Resume analyzed successfully!");
+      
     } catch (error) {
       console.error("Error processing PDF:", error);
-      toast.error("Error processing PDF. Please try again.");
+      setError(error instanceof Error ? error.message : "An unexpected error occurred");
+      setProgress(0);
+      
+      // Handle specific error types
+      if (error instanceof Error) {
+        if (error.message.includes('timeout')) {
+          toast.error("Analysis timed out. Please try again.");
+        } else if (error.message.includes('Upload failed')) {
+          toast.error("Failed to upload PDF. Please check file size and format.");
+        } else if (error.message.includes('Analysis failed')) {
+          toast.error("AI analysis failed. Please try again.");
+        } else {
+          toast.error(`Error: ${error.message}`);
+        }
+      } else {
+        toast.error("An unexpected error occurred. Please try again.");
+      }
     } finally {
-      setIsExtracting(false);
+      setIsProcessing(false);
+      setProcessingStep("");
     }
   };
 
   return (
     <div className="space-y-2">
+      {/* Main Upload Card - Fixed Height */}
       <Card
         className={cn(
           "border-2 border-dashed p-6 text-center transition-all duration-200 cursor-pointer",
-          isDragOver ? "border-primary bg-primary/5" : "border-muted-foreground/25",
-          file ? "border-green-500 bg-green-50" : ""
+          cardHeight, // Fixed height
+          "flex items-center justify-center", // Center content vertically
+          isDragOver ? "border-emerald-500 bg-emerald-50 scale-[1.02]" : "border-gray-300",
+          file && !isProcessing && !error ? "border-emerald-500 bg-emerald-50" : "",
+          error ? "border-red-300 bg-red-50" : "",
+          isProcessing ? "pointer-events-none border-emerald-300 bg-emerald-50" : "hover:border-emerald-400 hover:bg-emerald-50"
         )}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        onClick={() => fileInputRef.current?.click()}
+        onClick={() => !isProcessing && fileInputRef.current?.click()}
       >
         <input
           ref={fileInputRef}
@@ -297,28 +318,56 @@ const PDFUploader = ({ onDataExtracted }: PDFUploaderProps) => {
           accept=".pdf"
           onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
           className="hidden"
+          disabled={isProcessing}
         />
 
-        <div className="flex flex-col items-center">
-          {file ? (
+        <div className="flex flex-col items-center space-y-2 w-full">
+          {error ? (
             <>
-              <FileText className="h-3 w-3 text-green-600" />
-              <div className="">
-                <p className="text-xs font-medium text-green-700">PDF Uploaded Successfully</p>
-                <p className="text-xs text-muted-foreground">{file.name}</p>
+              <AlertCircle className="h-8 w-8 text-red-500" />
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-red-700">Upload Failed</p>
+                <p className="text-xs text-red-600 line-clamp-2">{error}</p>
               </div>
-              {isExtracting && (
-                <div className="mt-2 flex items-center text-sm text-muted-foreground">
-                  <Loader2 className="animate-spin mr-2 h-4 w-4" />
-                  Extracting data...
+            </>
+          ) : file && !isProcessing ? (
+            <>
+              <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-emerald-700">Ready to Analyze</p>
+                <p className="text-xs text-gray-600 truncate max-w-[200px]">{file.name}</p>
+              </div>
+            </>
+          ) : isProcessing ? (
+            <>
+              <Loader2 className="h-8 w-8 text-emerald-600 animate-spin" />
+              <div className="space-y-2 w-full max-w-[280px]">
+                <p className="text-xs font-medium text-gray-800">{getFriendlyMessage(safeProgress)}</p>
+                
+                {/* Progress Bar */}
+                <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                  <div 
+                    className="bg-emerald-600 h-full rounded-full transition-all duration-500 ease-out"
+                    style={{ width: `${safeProgress}%` }}
+                  />
                 </div>
-              )}
+                
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>Processing...</span>
+                  <span>{Math.round(safeProgress)}%</span>
+                </div>
+              </div>
             </>
           ) : (
             <>
-              <Upload className="h-4 w-4 text-muted-foreground" />
-              <div className="">
-                <p className="text-sm font-medium">Upload your CV (PDF)</p>
+              <div className="p-3 rounded-full bg-emerald-100">
+                <Upload className="h-6 w-6 text-emerald-600" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-gray-800">Upload your CV (PDF)</p>
+                <p className="text-xs text-gray-600">
+                  Drag & drop or click to browse
+                </p>
               </div>
             </>
           )}

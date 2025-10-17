@@ -196,17 +196,35 @@ export function CoverLetterPage({ user }: PageProps) {
       const cvContent = await getCVContentForAI(selectedCV)
 
       // Call DeepSeek AI for cover letter generation
-      console.log('Making request to:', 'http://localhost:3001/api/cover-letter-generation');
-      console.log('Request payload size:', JSON.stringify({ jobDescription, tone, cvContent, cvData: selectedCV }).length);
+      console.log('Making request to:', 'https://backendserver.resumaic.com/api/cover-letter-generation');
+      console.log('Selected tone:', tone);
+      console.log('Tone type:', typeof tone);
+      
+      // Find the full tone data to get name and description
+      const selectedToneData = tones.find(t => t.id === tone);
+      console.log('Selected tone data:', selectedToneData);
+      
+      const requestPayload = {
+        jobDescription,
+        tone,
+        toneName: selectedToneData?.name || tone,
+        toneDescription: selectedToneData?.description || '',
+        toneExample: selectedToneData?.example || '',
+        cvContent,
+        cvData: selectedCV,
+      };
+      
+      console.log('Request payload:', requestPayload);
+      console.log('Request payload size:', JSON.stringify(requestPayload).length);
 
       try {
-        const testResponse = await fetch('http://localhost:3001/', { method: 'HEAD' });
+        const testResponse = await fetch('https://backendserver.resumaic.com/', { method: 'HEAD' });
         console.log('Server reachable:', testResponse.ok);
       } catch (testError) {
         console.error('Server not reachable:', testError);
       }
 
-      const response = await fetch('http://localhost:3001/api/cover-letter-generation', {
+      const response = await fetch('https://backendserver.resumaic.com/api/cover-letter-generation', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -320,11 +338,31 @@ export function CoverLetterPage({ user }: PageProps) {
     setIsDialogOpen(true)
   }
 
+  const getCoverLetterFilename = (
+    letter: CoverLetter,
+    format: 'txt' | 'pdf' | 'docx' | 'png' = 'txt'
+  ) => {
+    const baseName =
+      (letter as any).title ||
+      (letter as any).company_name ||
+      (letter.job_description || '').slice(0, 30) ||
+      'cover_letter'
+
+    const safeBase = baseName
+      .toString()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+
+    const idPart = letter.id ? `-${letter.id}` : ''
+    return `${safeBase}${idPart}.${format}`
+  }
+
   const handleDownload = (letter: CoverLetter) => {
     const element = document.createElement("a")
     const file = new Blob([letter.generated_letter], { type: "text/plain" })
     element.href = URL.createObjectURL(file)
-    element.download = `cover_letter_${letter.id}.txt`
+    element.download = getCoverLetterFilename(letter, 'txt')
     document.body.appendChild(element)
     element.click()
     document.body.removeChild(element)
@@ -335,9 +373,9 @@ export function CoverLetterPage({ user }: PageProps) {
 
   const handleExportCoverLetter = async (letter: CoverLetter, format: 'pdf' | 'docx' | 'png') => {
     try {
-      const filename = `cover_letter_${letter.id}.${format}`
+      const filename = getCoverLetterFilename(letter, format)
       
-      const response = await fetch(`http://localhost:3001/api/cover-letter-export/${format}`, {
+      const response = await fetch(`https://backendserver.resumaic.com/api/cover-letter-export/${format}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -566,7 +604,7 @@ export function CoverLetterPage({ user }: PageProps) {
 
                     {!isViewMode && (
                       <div className="flex gap-2">
-                        <Button
+                        {/* <Button
                           variant="outline"
                           onClick={() => {
                             const tempLetter = {
@@ -580,7 +618,56 @@ export function CoverLetterPage({ user }: PageProps) {
                         >
                           <Download className="h-4 w-4 mr-2" />
                           Download
-                        </Button>
+                        </Button> */}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="button-press">
+                              <Download className="h-4 w-4 mr-2" />
+                              Export
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => {
+                                const tempLetter = {
+                                  ...(editingLetter || {}),
+                                  generated_letter: generatedLetter,
+                                  job_description: currentJobDescription,
+                                  tone: currentTone,
+                                } as CoverLetter
+                                handleExportCoverLetter(tempLetter, 'pdf')
+                              }}
+                            >
+                              Export as PDF
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                const tempLetter = {
+                                  ...(editingLetter || {}),
+                                  generated_letter: generatedLetter,
+                                  job_description: currentJobDescription,
+                                  tone: currentTone,
+                                } as CoverLetter
+                                handleExportCoverLetter(tempLetter, 'docx')
+                              }}
+                            >
+                              Export as DOCX
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                const tempLetter = {
+                                  ...(editingLetter || {}),
+                                  generated_letter: generatedLetter,
+                                  job_description: currentJobDescription,
+                                  tone: currentTone,
+                                } as CoverLetter
+                                handleExportCoverLetter(tempLetter, 'png')
+                              }}
+                            >
+                              Export as PNG
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                         <Button onClick={handleSaveLetter} className="resumaic-gradient-green hover:opacity-90  button-press">
                           <FileText className="h-4 w-4 mr-2" />
                           {editingLetter ? "Update Cover Letter" : "Save Cover Letter"}
@@ -790,7 +877,7 @@ export function CoverLetterPage({ user }: PageProps) {
                             </DropdownMenu>
                             <ConfirmDialog
                               title="Delete Cover Letter"
-                              description={`Are you sure you want to delete this cover letter? This action cannot be undone.`}
+                              description={`Are you sure you want to delete the cover letter ${letter.job_description || 'Untitled'}? This action is irreversible and cannot be undone.`}
                               confirmText="Delete"
                               cancelText="Cancel"
                               onConfirm={() => handleDelete(letter)}
@@ -875,7 +962,7 @@ export function CoverLetterPage({ user }: PageProps) {
                       <div className="flex gap-2 items-center">
                         <ConfirmDialog
                           title="Delete Cover Letter"
-                          description={`Are you sure you want to delete this cover letter? This action cannot be undone.`}
+                          description={`Are you sure you want to delete this cover letter? This action is irreversible and cannot be undone.`}
                           confirmText="Delete"
                           cancelText="Cancel"
                           onConfirm={() => handleDelete(letter)}

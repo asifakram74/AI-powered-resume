@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useDispatch, useSelector } from "react-redux"
 import { Button } from "../../../components/ui/button"
@@ -21,19 +21,35 @@ export default function ResetPasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [email, setEmail] = useState("")
+  const [otp, setOtp] = useState("")
+  const [hasValidParams, setHasValidParams] = useState(false)
+  
   const dispatch = useDispatch<AppDispatch>()
   const { loading, error } = useSelector((state: RootState) => state.auth)
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const email = searchParams?.get("email") || ""
-  const otp = searchParams?.get("opt") || searchParams?.get("otp") || ""
 
   useEffect(() => {
-    if (!email || !otp) {
-      router.push("/auth/verify-email")
-      return
+    // Client-side only approach using window.location
+    if (typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search)
+      const emailParam = searchParams.get("email") || ""
+      const otpParam = searchParams.get("opt") || searchParams.get("otp") || ""
+      
+      setEmail(emailParam)
+      setOtp(otpParam)
+      setIsLoading(false)
+
+      if (emailParam && otpParam) {
+        setHasValidParams(true)
+      } else {
+        setHasValidParams(false)
+        toast.error("Invalid or missing reset parameters")
+        router.push("/auth/verify-email")
+      }
     }
-  }, [email, otp, router])
+  }, [router])
 
   const validatePassword = (password: string) => {
     const minLength = 8
@@ -80,15 +96,11 @@ export default function ResetPasswordPage() {
       }
       
       console.log("Reset Password Payload:", resetData)
-      console.log("OTP value:", otp)
-      console.log("OTP type:", typeof otp)
-      console.log("OTP length:", otp?.length)
       
       const result = await dispatch(resetPasswordWithToken(resetData))
       
       if (resetPasswordWithToken.fulfilled.match(result)) {
         toast.success("Password reset successfully! You can now sign in with your new password.")
-        // Navigate to sign in page
         router.push("/auth/signin")
       } else {
         console.log("Reset password failed:", result)
@@ -106,6 +118,33 @@ export default function ResetPasswordPage() {
       {text}
     </div>
   )
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show redirect state or invalid params
+  if (!hasValidParams) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <AlertCircle className="h-8 w-8 text-red-600" />
+          <p className="text-gray-600">Invalid or missing reset parameters</p>
+          <Button onClick={() => router.push("/auth/verify-email")}>
+            Go to Verify Email
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">

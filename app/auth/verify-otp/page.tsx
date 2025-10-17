@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useDispatch, useSelector } from "react-redux"
 import { Button } from "../../../components/ui/button"
@@ -16,36 +16,50 @@ import type { RootState, AppDispatch } from "../../../lib/redux/store"
 import { Alert, AlertDescription } from "../../../components/ui/alert"
 import Image from "next/image"
 
+// Add this line to force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 export default function VerifyOTPPage() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""])
   const [resendLoading, setResendLoading] = useState(false)
   const [countdown, setCountdown] = useState(60)
   const [canResend, setCanResend] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [email, setEmail] = useState("")
+  
   const dispatch = useDispatch<AppDispatch>()
   const { loading, error } = useSelector((state: RootState) => state.auth)
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const email = searchParams?.get("email") || ""
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
   useEffect(() => {
-    if (!email) {
-      router.push("/auth/verify-email")
-      return
+    // Client-side only approach using window.location
+    if (typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search)
+      const emailParam = searchParams.get("email") || ""
+      
+      setEmail(emailParam)
+      setIsLoading(false)
+
+      if (!emailParam) {
+        toast.error("Email parameter is missing")
+        router.push("/auth/verify-email")
+        return
+      }
+
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            setCanResend(true)
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+
+      return () => clearInterval(timer)
     }
-
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          setCanResend(true)
-          return 0
-        }
-        return prev - 1
-      })
-    }, 1000)
-
-    return () => clearInterval(timer)
-  }, [email, router])
+  }, [router])
 
   const handleOtpChange = (index: number, value: string) => {
     if (value.length > 1) return
@@ -128,6 +142,33 @@ export default function VerifyOTPPage() {
     } finally {
       setResendLoading(false)
     }
+  }
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show redirect state or invalid params
+  if (!email) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <AlertCircle className="h-8 w-8 text-red-600" />
+          <p className="text-gray-600">Invalid or missing email parameter</p>
+          <Button onClick={() => router.push("/auth/verify-email")}>
+            Go to Verify Email
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   return (

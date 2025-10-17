@@ -509,8 +509,8 @@ export function UserList({ user }: PageProps) {
                               <Edit className="h-4 w-4" />
                             </Button>
                             <ConfirmDialog
-                              title={`Delete "${user.name}"`}
-                              description={`Are you sure you want to delete the user ${user.name}?`}
+                              title={"Delete User"}
+                              description={`Are you sure you want to delete the user ${user.name}? This action is irreversible and cannot be undone.`}
                               confirmText="Delete"
                               cancelText="Cancel"
                               onConfirm={() => handleDelete(user)}
@@ -617,8 +617,8 @@ export function UserList({ user }: PageProps) {
                           <Edit className="h-4 w-4" />
                         </Button>
                         <ConfirmDialog
-                          title={`Delete "${user.name}"`}
-                          description={`Are you sure you want to delete the user ${user.name}?`}
+                          title={"Delete User"}
+                          description={`Are you sure you want to delete the user ${user.name}? This action is irreversible and cannot be undone.`}
                           confirmText="Delete"
                           cancelText="Cancel"
                           onConfirm={() => handleDelete(user)}

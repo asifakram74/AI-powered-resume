@@ -29,15 +29,17 @@ A modern, full-stack application for creating professional resumes with AI optim
 2. **Environment Configuration**
    Create `.env.local` file:
    ```env
-   # Laravel API URL for authentication
-   NEXT_PUBLIC_API_URL=https://cffdcbd648f6.ngrok-free.app/api
+   # Laravel API URL for authentication on production
+   NEXT_PUBLIC_API_URL=https://backendcv.onlinetoolpot.com
    
-   # Node.js API URL for AI operations
-<<<<<<< HEAD
-   NEXT_PUBLIC_NODEJS_API_URL=http://localhost:3001/om
-=======
-   NEXT_PUBLIC_NODEJS_API_URL=http://localhost:3001//om
->>>>>>> extra-code
+   # Laravel API URL for authentication on staging
+   NEXT_PUBLIC_API_URL=https://stagingbackend.resumaic.com
+   
+   # Node.js API URL for AI operations on production
+   NEXT_PUBLIC_NODEJS_API_URL=https://backendserver.resumaic.com
+
+   # Node.js API URL for AI operations on staging
+   NEXT_PUBLIC_NODEJS_API_URL=https://stagingnode.resumaic.com
    ```
 
 3. **Development Server**
@@ -90,7 +92,7 @@ A modern, full-stack application for creating professional resumes with AI optim
    ```bash
    npm run dev
    ```
-   Backend runs on: `http://localhost:3001`
+   Backend runs on: `https://backendserver.resumaic.com`
 
 ### Production Build
 
@@ -175,8 +177,16 @@ A modern, full-stack application for creating professional resumes with AI optim
 
 1. **Update Frontend Environment** for production:
    ```env
-   NEXT_PUBLIC_API_URL=https://cffdcbd648f6.ngrok-free.app/api
-   NEXT_PUBLIC_NODEJS_API_URL=http://localhost:3001//om
+   NEXT_PUBLIC_API_URL=https://backendcv.onlinetoolpot.com/api
+
+   # Laravel API URL for authentication on staging
+   NEXT_PUBLIC_API_URL=https://stagingbackend.resumaic.com/api
+
+   # Node.js API URL for AI operations on production
+   NEXT_PUBLIC_NODEJS_API_URL=https://backendserver.resumaic.com
+
+   # Node.js API URL for AI operations on staging
+   NEXT_PUBLIC_NODEJS_API_URL=https://stagingnode.resumaic.com
    ```
 
 2. **Rebuild Frontend** with production URLs:
@@ -204,8 +214,17 @@ A modern, full-stack application for creating professional resumes with AI optim
 
 ### Frontend (.env.local)
 ```env
-NEXT_PUBLIC_API_URL=https://cffdcbd648f6.ngrok-free.app/api
-NEXT_PUBLIC_NODEJS_API_URL=http://localhost:3001//om
+# Laravel API URL for authentication on staging
+NEXT_PUBLIC_API_URL=https://backendcv.onlinetoolpot.com/api
+
+# Laravel API URL for authentication on staging
+NEXT_PUBLIC_API_URL=https://stagingbackend.resumaic.com/api
+
+# Node.js API URL for AI operations on production
+NEXT_PUBLIC_NODEJS_API_URL=https://backendserver.resumaic.com
+
+# Node.js API URL for AI operations on staging
+NEXT_PUBLIC_NODEJS_API_URL=https://stagingnode.resumaic.com
 ```
 
 ### Backend (.env)
