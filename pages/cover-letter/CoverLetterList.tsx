@@ -9,7 +9,7 @@ import { Label } from "../../components/ui/label"
 import { Textarea } from "../../components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
 import { Badge } from "../../components/ui/badge"
-import { Avatar, AvatarFallback } from "../../components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
 import { toast } from "sonner"
 import {
   Grid,
@@ -56,6 +56,7 @@ import {
   getCVs,
   type CV
 } from "../../lib/redux/service/resumeService"
+import { getAllPersonas, getPersonas, type PersonaResponse } from "../../lib/redux/service/pasonaService"
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog"
 import { PageProps } from "../../app/dashboard/page";
 import { createCheckoutSession } from "../../lib/redux/service/paymentService";
@@ -79,6 +80,7 @@ export function CoverLetterPage({ user }: PageProps) {
   const [isViewMode, setIsViewMode] = useState(false)
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
   const userId = user?.id
+  const [personaMap, setPersonaMap] = useState<Record<string, string>>({})
 
   const tones = [
     {
@@ -114,26 +116,34 @@ export function CoverLetterPage({ user }: PageProps) {
   ]
 
   useEffect(() => {
-    const fetchCVs = async () => {
+    const fetchCVsAndPersonas = async () => {
       try {
         setIsLoading(true);
 
-        let data;
-        if (user?.role?.toLowerCase() === 'admin') {
-          data = await getAllCVs();
-        } else {
-          data = await getCVs(userId?.toString() || "");
-        }
+        const isAdmin = user?.role?.toLowerCase() === 'admin';
+        const [cvData, personaList] = await Promise.all([
+          isAdmin ? getAllCVs() : getCVs(userId?.toString() || ""),
+          isAdmin ? getAllPersonas() : getPersonas(userId?.toString() || ""),
+        ]);
 
-        setCVs(data);
+        setCVs(cvData);
+
+        const map: Record<string, string> = {};
+        (personaList || []).forEach((p: any) => {
+          const id = p?.id?.toString();
+          if (id) {
+            map[id] = p.profile_picture || "";
+          }
+        });
+        setPersonaMap(map);
       } catch (error) {
-        console.error("Error fetching CVs:", error);
+        console.error("Error fetching CVs/personas:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchCVs();
+    fetchCVsAndPersonas();
   }, [userId, user?.role]);
 
   useEffect(() => {
@@ -197,7 +207,7 @@ export function CoverLetterPage({ user }: PageProps) {
       const cvContent = await getCVContentForAI(selectedCV)
 
       // Call DeepSeek AI for cover letter generation
-      console.log('Making request to:', ' http://localhost:3001/api/cover-letter-generation');
+      console.log('Making request to:', ' https://backendserver.resumaic.com/api/cover-letter-generation');
       console.log('Selected tone:', tone);
       console.log('Tone type:', typeof tone);
       
@@ -219,13 +229,13 @@ export function CoverLetterPage({ user }: PageProps) {
       console.log('Request payload size:', JSON.stringify(requestPayload).length);
 
       try {
-        const testResponse = await fetch(' http://localhost:3001/', { method: 'HEAD' });
+        const testResponse = await fetch(' https://backendserver.resumaic.com/', { method: 'HEAD' });
         console.log('Server reachable:', testResponse.ok);
       } catch (testError) {
         console.error('Server not reachable:', testError);
       }
 
-      const response = await fetch(' http://localhost:3001/api/cover-letter-generation', {
+      const response = await fetch(' https://backendserver.resumaic.com/api/cover-letter-generation', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -386,7 +396,7 @@ export function CoverLetterPage({ user }: PageProps) {
     try {
       const filename = getCoverLetterFilename(letter, format)
       
-      const response = await fetch(` http://localhost:3001/api/cover-letter-export/${format}`, {
+      const response = await fetch(` https://backendserver.resumaic.com/api/cover-letter-export/${format}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -805,6 +815,19 @@ export function CoverLetterPage({ user }: PageProps) {
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                              {(() => {
+                                const cvForLetter = cvs.find((cv) => cv.id.toString() === (letter.cv_id as any)?.toString());
+                                const imgSrc = cvForLetter ? personaMap[cvForLetter.personas_id] : "";
+                                return imgSrc ? (
+                                  <AvatarImage
+                                    src={imgSrc}
+                                    alt="Profile"
+                                    onError={(e) => {
+                                      (e.currentTarget as HTMLImageElement).src = "/placeholder-user.jpg";
+                                    }}
+                                  />
+                                ) : null;
+                              })()}
                               <AvatarFallback
                                 className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${user?.role === "admin"
                                   ? ""
@@ -931,6 +954,19 @@ export function CoverLetterPage({ user }: PageProps) {
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                          {(() => {
+                            const cvForLetter = cvs.find((cv) => cv.id.toString() === (letter.cv_id as any)?.toString());
+                            const imgSrc = cvForLetter ? personaMap[cvForLetter.personas_id] : "";
+                            return imgSrc ? (
+                              <AvatarImage
+                                src={imgSrc}
+                                alt="Profile"
+                                onError={(e) => {
+                                  (e.currentTarget as HTMLImageElement).src = "/placeholder-user.jpg";
+                                }}
+                              />
+                            ) : null;
+                          })()}
                           <AvatarFallback
                             className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${user?.role === "admin"
                               ? ""

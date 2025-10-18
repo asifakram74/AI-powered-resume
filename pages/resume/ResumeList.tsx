@@ -61,6 +61,7 @@ import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { Crown, UserCircle } from "lucide-react";
 import { PageProps } from "../../app/dashboard/page";
 import { createCheckoutSession } from "../../lib/redux/service/paymentService";
+import { getAllPersonas, getPersonas, type PersonaResponse } from "../../lib/redux/service/pasonaService";
 
 export function ResumePage({ user }: PageProps) {
   const router = useRouter();
@@ -72,28 +73,39 @@ export function ResumePage({ user }: PageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [selectedCV, setSelectedCV] = useState<CV | null>(null);
   const userId = user?.id;
+  const [personaMap, setPersonaMap] = useState<Record<string, string>>({});
+
+  // Data fetching handled in combined effect below (CVs + personas)
+
 
   useEffect(() => {
-    const fetchCVs = async () => {
+    const fetchData = async () => {
       try {
         setIsLoading(true);
+        const isAdmin = user?.role?.toLowerCase() === 'admin';
+        const [cvData, personaList] = await Promise.all([
+          isAdmin ? getAllCVs() : getCVs(userId?.toString() || ""),
+          isAdmin ? getAllPersonas() : getPersonas(userId?.toString() || ""),
+        ]);
 
-        let data;
-        if (user?.role?.toLowerCase() === 'admin') {
-          data = await getAllCVs();
-        } else {
-          data = await getCVs(userId?.toString() || "");
-        }
+        setCVs(cvData);
 
-        setCVs(data);
+        const map: Record<string, string> = {};
+        (personaList || []).forEach((p: any) => {
+          const id = p?.id?.toString();
+          if (id) {
+            map[id] = p.profile_picture || "";
+          }
+        });
+        setPersonaMap(map);
       } catch (error) {
-        console.error("Error fetching CVs:", error);
+        console.error("Error fetching CVs/personas:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchCVs();
+    fetchData();
   }, [userId, user?.role]);
 
   const handleCreateAICV = (personaId: string) => {
@@ -331,6 +343,15 @@ export function ResumePage({ user }: PageProps) {
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                              {personaMap[cv.personas_id] && (
+                                <AvatarImage
+                                  src={personaMap[cv.personas_id]}
+                                  alt="Profile"
+                                  onError={(e) => {
+                                    (e.currentTarget as HTMLImageElement).src = "/placeholder-user.jpg";
+                                  }}
+                                />
+                              )}
                               <AvatarFallback
                                 className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${user?.role === "admin"
                                   ? ""
@@ -415,6 +436,15 @@ export function ResumePage({ user }: PageProps) {
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                        {personaMap[cv.personas_id] && (
+                          <AvatarImage
+                            src={personaMap[cv.personas_id]}
+                            alt="Profile"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).src = "/placeholder-user.jpg";
+                            }}
+                          />
+                        )}
                         <AvatarFallback
                           className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${user?.role === "admin"
                             ? ""
