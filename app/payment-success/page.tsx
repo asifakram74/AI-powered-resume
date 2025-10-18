@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2, Crown, ShieldCheck, Sparkles, ArrowRight, Loader2 } from "lucide-react";
@@ -9,6 +9,28 @@ import { Separator } from "../../components/ui/separator";
 import { verifyCheckoutSession } from "../../lib/redux/service/paymentService";
 
 export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-black dark:to-gray-900">
+        <div className="max-w-3xl mx-auto px-6 py-12">
+          <Card className="shadow-xl border-0">
+            <CardHeader className="text-center space-y-3">
+              <div className="flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+              </div>
+              <CardTitle className="text-2xl">Verifying Payment</CardTitle>
+              <CardDescription>Hang tight while we verify your payment...</CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
+      </div>
+    }>
+      <PaymentSuccessContent />
+    </Suspense>
+  );
+}
+
+function PaymentSuccessContent() {
   const params = useSearchParams();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
