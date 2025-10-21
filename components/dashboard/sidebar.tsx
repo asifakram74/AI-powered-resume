@@ -272,40 +272,42 @@ export function Sidebar({
             </DropdownMenuContent>
           </DropdownMenu>
         ) : !isAdmin ? (
-          <div className="p-5 rounded-2xl bg-gradient-to-br from-green-50/80 via-white to-orange-50/30 border border-green-200/50">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2.5 rounded-xl resumaic-gradient-green shadow-lg">
-                <BarChart3 className="h-4 w-4 text-white" />
+          profile?.plan_type?.toLowerCase() !== 'pro' && (
+            <div className="p-5 rounded-2xl bg-gradient-to-br from-green-50/80 via-white to-orange-50/30 border border-green-200/50">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2.5 rounded-xl resumaic-gradient-green shadow-lg">
+                  <BarChart3 className="h-4 w-4 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-gray-900">Usage Stats</p>
+                </div>
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-bold text-gray-900">Usage Stats</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-gray-600">
-                Resumes created
-              </span>
-              {loading ? (
-                <div className="h-4 w-10 bg-gray-200 rounded animate-pulse"></div>
-              ) : (
-                <span className="text-sm font-bold">
-                  {resumeCount}/{maxResumes}
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-medium text-gray-600">
+                  Resumes created
                 </span>
-              )}
+                {loading ? (
+                  <div className="h-4 w-10 bg-gray-200 rounded animate-pulse"></div>
+                ) : (
+                  <span className="text-sm font-bold">
+                    {resumeCount}/{maxResumes}
+                  </span>
+                )}
+              </div>
+              <div className="w-full bg-gray-200/80 rounded-full h-2 shadow-inner">
+                {loading ? (
+                  <div className="h-2 rounded-full bg-gray-300 animate-pulse"></div>
+                ) : (
+                  <div
+                    className="resumaic-gradient-green h-2 rounded-full shadow-sm transition-all duration-700 ease-out"
+                    style={{ width: `${progressPercentage}%` }}
+                  ></div>
+                )}
+              </div>
             </div>
-            <div className="w-full bg-gray-200/80 rounded-full h-2 shadow-inner">
-              {loading ? (
-                <div className="h-2 rounded-full bg-gray-300 animate-pulse"></div>
-              ) : (
-                <div
-                  className="resumaic-gradient-green h-2 rounded-full shadow-sm transition-all duration-700 ease-out"
-                  style={{ width: `${progressPercentage}%` }}
-                ></div>
-              )}
-            </div>
-          </div>
+          )
         ) : null}
-
+        
         <Button
           variant="outline"
           className="w-full bg-transparent rounded-2xl border-2 border-gray-200/80 hover:border-red-300 hover:bg-red-50/50 hover:text-red-600 transition-all duration-300 transform hover:scale-[1.02] font-semibold"

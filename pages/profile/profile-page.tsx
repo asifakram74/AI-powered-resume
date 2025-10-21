@@ -206,22 +206,8 @@ export function ProfilePage() {
                   </h1>
                   
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge
-                      variant={profile.plan_type === 'Premium' ? 'default' : 'secondary'}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium ${
-                        profile.plan_type === 'Premium'
-                          ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md"
-                          : "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700"
-                      }`}
-                    >
-                      {profile.plan_type === 'Premium' ? (
-                        <>
-                          <Star className="h-4 w-4 fill-current" />
-                          <span>Premium</span>
-                        </>
-                      ) : (
-                        <span>Free Plan</span>
-                      )}
+                    <Badge className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700">
+                      <span>{profile.plan_type}</span>
                     </Badge>
 
                     {profile.status === 'verified' && (
@@ -343,15 +329,9 @@ export function ProfilePage() {
                     </Label>
                     <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                       <div className="flex items-center justify-between">
-                        <p className="text-sm sm:text-base font-medium text-gray-900 dark:text-white capitalize">
-                          {profile.plan_type || 'Free'} Plan
+                        <p className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">
+                          {profile.plan_type}
                         </p>
-                        {profile.plan_type === 'Premium' && (
-                          <Badge className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
-                            <Star className="h-3 w-3 mr-1 fill-current" />
-                            Premium
-                          </Badge>
-                        )}
                       </div>
                     </div>
                   </div>
@@ -398,7 +378,7 @@ export function ProfilePage() {
                   </div>
                 </Button>
 
-                {profile.plan_type !== 'Premium' && (
+                {profile?.plan_type?.toLowerCase() !== 'pro' && (
                   <Button
                     className="w-full justify-start h-12 resumaic-gradient-green hover:opacity-90 button-press"
                     onClick={async () => {
@@ -417,8 +397,8 @@ export function ProfilePage() {
                   >
                     <Crown className="h-4 w-4 mr-3 text-white" />
                     <div className="text-left">
-                      <p className="font-medium text-white">Upgrade to Premium</p>
-                      <p className="text-xs text-white/80">Unlock all features for $9.99/month</p>
+                      <p className="font-medium text-white">Upgrade Plan</p>
+                      <p className="text-xs text-white/80">Unlock all features</p>
                     </div>
                   </Button>
                 )}
@@ -452,7 +432,7 @@ export function ProfilePage() {
           reset({
             name: profile?.name || '',
             email: profile?.email || '',
-            // plan_type: profile?.plan_type || 'Free',
+            // plan_type: profile?.plan_type,
           });
         }
         setShowEditModal(open);
@@ -502,7 +482,7 @@ export function ProfilePage() {
 
               <div className="space-y-2">
                 <Label>Account Type</Label>
-                <Input value={profile?.plan_type || 'Free'} disabled />
+                <Input value={profile?.plan_type} disabled />
               </div>
             </div>
 
@@ -514,7 +494,7 @@ export function ProfilePage() {
                   reset({
                     name: profile?.name || '',
                     email: profile?.email || '',
-                    plan_type: profile?.plan_type || 'Free',
+                    plan_type: profile?.plan_type,
                   });
                   setShowEditModal(false);
                 }}

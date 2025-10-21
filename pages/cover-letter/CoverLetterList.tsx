@@ -81,6 +81,7 @@ export function CoverLetterPage({ user }: PageProps) {
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
   const userId = user?.id
   const [personaMap, setPersonaMap] = useState<Record<string, string>>({})
+  const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false)
 
   const tones = [
     {
@@ -282,13 +283,9 @@ export function CoverLetterPage({ user }: PageProps) {
     }
 
     // Enforce free plan limit for creating new cover letters
-    if (!editingLetter && (user as any)?.plan === 'free' && coverLetters.length >= 3) {
-      toast.error("Free plan allows only 3 cover letters. Upgrade to pro for unlimited.");
-      try {
-        await createCheckoutSession();
-      } catch (_err) {
-        // Ignore checkout errors here; UI already informed user
-      }
+    if (!editingLetter && (user as any)?.plan_type?.toLowerCase() === 'free' && coverLetters.length >= 3) {
+      toast.error("Free plan allows only 3 cover letters. Please upgrade your plan to create more.");
+      setIsUpgradeDialogOpen(true);
       return;
     }
 
@@ -500,14 +497,9 @@ export function CoverLetterPage({ user }: PageProps) {
               <Button
                 className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
                 onClick={async (e) => {
-                  if ((user as any)?.plan === 'free' && coverLetters.length >= 3) {
+                  if ((user as any)?.plan_type?.toLowerCase() === 'free' && coverLetters.length >= 3) {
                     e.preventDefault();
-                    toast.error("Free plan allows only 3 cover letters. Upgrade to pro for unlimited.");
-                    try {
-                      await createCheckoutSession();
-                    } catch (err) {
-                      console.error("Checkout error:", err);
-                    }
+                    setIsUpgradeDialogOpen(true);
                     return;
                   }
                   handleOpenNewGenerator();
@@ -748,6 +740,60 @@ export function CoverLetterPage({ user }: PageProps) {
                   </div>
                 </div>
               )}
+            </DialogContent>
+          </Dialog>
+
+          {/* Upgrade Plan Dialog */}
+          <Dialog open={isUpgradeDialogOpen} onOpenChange={setIsUpgradeDialogOpen}>
+            <DialogContent className="max-w-md p-0 overflow-hidden border-0 shadow-xl rounded-xl">
+              <div className="relative resumaic-gradient-green p-6 text-white rounded-t-xl animate-pulse-glow">
+                <div className="absolute inset-x-0 top-0 h-0.5 shimmer-effect opacity-70" />
+                <div className="flex items-center gap-3">
+                  <Crown className="h-6 w-6" />
+                  <DialogTitle className="text-lg font-semibold">Upgrade Required</DialogTitle>
+                </div>
+                <DialogDescription className="mt-2 text-sm opacity-90">
+                  You’ve reached the maximum number of cover letters for the Free plan. Upgrade your plan to create more!
+                </DialogDescription>
+                <div className="absolute -right-10 -top-10 w-32 h-32 resumaic-gradient-orange rounded-full blur-2xl opacity-30" />
+              </div>
+              <div className="p-6 space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground list-none">
+  {[
+    { color: "resumaic-gradient-green", text: "Create more cover letters" },
+    { color: "resumaic-gradient-orange", text: "Unlock extra cover letters" },
+    { color: "resumaic-gradient-blue", text: "Unlock unlimited persona slots" },
+    { color: "resumaic-gradient-purple", text: "Boost your CV with AI-powered optimization" },
+  ].map((item, i) => (
+    <div key={i} className="flex items-center gap-2 list-none">
+      <span className={`size-1.5 rounded-full ${item.color}`} />
+      <span className="list-none">{item.text}</span>
+    </div>
+  ))}
+</div>
+
+                <div className="space-y-3">
+                  <Button
+                    className="w-full resumaic-gradient-orange text-white hover:opacity-90 button-press"
+                    onClick={async () => {
+                      try {
+                        await createCheckoutSession();
+                      } catch (err) {
+                        console.error('Checkout error:', err);
+                      }
+                    }}
+                  >
+                    Upgrade Now
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full border-2 border-[#70E4A8] text-[#2d3639] hover:bg-[#70E4A8]/10"
+                    onClick={() => setIsUpgradeDialogOpen(false)}
+                  >
+                    Not Now
+                  </Button>
+                </div>
+              </div>
             </DialogContent>
           </Dialog>
         </div>

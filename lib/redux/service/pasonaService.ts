@@ -236,3 +236,22 @@ export const getPersonaProfilePicture = async (personaId: string): Promise<strin
     throw error
   }
 }
+
+// New: delete persona profile picture
+export const deletePersonaProfilePicture = async (personaId: string): Promise<void> => {
+  try {
+    await api.delete(`/personas/${personaId}/profile-picture`)
+  } catch (error) {
+    console.error(`Error deleting profile picture for persona ${personaId}:`, error)
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 404) {
+        throw new Error(`Profile picture not found for persona ${personaId}`)
+      }
+      if (error.response?.status === 500) {
+        const errorMessage = error.response?.data?.message || "Server error occurred"
+        throw new Error(`Server Error: ${errorMessage}`)
+      }
+    }
+    throw error
+  }
+}

@@ -34,6 +34,21 @@ export default function DashboardPage() {
   const [isClient, setIsClient] = useState(false)
   const { user } = useAppSelector((state) => state.auth)
   const router = useRouter()
+
+  // Load saved active page from localStorage on component mount
+  useEffect(() => {
+    const savedActivePage = localStorage.getItem('dashboardActivePage')
+    if (savedActivePage) {
+      setActivePage(savedActivePage)
+    }
+    setIsClient(true)
+  }, [])
+
+  // Save active page to localStorage whenever it changes
+  const handleSetActivePage = (page: string) => {
+    setActivePage(page)
+    localStorage.setItem('dashboardActivePage', page)
+  }
 // In your dashboard page
 useEffect(() => {
   const token = localStorage.getItem('token');
@@ -53,9 +68,6 @@ useEffect(() => {
     router.push('/auth/signin');
   }
 }, [router]);
-  useEffect(() => {
-    setIsClient(true)
-  }, [user])
 
   const isAdmin = user?.role?.toLowerCase() === "admin"
 
@@ -88,7 +100,7 @@ useEffect(() => {
         <div className="flex min-h-screen">
           <Sidebar
             activePage={activePage}
-            setActivePage={setActivePage}
+            setActivePage={handleSetActivePage}
             user={user}
           />
           <main className="flex-1 bg-gray-50 relative">

@@ -74,6 +74,7 @@ export function ResumePage({ user }: PageProps) {
   const [selectedCV, setSelectedCV] = useState<CV | null>(null);
   const userId = user?.id;
   const [personaMap, setPersonaMap] = useState<Record<string, string>>({});
+  const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
 
   // Data fetching handled in combined effect below (CVs + personas)
 
@@ -114,17 +115,11 @@ export function ResumePage({ user }: PageProps) {
 
   const handleSaveCV = async (cvData: CreateCVData) => {
     // Check CV limit for free plan users
-    if ((user as any)?.plan === 'free' && cvs.length >= 3) {
-      // e.preventDefault(); // removed: no event object in scope
-      toast.error("Free plan allows only 3 resumes. Upgrade to pro for unlimited.");
-      try {
-        await createCheckoutSession();
-      } catch (err) {
-        console.error("Checkout error:", err);
-      }
+    if ((user as any)?.plan_type?.toLowerCase() === 'free' && cvs.length >= 3) {
+      toast.error("Free plan allows only 3 resumes. Please upgrade your plan to create more.");
+      setIsUpgradeDialogOpen(true);
       return;
     }
-
     try {
       const response = await createCV(cvData);
       setCVs((prev) => [response, ...prev]);
@@ -211,14 +206,9 @@ export function ResumePage({ user }: PageProps) {
                 className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
                 onClick={async (e) => {
                   // Check CV limit for free plan users before opening dialog
-                  if ((user as any)?.plan === 'free' && cvs.length >= 3) {
+                  if ((user as any)?.plan_type?.toLowerCase() === 'free' && cvs.length >= 3) {
                     e.preventDefault();
-                    toast.error("Free plan allows only 3 resumes. Upgrade to pro for unlimited.");
-                    try {
-                      await createCheckoutSession();
-                    } catch (err) {
-                      console.error("Checkout error:", err);
-                    }
+                    setIsUpgradeDialogOpen(true);
                     return;
                   }
                   setIsDialogOpen(true);
@@ -226,11 +216,7 @@ export function ResumePage({ user }: PageProps) {
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Create Resume
-                {(user as any)?.plan === 'free' && (
-                  <Badge variant="secondary" className="ml-2 text-xs">
-                    {cvs.length}/3
-                  </Badge>
-                )}
+                
               </Button>
             </DialogTrigger>
             <DialogContent
@@ -254,6 +240,55 @@ export function ResumePage({ user }: PageProps) {
         </div>
       </div>
 
+      {/* Upgrade Plan Dialog */}
+      <Dialog open={isUpgradeDialogOpen} onOpenChange={setIsUpgradeDialogOpen}>
+        <DialogContent className="max-w-md p-0 overflow-hidden border-0 shadow-xl rounded-xl">
+          <div className="relative resumaic-gradient-green p-6 text-white rounded-t-xl animate-pulse-glow">
+            <div className="absolute inset-x-0 top-0 h-0.5 shimmer-effect opacity-70" />
+            <div className="flex items-center gap-3">
+              <Crown className="h-6 w-6" />
+              <DialogTitle className="text-lg font-semibold">Upgrade Required</DialogTitle>
+            </div>
+            <DialogDescription className="mt-2 text-sm opacity-90">
+              You’ve reached the maximum number of resumes for the Free plan. Upgrade your plan to create more!
+            </DialogDescription>
+            <div className="absolute -right-10 -top-10 w-32 h-32 resumaic-gradient-orange rounded-full blur-2xl opacity-30" />
+          </div>
+          <div className="p-6 space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <span className="size-1.5 rounded-full resumaic-gradient-green" />
+                <span>Create more resumes beyond 3</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="size-1.5 rounded-full resumaic-gradient-orange" />
+                <span>Access all premium features</span>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <Button
+                className="w-full resumaic-gradient-orange text-white hover:opacity-90 button-press"
+                onClick={async () => {
+                  try {
+                    await createCheckoutSession();
+                  } catch (err) {
+                    console.error('Checkout error:', err);
+                  }
+                }}
+              >
+                Upgrade Now
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full border-2 border-[#70E4A8] text-[#2d3639] hover:bg-[#70E4A8]/10"
+                onClick={() => setIsUpgradeDialogOpen(false)}
+              >
+                Not Now
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={isEditing} onOpenChange={setIsEditing}>
         <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">

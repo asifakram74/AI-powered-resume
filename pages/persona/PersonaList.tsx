@@ -55,6 +55,7 @@ import {
   updatePersona,
   deletePersona,
   uploadPersonaProfilePicture,
+  deletePersonaProfilePicture,
   type PersonaData,
   type PersonaResponse,
 } from "../../lib/redux/service/pasonaService";
@@ -68,6 +69,7 @@ function CreatePersonaPage({ user }: PageProps) {
   const [personas, setPersonas] = useState<CVData[]>([])
   const [viewMode, setViewMode] = useState<"grid" | "table">("table");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingPersona, setEditingPersona] = useState<CVData | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -373,20 +375,44 @@ function CreatePersonaPage({ user }: PageProps) {
 
       let response: PersonaResponse;
       if (editingPersona) {
+        // Update persona first
         response = await updatePersona(Number.parseInt(editingPersona.id), personaData);
+
+        // Then handle profile picture changes in edit flow
+        if (profilePictureFile) {
+          try {
+            const updatedResponse = await uploadPersonaProfilePicture(response.id, profilePictureFile);
+            response = updatedResponse;
+          } catch (profilePictureError) {
+            console.error("Error uploading profile picture:", profilePictureError);
+            toast("Persona updated, but failed to upload profile picture");
+          }
+        } else {
+          // Detect explicit removal: new persona has empty picture but original had one
+          const removed = !newPersona.personalInfo.profilePicture && !!editingPersona.personalInfo.profilePicture;
+          if (removed) {
+            try {
+              await deletePersonaProfilePicture(response.id);
+              // Ensure downstream state reflects deletion
+              response.profile_picture = "";
+            } catch (deleteError) {
+              console.error("Error deleting profile picture:", deleteError);
+              toast("Persona updated, but failed to delete profile picture");
+            }
+          }
+        }
       } else {
-        // Step 1: Create persona without profile picture (profilePicture will be null)
+        // Step 1: Create persona without profile picture
         console.log("Creating persona with data:", personaData);
         response = await createPersona(personaData);
         console.log("Create persona response:", response);
         
-        // Validate response has required fields
         if (!response || !response.id) {
           console.error("Invalid response from createPersona:", response);
           throw new Error("Failed to create persona: Invalid response from server");
         }
         
-        // Step 2: Upload profile picture if one exists
+        // Step 2: Upload profile picture if provided
         if (profilePictureFile) {
           try {
             console.log("Uploading profile picture for persona ID:", response.id);
@@ -522,18 +548,12 @@ function CreatePersonaPage({ user }: PageProps) {
               <Button
                 className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
                 onClick={async (e) => {
-                  if ((user as any)?.plan === "free" && personas.length >= 3) {
-                    e.preventDefault();
-                    toast.error(
-                      "Free plan allows only 3 personas. Upgrade to pro for unlimited."
-                    );
-                    try {
-                      await createCheckoutSession();
-                    } catch (err) {
-                      console.error("Checkout error:", err);
-                    }
-                    return;
-                  }
+
+                if ((user as any)?.plan_type?.toLowerCase() === "free" && personas.length >= 3) {
+                  e.preventDefault();
+                  setIsUpgradeDialogOpen(true);
+                  return;
+                }
                   setShowForm(false);
                   setPrefilledData(null);
                   setEditingPersona(null);
@@ -583,6 +603,55 @@ function CreatePersonaPage({ user }: PageProps) {
         </div>
       </div>
 
+      {/* Upgrade Plan Dialog */}
+      <Dialog open={isUpgradeDialogOpen} onOpenChange={setIsUpgradeDialogOpen}>
+        <DialogContent className="max-w-md p-0 overflow-hidden border-0 shadow-xl rounded-xl">
+          <div className="relative resumaic-gradient-green p-6 text-white rounded-t-xl animate-pulse-glow">
+            <div className="absolute inset-x-0 top-0 h-0.5 shimmer-effect opacity-70" />
+            <div className="flex items-center gap-3">
+              <Crown className="h-6 w-6" />
+              <DialogTitle className="text-lg font-semibold">Upgrade Required</DialogTitle>
+            </div>
+            <DialogDescription className="mt-2 text-sm opacity-90">
+              You’ve reached the maximum number of personas for the Free plan. Upgrade your plan to create more!
+            </DialogDescription>
+            <div className="absolute -right-10 -top-10 w-32 h-32 resumaic-gradient-orange rounded-full blur-2xl opacity-30" />
+          </div>
+          <div className="p-6 space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <span className="size-1.5 rounded-full resumaic-gradient-green" />
+                <span>Create more personas beyond 3</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="size-1.5 rounded-full resumaic-gradient-orange" />
+                <span>Faster AI generation</span>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <Button
+                className="w-full resumaic-gradient-orange text-white hover:opacity-90 button-press"
+                onClick={async () => {
+                  try {
+                    await createCheckoutSession();
+                  } catch (err) {
+                    console.error("Checkout error:", err);
+                  }
+                }}
+              >
+                Upgrade Now
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full border-2 border-[#70E4A8] text-[#2d3639] hover:bg-[#70E4A8]/10"
+                onClick={() => setIsUpgradeDialogOpen(false)}
+              >
+                Not Now
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
       {personas.length > 0 && (
         <>
           <Card>
@@ -730,7 +799,7 @@ function CreatePersonaPage({ user }: PageProps) {
                                     className="text-xs cursor-help"
                                     title={`Additional skills: ${persona.skills.technical.slice(2).join(', ')}`}
                                   >
-                                    +{persona.skills.technical.length - 2}
+                                    {'+'}{persona.skills.technical.length - 2}
                                   </Badge>
                                 )}
                             </div>
@@ -865,7 +934,7 @@ function CreatePersonaPage({ user }: PageProps) {
                         ))}
                         {persona.skills.technical.length > 4 && (
                           <Badge variant="outline" className="text-xs">
-                            +{persona.skills.technical.length - 4}
+                            {'+'}{persona.skills.technical.length - 4}
                           </Badge>
                         )}
                       </div>

@@ -214,15 +214,23 @@ export function PersonaForm({
   const handleProfilePictureChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        toast.error('Please select a valid image file');
+      const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+      const allowedExtensions = ["jpg", "jpeg", "png", "gif"];
+      const fileExt = file.name.split(".").pop()?.toLowerCase() || "";
+
+      // Validate file type by MIME and extension
+      if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExt)) {
+        toast.error("Unsupported image format. Allowed: JPG, PNG, GIF");
+        event.target.value = "";
+        setProfilePictureFile(null);
+        setProfilePicturePreview("");
         return;
       }
       
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        toast.error('File size must be less than 5MB');
+        toast.error("File size must be less than 5MB");
+        event.target.value = "";
         return;
       }
 
@@ -240,6 +248,13 @@ export function PersonaForm({
   const removeProfilePicture = () => {
     setProfilePictureFile(null);
     setProfilePicturePreview("");
+    setFormData((prev) => ({
+      ...prev,
+      personalInfo: {
+        ...prev.personalInfo,
+        profilePicture: "",
+      },
+    }));
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -700,7 +715,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*"
+                  accept=".jpg,.jpeg,.png,.gif"
                   onChange={handleProfilePictureChange}
                   className="hidden"
                 />

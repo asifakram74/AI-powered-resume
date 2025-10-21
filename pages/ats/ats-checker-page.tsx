@@ -14,6 +14,7 @@ import {
   Briefcase,
   Save,
   FileCheck,
+  Crown,
 } from "lucide-react";
 import { Textarea } from "../../components/ui/textarea";
 import { Progress } from "../../components/ui/progress";
@@ -69,6 +70,7 @@ export default function ATSCheckerPage() {
     useState<ATSAnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
   const analysisRef = useRef<HTMLDivElement>(null);
   const [isSaving, setIsSaving] = useState(false);
   const planType = useAppSelector((state) => state.auth.profile?.plan_type || state.auth.user?.plan_type);
@@ -77,13 +79,8 @@ export default function ATSCheckerPage() {
     if (open) {
       // Gate ATS checker to Pro plan users only
       if (!planType || String(planType).toLowerCase() === "free") {
-        toast.error("ATS checker is a Pro feature. Upgrade to continue.");
-        try {
-          await createCheckoutSession();
-        } catch (err) {
-          toast.error("Failed to start checkout. Please try again.");
-        }
-        return; // Prevent opening the dialog for free users
+        setIsUpgradeDialogOpen(true);
+        return; // Prevent opening the analysis dialog for free users
       }
     }
     setIsDialogOpen(open);
@@ -745,6 +742,68 @@ export default function ATSCheckerPage() {
           </CardContent>
         </Card>
       </div>
+      {/* Upgrade Dialog for Free Users */}
+      <Dialog open={isUpgradeDialogOpen} onOpenChange={setIsUpgradeDialogOpen}>
+        <DialogContent className="sm:max-w-[520px] border-0 shadow-2xl overflow-hidden">
+          <div className="relative">
+            <div className="absolute -top-20 -left-20 w-64 h-64 rounded-full blur-3xl opacity-30" />
+            <Card className="border-0">
+              <CardHeader className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl resumaic-gradient-green flex items-center justify-center text-white shadow-md">
+                    <Crown className="h-5 w-5" />
+                  </div>
+                  <DialogTitle className="text-2xl font-bold text-[#1F2937]">
+                    Upgrade to Pro
+                  </DialogTitle>
+                </div>
+                <DialogDescription className="text-[#4B5563]">
+                  ATS checker is a Pro feature. Upgrade to unlock ATS score analysis and more.
+                </DialogDescription>
+              </CardHeader>
+
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="p-3 rounded-lg bg-[#70E4A8]/10">
+                    <p className="text-sm font-medium text-[#2D3639]">Unlimited ATS analyses</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-[#EA580C]/10">
+                    <p className="text-sm font-medium text-[#2D3639]">Priority scoring engine</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-blue-100">
+                    <p className="text-sm font-medium text-[#2D3639]">Advanced suggestions</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-purple-100">
+                    <p className="text-sm font-medium text-[#2D3639]">Keyword matching</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <Button
+                    className="flex-1 resumaic-gradient-orange hover:opacity-90 hover-lift button-press text-white"
+                    onClick={async () => {
+                      try {
+                        await createCheckoutSession();
+                      } catch (err) {
+                        toast.error("Failed to start checkout. Please try again.");
+                      }
+                    }}
+                  >
+                    Upgrade Now
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-[#70E4A8] text-[#2D3639]"
+                    onClick={() => setIsUpgradeDialogOpen(false)}
+                  >
+                    Not Now
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
