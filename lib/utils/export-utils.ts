@@ -3,83 +3,6 @@
  */
 
 
-
-// PDF Export using browser print API
-export const exportToPDF = async (elementId: string, filename: string = 'cv.pdf') => {
-  try {
-    const element = document.getElementById(elementId)
-    if (!element) {
-      throw new Error('Element not found')
-    }
-
-    // Create a new window with the CV content
-    const printWindow = window.open('', '_blank')
-    if (!printWindow) {
-      throw new Error('Failed to open print window')
-    }
-
-    // Clone the content and styles
-    const clonedContent = element.cloneNode(true) as HTMLElement
-    
-    // Get all styles
-    const styles = Array.from(document.styleSheets)
-      .map(sheet => {
-        try {
-          return Array.from(sheet.cssRules)
-            .map(rule => rule.cssText)
-            .join('\n')
-        } catch (e) {
-          return ''
-        }
-      })
-      .join('\n')
-
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <title>CV Export</title>
-          <style>
-            ${styles}
-            body { 
-              margin: 0; 
-              padding: 20px; 
-              font-family: Arial, sans-serif;
-              background: white;
-            }
-            @media print {
-              body { 
-                margin: 0; 
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
-            }
-          </style>
-        </head>
-        <body>
-          ${clonedContent.innerHTML}
-        </body>
-      </html>
-    `
-
-    printWindow.document.write(htmlContent)
-    printWindow.document.close()
-
-    // Trigger print dialog
-    setTimeout(() => {
-      printWindow.print()
-      printWindow.close()
-    }, 500)
-
-    return { success: true, message: 'PDF export initiated' }
-  } catch (error) {
-    console.error('PDF export error:', error)
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred during PDF export'
-    return { success: false, error: errorMessage }
-  }
-}
-
 // PNG Export using html2canvas (would need to be installed)
 export const exportToPNG = async (elementId: string, filename: string = 'cv.png') => {
   try {
@@ -99,17 +22,17 @@ export const exportToPNG = async (elementId: string, filename: string = 'cv.png'
 // DOCX Export using server API
 export const exportToDOCX = async (htmlContent: string, filename: string = 'cv.docx') => {
   try {
-    console.log('Making request to:', ' https://backendserver.resumaic.com/api/export-docx');
+    console.log('Making request to:', '  https://backendserver.resumaic.com/api/export-docx');
     console.log('Request payload size:', JSON.stringify({ html: htmlContent }).length);
     
     try {
-      const testResponse = await fetch(' https://backendserver.resumaic.com', { method: 'HEAD' });
+      const testResponse = await fetch('  https://backendserver.resumaic.com', { method: 'HEAD' });
       console.log('Server reachable:', testResponse.ok);
     } catch (testError) {
       console.error('Server not reachable:', testError);
     }
     
-    const response = await fetch(' https://backendserver.resumaic.com/api/export-docx', {
+    const response = await fetch('  https://backendserver.resumaic.com/api/export-docx', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -146,6 +69,44 @@ export const getCVHTMLContent = (elementId: string): string => {
   return element.outerHTML
 }
 
+// New: Wrap inner HTML with Tailwind and inline styles for Browserless
+export const wrapHtmlWithStyles = (innerHTML: string): string => {
+  // Collect accessible styles from the current page (best-effort)
+  const inlineStyles = Array.from(document.styleSheets)
+    .map(sheet => {
+      try {
+        return Array.from((sheet as CSSStyleSheet).cssRules)
+          .map(rule => rule.cssText)
+          .join('\n')
+      } catch {
+        return ''
+      }
+    })
+    .join('\n')
+
+  const googleFonts = `
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  `
+
+  // Use Tailwind CDN so classes render when Browserless loads this HTML
+  return `<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CV Export</title>
+    ${googleFonts}
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+  </head>
+  <body class="bg-white m-0 p-0">
+    <div id="cv-export-root" class="m-0 p-0">${innerHTML}</div>
+  </body>
+</html>`
+}
+
 // Download helper
 export const downloadFile = (content: string, filename: string, mimeType: string) => {
   const blob = new Blob([content], { type: mimeType })
@@ -157,4 +118,104 @@ export const downloadFile = (content: string, filename: string, mimeType: string
   link.click()
   document.body.removeChild(link)
   URL.revokeObjectURL(url)
+}
+
+// ===== Browserless.io Export Utilities =====
+const BROWSERLESS_TOKEN = process.env.NEXT_PUBLIC_BROWSERLESS_TOKEN || ''
+const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_BASE_URL || ' https://backendserver.resumaic.com'
+
+export const exportToPDFViaBrowserless = async (
+  htmlContent: string,
+  filename: string = 'cv.pdf',
+  _token: string = BROWSERLESS_TOKEN
+) => {
+  try {
+    const endpoint = `${BACKEND_BASE_URL}/api/cv-export/pdf`
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ html: htmlContent, filename }),
+    })
+
+    if (!response.ok) {
+      const text = await response.text()
+      throw new Error(`Backend PDF error: ${response.status} ${text}`)
+    }
+
+    const buffer = await response.arrayBuffer()
+    const blob = new Blob([buffer], { type: 'application/pdf' })
+
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+
+    return { success: true }
+  } catch (error) {
+    console.error('Backend PDF export error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error during Backend PDF export'
+    return { success: false, error: errorMessage }
+  }
+}
+
+export const exportToPNGViaBrowserless = async (
+  htmlContent: string,
+  filename: string = 'cv.png',
+  _token: string = BROWSERLESS_TOKEN
+) => {
+  try {
+    const endpoint = `${BACKEND_BASE_URL}/api/cv-export/png`
+
+    const payload = {
+      html: htmlContent,
+      filename,
+      options: {
+        type: 'png',
+        fullPage: true,
+        omitBackground: false,
+      },
+      viewport: {
+        width: 1240,
+        height: 1754,
+        deviceScaleFactor: 2,
+      },
+    }
+
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+
+    if (!response.ok) {
+      const text = await response.text()
+      throw new Error(`Backend PNG error: ${response.status} ${text}`)
+    }
+
+    const buffer = await response.arrayBuffer()
+    const blob = new Blob([buffer], { type: 'image/png' })
+
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+
+    return { success: true }
+  } catch (error) {
+    console.error('Backend PNG export error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error during Backend PNG export'
+    return { success: false, error: errorMessage }
+  }
 }

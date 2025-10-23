@@ -25,6 +25,7 @@ import { CVPageLoading } from "./cv-page-loading"
 import { CVHeaderActions } from "./cv-header-actions"
 import { CVTemplateSelector } from "./cv-template-selector"
 import { CVPreviewSection } from "./cv-preview-section"
+import { exportToPDFViaBrowserless, exportToPNGViaBrowserless, wrapHtmlWithStyles } from "@/lib/utils/export-utils"
 
 interface OptimizedCV {
   personalInfo: {
@@ -413,18 +414,18 @@ export function CVPageClientContent() {
         if (!cvId) {
           const personaText = convertPersonaToText(personaData)
 
-          console.log("Making request to:", " https://backendserver.resumaic.com/api/optimize-cv")
+          console.log("Making request to:", "  https://backendserver.resumaic.com/api/optimize-cv")
           console.log("Request payload size:", JSON.stringify({ extractedText: personaText }).length)
 
           try {
-            const testResponse = await fetch(" https://backendserver.resumaic.com/", { method: "HEAD" })
+            const testResponse = await fetch("  https://backendserver.resumaic.com/", { method: "HEAD" })
 
             console.log("Server reachable:", testResponse.ok)
           } catch (testError) {
             console.error("Server not reachable:", testError)
           }
 
-          const response = await fetch(" https://backendserver.resumaic.com/api/optimize-cv", {
+          const response = await fetch("  https://backendserver.resumaic.com/api/optimize-cv", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -628,17 +629,17 @@ export function CVPageClientContent() {
     try {
       const personaText = convertPersonaToText(persona)
 
-      console.log("Making request to:", " https://backendserver.resumaic.com/api/optimize-cv")
+      console.log("Making request to:", "  https://backendserver.resumaic.com/api/optimize-cv")
       console.log("Request payload size:", JSON.stringify({ extractedText: personaText }).length)
 
       try {
-        const testResponse = await fetch(" https://backendserver.resumaic.com", { method: "HEAD" })
+        const testResponse = await fetch("  https://backendserver.resumaic.com", { method: "HEAD" })
         console.log("Server reachable:", testResponse.ok)
       } catch (testError) {
         console.error("Server not reachable:", testError)
       }
 
-      const response = await fetch(" https://backendserver.resumaic.com/api/optimize-cv", {
+      const response = await fetch("  https://backendserver.resumaic.com/api/optimize-cv", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -689,52 +690,34 @@ export function CVPageClientContent() {
       )
 
       try {
-        // Get HTML content and CV data for backend processing
-        const htmlContent = cvElement.outerHTML
-        const cvData = aiResponse?.optimizedCV
+        const htmlContent = wrapHtmlWithStyles(cvElement.outerHTML)
         const filename = `${persona?.full_name || "resume"}-cv.${format}`
 
-        // Call the new backend API
-        const response = await fetch(` https://backendserver.resumaic.com/api/cv-export/${format}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            html: htmlContent,
-            cvData: cvData,
-            filename: filename,
-            options:
-              format === "pdf"
-                ? {
-                    format: "A4",
-                    printBackground: true,
-                  }
-                : format === "png"
-                  ? {
-                      type: "png",
-                      fullPage: true,
-                      omitBackground: false,
-                    }
-                  : {},
-          }),
-        })
-
-        if (!response.ok) {
-          const errorData = await response.json()
-          throw new Error(errorData.error || `Failed to export ${format.toUpperCase()}`)
+        if (format === "pdf") {
+          await exportToPDFViaBrowserless(htmlContent, filename)
+        } else if (format === "png") {
+          await exportToPNGViaBrowserless(htmlContent, filename)
+        } else if (format === "docx") {
+          // Keep existing DOCX export flow via backend
+          const response = await fetch(`  https://backendserver.resumaic.com/api/cv-export/docx`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ html: htmlContent, filename }),
+          })
+          if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.error || `Failed to export ${format.toUpperCase()}`)
+          }
+          const blob = await response.blob()
+          const url = URL.createObjectURL(blob)
+          const link = document.createElement("a")
+          link.href = url
+          link.download = filename
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+          URL.revokeObjectURL(url)
         }
-
-        // Get the file as blob and download it
-        const blob = await response.blob()
-        const url = URL.createObjectURL(blob)
-        const link = document.createElement("a")
-        link.href = url
-        link.download = filename
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        URL.revokeObjectURL(url)
 
         toast.dismiss(loadingToastId)
         showSuccessToast(
