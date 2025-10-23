@@ -26,12 +26,13 @@ export function ModernTemplate9({ data, isPreview = false }: ModernTemplate9Prop
           }
           .print\\:break-inside-avoid {
             break-inside: avoid;
+            page-break-inside: avoid;
           }
         }
       `}</style>
 
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-blue-100 to-blue-200 p-8 mb-8">
+      <div className="bg-gradient-to-r from-blue-100 to-blue-200 p-8 mb-8 print:break-inside-avoid">
         <div className="flex items-center space-x-8">
           {/* Profile Picture */}
           <div className="flex-shrink-0">
@@ -64,9 +65,9 @@ export function ModernTemplate9({ data, isPreview = false }: ModernTemplate9Prop
         </div>
       </div>
 
-      <div className="flex px-8 space-x-8">
+      <div className="flex px-8 space-x-8 print:break-inside-avoid">
         {/* Left Sidebar */}
-        <div className="w-1/3 space-y-8">
+        <div className="w-1/3 space-y-8 print:break-inside-avoid">
           {/* Contact */}
           <div className="bg-blue-100 rounded-2xl p-6 print:break-inside-avoid">
             <h2 className="text-xl font-bold mb-4 text-slate-700 border-b-2 border-slate-700 pb-2">CONTACT</h2>
@@ -139,7 +140,7 @@ export function ModernTemplate9({ data, isPreview = false }: ModernTemplate9Prop
               <h2 className="text-xl font-bold mb-4 text-slate-700 border-b-2 border-slate-700 pb-2">LANGUAGES</h2>
               <div className="space-y-2 text-sm text-slate-700">
                 {data.languages.map((lang) => (
-                  <div key={lang.id} className="flex justify-between">
+                  <div key={lang.id} className="flex justify-between print:break-inside-avoid">
                     <span>{lang.name}</span>
                     <span className="text-slate-600">{lang.proficiency}</span>
                   </div>
@@ -153,7 +154,7 @@ export function ModernTemplate9({ data, isPreview = false }: ModernTemplate9Prop
             <h2 className="text-xl font-bold mb-4 text-slate-700 border-b-2 border-slate-700 pb-2">EDUCATION</h2>
             <div className="space-y-4 text-sm text-slate-700">
               {data.education.map((edu) => (
-                <div key={edu.id}>
+                <div key={edu.id} className="print:break-inside-avoid">
                   <h3 className="font-semibold">{edu.degree}</h3>
                   <p className="text-slate-600">{edu.institutionName}</p>
                   {edu.location && (
@@ -190,7 +191,7 @@ export function ModernTemplate9({ data, isPreview = false }: ModernTemplate9Prop
         </div>
 
         {/* Right Content */}
-        <div className="flex-1 space-y-8">
+        <div className="flex-1 space-y-8 print:break-inside-avoid">
           {/* Profile Section */}
           <div className="print:break-inside-avoid">
             <div className="flex items-center mb-4">

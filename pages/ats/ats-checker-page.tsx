@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import {
@@ -74,15 +74,18 @@ export default function ATSCheckerPage() {
   const analysisRef = useRef<HTMLDivElement>(null);
   const [isSaving, setIsSaving] = useState(false);
   const planType = useAppSelector((state) => state.auth.profile?.plan_type || state.auth.user?.plan_type);
+  const [freeChecksUsed, setFreeChecksUsed] = useState<number>(0);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const countRaw = window.localStorage.getItem("atsChecksUsed");
+      const count = countRaw ? Number(countRaw) : 0;
+      setFreeChecksUsed(Number.isNaN(count) ? 0 : count);
+    }
+  }, []);
 
   const handleDialogOpenChange = async (open: boolean) => {
-    if (open) {
-      // Gate ATS checker to Pro plan users only
-      if (!planType || String(planType).toLowerCase() === "free") {
-        setIsUpgradeDialogOpen(true);
-        return; // Prevent opening the analysis dialog for free users
-      }
-    }
+    // Allow free users to open the dialog; gating happens on analyze after 3 checks
     setIsDialogOpen(open);
   };
 
@@ -92,18 +95,24 @@ export default function ATSCheckerPage() {
       return;
     }
 
+    const isFree = !planType || String(planType).toLowerCase() === "free";
+    if (isFree && freeChecksUsed >= 3) {
+      setIsUpgradeDialogOpen(true);
+      return;
+    }
+
     setIsAnalyzing(true);
     setError(null);
-    console.log('Making request to:', '  https://backendserver.resumaic.com/api/ats-analysis');
+    console.log('Making request to:', '  http://localhost:3001/api/ats-analysis');
     console.log('Request payload size:', JSON.stringify({ extractedText, jobDescription }).length);
     try {
-      const testResponse = await fetch('  https://backendserver.resumaic.com', { method: 'HEAD' });
+      const testResponse = await fetch('  http://localhost:3001', { method: 'HEAD' });
       console.log('Server reachable:', testResponse.ok);
     } catch (testError) {
       console.error('Server not reachable:', testError);
     }
     try {
-      const response = await fetch('  https://backendserver.resumaic.com/api/ats-analysis', {
+      const response = await fetch('  http://localhost:3001/api/ats-analysis', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -132,6 +141,15 @@ export default function ATSCheckerPage() {
       }
 
       setAnalysisResult(data);
+
+      // Increment free usage after successful analysis
+      if (isFree) {
+        const newCount = freeChecksUsed + 1;
+        setFreeChecksUsed(newCount);
+        if (typeof window !== "undefined") {
+          window.localStorage.setItem("atsChecksUsed", String(newCount));
+        }
+      }
     } catch (err: any) {
       console.error("ATS Analysis Error:", err);
       setError(
@@ -474,7 +492,7 @@ export default function ATSCheckerPage() {
                     )}
 
                     {/* Analyze Button */}
-                    <div className="flex justify-center">
+                    <div className="flex flex-col items-center">
                       <Button
                         onClick={handleAnalyze}
                         disabled={!extractedText || !jobDescription.trim() || isAnalyzing}
@@ -493,6 +511,11 @@ export default function ATSCheckerPage() {
                           </>
                         )}
                       </Button>
+                      {(!planType || String(planType).toLowerCase() === "free") && (
+                        <p className="text-sm text-gray-500 mt-2">
+                          Free checks remaining: {Math.max(0, 3 - freeChecksUsed)} of 3
+                        </p>
+                      )}
                     </div>
                   </div>
                 ) : (
@@ -758,7 +781,7 @@ export default function ATSCheckerPage() {
                   </DialogTitle>
                 </div>
                 <DialogDescription className="text-[#4B5563]">
-                  ATS checker is a Pro feature. Upgrade to unlock ATS score analysis and more.
+                  You have reached the limit of 3 free ATS checks. Upgrade to Pro for unlimited analyses and advanced insights.
                 </DialogDescription>
               </CardHeader>
 

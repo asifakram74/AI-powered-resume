@@ -49,15 +49,18 @@ export function ModernTemplate({
           .print\\:break-after-avoid {
             break-after: avoid;
           }
+          .print\\:page-start-pad {
+            padding-top: 0.3in;
+          }
         }
       `}</style>
 
       {/* Sidebar */}
-      <div className="w-1/3 bg-slate-800 text-white p-8 print:break-inside-avoid">
+      <div className="w-1/3 bg-slate-800 text-white p-8">
         <div className="space-y-8">
           {/* Profile Picture */}
           {data.personalInfo.profilePicture && (
-            <div className="text-center print:break-inside-avoid">
+            <div className="text-center print:break-inside-avoid print:page-start-pad">
               <img
                 src={data.personalInfo.profilePicture || "/placeholder.svg"}
                 alt={data.personalInfo.fullName}
@@ -156,11 +159,11 @@ export function ModernTemplate({
           )}
 
           {/* Education */}
-          <div className="print:break-inside-avoid">
+          <div>
             <h2 className="text-xl font-bold mb-4 text-blue-300">Education</h2>
             <div className="space-y-4">
               {data.education.map((edu) => (
-                <div key={edu.id} className="text-sm print:break-inside-avoid">
+                <div key={edu.id} className="text-sm print:break-inside-avoid print:page-start-pad">
                   <h3 className="font-semibold">{edu.degree}</h3>
                   <p className="text-blue-200">{edu.institutionName}</p>
                   {edu.location && (
@@ -207,7 +210,7 @@ export function ModernTemplate({
       <div className="flex-1 p-8">
         <div className="space-y-8">
           {/* Header */}
-          <div className="border-b border-gray-200 pb-6 mb-8 print:break-inside-avoid">
+          <div className="border-b border-gray-200 pb-6 mb-8 print:break-inside-avoid print:page-start-pad">
             <h1 className="text-4xl font-bold text-gray-900 mb-2">
               {data.personalInfo.fullName}
             </h1>
@@ -220,15 +223,15 @@ export function ModernTemplate({
           </div>
 
           {/* Experience */}
-          <div className="print:break-inside-avoid">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 pt-5  ">
               Experience
             </h2>
             <div className="space-y-6">
               {data.experience.map((exp, index) => (
                 <div
                   key={exp.id}
-                  className="border-l-4 border-blue-500 pl-6 print:break-inside-avoid"
+                  className="border-l-4 border-blue-500 pl-6 print:break-inside-avoid print:mt-4 print:page-start-pad"
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div>
@@ -262,15 +265,15 @@ export function ModernTemplate({
 
           {/* Projects */}
           {data.projects.length > 0 && (
-            <div className="print:break-inside-avoid">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 pt-5  ">
                 Projects
               </h2>
               <div className="space-y-6">
                 {data.projects.map((project) => (
                   <div
                     key={project.id}
-                    className="border rounded-lg p-4 print:break-inside-avoid"
+                    className="border rounded-lg p-4 print:break-inside-avoid print:mt-4 print:page-start-pad"
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div>
@@ -323,7 +326,7 @@ export function ModernTemplate({
 
           {/* Certifications */}
           {data.certifications.length > 0 && (
-            <div className="print:break-inside-avoid">
+            <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
                 Certifications & Awards
               </h2>
@@ -331,7 +334,7 @@ export function ModernTemplate({
                 {data.certifications.map((cert) => (
                   <div
                     key={cert.id}
-                    className="flex justify-between items-center print:break-inside-avoid"
+                    className="flex justify-between items-center print:break-inside-avoid print:mt-4 print:page-start-pad"
                   >
                     <div>
                       <h3 className="font-semibold text-gray-900">

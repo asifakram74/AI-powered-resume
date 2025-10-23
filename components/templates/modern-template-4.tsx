@@ -17,23 +17,7 @@ export function ModernTemplate4({ data, isPreview = false }: ModernTemplate4Prop
 
   return (
     <div className="flex min-h-screen bg-white print:min-h-0 print:shadow-none">
-      <style jsx global>{`
-        @media print {
-          @page {
-            size: A4;
-            margin: 0.5in;
-          }
-          .print\\:break-inside-avoid {
-            break-inside: avoid;
-          }
-          .print\\:break-before-page {
-            break-before: page;
-          }
-          .print\\:break-after-avoid {
-            break-after: avoid;
-          }
-        }
-      `}</style>
+   
 
       <div className="w-full max-w-5xl mx-auto bg-gray-50 font-sans">
         {/* Modern floating header */}

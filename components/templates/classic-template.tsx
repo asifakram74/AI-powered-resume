@@ -70,7 +70,7 @@ export function ClassicTemplate({
 
       {/* Summary */}
       <div className="mb-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-3 border-b border-gray-300 pb-1">
+        <h2 className="text-xl font-bold text-gray-900 mb-3  border-gray-300 pb-1">
           PROFESSIONAL SUMMARY
         </h2>
         <p className="text-gray-700 leading-relaxed">
@@ -80,7 +80,7 @@ export function ClassicTemplate({
 
       {/* Experience */}
       <div className="mb-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-4 border-b border-gray-300 pb-1">
+        <h2 className="text-xl font-bold text-gray-900 mb-4 border-gray-300 pb-1">
           PROFESSIONAL EXPERIENCE
         </h2>
         <div className="space-y-6">
@@ -115,7 +115,7 @@ export function ClassicTemplate({
 
       {/* Education */}
       <div className="mb-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-4 border-b border-gray-300 pb-1">
+        <h2 className="text-xl font-bold text-gray-900 mb-4 border-gray-300 pb-1">
           EDUCATION
         </h2>
         <div className="space-y-4">
@@ -147,7 +147,7 @@ export function ClassicTemplate({
 
       {/* Skills */}
       <div className="mb-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-4 border-b border-gray-300 pb-1">
+        <h2 className="text-xl font-bold text-gray-900 mb-4 border-gray-300 pb-1">
           SKILLS
         </h2>
         <div className="space-y-3">
@@ -175,7 +175,7 @@ export function ClassicTemplate({
       {/* Languages */}
       {data.languages.length > 0 && (
         <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-4 border-b border-gray-300 pb-1">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 border-gray-300 pb-1">
             LANGUAGES
           </h2>
           <div className="space-y-2">
@@ -194,7 +194,7 @@ export function ClassicTemplate({
       {/* Projects */}
       {data.projects.length > 0 && (
         <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-4 border-b border-gray-300 pb-1">
+          <h2 className="text-xl font-bold text-gray-900 mb-4  border-gray-300 pb-1">
             PROJECTS
           </h2>
           <div className="space-y-4">
@@ -245,7 +245,7 @@ export function ClassicTemplate({
       {/* Certifications */}
       {data.certifications.length > 0 && (
         <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-4 border-b border-gray-300 pb-1">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 border-gray-300 pb-1">
             CERTIFICATIONS & AWARDS
           </h2>
           <div className="space-y-2">
@@ -285,7 +285,7 @@ export function ClassicTemplate({
       {/* Interests */}
       {data.additional.interests.length > 0 && (
         <div>
-          <h2 className="text-xl font-bold text-gray-900 mb-4 border-b border-gray-300 pb-1">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 border-gray-300 pb-1">
             INTERESTS & HOBBIES
           </h2>
           <p className="text-gray-700">

@@ -43,31 +43,31 @@ const templates: CVTemplate[] = [
     description: "Traditional format ideal for conservative industries",
     category: "classic",
   },
-  {
-    id: "creative",
-    name: "Creative Designer",
-    description: "Eye-catching design for creative professionals",
-    category: "creative",
-  },
-  {
-    id: "minimal",
-    name: "Minimal Clean",
-    description: "Simple, clean layout focusing on content",
-    category: "minimal",
-  },
-  // New templates
-  {
-    id: "classic-2",
-    name: "Classic Traditional 2",
-    description: "An updated classic format for conservative industries",
-    category: "classic",
-  },
-  {
-    id: "classic-3",
-    name: "Classic Traditional 3",
-    description: "Another variation of the classic format",
-    category: "classic",
-  },
+  // {
+  //   id: "creative",
+  //   name: "Creative Designer",
+  //   description: "Eye-catching design for creative professionals",
+  //   category: "creative",
+  // },
+  // {
+  //   id: "minimal",
+  //   name: "Minimal Clean",
+  //   description: "Simple, clean layout focusing on content",
+  //   category: "minimal",
+  // },
+  // // New templates
+  // {
+  //   id: "classic-2",
+  //   name: "Classic Traditional 2",
+  //   description: "An updated classic format for conservative industries",
+  //   category: "classic",
+  // },
+  // {
+  //   id: "classic-3",
+  //   name: "Classic Traditional 3",
+  //   description: "Another variation of the classic format",
+  //   category: "classic",
+  // },
   // {
   //   id: "creative-2",
   //   name: "Creative Designer 2",
@@ -105,30 +105,30 @@ const templates: CVTemplate[] = [
   //   category: "modern",
   // },
   // New template 4 versions
-  {
-    id: "classic-4",
-    name: "Classic Traditional 4",
-    description: "Premium classic format with enhanced layout",
-    category: "classic",
-  },
-  {
-    id: "minimal-4",
-    name: "Minimal Clean 4",
-    description: "Ultra-clean minimal design focusing on content",
-    category: "minimal",
-  },
-  {
-    id: "modern-4",
-    name: "Modern Professional 4",
-    description: "Advanced modern design for professionals",
-    category: "modern",
-  },
-  {
-    id: "creative-4",
-    name: "Creative Designer 4",
-    description: "Premium creative design for professionals",
-    category: "creative",
-  },
+  // {
+  //   id: "classic-4",
+  //   name: "Classic Traditional 4",
+  //   description: "Premium classic format with enhanced layout",
+  //   category: "classic",
+  // },
+  // {
+  //   id: "minimal-4",
+  //   name: "Minimal Clean 4",
+  //   description: "Ultra-clean minimal design focusing on content",
+  //   category: "minimal",
+  // },
+  // {
+  //   id: "modern-4",
+  //   name: "Modern Professional 4",
+  //   description: "Advanced modern design for professionals",
+  //   category: "modern",
+  // },
+  // {
+  //   id: "creative-4",
+  //   name: "Creative Designer 4",
+  //   description: "Premium creative design for professionals",
+  //   category: "creative",
+  // },
   {
     id: "modern-5",
     name: "Modern JAY",

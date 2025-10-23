@@ -230,7 +230,7 @@ export function Sidebar({
                       {item.label}
                     </span>
                   </div>
-                  {item.badge && (
+                  {item.badge && !(item.id === "ats-checker" && profile?.plan_type?.toLowerCase() === "pro") && (
                     <Badge
                       className={`text-xs px-3 py-1 font-bold rounded-full ${item.badgeColor || "bg-gray-100 text-gray-700"}`}
                     >
@@ -265,10 +265,10 @@ export function Sidebar({
                 <FileText className="mr-2 h-4 w-4" />
                 <span>DOCX</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={onExportPNG} className="rounded-xl">
+              {/* <DropdownMenuItem onClick={onExportPNG} className="rounded-xl">
                 <FileText className="mr-2 h-4 w-4" />
                 <span>PNG</span>
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
             </DropdownMenuContent>
           </DropdownMenu>
         ) : !isAdmin ? (
