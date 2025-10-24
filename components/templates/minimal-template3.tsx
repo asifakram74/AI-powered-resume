@@ -6,11 +6,36 @@ interface MinimalTemplate3Props {
 }
 
 export function MinimalTemplate3({ data, isPreview = false }: MinimalTemplate3Props) {
-  const formatDate = (date: string) => {
-    if (!date) return ""
-    const [year, month] = date.split("-")
-    return `${year}`
+const formatDate = (date: string) => {
+  if (!date) return "";
+  const monthNames = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  ];
+  
+  // ISO patterns: YYYY-MM or YYYY-MM-DD
+  const isoMatch = /^(\d{4})-(\d{1,2})(?:-\d{1,2})?$/.exec(date);
+  if (isoMatch) {
+    const year = isoMatch[1];
+    const month = Math.max(1, Math.min(12, Number.parseInt(isoMatch[2], 10)));
+    return `${monthNames[month - 1]} ${year}`;
   }
+  
+  // Slash pattern: MM/YYYY
+  const slashMatch = /^(\d{1,2})\/(\d{4})$/.exec(date);
+  if (slashMatch) {
+    const month = Math.max(1, Math.min(12, Number.parseInt(slashMatch[1], 10)));
+    const year = slashMatch[2];
+    return `${monthNames[month - 1]} ${year}`;
+  }
+  
+  // Already formatted like "Jan 2020"
+  const monTextMatch = /^([A-Za-z]{3,})\s+(\d{4})$/.exec(date);
+  if (monTextMatch) return date;
+  
+  // Fallback: return raw string
+  return date;
+};
 
   return (
     <div className="max-w-full mx-auto bg-white p-16 min-h-screen">

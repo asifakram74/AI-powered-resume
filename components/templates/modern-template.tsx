@@ -14,7 +14,6 @@ export function ModernTemplate({
 }: ModernTemplateProps) {
   const formatDate = (date: string) => {
     if (!date) return "";
-    const [year, month] = date.split("-");
     const monthNames = [
       "Jan",
       "Feb",
@@ -29,7 +28,25 @@ export function ModernTemplate({
       "Nov",
       "Dec",
     ];
-    return `${monthNames[Number.parseInt(month) - 1]} ${year}`;
+    // ISO patterns: YYYY-MM or YYYY-MM-DD
+    const isoMatch = /^(\d{4})-(\d{1,2})(?:-\d{1,2})?$/.exec(date);
+    if (isoMatch) {
+      const year = isoMatch[1];
+      const month = Math.max(1, Math.min(12, Number.parseInt(isoMatch[2], 10)));
+      return `${monthNames[month - 1]} ${year}`;
+    }
+    // Slash pattern: MM/YYYY
+    const slashMatch = /^(\d{1,2})\/(\d{4})$/.exec(date);
+    if (slashMatch) {
+      const month = Math.max(1, Math.min(12, Number.parseInt(slashMatch[1], 10)));
+      const year = slashMatch[2];
+      return `${monthNames[month - 1]} ${year}`;
+    }
+    // Already formatted like "Jan 2020"
+    const monTextMatch = /^([A-Za-z]{3,})\s+(\d{4})$/.exec(date);
+    if (monTextMatch) return date;
+    // Fallback: return raw string
+    return date;
   };
 
   return (
@@ -245,10 +262,13 @@ export function ModernTemplate({
                         <p className="text-gray-500 text-sm">{exp.location}</p>
                       )}
                     </div>
-                    <span className="text-gray-500 text-sm">
-                      {formatDate(exp.startDate)} -{" "}
-                      {exp.current ? "Present" : formatDate(exp.endDate)}
-                    </span>
+                    {(formatDate(exp.startDate) || exp.current || formatDate(exp.endDate)) && (
+                      <span className="text-gray-500 text-sm">
+                        {formatDate(exp.startDate)}
+                        {(formatDate(exp.startDate) && (exp.current || formatDate(exp.endDate))) ? " - " : ""}
+                        {exp.current ? "Present" : formatDate(exp.endDate)}
+                      </span>
+                    )}
                   </div>
                   <ul className="text-gray-700 leading-relaxed space-y-1">
                     {exp.responsibilities.map((resp, index) => (

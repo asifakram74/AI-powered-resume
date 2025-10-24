@@ -11,7 +11,15 @@ export function ClassicTemplate({
 }: ClassicTemplateProps) {
   const formatDate = (date: string) => {
     if (!date) return "";
-    const [year, month] = date.split("-");
+    const s = date.trim();
+    if (!s) return "";
+
+    // Normalize dash types
+    const normalized = s.replace(/[\u2012-\u2015\u2212]/g, "-");
+
+    // Year-only: 2021
+    if (/^\d{4}$/.test(normalized)) return normalized;
+
     const monthNames = [
       "January",
       "February",
@@ -26,7 +34,28 @@ export function ClassicTemplate({
       "November",
       "December",
     ];
-    return `${monthNames[Number.parseInt(month) - 1]} ${year}`;
+
+    // ISO: YYYY-MM or YYYY-MM-DD
+    const isoMatch = normalized.match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?$/);
+    if (isoMatch) {
+      const year = isoMatch[1];
+      const month = Math.max(1, Math.min(12, Number.parseInt(isoMatch[2], 10)));
+      return `${monthNames[month - 1]} ${year}`;
+    }
+
+    // MM/YYYY
+    const slashMatch = normalized.match(/^(\d{1,2})\/(\d{4})$/);
+    if (slashMatch) {
+      const month = Math.max(1, Math.min(12, Number.parseInt(slashMatch[1], 10)));
+      const year = slashMatch[2];
+      return `${monthNames[month - 1]} ${year}`;
+    }
+
+    // Already readable like "Jan 2020" or "March 2022"
+    if (/^([A-Za-z]{3,9})\s+\d{4}$/.test(normalized)) return normalized;
+
+    // Fallback: return raw string to avoid "undefined"
+    return normalized;
   };
 
   return (
@@ -96,10 +125,13 @@ export function ClassicTemplate({
                     <p className="text-gray-600">{exp.location}</p>
                   )}
                 </div>
-                <span className="text-gray-600">
-                  {formatDate(exp.startDate)} -{" "}
-                  {exp.current ? "Present" : formatDate(exp.endDate)}
-                </span>
+                {(formatDate(exp.startDate) || exp.current || formatDate(exp.endDate)) && (
+                  <span className="text-gray-600">
+                    {formatDate(exp.startDate)}
+                    {(formatDate(exp.startDate) && (exp.current || formatDate(exp.endDate))) ? " - " : ""}
+                    {exp.current ? "Present" : formatDate(exp.endDate)}
+                  </span>
+                )}
               </div>
               <ul className="text-gray-700 leading-relaxed ml-4 space-y-1">
                 {exp.responsibilities.map((resp, index) => (
