@@ -558,16 +558,24 @@ export function CVPageClientContent() {
         linkedin: aiResponse.optimizedCV.personalInfo.linkedin,
         github: "",
       },
-      experience: aiResponse.optimizedCV.workExperience.map((exp, index) => ({
-        id: `exp-${index}`,
-        jobTitle: exp.title,
-        companyName: exp.company,
-        location: "",
-        startDate: "",
-        endDate: "",
-        current: false,
-        responsibilities: [exp.description],
-      })),
+      experience: aiResponse.optimizedCV.workExperience.map((exp, index) => {
+        const normalizedDuration = (exp.duration || "").replace(/[–—]/g, "-");
+        const parts = normalizedDuration.split("-").map((s) => s.trim());
+        const start = parts[0] || "";
+        let end = parts[1] || "";
+        const current = /present/i.test(end);
+        if (current) end = "";
+        return {
+          id: `exp-${index}`,
+          jobTitle: exp.title,
+          companyName: exp.company,
+          location: "",
+          startDate: start,
+          endDate: end,
+          current,
+          responsibilities: [exp.description],
+        };
+      }),
       education: aiResponse.optimizedCV.education.map((edu, index) => ({
         id: `edu-${index}`,
         degree: edu.degree,
@@ -607,7 +615,7 @@ export function CVPageClientContent() {
         interests: aiResponse.optimizedCV.interests,
       },
       createdAt: existingCV?.created_at || new Date().toISOString(),
-    }
+    };
   }
 
   const handleEdit = () => {
@@ -694,7 +702,10 @@ export function CVPageClientContent() {
         const filename = `${persona?.full_name || "resume"}-cv.${format}`
 
         if (format === "pdf") {
-          await exportToPDFViaBrowserless(htmlContent, filename)
+          const result = await exportToPDFViaBrowserless(htmlContent, filename, undefined,)
+          if (!result.success) {
+            throw new Error(result.error || 'PDF export failed')
+          }
         } else if (format === "png") {
           await exportToPNGViaBrowserless(htmlContent, filename)
         } else if (format === "docx") {

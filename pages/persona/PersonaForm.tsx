@@ -51,6 +51,37 @@ const isValidUrl = (url: string): boolean => {
   }
 };
 
+// Helper function to format dates safely for display
+const formatDateForPersona = (input?: string) => {
+  if (!input) return "";
+  const s = input.trim();
+  if (!s) return "";
+  const normalized = s.replace(/[\u2012-\u2015\u2212]/g, "-");
+  const monthNames = [
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December",
+  ];
+  // YYYY-MM or YYYY-MM-DD
+  const iso = normalized.match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?$/);
+  if (iso) {
+    const year = iso[1];
+    const month = Math.max(1, Math.min(12, Number.parseInt(iso[2], 10)));
+    return `${monthNames[month - 1]} ${year}`;
+  }
+  // MM/YYYY
+  const sl = normalized.match(/^(\d{1,2})\/(\d{4})$/);
+  if (sl) {
+    const month = Math.max(1, Math.min(12, Number.parseInt(sl[1], 10)));
+    const year = sl[2];
+    return `${monthNames[month - 1]} ${year}`;
+  }
+  // Year only
+  if (/^\d{4}$/.test(normalized)) return normalized;
+  // Month text like "Jan 2020" or "March 2022"
+  if (/^([A-Za-z]{3,9})\s+\d{4}$/.test(normalized)) return normalized;
+  return normalized;
+};
+
 interface PersonaFormProps {
   prefilledData: Partial<Omit<CVData, "id" | "createdAt">> | null;
   editingPersona: CVData | null;
@@ -271,6 +302,37 @@ export function PersonaForm({
     }));
   };
 
+  // Helper function to format dates safely for display
+  const formatDateForPersona = (input?: string) => {
+    if (!input) return "";
+    const s = input.trim();
+    if (!s) return "";
+    const normalized = s.replace(/[\u2012-\u2015\u2212]/g, "-");
+    const monthNames = [
+      "January","February","March","April","May","June",
+      "July","August","September","October","November","December",
+    ];
+    // YYYY-MM or YYYY-MM-DD
+    const iso = normalized.match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?$/);
+    if (iso) {
+      const year = iso[1];
+      const month = Math.max(1, Math.min(12, Number.parseInt(iso[2], 10)));
+      return `${monthNames[month - 1]} ${year}`;
+    }
+    // MM/YYYY
+    const sl = normalized.match(/^(\d{1,2})\/(\d{4})$/);
+    if (sl) {
+      const month = Math.max(1, Math.min(12, Number.parseInt(sl[1], 10)));
+      const year = sl[2];
+      return `${monthNames[month - 1]} ${year}`;
+    }
+    // Year only
+    if (/^\d{4}$/.test(normalized)) return normalized;
+    // Month text like "Jan 2020" or "March 2022"
+    if (/^([A-Za-z]{3,9})\s+\d{4}$/.test(normalized)) return normalized;
+    return normalized;
+  };
+
   const addExperience = () => {
     if (currentExperience.jobTitle && currentExperience.companyName) {
       setFormData((prev) => ({
@@ -279,6 +341,7 @@ export function PersonaForm({
           ...prev.experience,
           {
             ...currentExperience,
+            endDate: currentExperience.current ? "" : currentExperience.endDate,
             id: Date.now().toString(),
           },
         ],
@@ -470,9 +533,13 @@ As a ${updatedFormData.personalInfo.jobTitle} with ${updatedFormData.experience.
 Professional Experience:
 ${updatedFormData.experience
           .map(
-            (exp) =>
-              `• ${exp.jobTitle} at ${exp.companyName} (${exp.startDate} - ${exp.current ? "Present" : exp.endDate
-              })`
+            (exp) => {
+              const start = formatDateForPersona(exp.startDate);
+              const end = exp.current ? "Present" : formatDateForPersona(exp.endDate);
+              const dash = start && end ? " - " : "";
+              const range = start || end ? `(${start}${dash}${end})` : "";
+              return `• ${exp.jobTitle} at ${exp.companyName} ${range}`;
+            }
           )
           .join("\n")}
 
@@ -868,7 +935,11 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             <Switch
               checked={currentExperience.current}
               onCheckedChange={(checked) =>
-                setCurrentExperience((prev) => ({ ...prev, current: checked }))
+                setCurrentExperience((prev) => ({
+                  ...prev,
+                  current: checked,
+                  endDate: checked ? "" : prev.endDate,
+                }))
               }
             />
             <Label>Currently working here</Label>
@@ -987,9 +1058,13 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                   <div className="flex-1">
                     <div className="font-medium">{exp.jobTitle}</div>
                     <div className="text-sm text-gray-600">{exp.companyName}</div>
+                    {(formatDateForPersona(exp.startDate) || exp.current || formatDateForPersona(exp.endDate)) && (
                     <div className="text-sm text-gray-500">
-                      {exp.startDate} - {exp.current ? "Present" : exp.endDate}
+                      {formatDateForPersona(exp.startDate)}
+                      {(formatDateForPersona(exp.startDate) && (exp.current || formatDateForPersona(exp.endDate))) ? " - " : ""}
+                      {exp.current ? "Present" : formatDateForPersona(exp.endDate)}
                     </div>
+                  )}
                   </div>
                   <Button
                     type="button"
