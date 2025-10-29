@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Node.js Backend Configuration for app/api routes
-const NODEJS_API_BASE_URL = process.env.NEXT_PUBLIC_NODEJS_API_URL || "  http://localhost:3001";
+const NODEJS_API_BASE_URL = process.env.NEXT_PUBLIC_NODEJS_API_URL || "  https://backendserver.resumaic.com";
 
 console.log("NODEJS_API_BASE_URL", NODEJS_API_BASE_URL);
 
