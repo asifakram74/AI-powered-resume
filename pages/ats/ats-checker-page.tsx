@@ -103,20 +103,20 @@ export default function ATSCheckerPage() {
 
     setIsAnalyzing(true);
     setError(null);
-    console.log('Making request to:', '  http://localhost:3001/api/ats-analysis');
+    console.log('Making request to:', 'https://backendserver.resumaic.com/api/ats-analysis');
     console.log('Request payload size:', JSON.stringify({ extractedText, jobDescription }).length);
     try {
-      const testResponse = await fetch('  http://localhost:3001', { method: 'HEAD' });
+      const testResponse = await fetch('https://backendserver.resumaic.com', { method: 'HEAD' });
       console.log('Server reachable:', testResponse.ok);
     } catch (testError) {
       console.error('Server not reachable:', testError);
     }
     try {
-      const response = await fetch('  http://localhost:3001/api/ats-analysis', {
+      const response = await fetch('https://backendserver.resumaic.com/api/ats-analysis', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true',
+          // 'ngrok-skip-browser-warning': 'true',
         },
         body: JSON.stringify({
           extractedText,
@@ -181,7 +181,8 @@ export default function ATSCheckerPage() {
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
       const margin = 15; // 15mm margins
-      const contentWidth = pageWidth - 2 * margin;
+      const padding = 10; // 10mm padding on each page
+      const contentWidth = pageWidth - 2 * margin - 2 * padding;
 
       // Get the actual height of the content
       const originalHeight = element.scrollHeight;
@@ -191,61 +192,83 @@ export default function ATSCheckerPage() {
       const scale = contentWidth / originalWidth;
       const scaledHeight = originalHeight * scale;
 
-      // Create canvas with proper dimensions
-      const canvas = document.createElement('canvas');
-      canvas.width = originalWidth * 2; // Higher resolution
-      canvas.height = originalHeight * 2;
-      const ctx = canvas.getContext('2d');
-
-      if (!ctx) return;
-
-      // Scale the context for high resolution
-      ctx.scale(2, 2);
-
       // Use html-to-image with better options
       const dataUrl = await htmlToImage.toPng(element, {
-        // canvas: canvas,
         quality: 1,
         pixelRatio: 2,
         backgroundColor: '#ffffff',
-        skipFonts: true
+        skipFonts: true,
+        width: originalWidth,
+        height: originalHeight
       });
 
-      // Add first page
-      let position = 0;
+      // Calculate available height per page (accounting for margins and padding)
+      const availableHeight = pageHeight - 2 * margin - 2 * padding;
+
       let currentPage = 1;
+      let position = 0;
 
       while (position < scaledHeight) {
         if (currentPage > 1) {
           pdf.addPage();
         }
 
-        // Calculate how much of the image to show on this page with 4px bottom margin
-        const bottomMargin = 4; // 4px bottom margin
-        const pageContentHeight = Math.min(pageHeight - 2 * margin - bottomMargin, scaledHeight - position);
+        // Calculate the crop parameters for this page
+        const cropY = (position / scale) * 2; // Convert back to original image coordinates
+        const cropHeight = Math.min(availableHeight / scale, originalHeight - cropY / 2) * 2;
 
+        // Create a canvas for this specific page
+        const pageCanvas = document.createElement('canvas');
+        pageCanvas.width = originalWidth * 2;
+        pageCanvas.height = cropHeight;
+        const pageCtx = pageCanvas.getContext('2d');
+
+        if (!pageCtx) return;
+
+        // Draw only the portion for this page
+        const img = new Image();
+        img.src = dataUrl;
+
+        await new Promise((resolve) => {
+          img.onload = () => {
+            pageCtx.drawImage(
+              img,
+              0, cropY, // source x, y
+              originalWidth * 2, cropHeight, // source width, height
+              0, 0, // destination x, y
+              originalWidth * 2, cropHeight // destination width, height
+            );
+            resolve();
+          };
+        });
+
+        const pageDataUrl = pageCanvas.toDataURL('image/png', 1.0);
+
+        // Add the cropped image to the PDF page
         pdf.addImage(
-          dataUrl,
+          pageDataUrl,
           'PNG',
-          margin,
-          margin - position,
+          margin + padding,
+          margin + padding,
           contentWidth,
-          scaledHeight,
+          Math.min(availableHeight, scaledHeight - position),
           undefined,
-          'MEDIUM'
+          'FAST'
         );
 
-        position += pageHeight - 2 * margin - bottomMargin;
+        position += availableHeight;
         currentPage++;
       }
 
       pdf.save("ats-analysis-report.pdf");
+      console.log("exported Pdf");
 
     } catch (error) {
       console.error("Error exporting as PDF:", error);
       toast.error("Failed to export PDF. Please try again.");
     }
   };
+
   const exportAsDOCX = async () => {
     if (!analysisResult) return;
 
