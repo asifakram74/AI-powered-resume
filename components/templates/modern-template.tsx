@@ -49,7 +49,7 @@ export function ModernTemplate({
           }
           @page :first {
             margin-top: 0.5in;
-            margin-bottom: 0.3in; /* Reduced bottom margin on first page */
+            margin-bottom: 0.3in;
           }
           @page :not(:first) {
             margin-top: 0.5in;
@@ -69,29 +69,66 @@ export function ModernTemplate({
           .print-break-before-auto {
             break-before: auto;
           }
-          .sidebar-container {
-            height: fit-content !important;
-            min-height: auto !important;
-            background: #1e293b !important; /* Force sidebar color on all pages */
+          
+          /* Fix for sidebar background on all pages */
+          .sidebar-bg {
+            background: #1e293b !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
+          
+          /* Ensure sidebar appears on every page */
+          .sidebar-container {
+            position: relative;
+            background: #1e293b !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          
           /* Fix for page breaks */
           .main-content-section {
             break-inside: avoid;
           }
+          
           /* Ensure content uses full page height */
           .page-content {
             min-height: calc(100vh - 1in);
           }
-          /* Force sidebar background color on all pages */
-          .sidebar-bg {
+          
+          /* Force colors in print */
+          .print-slate-800 {
+            background-color: #1e293b !important;
+          }
+          .print-blue-600 {
+            background-color: #2563eb !important;
+          }
+          .print-slate-600 {
+            background-color: #475569 !important;
+          }
+        }
+        
+        /* Additional CSS for multi-page layout */
+        @media print {
+          .cv-container {
+            display: flex;
+            width: 100%;
+          }
+          .sidebar-print {
+            width: 33.333%;
             background: #1e293b !important;
+            color: white !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          .main-content-print {
+            width: 66.667%;
           }
         }
       `}</style>
 
       {/* Sidebar - Made more compact */}
-      <div className="w-1/3 bg-slate-800 text-white p-6 print:break-inside-avoid print:bg-slate-800 sidebar-container sidebar-bg">
-        <div className="space-y-4 print:space-y-3"> {/* Reduced spacing for print */}
+      <div className="w-1/3 bg-slate-800 text-white p-6 print:break-inside-avoid print:bg-slate-800 sidebar-container sidebar-bg print-slate-800 sidebar-print">
+        <div className="space-y-4 print:space-y-3 sticky top-0">
           {/* Profile Picture */}
           {data.personalInfo.profilePicture && (
             <div className="text-center print-break-inside-avoid mb-4 print:mb-3">
@@ -141,7 +178,7 @@ export function ModernTemplate({
                     {data.skills.technical.map((skill, index) => (
                       <span
                         key={index}
-                        className="bg-blue-600 text-white px-1.5 py-0.5 rounded text-xs print:bg-blue-600"
+                        className="bg-blue-600 text-white px-1.5 py-0.5 rounded text-xs print:bg-blue-600 print-blue-600"
                       >
                         {skill}
                       </span>
@@ -156,7 +193,7 @@ export function ModernTemplate({
                     {data.skills.soft.map((skill, index) => (
                       <span
                         key={index}
-                        className="bg-slate-600 text-white px-1.5 py-0.5 rounded text-xs print:bg-slate-600"
+                        className="bg-slate-600 text-white px-1.5 py-0.5 rounded text-xs print:bg-slate-600 print-slate-600"
                       >
                         {skill}
                       </span>
@@ -208,7 +245,7 @@ export function ModernTemplate({
                 {data.additional.interests.map((interest, index) => (
                   <span
                     key={index}
-                    className="bg-slate-600 text-white px-1.5 py-0.5 rounded text-xs print:bg-slate-600"
+                    className="bg-slate-600 text-white px-1.5 py-0.5 rounded text-xs print:bg-slate-600 print-slate-600"
                   >
                     {interest}
                   </span>
@@ -220,8 +257,8 @@ export function ModernTemplate({
       </div>
 
       {/* Main Content - Adjusted spacing */}
-      <div className="flex-1 p-6 print:p-4 print:break-inside-avoid page-content">
-        <div className="space-y-4 print:space-y-3"> {/* Reduced spacing */}
+      <div className="flex-1 p-6 print:p-4 print:break-inside-avoid page-content main-content-print">
+        <div className="space-y-4 print:space-y-3">
           {/* Header - Made more compact */}
           <div className="border-b border-gray-200 pb-3 mb-3 print-break-inside-avoid print:border-gray-200 main-content-section">
             <h1 className="text-2xl font-bold text-gray-900 mb-1 print:text-gray-900 print:text-xl">
