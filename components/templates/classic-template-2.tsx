@@ -38,7 +38,29 @@ const formatDate = (date: string) => {
 };
 
   return (
-    <div className="max-w-full mx-auto bg-white p-12 min-h-screen font-serif">
+    <div className="max-w-full mx-auto bg-white p-12 min-h-screen font-serif print:px-4 print:py-8">
+      <style jsx global>{`
+        @media print {
+          @page {
+            size: A4;
+            margin: 0.2in;
+          }
+          @page :first {
+            margin-top: 0.2in;
+            margin-bottom: 0.2in;
+          }
+          @page :not(:first) {
+            margin-top: 0.2in;
+            margin-bottom: 0.2in;
+          }
+          body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            background: white;
+          }
+        }
+      `}</style>
+
       {/* Header with underline */}
       <div className="text-center mb-10">
         <h1 className="text-4xl font-bold text-gray-900 mb-3 tracking-wide">

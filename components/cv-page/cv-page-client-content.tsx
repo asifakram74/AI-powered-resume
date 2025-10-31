@@ -105,12 +105,12 @@ const templates: CVTemplate[] = [
   //   category: "minimal",
   // },
   // // New templates
-  // {
-  //   id: "classic-2",
-  //   name: "Classic Traditional 2",
-  //   description: "An updated classic format for conservative industries",
-  //   category: "classic",
-  // },
+  {
+    id: "classic-2",
+    name: "Classic Traditional 2",
+    description: "An updated classic format for conservative industries",
+    category: "classic",
+  },
   // {
   //   id: "classic-3",
   //   name: "Classic Traditional 3",
@@ -154,12 +154,12 @@ const templates: CVTemplate[] = [
   //   category: "modern",
   // },
   // New template 4 versions
-  // {
-  //   id: "classic-4",
-  //   name: "Classic Traditional 4",
-  //   description: "Premium classic format with enhanced layout",
-  //   category: "classic",
-  // },
+  {
+    id: "classic-4",
+    name: "Classic Traditional 4",
+    description: "Premium classic format with enhanced layout",
+    category: "classic",
+  },
   // {
   //   id: "minimal-4",
   //   name: "Minimal Clean 4",
@@ -191,12 +191,12 @@ const templates: CVTemplate[] = [
   //   description: "Dark blue curved sidebar with elegant design",
   //   category: "modern",
   // },
-  // {
-  //   id: "modern-8",
-  //   name: "Modern LILLY",
-  //   description: "Light blue sidebar with rounded contact section",
-  //   category: "modern",
-  // },
+  {
+    id: "modern-8",
+    name: "Modern LILLY",
+    description: "Light blue sidebar with rounded contact section",
+    category: "modern",
+  },
 
   // {
   //   id: "creative",

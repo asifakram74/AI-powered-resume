@@ -264,3 +264,4 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
     </div>
   )
 }
+
