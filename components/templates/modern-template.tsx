@@ -15,92 +15,109 @@ export function ModernTemplate({
   const formatDate = (date: string) => {
     if (!date) return "";
     const monthNames = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
     ];
-    // ISO patterns: YYYY-MM or YYYY-MM-DD
+    
     const isoMatch = /^(\d{4})-(\d{1,2})(?:-\d{1,2})?$/.exec(date);
     if (isoMatch) {
       const year = isoMatch[1];
       const month = Math.max(1, Math.min(12, Number.parseInt(isoMatch[2], 10)));
       return `${monthNames[month - 1]} ${year}`;
     }
-    // Slash pattern: MM/YYYY
+    
     const slashMatch = /^(\d{1,2})\/(\d{4})$/.exec(date);
     if (slashMatch) {
       const month = Math.max(1, Math.min(12, Number.parseInt(slashMatch[1], 10)));
       const year = slashMatch[2];
       return `${monthNames[month - 1]} ${year}`;
     }
-    // Already formatted like "Jan 2020"
+    
     const monTextMatch = /^([A-Za-z]{3,})\s+(\d{4})$/.exec(date);
     if (monTextMatch) return date;
-    // Fallback: return raw string
+    
     return date;
   };
 
   return (
-    <div className="flex max-w-full mx-auto min-h-screen bg-white print:min-h-0 print:shadow-none">
+    <div className="flex max-w-full mx-auto min-h-screen bg-white print:min-h-0 print:shadow-none print:bg-white">
       <style jsx global>{`
         @media print {
           @page {
             size: A4;
             margin: 0.5in;
           }
-          .print\\:break-inside-avoid {
+          @page :first {
+            margin-top: 0.5in;
+            margin-bottom: 0.3in; /* Reduced bottom margin on first page */
+          }
+          @page :not(:first) {
+            margin-top: 0.5in;
+            margin-bottom: 0.5in;
+          }
+          body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            background: white;
+          }
+          .print-break-inside-avoid {
             break-inside: avoid;
           }
-          .print\\:break-before-page {
-            break-before: page;
+          .print-break-after-auto {
+            break-after: auto;
           }
-          .print\\:break-after-avoid {
-            break-after: avoid;
+          .print-break-before-auto {
+            break-before: auto;
           }
-          .print\\:page-start-pad {
-            padding-top: 0.3in;
+          .sidebar-container {
+            height: fit-content !important;
+            min-height: auto !important;
+            background: #1e293b !important; /* Force sidebar color on all pages */
+          }
+          /* Fix for page breaks */
+          .main-content-section {
+            break-inside: avoid;
+          }
+          /* Ensure content uses full page height */
+          .page-content {
+            min-height: calc(100vh - 1in);
+          }
+          /* Force sidebar background color on all pages */
+          .sidebar-bg {
+            background: #1e293b !important;
           }
         }
       `}</style>
 
-      {/* Sidebar */}
-      <div className="w-1/3 bg-slate-800 text-white p-8">
-        <div className="space-y-8">
+      {/* Sidebar - Made more compact */}
+      <div className="w-1/3 bg-slate-800 text-white p-6 print:break-inside-avoid print:bg-slate-800 sidebar-container sidebar-bg">
+        <div className="space-y-4 print:space-y-3"> {/* Reduced spacing for print */}
           {/* Profile Picture */}
           {data.personalInfo.profilePicture && (
-            <div className="text-center print:break-inside-avoid print:page-start-pad">
+            <div className="text-center print-break-inside-avoid mb-4 print:mb-3">
               <img
                 src={data.personalInfo.profilePicture || "/placeholder.svg"}
                 alt={data.personalInfo.fullName}
-                className="w-32 h-32 rounded-full mx-auto object-cover border-4 border-blue-300"
+                className="w-24 h-24 rounded-full mx-auto object-cover border-4 border-blue-300 print:border-blue-300 print:w-20 print:h-20"
               />
             </div>
           )}
 
           {/* Contact Info */}
-          <div className="print:break-inside-avoid">
-            <h2 className="text-xl font-bold mb-4 text-blue-300">Contact</h2>
-            <div className="space-y-3 text-sm">
-              <div className="flex items-center space-x-3">
-                <Mail className="w-4 h-4 text-blue-300" />
-                <span className="break-all">{data.personalInfo.email}</span>
+          <div className="print-break-inside-avoid mb-4 print:mb-3">
+            <h2 className="text-lg font-bold mb-2 text-blue-300 print:text-blue-300 print:text-base">Contact</h2>
+            <div className="space-y-1.5 text-sm">
+              <div className="flex items-center space-x-2">
+                <Mail className="w-3 h-3 text-blue-300 print:text-blue-300 flex-shrink-0" />
+                <span className="break-all text-xs">{data.personalInfo.email}</span>
               </div>
-              <div className="flex items-center space-x-3">
-                <Phone className="w-4 h-4 text-blue-300" />
-                <span>{data.personalInfo.phone}</span>
+              <div className="flex items-center space-x-2">
+                <Phone className="w-3 h-3 text-blue-300 print:text-blue-300 flex-shrink-0" />
+                <span className="text-xs">{data.personalInfo.phone}</span>
               </div>
-              <div className="flex items-center space-x-3">
-                <MapPin className="w-4 h-4 text-blue-300" />
-                <span>
+              <div className="flex items-center space-x-2">
+                <MapPin className="w-3 h-3 text-blue-300 print:text-blue-300 flex-shrink-0" />
+                <span className="text-xs">
                   {(data.personalInfo.city || data.personalInfo.country) && (
                     <span>
                       {data.personalInfo.city && data.personalInfo.country
@@ -108,31 +125,23 @@ export function ModernTemplate({
                         : data.personalInfo.city || data.personalInfo.country}
                     </span>
                   )}
-                  {data.personalInfo.address && (
-                    <>
-                      {/* <br /> */}
-                      {data.personalInfo.address}
-                    </>
-                  )}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Skills */}
-          <div className="print:break-inside-avoid">
-            <h2 className="text-xl font-bold mb-4 text-blue-300">Skills</h2>
-            <div className="space-y-4">
+          {/* Skills - Made more compact */}
+          <div className="print-break-inside-avoid mb-4 print:mb-3">
+            <h2 className="text-lg font-bold mb-2 text-blue-300 print:text-blue-300 print:text-base">Skills</h2>
+            <div className="space-y-2">
               {data.skills.technical.length > 0 && (
                 <div>
-                  <h3 className="font-semibold mb-2 text-sm">
-                    Technical Skills
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
+                  <h3 className="font-semibold mb-1 text-xs">Technical Skills</h3>
+                  <div className="flex flex-wrap gap-1">
                     {data.skills.technical.map((skill, index) => (
                       <span
                         key={index}
-                        className="bg-blue-600 text-white px-2 py-1 rounded text-xs"
+                        className="bg-blue-600 text-white px-1.5 py-0.5 rounded text-xs print:bg-blue-600"
                       >
                         {skill}
                       </span>
@@ -142,12 +151,12 @@ export function ModernTemplate({
               )}
               {data.skills.soft.length > 0 && (
                 <div>
-                  <h3 className="font-semibold mb-2 text-sm">Soft Skills</h3>
-                  <div className="flex flex-wrap gap-2">
+                  <h3 className="font-semibold mb-1 text-xs">Soft Skills</h3>
+                  <div className="flex flex-wrap gap-1">
                     {data.skills.soft.map((skill, index) => (
                       <span
                         key={index}
-                        className="bg-slate-600 text-white px-2 py-1 rounded text-xs"
+                        className="bg-slate-600 text-white px-1.5 py-0.5 rounded text-xs print:bg-slate-600"
                       >
                         {skill}
                       </span>
@@ -160,42 +169,31 @@ export function ModernTemplate({
 
           {/* Languages */}
           {data.languages.length > 0 && (
-            <div className="print:break-inside-avoid">
-              <h2 className="text-xl font-bold mb-4 text-blue-300">
-                Languages
-              </h2>
-              <div className="space-y-2">
+            <div className="print-break-inside-avoid mb-4 print:mb-3">
+              <h2 className="text-lg font-bold mb-2 text-blue-300 print:text-blue-300 print:text-base">Languages</h2>
+              <div className="space-y-1">
                 {data.languages.map((lang) => (
-                  <div key={lang.id} className="flex justify-between text-sm">
+                  <div key={lang.id} className="flex justify-between text-xs">
                     <span>{lang.name}</span>
-                    <span className="text-blue-200">{lang.proficiency}</span>
+                    <span className="text-blue-200 print:text-blue-200">{lang.proficiency}</span>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Education */}
-          <div>
-            <h2 className="text-xl font-bold mb-4 text-blue-300">Education</h2>
-            <div className="space-y-4">
+          {/* Education - Made more compact */}
+          <div className="print-break-inside-avoid mb-4 print:mb-3">
+            <h2 className="text-lg font-bold mb-2 text-blue-300 print:text-blue-300 print:text-base">Education</h2>
+            <div className="space-y-2">
               {data.education.map((edu) => (
-                <div key={edu.id} className="text-sm print:break-inside-avoid print:page-start-pad">
+                <div key={edu.id} className="text-xs print-break-inside-avoid">
                   <h3 className="font-semibold">{edu.degree}</h3>
-                  <p className="text-blue-200">{edu.institutionName}</p>
-                  {edu.location && (
-                    <p className="text-gray-300">{edu.location}</p>
-                  )}
+                  <p className="text-blue-200 print:text-blue-200">{edu.institutionName}</p>
                   {edu.graduationDate && (
-                    <p className="text-gray-400 text-xs">
+                    <p className="text-gray-400">
                       {formatDate(edu.graduationDate)}
                     </p>
-                  )}
-                  {edu.gpa && (
-                    <p className="text-gray-400 text-xs">GPA: {edu.gpa}</p>
-                  )}
-                  {edu.honors && (
-                    <p className="text-blue-200 text-xs">{edu.honors}</p>
                   )}
                 </div>
               ))}
@@ -204,15 +202,13 @@ export function ModernTemplate({
 
           {/* Interests */}
           {data.additional.interests.length > 0 && (
-            <div className="print:break-inside-avoid">
-              <h2 className="text-xl font-bold mb-4 text-blue-300">
-                Interests
-              </h2>
-              <div className="flex flex-wrap gap-2">
+            <div className="print-break-inside-avoid">
+              <h2 className="text-lg font-bold mb-2 text-blue-300 print:text-blue-300 print:text-base">Interests</h2>
+              <div className="flex flex-wrap gap-1">
                 {data.additional.interests.map((interest, index) => (
                   <span
                     key={index}
-                    className="bg-slate-600 text-white px-2 py-1 rounded text-xs"
+                    className="bg-slate-600 text-white px-1.5 py-0.5 rounded text-xs print:bg-slate-600"
                   >
                     {interest}
                   </span>
@@ -223,57 +219,52 @@ export function ModernTemplate({
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 p-8">
-        <div className="space-y-8">
-          {/* Header */}
-          <div className="border-b border-gray-200 pb-6 mb-8 print:break-inside-avoid print:page-start-pad">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
+      {/* Main Content - Adjusted spacing */}
+      <div className="flex-1 p-6 print:p-4 print:break-inside-avoid page-content">
+        <div className="space-y-4 print:space-y-3"> {/* Reduced spacing */}
+          {/* Header - Made more compact */}
+          <div className="border-b border-gray-200 pb-3 mb-3 print-break-inside-avoid print:border-gray-200 main-content-section">
+            <h1 className="text-2xl font-bold text-gray-900 mb-1 print:text-gray-900 print:text-xl">
               {data.personalInfo.fullName}
             </h1>
-            <h2 className="text-xl text-blue-600 font-medium mb-4">
+            <h2 className="text-base text-blue-600 font-medium mb-1 print:text-blue-600">
               {data.personalInfo.jobTitle}
             </h2>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-gray-600 leading-relaxed text-xs print:text-gray-600">
               {data.personalInfo.summary}
             </p>
           </div>
 
-          {/* Experience */}
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 pt-5  ">
-              Experience
-            </h2>
-            <div className="space-y-6">
+          {/* Experience - Made more compact */}
+          <div className="print-break-inside-avoid main-content-section">
+            <h2 className="text-lg font-bold text-gray-900 mb-3 print:text-gray-900">Experience</h2>
+            <div className="space-y-3">
               {data.experience.map((exp, index) => (
                 <div
                   key={exp.id}
-                  className="border-l-4 border-blue-500 pl-6 print:break-inside-avoid print:mt-4 print:page-start-pad"
+                  className="border-l-2 border-blue-500 pl-3 print-break-inside-avoid print:border-blue-500"
                 >
-                  <div className="flex justify-between items-start mb-2">
+                  <div className="flex justify-between items-start mb-1">
                     <div>
-                      <h3 className="text-xl font-semibold text-gray-900">
+                      <h3 className="text-base font-semibold text-gray-900 print:text-gray-900">
                         {exp.jobTitle}
                       </h3>
-                      <p className="text-blue-600 font-medium">
+                      <p className="text-blue-600 font-medium text-xs print:text-blue-600">
                         {exp.companyName}
                       </p>
-                      {exp.location && (
-                        <p className="text-gray-500 text-sm">{exp.location}</p>
-                      )}
                     </div>
                     {(formatDate(exp.startDate) || exp.current || formatDate(exp.endDate)) && (
-                      <span className="text-gray-500 text-sm">
+                      <span className="text-gray-500 text-xs print:text-gray-500 whitespace-nowrap">
                         {formatDate(exp.startDate)}
                         {(formatDate(exp.startDate) && (exp.current || formatDate(exp.endDate))) ? " - " : ""}
                         {exp.current ? "Present" : formatDate(exp.endDate)}
                       </span>
                     )}
                   </div>
-                  <ul className="text-gray-700 leading-relaxed space-y-1">
+                  <ul className="text-gray-700 leading-relaxed space-y-0.5 text-xs print:text-gray-700">
                     {exp.responsibilities.map((resp, index) => (
                       <li key={index} className="flex items-start">
-                        <span className="text-blue-500 mr-2">•</span>
+                        <span className="text-blue-500 mr-1 print:text-blue-500">•</span>
                         <span>{resp}</span>
                       </li>
                     ))}
@@ -283,36 +274,34 @@ export function ModernTemplate({
             </div>
           </div>
 
-          {/* Projects */}
+          {/* Projects - Made more compact */}
           {data.projects.length > 0 && (
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 pt-5  ">
-                Projects
-              </h2>
-              <div className="space-y-6">
+            <div className="print-break-inside-avoid main-content-section">
+              <h2 className="text-lg font-bold text-gray-900 mb-3 print:text-gray-900">Projects</h2>
+              <div className="space-y-3">
                 {data.projects.map((project) => (
                   <div
                     key={project.id}
-                    className="border rounded-lg p-4 print:break-inside-avoid print:mt-4 print:page-start-pad"
+                    className="border rounded p-2 print-break-inside-avoid print:border-gray-300"
                   >
-                    <div className="flex justify-between items-start mb-2">
+                    <div className="flex justify-between items-start mb-1">
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900">
+                        <h3 className="text-sm font-semibold text-gray-900 print:text-gray-900">
                           {project.name}
                         </h3>
-                        <p className="text-blue-600 font-medium">
+                        <p className="text-blue-600 font-medium text-xs print:text-blue-600">
                           {project.role}
                         </p>
                       </div>
-                      <div className="flex space-x-2">
+                      <div className="flex space-x-1">
                         {project.liveDemoLink && (
                           <a
                             href={project.liveDemoLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-500 hover:text-blue-700"
+                            className="text-blue-500 hover:text-blue-700 print:text-blue-500"
                           >
-                            <ExternalLink className="w-4 h-4" />
+                            <ExternalLink className="w-3 h-3" />
                           </a>
                         )}
                         {project.githubLink && (
@@ -320,19 +309,19 @@ export function ModernTemplate({
                             href={project.githubLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-gray-600 hover:text-gray-800"
+                            className="text-gray-600 hover:text-gray-800 print:text-gray-600"
                           >
-                            <Github className="w-4 h-4" />
+                            <Github className="w-3 h-3" />
                           </a>
                         )}
                       </div>
                     </div>
-                    <p className="text-gray-700 mb-3">{project.description}</p>
-                    <div className="flex flex-wrap gap-2">
+                    <p className="text-gray-700 mb-1 text-xs print:text-gray-700">{project.description}</p>
+                    <div className="flex flex-wrap gap-1">
                       {project.technologies.map((tech, index) => (
                         <span
                           key={index}
-                          className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-sm"
+                          className="bg-gray-100 text-gray-700 px-1 py-0.5 rounded text-xs print:bg-gray-100 print:text-gray-700"
                         >
                           {tech}
                         </span>
@@ -346,40 +335,26 @@ export function ModernTemplate({
 
           {/* Certifications */}
           {data.certifications.length > 0 && (
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                Certifications & Awards
-              </h2>
-              <div className="space-y-3">
+            <div className="print-break-inside-avoid main-content-section">
+              <h2 className="text-lg font-bold text-gray-900 mb-3 print:text-gray-900">Certifications & Awards</h2>
+              <div className="space-y-1">
                 {data.certifications.map((cert) => (
                   <div
                     key={cert.id}
-                    className="flex justify-between items-center print:break-inside-avoid print:mt-4 print:page-start-pad"
+                    className="flex justify-between items-center print-break-inside-avoid"
                   >
                     <div>
-                      <h3 className="font-semibold text-gray-900">
+                      <h3 className="font-semibold text-gray-900 text-xs print:text-gray-900">
                         {cert.title}
                       </h3>
-                      <p className="text-gray-600">
+                      <p className="text-gray-600 text-xs print:text-gray-600">
                         {cert.issuingOrganization}
                       </p>
                     </div>
                     <div className="text-right">
-                      <span className="text-gray-500 text-sm">
+                      <span className="text-gray-500 text-xs print:text-gray-500">
                         {formatDate(cert.dateObtained)}
                       </span>
-                      {cert.verificationLink && (
-                        <div>
-                          <a
-                            href={cert.verificationLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-500 hover:text-blue-700 text-sm"
-                          >
-                            Verify
-                          </a>
-                        </div>
-                      )}
                     </div>
                   </div>
                 ))}
