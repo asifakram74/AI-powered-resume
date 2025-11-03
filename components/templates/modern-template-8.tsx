@@ -35,7 +35,7 @@ export default function ModernTemplate8({ data }: ModernTemplate8Props) {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-white shadow-lg print:shadow-none print:max-w-full print:mx-0">
+    <div className="w-full mx-auto bg-white shadow-lg print:shadow-none print:max-w-full print:mx-0">
       <style jsx global>{`
         @media print {
           @page {

@@ -6,139 +6,240 @@ import type { CVData } from "../../types/cv-data";
 interface ModernTemplate7Props {
   data: CVData;
   isPreview?: boolean;
+  colorScheme?: "blue" | "emerald" | "violet" | "rose" | "amber" | "teal";
 }
 
 export function ModernTemplate7({
   data,
   isPreview = false,
+  colorScheme = "blue",
 }: ModernTemplate7Props) {
- const formatDate = (date: string) => {
-  if (!date) return "";
-  const monthNames = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-  ];
-  
-  // ISO patterns: YYYY-MM or YYYY-MM-DD
-  const isoMatch = /^(\d{4})-(\d{1,2})(?:-\d{1,2})?$/.exec(date);
-  if (isoMatch) {
-    const year = isoMatch[1];
-    const month = Math.max(1, Math.min(12, Number.parseInt(isoMatch[2], 10)));
-    return `${monthNames[month - 1]} ${year}`;
-  }
-  
-  // Slash pattern: MM/YYYY
-  const slashMatch = /^(\d{1,2})\/(\d{4})$/.exec(date);
-  if (slashMatch) {
-    const month = Math.max(1, Math.min(12, Number.parseInt(slashMatch[1], 10)));
-    const year = slashMatch[2];
-    return `${monthNames[month - 1]} ${year}`;
-  }
-  
-  // Already formatted like "Jan 2020"
-  const monTextMatch = /^([A-Za-z]{3,})\s+(\d{4})$/.exec(date);
-  if (monTextMatch) return date;
-  
-  // Fallback: return raw string
-  return date;
-};
+  const formatDate = (date: string) => {
+    if (!date) return "";
+    const monthNames = [
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    ];
+    
+    const isoMatch = /^(\d{4})-(\d{1,2})(?:-\d{1,2})?$/.exec(date);
+    if (isoMatch) {
+      const year = isoMatch[1];
+      const month = Math.max(1, Math.min(12, Number.parseInt(isoMatch[2], 10)));
+      return `${monthNames[month - 1]} ${year}`;
+    }
+    
+    const slashMatch = /^(\d{1,2})\/(\d{4})$/.exec(date);
+    if (slashMatch) {
+      const month = Math.max(1, Math.min(12, Number.parseInt(slashMatch[1], 10)));
+      const year = slashMatch[2];
+      return `${monthNames[month - 1]} ${year}`;
+    }
+    
+    const monTextMatch = /^([A-Za-z]{3,})\s+(\d{4})$/.exec(date);
+    if (monTextMatch) return date;
+    
+    return date;
+  };
 
+  // Color scheme mapping for sidebar and accents
+  const COLOR_MAP = {
+    blue: {
+      sidebarBg: "bg-[#350166]",
+      sidebarPrintBg: "print:bg-slate-800",
+      accentText: "text-blue-600",
+      accentLightText: "text-blue-300",
+      accentLighterText: "text-blue-200",
+      accentIcon: "text-blue-300",
+      accentBg: "bg-blue-600",
+      accentMutedBg: "bg-blue-700",
+      accentBorder: "border-blue-500",
+      accentBorderText: "text-blue-500",
+    },
+    emerald: {
+          sidebarBg: "bg-[#350166]",
+      sidebarPrintBg: "print:bg-emerald-800",
+      accentText: "text-emerald-600",
+      accentLightText: "text-emerald-300",
+      accentLighterText: "text-emerald-200",
+      accentIcon: "text-emerald-300",
+      accentBg: "bg-emerald-600",
+      accentMutedBg: "bg-emerald-700",
+      accentBorder: "border-emerald-500",
+      accentBorderText: "text-emerald-500",
+    },
+    violet: {
+          sidebarBg: "bg-[#350166]",
+      sidebarPrintBg: "print:bg-violet-800",
+      accentText: "text-violet-600",
+      accentLightText: "text-violet-300",
+      accentLighterText: "text-violet-200",
+      accentIcon: "text-violet-300",
+      accentBg: "bg-violet-600",
+      accentMutedBg: "bg-violet-700",
+      accentBorder: "border-violet-500",
+      accentBorderText: "text-violet-500",
+    },
+    rose: {
+      sidebarBg: "bg-rose-800",
+      sidebarPrintBg: "print:bg-rose-800",
+      accentText: "text-rose-600",
+      accentLightText: "text-rose-300",
+      accentLighterText: "text-rose-200",
+      accentIcon: "text-rose-300",
+      accentBg: "bg-rose-600",
+      accentMutedBg: "bg-rose-700",
+      accentBorder: "border-rose-500",
+      accentBorderText: "text-rose-500",
+    },
+    amber: {
+      sidebarBg: "bg-amber-800",
+      sidebarPrintBg: "print:bg-amber-800",
+      accentText: "text-amber-600",
+      accentLightText: "text-amber-300",
+      accentLighterText: "text-amber-200",
+      accentIcon: "text-amber-300",
+      accentBg: "bg-amber-600",
+      accentMutedBg: "bg-amber-700",
+      accentBorder: "border-amber-500",
+      accentBorderText: "text-amber-500",
+    },
+    teal: {
+      sidebarBg: "bg-teal-800",
+      sidebarPrintBg: "print:bg-teal-800",
+      accentText: "text-teal-600",
+      accentLightText: "text-teal-300",
+      accentLighterText: "text-teal-200",
+      accentIcon: "text-teal-300",
+      accentBg: "bg-teal-600",
+      accentMutedBg: "bg-teal-700",
+      accentBorder: "border-teal-500",
+      accentBorderText: "text-teal-500",
+    },
+  } as const;
+
+  const colors = COLOR_MAP[colorScheme];
   return (
-    <div className="flex min-h-screen bg-white print:min-h-0 print:shadow-none">
+    <div className="flex max-w-full mx-auto min-h-screen bg-white print:min-h-0 print:shadow-none print:bg-white">
       <style jsx global>{`
         @media print {
-          @page {
-            size: A4;
-            margin: 0.5in;
+       
+          body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            background: white;
           }
-          .print\\:break-inside-avoid {
+          .print-break-inside-avoid {
             break-inside: avoid;
           }
-          .print\\:break-before-page {
-            break-before: page;
+          .print-break-after-auto {
+            break-after: auto;
           }
-          .print\\:break-after-avoid {
-            break-after: avoid;
+          .print-break-before-auto {
+            break-before: auto;
+          }
+          
+          /* Fix for sidebar background on all pages */
+          .sidebar-bg {
+            background: inherit !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          
+          /* Ensure sidebar appears on every page */
+          .sidebar-container {
+            position: relative;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          
+          /* Fix for page breaks */
+          .main-content-section {
+            break-inside: avoid;
+          }
+          
+          /* Ensure content uses full page height */
+          .page-content {
+            min-height: calc(100vh - 1in);
+          }
+          
+          /* Generic print helpers bound to applied classes */
+          .print-accent-bg {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
         }
-        .curved-sidebar {
-          background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
-          position: relative;
-        }
-        .curved-sidebar::after {
-          content: '';
-          position: absolute;
-          top: 0;
-          right: -20px;
-          width: 40px;
-          height: 100%;
-          background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
-          border-radius: 0 50px 50px 0;
+        
+        /* Additional CSS for multi-page layout */
+        @media print {
+          .cv-container {
+            display: flex;
+            width: 100%;
+          }
+          .sidebar-print {
+            width: 33.333%;
+            color: white !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          .main-content-print {
+            width: 66.667%;
+          }
         }
       `}</style>
 
-      {/* Curved Sidebar */}
-      <div className="w-1/3 curved-sidebar text-white p-8 print:break-inside-avoid relative">
-        <div className="space-y-8 relative z-10">
+      {/* Sidebar - Made more compact */}
+      <div className={`w-1/3 ${colors.sidebarBg} text-white p-6 print:break-inside-avoid ${colors.sidebarPrintBg} sidebar-container sidebar-bg sidebar-print`}>
+        <div className="space-y-4 print:space-y-3 sticky top-0">
           {/* Profile Picture */}
           {data.personalInfo.profilePicture && (
-            <div className="text-center print:break-inside-avoid">
+            <div className="text-center print-break-inside-avoid mb-4 print:mb-3">
               <img
                 src={data.personalInfo.profilePicture || "/placeholder.svg"}
                 alt={data.personalInfo.fullName}
-                className="w-32 h-32 rounded-full mx-auto object-cover border-4 border-white shadow-lg"
+                className="w-24 h-24 rounded-full mx-auto object-cover border-4 border-blue-300 print:border-blue-300 print:w-20 print:h-20"
               />
             </div>
           )}
 
-          {/* Name */}
-          <div className="text-center print:break-inside-avoid">
-            <h1 className="text-3xl font-bold text-white mb-2">
-              {data.personalInfo.fullName}
-            </h1>
-          </div>
-
-          {/* Contact Info - Rounded Section */}
-          <div className="bg-white bg-opacity-20 rounded-2xl p-6 backdrop-blur-sm print:break-inside-avoid">
-            <h2 className="text-xl font-bold mb-4 text-white">CONTACT</h2>
-            <div className="space-y-3 text-sm">
-              <div className="flex items-center space-x-3">
-                <Phone className="w-4 h-4 text-blue-200" />
-                <span>{data.personalInfo.phone}</span>
+          {/* Contact Info */}
+          <div className="print-break-inside-avoid mb-4 print:mb-3">
+            <h2 className={`text-lg font-bold mb-2 ${colors.accentLightText} print:text-base`}>Contact</h2>
+            <div className="space-y-1.5 text-sm">
+              <div className="flex items-center space-x-2">
+                <Mail className={`w-3 h-3 ${colors.accentIcon} flex-shrink-0`} />
+                <span className="break-all text-xs">{data.personalInfo.email}</span>
               </div>
-              <div className="flex items-center space-x-3">
-                <Mail className="w-4 h-4 text-blue-200" />
-                <span className="break-all">{data.personalInfo.email}</span>
+              <div className="flex items-center space-x-2">
+                <Phone className={`w-3 h-3 ${colors.accentIcon} flex-shrink-0`} />
+                <span className="text-xs">{data.personalInfo.phone}</span>
               </div>
-              <div className="flex items-center space-x-3">
-                <MapPin className="w-4 h-4 text-blue-200" />
-                <span>
-                  {data.personalInfo.city}, {data.personalInfo.country}
-                  {data.personalInfo.address && (
-                    <>
-                      <br />
-                      {data.personalInfo.address}
-                    </>
+              <div className="flex items-center space-x-2">
+                <MapPin className={`w-3 h-3 ${colors.accentIcon} flex-shrink-0`} />
+                <span className="text-xs">
+                  {(data.personalInfo.city || data.personalInfo.country) && (
+                    <span>
+                      {data.personalInfo.city && data.personalInfo.country
+                        ? `${data.personalInfo.city}, ${data.personalInfo.country}`
+                        : data.personalInfo.city || data.personalInfo.country}
+                    </span>
                   )}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Skills */}
-          <div className="print:break-inside-avoid">
-            <h2 className="text-xl font-bold mb-4 text-white">SKILLS</h2>
-            <div className="space-y-4">
+          {/* Skills - Made more compact */}
+          <div className="print-break-inside-avoid mb-4 print:mb-3">
+            <h2 className="text-lg font-bold mb-2 text-blue-300 print:text-blue-300 print:text-base">Skills</h2>
+            <div className="space-y-2">
               {data.skills.technical.length > 0 && (
                 <div>
-                  <h3 className="font-semibold mb-2 text-sm text-blue-200">
-                    Technical Skills
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
+                  <h3 className="font-semibold mb-1 text-xs">Technical Skills</h3>
+                  <div className="flex flex-wrap gap-1">
                     {data.skills.technical.map((skill, index) => (
                       <span
                         key={index}
-                        className="bg-white bg-opacity-20 text-white px-3 py-1 rounded-full text-xs backdrop-blur-sm"
+                        className="bg-blue-600 text-white px-1.5 py-0.5 rounded text-xs"
                       >
                         {skill}
                       </span>
@@ -148,14 +249,12 @@ export function ModernTemplate7({
               )}
               {data.skills.soft.length > 0 && (
                 <div>
-                  <h3 className="font-semibold mb-2 text-sm text-blue-200">
-                    Soft Skills
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
+                  <h3 className="font-semibold mb-1 text-xs">Soft Skills</h3>
+                  <div className="flex flex-wrap gap-1">
                     {data.skills.soft.map((skill, index) => (
                       <span
                         key={index}
-                        className="bg-white bg-opacity-20 text-white px-3 py-1 rounded-full text-xs backdrop-blur-sm"
+                        className="bg-slate-600 text-white px-1.5 py-0.5 rounded text-xs"
                       >
                         {skill}
                       </span>
@@ -168,44 +267,31 @@ export function ModernTemplate7({
 
           {/* Languages */}
           {data.languages.length > 0 && (
-            <div className="print:break-inside-avoid">
-              <h2 className="text-xl font-bold mb-4 text-white">
-                LANGUAGES
-              </h2>
-              <div className="space-y-2">
+            <div className="print-break-inside-avoid mb-4 print:mb-3">
+              <h2 className="text-lg font-bold mb-2 text-blue-300 print:text-blue-300 print:text-base">Languages</h2>
+              <div className="space-y-1">
                 {data.languages.map((lang) => (
-                  <div key={lang.id} className="text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-white">{lang.name}</span>
-                      <span className="text-blue-200">{lang.proficiency}</span>
-                    </div>
+                  <div key={lang.id} className="flex justify-between text-xs">
+                    <span>{lang.name}</span>
+                    <span className="text-blue-200 print:text-blue-200">{lang.proficiency}</span>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Education */}
-          <div className="print:break-inside-avoid">
-            <h2 className="text-xl font-bold mb-4 text-white">EDUCATION</h2>
-            <div className="space-y-4">
+          {/* Education - Made more compact */}
+          <div className="print-break-inside-avoid mb-4 print:mb-3">
+            <h2 className={`text-lg font-bold mb-2 ${colors.accentLightText} print:text-base`}>Education</h2>
+            <div className="space-y-2">
               {data.education.map((edu) => (
-                <div key={edu.id} className="text-sm print:break-inside-avoid">
-                  <h3 className="font-semibold text-white">{edu.degree}</h3>
-                  <p className="text-blue-200">{edu.institutionName}</p>
-                  {edu.location && (
-                    <p className="text-blue-100">{edu.location}</p>
-                  )}
+                <div key={edu.id} className="text-xs print-break-inside-avoid">
+                  <h3 className="font-semibold">{edu.degree}</h3>
+                  <p className={`${colors.accentLighterText}`}>{edu.institutionName}</p>
                   {edu.graduationDate && (
-                    <p className="text-blue-300 text-xs">
+                    <p className="text-gray-400">
                       {formatDate(edu.graduationDate)}
                     </p>
-                  )}
-                  {edu.gpa && (
-                    <p className="text-blue-300 text-xs">GPA: {edu.gpa}</p>
-                  )}
-                  {edu.honors && (
-                    <p className="text-blue-200 text-xs">{edu.honors}</p>
                   )}
                 </div>
               ))}
@@ -214,15 +300,13 @@ export function ModernTemplate7({
 
           {/* Interests */}
           {data.additional.interests.length > 0 && (
-            <div className="print:break-inside-avoid">
-              <h2 className="text-xl font-bold mb-4 text-white">
-                INTERESTS
-              </h2>
-              <div className="flex flex-wrap gap-2">
+            <div className="print-break-inside-avoid">
+              <h2 className={`text-lg font-bold mb-2 ${colors.accentLightText} print:text-base`}>Interests</h2>
+              <div className="flex flex-wrap gap-1">
                 {data.additional.interests.map((interest, index) => (
                   <span
                     key={index}
-                    className="bg-white bg-opacity-20 text-white px-3 py-1 rounded-full text-xs backdrop-blur-sm"
+                    className={`${colors.accentMutedBg} text-white px-1.5 py-0.5 rounded text-xs`}
                   >
                     {interest}
                   </span>
@@ -233,53 +317,52 @@ export function ModernTemplate7({
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 p-8 pl-12">
-        <div className="space-y-8">
-          {/* Profile Section */}
-          <div className="print:break-inside-avoid">
-            <div className="flex items-center mb-4">
-              <div className="w-8 h-8 bg-blue-800 rounded-full flex items-center justify-center mr-3">
-                <span className="text-white text-sm font-bold">👤</span>
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900">PROFILE</h2>
-            </div>
-            <div className="border-b-2 border-blue-300 mb-4"></div>
-            <p className="text-gray-700 leading-relaxed">
+      {/* Main Content - Adjusted spacing */}
+      <div className="flex-1 p-6 print:p-4 print:break-inside-avoid page-content main-content-print">
+        <div className="space-y-4 print:space-y-3">
+          {/* Header - Made more compact */}
+          <div className="border-b border-gray-200 pb-3 mb-3 print-break-inside-avoid print:border-gray-200 main-content-section">
+            <h1 className="text-2xl font-bold text-gray-900 mb-1 print:text-gray-900 print:text-xl">
+              {data.personalInfo.fullName}
+            </h1>
+            <h2 className="text-base text-blue-600 font-medium mb-1 print:text-blue-600">
+              {data.personalInfo.jobTitle}
+            </h2>
+            <p className="text-gray-600 leading-relaxed text-xs print:text-gray-600">
               {data.personalInfo.summary}
             </p>
           </div>
 
-          {/* Work Experience */}
-          <div className="print:break-inside-avoid">
-            <div className="flex items-center mb-4">
-              <div className="w-8 h-8 bg-blue-800 rounded-full flex items-center justify-center mr-3">
-                <span className="text-white text-sm font-bold">💼</span>
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900">WORK EXPERIENCE</h2>
-            </div>
-            <div className="border-b-2 border-blue-300 mb-6"></div>
-            <div className="space-y-6">
+          {/* Experience - Made more compact */}
+          <div className="print-break-inside-avoid main-content-section">
+            <h2 className="text-lg font-bold text-gray-900 mb-3 print:text-gray-900">Experience</h2>
+            <div className="space-y-3">
               {data.experience.map((exp, index) => (
-                <div key={exp.id} className="print:break-inside-avoid">
-                  <div className="flex justify-between items-start mb-2">
+                <div
+                  key={exp.id}
+                  className={`border-l-2 ${colors.accentBorder} pl-3 print-break-inside-avoid`}
+                >
+                  <div className="flex justify-between items-start mb-1">
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900">
-                        {exp.jobTitle} - {exp.companyName}
+                      <h3 className="text-base font-semibold text-gray-900 print:text-gray-900">
+                        {exp.jobTitle}
                       </h3>
-                      {exp.location && (
-                        <p className="text-gray-600 text-sm">{exp.location}</p>
-                      )}
+                      <p className={`${colors.accentText} font-medium text-xs`}>
+                        {exp.companyName}
+                      </p>
                     </div>
-                    <span className="text-gray-600 text-sm font-medium">
-                      {formatDate(exp.startDate)} -{" "}
-                      {exp.current ? "Present" : formatDate(exp.endDate)}
-                    </span>
+                    {(formatDate(exp.startDate) || exp.current || formatDate(exp.endDate)) && (
+                      <span className="text-gray-500 text-xs print:text-gray-500 whitespace-nowrap">
+                        {formatDate(exp.startDate)}
+                        {(formatDate(exp.startDate) && (exp.current || formatDate(exp.endDate))) ? " - " : ""}
+                        {exp.current ? "Present" : formatDate(exp.endDate)}
+                      </span>
+                    )}
                   </div>
-                  <ul className="text-gray-700 leading-relaxed space-y-1 ml-4">
+                  <ul className="text-gray-700 leading-relaxed space-y-0.5 text-xs print:text-gray-700">
                     {exp.responsibilities.map((resp, index) => (
                       <li key={index} className="flex items-start">
-                        <span className="text-blue-500 mr-2">•</span>
+                        <span className={`${colors.accentBorderText} mr-1`}>•</span>
                         <span>{resp}</span>
                       </li>
                     ))}
@@ -289,37 +372,34 @@ export function ModernTemplate7({
             </div>
           </div>
 
-          {/* Projects */}
+          {/* Projects - Made more compact */}
           {data.projects.length > 0 && (
-            <div className="print:break-inside-avoid">
-              <div className="flex items-center mb-4">
-                <div className="w-8 h-8 bg-blue-800 rounded-full flex items-center justify-center mr-3">
-                  <span className="text-white text-sm font-bold">🚀</span>
-                </div>
-                <h2 className="text-2xl font-bold text-gray-900">PROJECTS</h2>
-              </div>
-              <div className="border-b-2 border-blue-300 mb-6"></div>
-              <div className="space-y-6">
+            <div className="print-break-inside-avoid main-content-section">
+              <h2 className="text-lg font-bold text-gray-900 mb-3 print:text-gray-900">Projects</h2>
+              <div className="space-y-3">
                 {data.projects.map((project) => (
-                  <div key={project.id} className="print:break-inside-avoid">
-                    <div className="flex justify-between items-start mb-2">
+                  <div
+                    key={project.id}
+                    className="border rounded p-2 print-break-inside-avoid print:border-gray-300"
+                  >
+                    <div className="flex justify-between items-start mb-1">
                       <div>
-                        <h3 className="text-lg font-bold text-gray-900">
+                        <h3 className="text-sm font-semibold text-gray-900 print:text-gray-900">
                           {project.name}
                         </h3>
-                        <p className="text-blue-600 font-medium">
-                          {project.role}
-                        </p>
+                        <p className={`${colors.accentText} font-medium text-xs`}>
+                           {project.role}
+                         </p>
                       </div>
-                      <div className="flex space-x-2">
+                      <div className="flex space-x-1">
                         {project.liveDemoLink && (
                           <a
                             href={project.liveDemoLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800"
+                            className={`${colors.accentBorderText} hover:opacity-80`}
                           >
-                            <ExternalLink className="w-4 h-4" />
+                            <ExternalLink className="w-3 h-3" />
                           </a>
                         )}
                         {project.githubLink && (
@@ -327,31 +407,23 @@ export function ModernTemplate7({
                             href={project.githubLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-gray-600 hover:text-gray-800"
+                            className="text-gray-600 hover:text-gray-800 print:text-gray-600"
                           >
-                            <Github className="w-4 h-4" />
+                            <Github className="w-3 h-3" />
                           </a>
                         )}
                       </div>
                     </div>
-                    <ul className="text-gray-700 leading-relaxed space-y-1 ml-4 mb-3">
-                      <li className="flex items-start">
-                        <span className="text-blue-500 mr-2">•</span>
-                        <span>{project.description}</span>
-                      </li>
-                    </ul>
-                    <div className="ml-4">
-                      <p className="text-sm text-gray-600 mb-2">Tech Stack:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {project.technologies.map((tech, index) => (
-                          <span
-                            key={index}
-                            className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs"
-                          >
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
+                    <p className="text-gray-700 mb-1 text-xs print:text-gray-700">{project.description}</p>
+                    <div className="flex flex-wrap gap-1">
+                      {project.technologies.map((tech, index) => (
+                        <span
+                          key={index}
+                          className="bg-gray-100 text-gray-700 px-1 py-0.5 rounded text-xs print:bg-gray-100 print:text-gray-700"
+                        >
+                          {tech}
+                        </span>
+                      ))}
                     </div>
                   </div>
                 ))}
@@ -361,42 +433,26 @@ export function ModernTemplate7({
 
           {/* Certifications */}
           {data.certifications.length > 0 && (
-            <div className="print:break-inside-avoid">
-              <div className="flex items-center mb-4">
-                <div className="w-8 h-8 bg-blue-800 rounded-full flex items-center justify-center mr-3">
-                  <span className="text-white text-sm font-bold">🏆</span>
-                </div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  CERTIFICATIONS & AWARDS
-                </h2>
-              </div>
-              <div className="border-b-2 border-blue-300 mb-6"></div>
-              <div className="space-y-3">
+            <div className="print-break-inside-avoid main-content-section">
+              <h2 className="text-lg font-bold text-gray-900 mb-3 print:text-gray-900">Certifications & Awards</h2>
+              <div className="space-y-1">
                 {data.certifications.map((cert) => (
                   <div
                     key={cert.id}
-                    className="flex justify-between items-center print:break-inside-avoid"
+                    className="flex justify-between items-center print-break-inside-avoid"
                   >
                     <div>
-                      <h3 className="font-bold text-gray-900">{cert.title}</h3>
-                      <p className="text-gray-600">{cert.issuingOrganization}</p>
+                      <h3 className="font-semibold text-gray-900 text-xs print:text-gray-900">
+                        {cert.title}
+                      </h3>
+                      <p className="text-gray-600 text-xs print:text-gray-600">
+                        {cert.issuingOrganization}
+                      </p>
                     </div>
                     <div className="text-right">
-                      <span className="text-gray-600 text-sm">
+                      <span className="text-gray-500 text-xs print:text-gray-500">
                         {formatDate(cert.dateObtained)}
                       </span>
-                      {cert.verificationLink && (
-                        <div>
-                          <a
-                            href={cert.verificationLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 text-sm"
-                          >
-                            Verify
-                          </a>
-                        </div>
-                      )}
                     </div>
                   </div>
                 ))}

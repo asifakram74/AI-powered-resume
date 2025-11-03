@@ -98,12 +98,12 @@ const templates: CVTemplate[] = [
     description: "Gray sidebar with clean white main content",
     category: "modern",
   },
-  // {
-  //   id: "minimal",
-  //   name: "Minimal Clean",
-  //   description: "Simple, clean layout focusing on content",
-  //   category: "minimal",
-  // },
+  {
+    id: "minimal",
+    name: "Minimal Clean",
+    description: "Simple, clean layout focusing on content",
+    category: "minimal",
+  },
   // // New templates
   {
     id: "classic-2",
@@ -141,7 +141,7 @@ const templates: CVTemplate[] = [
   //   description: "Another variation of the minimal layout",
   //   category: "minimal",
   // },
-  // {
+  //  {
   //   id: "modern-2",
   //   name: "Modern Professional 2",
   //   description: "An updated modern design for professionals",
@@ -179,18 +179,18 @@ const templates: CVTemplate[] = [
   //   category: "creative",
   // },
 
-  // {
-  //   id: "modern-6",
-  //   name: "Modern MIKE",
-  //   description: "Blue sidebar with professional white layout",
-  //   category: "modern",
-  // },
-  // {
-  //   id: "modern-7",
-  //   name: "Modern LOREN",
-  //   description: "Dark blue curved sidebar with elegant design",
-  //   category: "modern",
-  // },
+  {
+    id: "modern-6",
+    name: "Modern MIKE",
+    description: "Blue sidebar with professional white layout",
+    category: "modern",
+  },
+  {
+    id: "modern-7",
+    name: "Modern LOREN",
+    description: "Dark blue curved sidebar with elegant design",
+    category: "modern",
+  },
   {
     id: "modern-8",
     name: "Modern LILLY",

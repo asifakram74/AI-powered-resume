@@ -12,36 +12,36 @@ export function ModernTemplate6({
   data,
   isPreview = false,
 }: ModernTemplate6Props) {
- const formatDate = (date: string) => {
-  if (!date) return "";
-  const monthNames = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-  ];
-  
-  // ISO patterns: YYYY-MM or YYYY-MM-DD
-  const isoMatch = /^(\d{4})-(\d{1,2})(?:-\d{1,2})?$/.exec(date);
-  if (isoMatch) {
-    const year = isoMatch[1];
-    const month = Math.max(1, Math.min(12, Number.parseInt(isoMatch[2], 10)));
-    return `${monthNames[month - 1]} ${year}`;
-  }
-  
-  // Slash pattern: MM/YYYY
-  const slashMatch = /^(\d{1,2})\/(\d{4})$/.exec(date);
-  if (slashMatch) {
-    const month = Math.max(1, Math.min(12, Number.parseInt(slashMatch[1], 10)));
-    const year = slashMatch[2];
-    return `${monthNames[month - 1]} ${year}`;
-  }
-  
-  // Already formatted like "Jan 2020"
-  const monTextMatch = /^([A-Za-z]{3,})\s+(\d{4})$/.exec(date);
-  if (monTextMatch) return date;
-  
-  // Fallback: return raw string
-  return date;
-};
+  const formatDate = (date: string) => {
+    if (!date) return "";
+    const monthNames = [
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    ];
+    
+    // ISO patterns: YYYY-MM or YYYY-MM-DD
+    const isoMatch = /^(\d{4})-(\d{1,2})(?:-\d{1,2})?$/.exec(date);
+    if (isoMatch) {
+      const year = isoMatch[1];
+      const month = Math.max(1, Math.min(12, Number.parseInt(isoMatch[2], 10)));
+      return `${monthNames[month - 1]} ${year}`;
+    }
+    
+    // Slash pattern: MM/YYYY
+    const slashMatch = /^(\d{1,2})\/(\d{4})$/.exec(date);
+    if (slashMatch) {
+      const month = Math.max(1, Math.min(12, Number.parseInt(slashMatch[1], 10)));
+      const year = slashMatch[2];
+      return `${monthNames[month - 1]} ${year}`;
+    }
+    
+    // Already formatted like "Jan 2020"
+    const monTextMatch = /^([A-Za-z]{3,})\s+(\d{4})$/.exec(date);
+    if (monTextMatch) return date;
+    
+    // Fallback: return raw string
+    return date;
+  };
 
   return (
     <div className="flex min-h-screen bg-white print:min-h-0 print:shadow-none">
@@ -51,24 +51,35 @@ export function ModernTemplate6({
             size: A4;
             margin: 0.5in;
           }
-          .print\\:break-inside-avoid {
+          .print-break-inside-avoid {
             break-inside: avoid;
+            // page-break-inside: avoid;
           }
-          .print\\:break-before-page {
+          .print-break-before-page {
             break-before: page;
+            page-break-before: always;
           }
-          .print\\:break-after-avoid {
+          .print-break-after-avoid {
             break-after: avoid;
+            // page-break-after: avoid;
+          }
+          .print-keep-together {
+            break-inside: avoid;
+            // page-break-inside: avoid;
+          }
+          .section-container {
+            break-inside: avoid;
+            // page-break-inside: avoid;
           }
         }
       `}</style>
 
       {/* Sidebar */}
-      <div className="w-1/3 bg-blue-900 text-white p-8 print:break-inside-avoid">
+      <div className="w-1/3 bg-blue-900 text-white p-8 print-break-inside-avoid">
         <div className="space-y-8">
           {/* Profile Picture */}
           {data.personalInfo.profilePicture && (
-            <div className="text-center print:break-inside-avoid">
+            <div className="text-center print-break-inside-avoid">
               <img
                 src={data.personalInfo.profilePicture || "/placeholder.svg"}
                 alt={data.personalInfo.fullName}
@@ -78,14 +89,14 @@ export function ModernTemplate6({
           )}
 
           {/* Name */}
-          <div className="text-center print:break-inside-avoid">
+          <div className="text-center print-break-inside-avoid">
             <h1 className="text-3xl font-bold text-white mb-2">
               {data.personalInfo.fullName}
             </h1>
           </div>
 
           {/* Contact Info */}
-          <div className="print:break-inside-avoid">
+          <div className="print-break-inside-avoid">
             <h2 className="text-xl font-bold mb-4 text-blue-200">CONTACT</h2>
             <div className="space-y-3 text-sm">
               <div className="flex items-center space-x-3">
@@ -112,7 +123,7 @@ export function ModernTemplate6({
           </div>
 
           {/* Skills */}
-          <div className="print:break-inside-avoid">
+          <div className="print-break-inside-avoid">
             <h2 className="text-xl font-bold mb-4 text-blue-200">SKILLS</h2>
             <div className="space-y-4">
               {data.skills.technical.length > 0 && (
@@ -142,7 +153,7 @@ export function ModernTemplate6({
 
           {/* Languages */}
           {data.languages.length > 0 && (
-            <div className="print:break-inside-avoid">
+            <div className="print-break-inside-avoid">
               <h2 className="text-xl font-bold mb-4 text-blue-200">
                 LANGUAGES
               </h2>
@@ -160,18 +171,18 @@ export function ModernTemplate6({
           )}
 
           {/* Education */}
-          <div className="print:break-inside-avoid">
+          <div className="print-break-inside-avoid">
             <h2 className="text-xl font-bold mb-4 text-blue-200">EDUCATION</h2>
-            <div className="space-y-4">
+            <div className="space-y-4 print-break-inside-avoid">
               {data.education.map((edu) => (
-                <div key={edu.id} className="text-sm print:break-inside-avoid">
+                <div key={edu.id} className="text-sm print-break-inside-avoid">
                   <h3 className="font-semibold text-white">{edu.degree}</h3>
                   <p className="text-blue-200">{edu.institutionName}</p>
                   {edu.location && (
                     <p className="text-blue-100">{edu.location}</p>
                   )}
                   {edu.graduationDate && (
-                    <p className="text-blue-300 text-xs">
+                    <p className="text-blue-300 text-xs print-break-inside-avoid">
                       {formatDate(edu.graduationDate)}
                     </p>
                   )}
@@ -192,7 +203,7 @@ export function ModernTemplate6({
       <div className="flex-1 p-8">
         <div className="space-y-8">
           {/* Profile Section */}
-          <div className="print:break-inside-avoid">
+          <div className="section-container print-keep-together">
             <div className="flex items-center mb-4">
               <div className="w-8 h-8 bg-blue-900 rounded-full flex items-center justify-center mr-3">
                 <span className="text-white text-sm font-bold">👤</span>
@@ -206,7 +217,7 @@ export function ModernTemplate6({
           </div>
 
           {/* Work Experience */}
-          <div className="print:break-inside-avoid">
+          <div className="section-container print-keep-together">
             <div className="flex items-center mb-4">
               <div className="w-8 h-8 bg-blue-900 rounded-full flex items-center justify-center mr-3">
                 <span className="text-white text-sm font-bold">💼</span>
@@ -216,7 +227,7 @@ export function ModernTemplate6({
             <div className="border-b-2 border-blue-300 mb-6"></div>
             <div className="space-y-6">
               {data.experience.map((exp, index) => (
-                <div key={exp.id} className="print:break-inside-avoid">
+                <div key={exp.id} className="print-keep-together">
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <h3 className="text-lg font-bold text-gray-900">
@@ -233,7 +244,7 @@ export function ModernTemplate6({
                   </div>
                   <ul className="text-gray-700 leading-relaxed space-y-1 ml-4">
                     {exp.responsibilities.map((resp, index) => (
-                      <li key={index} className="flex items-start">
+                      <li key={index} className="flex items-start print-keep-together">
                         <span className="text-blue-500 mr-2">•</span>
                         <span>{resp}</span>
                       </li>
@@ -246,7 +257,7 @@ export function ModernTemplate6({
 
           {/* Projects */}
           {data.projects.length > 0 && (
-            <div className="print:break-inside-avoid">
+            <div className="section-container print-keep-together">
               <div className="flex items-center mb-4">
                 <div className="w-8 h-8 bg-blue-900 rounded-full flex items-center justify-center mr-3">
                   <span className="text-white text-sm font-bold">🚀</span>
@@ -256,7 +267,7 @@ export function ModernTemplate6({
               <div className="border-b-2 border-blue-300 mb-6"></div>
               <div className="space-y-6">
                 {data.projects.map((project) => (
-                  <div key={project.id} className="print:break-inside-avoid">
+                  <div key={project.id} className="print-keep-together">
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <h3 className="text-lg font-bold text-gray-900">
@@ -316,7 +327,7 @@ export function ModernTemplate6({
 
           {/* Certifications */}
           {data.certifications.length > 0 && (
-            <div className="print:break-inside-avoid">
+            <div className="section-container print-keep-together">
               <div className="flex items-center mb-4">
                 <div className="w-8 h-8 bg-blue-900 rounded-full flex items-center justify-center mr-3">
                   <span className="text-white text-sm font-bold">🏆</span>
@@ -330,7 +341,7 @@ export function ModernTemplate6({
                 {data.certifications.map((cert) => (
                   <div
                     key={cert.id}
-                    className="flex justify-between items-center print:break-inside-avoid"
+                    className="flex justify-between items-center print-keep-together"
                   >
                     <div>
                       <h3 className="font-bold text-gray-900">{cert.title}</h3>
@@ -361,7 +372,7 @@ export function ModernTemplate6({
 
           {/* Interests */}
           {data.additional.interests.length > 0 && (
-            <div className="print:break-inside-avoid">
+            <div className="section-container print-keep-together">
               <div className="flex items-center mb-4">
                 <div className="w-8 h-8 bg-blue-900 rounded-full flex items-center justify-center mr-3">
                   <span className="text-white text-sm font-bold">⭐</span>

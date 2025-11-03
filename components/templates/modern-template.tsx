@@ -43,18 +43,7 @@ export function ModernTemplate({
     <div className="flex max-w-full mx-auto min-h-screen bg-white print:min-h-0 print:shadow-none print:bg-white">
       <style jsx global>{`
         @media print {
-          @page {
-            size: A4;
-            margin: 0.5in;
-          }
-          @page :first {
-            margin-top: 0.5in;
-            margin-bottom: 0.3in;
-          }
-          @page :not(:first) {
-            margin-top: 0.5in;
-            margin-bottom: 0.5in;
-          }
+       
           body {
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
