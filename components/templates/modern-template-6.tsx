@@ -86,7 +86,7 @@ const formatDate = (date: string) => {
                   <Phone className="w-5 h-5 text-indigo-600" />
                   <span>{data.personalInfo.phone}</span>
                 </div>
-                {(data.personalInfo.city || data.personalInfo.country || data.personalInfo.address) && (
+                {(data.personalInfo.city || data.personalInfo.country) && (
                   <div className="flex items-start gap-3">
                     <MapPin className="w-5 h-5 text-indigo-600 mt-0.5" />
                     <div>
@@ -97,11 +97,7 @@ const formatDate = (date: string) => {
                             : data.personalInfo.city || data.personalInfo.country}
                         </div>
                       )}
-                      {data.personalInfo.address && (
-                        <div className={`text-sm ${(data.personalInfo.city || data.personalInfo.country) ? 'mt-1' : ''}`}>
-                          {data.personalInfo.address}
-                        </div>
-                      )}
+                     
                     </div>
                   </div>
                 )}
