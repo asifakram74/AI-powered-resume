@@ -37,6 +37,16 @@ const formatDate = (date: string) => {
   return date;
 };
 
+  // Compute location and whether to show address without duplication
+  const locationText = (data.personalInfo.city && data.personalInfo.country)
+    ? `${data.personalInfo.city}, ${data.personalInfo.country}`
+    : (data.personalInfo.city || data.personalInfo.country || "")
+
+  const addressText = (data.personalInfo.address || "").trim()
+  const locLower = locationText.toLowerCase()
+  const addrLower = addressText.toLowerCase()
+  const showAddress = Boolean(addressText) && (!locLower || (addrLower !== locLower && !addrLower.includes(locLower)))
+
   return (
     <div className="max-w-full mx-auto bg-white p-12 min-h-screen font-serif print:px-4 print:py-8">
       <style jsx global>{`
@@ -76,14 +86,9 @@ const formatDate = (date: string) => {
             <>
               <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
               <span>
-                {data.personalInfo.city && data.personalInfo.country
-                  ? `${data.personalInfo.city}, ${data.personalInfo.country}`
-                  : data.personalInfo.city || data.personalInfo.country}
-                {data.personalInfo.address && (
-                  <>
-                    {" "}
-                    {data.personalInfo.address}
-                  </>
+                {locationText}
+                {showAddress && (
+                  <> {addressText}</>
                 )}
               </span>
             </>

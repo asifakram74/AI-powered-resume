@@ -153,7 +153,7 @@ const templates: CVTemplate[] = [
     description: "Light blue sidebar with rounded contact section",
     category: "modern",
   },
-
+  
   {
     id: "creative",
     name: "Creative Designer",

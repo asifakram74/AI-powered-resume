@@ -543,6 +543,25 @@ export function CVPageClientContent() {
   }
 
   const convertToCVData = (aiResponse: AIResponse): CVData => {
+    // Derive location pieces from persona or AI location string
+    const locationRaw = aiResponse.optimizedCV.personalInfo.location || ""
+    const personaCity = persona?.city || ""
+    const personaCountry = persona?.country || ""
+
+    let derivedCity = personaCity
+    let derivedCountry = personaCountry
+
+    if (!derivedCity && !derivedCountry && locationRaw) {
+      const parts = locationRaw.split(",").map((p) => p.trim()).filter(Boolean)
+      if (parts.length >= 2) {
+        derivedCity = parts[0]
+        derivedCountry = parts.slice(1).join(", ")
+      } else if (parts.length === 1) {
+        // If only one token, treat it as city by default
+        derivedCity = parts[0]
+      }
+    }
+
     return {
       id: existingCV?.id || "generated-cv",
       personalInfo: {
@@ -550,21 +569,21 @@ export function CVPageClientContent() {
         jobTitle: persona?.job_title || "",
         email: aiResponse.optimizedCV.personalInfo.email,
         phone: aiResponse.optimizedCV.personalInfo.phone,
-        address: aiResponse.optimizedCV.personalInfo.location,
-        city: "",
-        country: "",
+        address: persona?.address || locationRaw,
+        city: derivedCity,
+        country: derivedCountry,
         profilePicture: persona?.profile_picture || "",
         summary: aiResponse.optimizedCV.summary,
         linkedin: aiResponse.optimizedCV.personalInfo.linkedin,
         github: "",
       },
       experience: aiResponse.optimizedCV.workExperience.map((exp, index) => {
-        const normalizedDuration = (exp.duration || "").replace(/[–—]/g, "-");
-        const parts = normalizedDuration.split("-").map((s) => s.trim());
-        const start = parts[0] || "";
-        let end = parts[1] || "";
-        const current = /present/i.test(end);
-        if (current) end = "";
+        const normalizedDuration = (exp.duration || "").replace(/[–—]/g, "-")
+        const parts = normalizedDuration.split("-").map((s) => s.trim())
+        const start = parts[0] || ""
+        let end = parts[1] || ""
+        const current = /present/i.test(end)
+        if (current) end = ""
         return {
           id: `exp-${index}`,
           jobTitle: exp.title,
@@ -574,7 +593,7 @@ export function CVPageClientContent() {
           endDate: end,
           current,
           responsibilities: [exp.description],
-        };
+        }
       }),
       education: aiResponse.optimizedCV.education.map((edu, index) => ({
         id: `edu-${index}`,
@@ -582,40 +601,35 @@ export function CVPageClientContent() {
         institutionName: edu.institution,
         location: "",
         graduationDate: edu.year,
-        gpa: edu.gpa,
-        honors: "",
-        additionalInfo: "",
+        gpa: edu.gpa || "",
+        honors: (edu as any).honors || "",
+        additionalInfo: (edu as any).additionalInfo || "",
       })),
       skills: {
-        technical: aiResponse.optimizedCV.skills,
+        technical: aiResponse.optimizedCV.skills || [],
         soft: [],
       },
-      languages: aiResponse.optimizedCV.languages.map((lang, index) => ({
+      languages: (aiResponse.optimizedCV.languages || []).map((lang, index) => ({
         id: `lang-${index}`,
         name: lang,
-        proficiency: "Intermediate" as const,
+        proficiency: "Fluent" as const,
       })),
-      certifications: aiResponse.optimizedCV.certifications.map((cert, index) => ({
-        id: `cert-${index}`,
-        title: cert,
-        issuingOrganization: "",
-        dateObtained: "",
-        verificationLink: "",
-      })),
-      projects: aiResponse.optimizedCV.projects.map((proj, index) => ({
+      certifications: [],
+      projects: (aiResponse.optimizedCV.projects || []).map((proj, index) => ({
         id: `proj-${index}`,
-        name: proj.name,
-        role: "",
-        description: proj.description,
-        technologies: proj.technologies,
-        liveDemoLink: "",
-        githubLink: "",
+        name: proj.name || "",
+        role: "", // proj.role does not exist on the type, defaulting to empty string
+        description: proj.description || "",
+        technologies: proj.technologies || [],
+        liveDemoLink: (proj as any).liveDemoLink || "",
+        githubLink: (proj as any).githubLink || "",
       })),
       additional: {
-        interests: aiResponse.optimizedCV.interests,
+        interests: aiResponse.optimizedCV.interests || [],
       },
-      createdAt: existingCV?.created_at || new Date().toISOString(),
-    };
+      createdAt: new Date().toISOString(),
+      generatedPersona: persona?.generatedPersona || "",
+    }
   }
 
   const handleEdit = () => {
