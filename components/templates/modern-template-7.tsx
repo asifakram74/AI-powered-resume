@@ -122,8 +122,7 @@ export function ModernTemplate7({
     <div className="flex max-w-full mx-auto min-h-screen bg-white print:min-h-0 print:shadow-none print:bg-white">
       <style jsx global>{`
         @media print {
-       
-          body {
+                body {
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
             background: white;
@@ -138,9 +137,10 @@ export function ModernTemplate7({
             break-before: auto;
           }
           
-          /* Fix for sidebar background on all pages */
-          .sidebar-bg {
-            background: inherit !important;
+          /* FixFix fo idebar bapages */
+  n a l .agesbar-bg {
+            backgr
+            background: inherit !important;ound: inherit !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
@@ -188,7 +188,7 @@ export function ModernTemplate7({
       `}</style>
 
       {/* Sidebar - Made more compact */}
-      <div className={`w-1/3 ${colors.sidebarBg} text-white p-6 print:break-inside-avoid ${colors.sidebarPrintBg} sidebar-container sidebar-bg sidebar-print`}>
+      <div className={`w-1/3 ${colors.sidebarBg} text-white p-6 print:break-inside-avoid sidebar-container sidebar-bg sidebar-print`}>
         <div className="space-y-4 print:space-y-3 sticky top-0">
           {/* Profile Picture */}
           {data.personalInfo.profilePicture && (
