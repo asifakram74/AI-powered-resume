@@ -223,11 +223,7 @@ export function ModernTemplate3({ data, isPreview = false }: ModernTemplate3Prop
         </div>
 
         {/* Footer */}
-        <div className="bg-gray-100 py-8 px-12 mt-12 border-t-2 border-amber-600">
-          <p className="text-center text-gray-600 text-sm font-light">
-            This CV is a professional representation of qualifications and experience.
-          </p>
-        </div>
+       
       </div>
     </div>
   )

@@ -235,11 +235,6 @@ export function MinimalTemplate3({ data, isPreview = false }: MinimalTemplate3Pr
           </div>
         )}
       </div>
-
-      {/* Footer */}
-      <div className="bg-slate-900 text-slate-300 py-6 px-12 mt-12 text-center text-sm">
-        <p>Professional CV | {new Date().getFullYear()}</p>
-      </div>
     </div>
   )
 }
