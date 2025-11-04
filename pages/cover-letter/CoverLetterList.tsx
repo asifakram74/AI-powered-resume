@@ -282,8 +282,8 @@ export function CoverLetterPage({ user }: PageProps) {
       return
     }
 
-    // Enforce free plan limit for creating new cover letters
-    if (!editingLetter && (user as any)?.plan_type?.toLowerCase() === 'free' && coverLetters.length >= 3) {
+    // Enforce free plan limit for creating new cover letters; allow admin unlimited
+    if (!editingLetter && (user as any)?.plan_type?.toLowerCase() === 'free' && coverLetters.length >= 3 && (user?.role?.toLowerCase() !== 'admin')) {
       toast.error("Free plan allows only 3 cover letters. Please upgrade your plan to create more.");
       setIsUpgradeDialogOpen(true);
       return;
@@ -497,7 +497,7 @@ export function CoverLetterPage({ user }: PageProps) {
               <Button
                 className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
                 onClick={async (e) => {
-                  if ((user as any)?.plan_type?.toLowerCase() === 'free' && coverLetters.length >= 3) {
+                  if ((user as any)?.plan_type?.toLowerCase() === 'free' && coverLetters.length >= 3 && (user?.role?.toLowerCase() !== 'admin')) {
                     e.preventDefault();
                     setIsUpgradeDialogOpen(true);
                     return;

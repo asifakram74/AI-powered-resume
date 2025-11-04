@@ -319,7 +319,7 @@ const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
 
   const handleCreateAICV = (persona: CVData) => {
     // Check CV limit for free plan users
-    if (user?.plan === 'free' && user?.profile?.cvs_count !== undefined && user.profile.cvs_count >= 3) {
+    if (user?.plan === 'free' && user?.profile?.cvs_count !== undefined && user.profile.cvs_count >= 3 && (user?.role?.toLowerCase() !== 'admin')) {
       toast.error("Free plan users can only create up to 3 CVs. Please upgrade your plan to create more.");
       return;
     }
@@ -549,7 +549,7 @@ const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
                 className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
                 onClick={async (e) => {
 
-                if ((user as any)?.plan_type?.toLowerCase() === "free" && personas.length >= 3) {
+                if ((user as any)?.plan_type?.toLowerCase() === "free" && personas.length >= 3 && (user?.role?.toLowerCase() !== 'admin')) {
                   e.preventDefault();
                   setIsUpgradeDialogOpen(true);
                   return;

@@ -74,6 +74,8 @@ export default function ATSCheckerPage() {
   const analysisRef = useRef<HTMLDivElement>(null);
   const [isSaving, setIsSaving] = useState(false);
   const planType = useAppSelector((state) => state.auth.profile?.plan_type || state.auth.user?.plan_type);
+  const userRole = useAppSelector((state) => state.auth.user?.role);
+  const isAdmin = String(userRole || '').toLowerCase() === 'admin';
   const [freeChecksUsed, setFreeChecksUsed] = useState<number>(0);
 
   useEffect(() => {
@@ -96,7 +98,7 @@ export default function ATSCheckerPage() {
     }
 
     const isFree = !planType || String(planType).toLowerCase() === "free";
-    if (isFree && freeChecksUsed >= 3) {
+    if (isFree && freeChecksUsed >= 3 && !isAdmin) {
       setIsUpgradeDialogOpen(true);
       return;
     }
@@ -142,8 +144,8 @@ export default function ATSCheckerPage() {
 
       setAnalysisResult(data);
 
-      // Increment free usage after successful analysis
-      if (isFree) {
+      // Increment free usage after successful analysis (skip for admins)
+      if (isFree && !isAdmin) {
         const newCount = freeChecksUsed + 1;
         setFreeChecksUsed(newCount);
         if (typeof window !== "undefined") {
@@ -238,7 +240,7 @@ export default function ATSCheckerPage() {
               0, 0, // destination x, y
               originalWidth * 2, cropHeight // destination width, height
             );
-            resolve();
+            resolve(void 0);
           };
         });
 
@@ -534,7 +536,7 @@ export default function ATSCheckerPage() {
                           </>
                         )}
                       </Button>
-                      {(!planType || String(planType).toLowerCase() === "free") && (
+                      {(!planType || String(planType).toLowerCase() === "free") && !isAdmin && (
                         <p className="text-sm text-gray-500 mt-2">
                           Free checks remaining: {Math.max(0, 3 - freeChecksUsed)} of 3
                         </p>

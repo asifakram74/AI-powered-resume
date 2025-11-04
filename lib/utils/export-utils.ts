@@ -116,10 +116,11 @@ export const wrapHtmlWithStyles = (innerHTML: string): string => {
         filter: none !important;
       }
       @media print {
-        @page {
-          size: A4;
-          margin: 0.5in;
-        }
+       @page {
+  size: A4;
+  /* top | right | bottom | left */
+  margin: 0.2in 0in 0.2in 0in; /* adds 0.5in margin at bottom */
+}
         html, body, #cv-export-root {
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;

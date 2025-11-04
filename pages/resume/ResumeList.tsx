@@ -115,7 +115,7 @@ export function ResumePage({ user }: PageProps) {
 
   const handleSaveCV = async (cvData: CreateCVData) => {
     // Check CV limit for free plan users
-    if ((user as any)?.plan_type?.toLowerCase() === 'free' && cvs.length >= 3) {
+    if ((user as any)?.plan_type?.toLowerCase() === 'free' && cvs.length >= 3 && (user?.role?.toLowerCase() !== 'admin')) {
       toast.error("Free plan allows only 3 resumes. Please upgrade your plan to create more.");
       setIsUpgradeDialogOpen(true);
       return;
@@ -206,7 +206,7 @@ export function ResumePage({ user }: PageProps) {
                 className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
                 onClick={async (e) => {
                   // Check CV limit for free plan users before opening dialog
-                  if ((user as any)?.plan_type?.toLowerCase() === 'free' && cvs.length >= 3) {
+                  if ((user as any)?.plan_type?.toLowerCase() === 'free' && cvs.length >= 3 && (user?.role?.toLowerCase() !== 'admin')) {
                     e.preventDefault();
                     setIsUpgradeDialogOpen(true);
                     return;
