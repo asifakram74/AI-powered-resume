@@ -110,6 +110,11 @@ export const wrapHtmlWithStyles = (innerHTML: string): string => {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
+      /* Remove any shadows or drop-shadow filters during export */
+      #cv-export-root, #cv-export-root * {
+        box-shadow: none !important;
+        filter: none !important;
+      }
       @media print {
         @page {
           size: A4;
@@ -119,6 +124,11 @@ export const wrapHtmlWithStyles = (innerHTML: string): string => {
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
           background: white !important;
+        }
+        /* Also remove shadows for print explicitly */
+        #cv-export-root, #cv-export-root * {
+          box-shadow: none !important;
+          filter: none !important;
         }
         /* Explicitly map commonly used amber utilities to hex values */
         .bg-amber-600 { background-color: #d97706 !important; }
@@ -219,28 +229,12 @@ export const exportToPNGViaBrowserless = async (
 ) => {
   try {
     const endpoint = `${BACKEND_BASE_URL}/api/cv-export/png`
-
-    const payload = {
-      html: htmlContent,
-      filename,
-      options: {
-        type: 'png',
-        fullPage: true,
-        omitBackground: false,
-      },
-      viewport: {
-        width: 1240,
-        height: 1754,
-        deviceScaleFactor: 2,
-      },
-    }
-
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ html: htmlContent, filename }),
     })
 
     if (!response.ok) {

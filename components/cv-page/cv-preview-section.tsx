@@ -16,7 +16,7 @@ export function CVPreviewSection({ selectedTemplate, aiResponse, convertToCVData
       {/* Progress Overlay */}
       {isRegenerating && (
         <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50 rounded-lg">
-          <div className="bg-white p-8 rounded-xl shadow-lg border flex flex-col items-center gap-4 max-w-sm mx-4">
+          <div className="bg-white p-8 rounded-xl border flex flex-col items-center gap-4 max-w-sm mx-4">
             <div className="relative">
               <div className="w-16 h-16 border-4 border-blue-200 rounded-full animate-pulse"></div>
               <div className="absolute inset-0 w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
