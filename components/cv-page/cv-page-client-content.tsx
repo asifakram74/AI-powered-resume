@@ -111,12 +111,12 @@ const templates: CVTemplate[] = [
     description: "An updated classic format for conservative industries",
     category: "classic",
   },
-  // {
-  //   id: "classic-3",
-  //   name: "Classic Traditional 3",
-  //   description: "Another variation of the classic format",
-  //   category: "classic",
-  // },
+  {
+    id: "classic-3",
+    name: "Classic Traditional 3",
+    description: "Another variation of the classic format",
+    category: "classic",
+  },
   // {
   //   id: "creative-2",
   //   name: "Creative Designer 2",
@@ -129,30 +129,30 @@ const templates: CVTemplate[] = [
   //   description: "Another creative design option",
   //   category: "creative",
   // },
-  // {
-  //   id: "minimal-2",
-  //   name: "Minimal Clean 2",
-  //   description: "An updated minimal layout focusing on content",
-  //   category: "minimal",
-  // },
-  // {
-  //   id: "minimal-3",
-  //   name: "Minimal Clean 3",
-  //   description: "Another variation of the minimal layout",
-  //   category: "minimal",
-  // },
+  {
+    id: "minimal-2",
+    name: "Minimal Clean 2",
+    description: "An updated minimal layout focusing on content",
+    category: "minimal",
+  },
+   {
+    id: "minimal-3",
+    name: "Minimal Clean 3",
+    description: "Another variation of the minimal layout",
+    category: "minimal",
+  },
   //  {
   //   id: "modern-2",
   //   name: "Modern Professional 2",
   //   description: "An updated modern design for professionals",
   //   category: "modern",
   // },
-  // {
-  //   id: "modern-3",
-  //   name: "Modern Professional 3",
-  //   description: "Another modern design option",
-  //   category: "modern",
-  // },
+   {
+    id: "modern-3",
+    name: "Modern Professional 3",
+    description: "Another modern design option",
+    category: "modern",
+  },
   // New template 4 versions
   {
     id: "classic-4",
@@ -160,12 +160,12 @@ const templates: CVTemplate[] = [
     description: "Premium classic format with enhanced layout",
     category: "classic",
   },
-  // {
-  //   id: "minimal-4",
-  //   name: "Minimal Clean 4",
-  //   description: "Ultra-clean minimal design focusing on content",
-  //   category: "minimal",
-  // },
+  {
+    id: "minimal-4",
+    name: "Minimal Clean 4",
+    description: "Ultra-clean minimal design focusing on content",
+    category: "minimal",
+  },
   // {
   //   id: "modern-4",
   //   name: "Modern Professional 4",
@@ -198,12 +198,12 @@ const templates: CVTemplate[] = [
     category: "modern",
   },
 
-  // {
-  //   id: "creative",
-  //   name: "Creative Designer",
-  //   description: "Eye-catching design for creative professionals",
-  //   category: "creative",
-  // },
+  {
+    id: "creative",
+    name: "Creative Designer",
+    description: "Eye-catching design for creative professionals",
+    category: "creative",
+  },
 ]
 
 const showSuccessToast = (message: string, description?: string) => {

@@ -101,11 +101,30 @@ export const wrapHtmlWithStyles = (innerHTML: string): string => {
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       ${inlineStyles}
+      /* Ensure background colors and borders are preserved when printing to PDF */
+      :root {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
       @media print {
         @page {
           size: A4;
           margin: 0.5in;
         }
+        html, body, #cv-export-root {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          background: white !important;
+        }
+        /* Explicitly map commonly used amber utilities to hex values */
+        .bg-amber-600 { background-color: #d97706 !important; }
+        .border-amber-600 { border-color: #d97706 !important; }
+        .text-amber-700 { color: #b45309 !important; }
+        /* Print helpers */
         .print\\:break-inside-avoid {
           break-inside: avoid;
         }

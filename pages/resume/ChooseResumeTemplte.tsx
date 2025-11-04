@@ -33,8 +33,7 @@ const templates: CVTemplate[] = [
   {
     id: "modern",
     name: "Modern Professional",
-    description:
-      "Clean, modern design perfect for tech and business professionals",
+    description: "Clean, modern design perfect for tech and business professionals",
     category: "modern",
   },
   {
@@ -43,31 +42,37 @@ const templates: CVTemplate[] = [
     description: "Traditional format ideal for conservative industries",
     category: "classic",
   },
-  // {
-  //   id: "creative",
-  //   name: "Creative Designer",
-  //   description: "Eye-catching design for creative professionals",
-  //   category: "creative",
-  // },
-  // {
-  //   id: "minimal",
-  //   name: "Minimal Clean",
-  //   description: "Simple, clean layout focusing on content",
-  //   category: "minimal",
-  // },
+  {
+    id: "modern-9",
+    name: "Modern SOFIA",
+    description: "Clean layout with name positioned on left side",
+    category: "modern",
+  },
+  {
+    id: "modern-5",
+    name: "Modern JAY",
+    description: "Gray sidebar with clean white main content",
+    category: "modern",
+  },
+  {
+    id: "minimal",
+    name: "Minimal Clean",
+    description: "Simple, clean layout focusing on content",
+    category: "minimal",
+  },
   // // New templates
-  // {
-  //   id: "classic-2",
-  //   name: "Classic Traditional 2",
-  //   description: "An updated classic format for conservative industries",
-  //   category: "classic",
-  // },
-  // {
-  //   id: "classic-3",
-  //   name: "Classic Traditional 3",
-  //   description: "Another variation of the classic format",
-  //   category: "classic",
-  // },
+  {
+    id: "classic-2",
+    name: "Classic Traditional 2",
+    description: "An updated classic format for conservative industries",
+    category: "classic",
+  },
+  {
+    id: "classic-3",
+    name: "Classic Traditional 3",
+    description: "Another variation of the classic format",
+    category: "classic",
+  },
   // {
   //   id: "creative-2",
   //   name: "Creative Designer 2",
@@ -80,43 +85,43 @@ const templates: CVTemplate[] = [
   //   description: "Another creative design option",
   //   category: "creative",
   // },
-  // {
-  //   id: "minimal-2",
-  //   name: "Minimal Clean 2",
-  //   description: "An updated minimal layout focusing on content",
-  //   category: "minimal",
-  // },
-  // {
-  //   id: "minimal-3",
-  //   name: "Minimal Clean 3",
-  //   description: "Another variation of the minimal layout",
-  //   category: "minimal",
-  // },
-  // {
+  {
+    id: "minimal-2",
+    name: "Minimal Clean 2",
+    description: "An updated minimal layout focusing on content",
+    category: "minimal",
+  },
+   {
+    id: "minimal-3",
+    name: "Minimal Clean 3",
+    description: "Another variation of the minimal layout",
+    category: "minimal",
+  },
+  //  {
   //   id: "modern-2",
   //   name: "Modern Professional 2",
   //   description: "An updated modern design for professionals",
   //   category: "modern",
   // },
-  // {
-  //   id: "modern-3",
-  //   name: "Modern Professional 3",
-  //   description: "Another modern design option",
-  //   category: "modern",
-  // },
+   {
+    id: "modern-3",
+    name: "Modern Professional 3",
+    description: "Another modern design option",
+    category: "modern",
+  },
   // New template 4 versions
-  // {
-  //   id: "classic-4",
-  //   name: "Classic Traditional 4",
-  //   description: "Premium classic format with enhanced layout",
-  //   category: "classic",
-  // },
-  // {
-  //   id: "minimal-4",
-  //   name: "Minimal Clean 4",
-  //   description: "Ultra-clean minimal design focusing on content",
-  //   category: "minimal",
-  // },
+  {
+    id: "classic-4",
+    name: "Classic Traditional 4",
+    description: "Premium classic format with enhanced layout",
+    category: "classic",
+  },
+  {
+    id: "minimal-4",
+    name: "Minimal Clean 4",
+    description: "Ultra-clean minimal design focusing on content",
+    category: "minimal",
+  },
   // {
   //   id: "modern-4",
   //   name: "Modern Professional 4",
@@ -129,37 +134,33 @@ const templates: CVTemplate[] = [
   //   description: "Premium creative design for professionals",
   //   category: "creative",
   // },
+
   {
-    id: "modern-5",
-    name: "Modern JAY",
-    description: "Gray sidebar with clean white main content",
+    id: "modern-6",
+    name: "Modern MIKE",
+    description: "Blue sidebar with professional white layout",
     category: "modern",
   },
-  // {
-  //   id: "modern-6",
-  //   name: "Modern MIKE",
-  //   description: "Blue sidebar with professional white layout",
-  //   category: "modern",
-  // },
-  // {
-  //   id: "modern-7",
-  //   name: "Modern LOREN",
-  //   description: "Dark blue curved sidebar with elegant design",
-  //   category: "modern",
-  // },
-  // {
-  //   id: "modern-8",
-  //   name: "Modern LILLY",
-  //   description: "Light blue sidebar with rounded contact section",
-  //   category: "modern",
-  // },
   {
-    id: "modern-9",
-    name: "Modern SOFIA",
-    description: "Clean layout with name positioned on left side",
+    id: "modern-7",
+    name: "Modern LOREN",
+    description: "Dark blue curved sidebar with elegant design",
     category: "modern",
   },
-];
+  {
+    id: "modern-8",
+    name: "Modern LILLY",
+    description: "Light blue sidebar with rounded contact section",
+    category: "modern",
+  },
+
+  {
+    id: "creative",
+    name: "Creative Designer",
+    description: "Eye-catching design for creative professionals",
+    category: "creative",
+  },
+]
 
 const dashboardMenuItems = [
   {

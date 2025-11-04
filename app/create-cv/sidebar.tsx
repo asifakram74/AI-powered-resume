@@ -110,12 +110,12 @@ export function Sidebar({
                 >
                   <FileOutput className="h-4 w-4" /> DOCX
                 </DropdownMenuItem>
-                {/* <DropdownMenuItem 
+                <DropdownMenuItem 
                   className="gap-2 cursor-pointer" 
                   onClick={() => handleExport("png")}
                 >
                   <FileInput className="h-4 w-4" /> PNG
-                </DropdownMenuItem> */}
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarMenuItem>
