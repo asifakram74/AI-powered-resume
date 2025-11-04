@@ -81,12 +81,6 @@ const templates: CVTemplate[] = [
   category: "modern",
 },
 {
-  id: "modern-6",
-  name: "Modern MIKE",
-  description: "Blue sidebar with professional white layout",
-  category: "modern",
-},
-{
   id: "modern-7",
   name: "Modern LOREN",
   description: "Dark blue curved sidebar with elegant design",
@@ -96,6 +90,12 @@ const templates: CVTemplate[] = [
   id: "modern-8",
   name: "Modern LILLY",
   description: "Light blue sidebar with rounded contact section",
+  category: "modern",
+},
+{
+  id: "modern-6",
+  name: "Modern MIKE",
+  description: "Blue sidebar with professional white layout",
   category: "modern",
 },
 
@@ -768,8 +768,8 @@ export function CVPageClientContent() {
       return
     }
 
-    // Check CV limit for free plan users (only for new CVs)
-    if (!existingCV && user?.plan === "free" && (user as any)?.profile?.cvs_count >= 3) {
+    // Check CV limit for free plan users (only for new CVs); allow admin unlimited
+    if (!existingCV && user?.plan === "free" && (user as any)?.profile?.cvs_count >= 3 && (user?.role?.toLowerCase() !== 'admin')) {
       showErrorToast(
         "CV Limit Reached",
         "Free plan allows only 3 resumes. Upgrade to pro for unlimited.",
@@ -910,14 +910,22 @@ export function CVPageClientContent() {
             user={user}
             activePage="cv-export"
             setActivePage={(page) => {
-              if (page === "create-persona") {
-                router.push("/dashboard?page=create-persona")
-              } else if (page === "resumes") {
-                router.push("/dashboard?page=resumes")
-              } else if (page === "cover-letter") {
-                router.push("/dashboard?page=cover-letter")
-              } else if (page === "profile") {
-                router.push("/dashboard?page=profile")
+              try {
+                if (typeof window !== "undefined") {
+                  window.localStorage.setItem('dashboardActivePage', page)
+                }
+              } catch {}
+
+              // Navigate to dashboard for all sidebar pages including ATS Checker and Users
+              if (
+                page === "create-persona" ||
+                page === "resumes" ||
+                page === "cover-letter" ||
+                page === "profile" ||
+                page === "ats-checker" ||
+                page === "users"
+              ) {
+                router.push("/dashboard")
               }
             }}
             onExportPDF={() => handleExport("pdf")}
