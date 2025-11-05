@@ -1,4 +1,4 @@
-import { CVData } from '@/types/cv-data';
+import type { CVData } from "../../../types/cv-data";
 import { Mail, Phone, MapPin, Globe, Calendar, Award, Briefcase, GraduationCap, User, Star } from 'lucide-react';
 
 interface ModernTemplate4Props {

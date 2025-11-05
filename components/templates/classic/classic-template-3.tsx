@@ -12,7 +12,7 @@
 
 
 
-import type { CVData } from "../../types/cv-data"
+import type { CVData } from "../../../types/cv-data";
 
 interface ClassicTemplate3Props {
   data: CVData

@@ -1,5 +1,4 @@
-import type { CVData } from "../../types/cv-data"
-
+import type { CVData } from "../../../types/cv-data";
 interface MinimalTemplate6Props {
   data: CVData
   isPreview?: boolean
