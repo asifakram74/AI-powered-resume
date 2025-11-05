@@ -39,7 +39,7 @@ export function CreativeTemplate({ data, isPreview = false }: CreativeTemplatePr
       `}</style>
 
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 via-blue-75 p-6 mb-6 rounded-b-2xl">
+      <div className="bg-gradient-to-r from-blue-50 to-blue-100 via-blue-75 p-6 mb-6">
         <div className="flex items-center gap-6 max-w-6xl mx-auto">
           <img
             src={data.personalInfo.profilePicture || "https://img.freepik.com/free-photo/emotions-people-concept-headshot-serious-looking-handsome-man-with-beard-looking-confident-determined_1258-26730.jpg"}
@@ -175,7 +175,7 @@ export function CreativeTemplate({ data, isPreview = false }: CreativeTemplatePr
 
           {/* Interests */}
           {data.additional.interests.length > 0 && (
-            <div className="bg-blue-50 rounded-xl p-4 shadow-sm">
+            <div className="bg-blue-50 rounded-xl p-4 shadow-sm mb-9">
               <h2 className="text-lg font-bold text-slate-800 border-b-2 border-slate-300 pb-2 mb-3">
                 INTERESTS
               </h2>
