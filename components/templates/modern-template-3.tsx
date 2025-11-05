@@ -3,17 +3,17 @@
 import { Mail, Phone, MapPin, ExternalLink, Github } from "lucide-react";
 import type { CVData } from "../../types/cv-data";
 
-interface ModernTemplate7Props {
+interface ModernTemplate3Props {
   data: CVData;
   isPreview?: boolean;
   colorScheme?: "blue" | "emerald" | "violet" | "rose" | "amber" | "teal";
 }
 
-export function ModernTemplate7({
+export function ModernTemplate3({
   data,
   isPreview = false,
   colorScheme = "blue",
-}: ModernTemplate7Props) {
+}: ModernTemplate3Props) {
   const formatDate = (date: string) => {
     if (!date) return "";
     const monthNames = [

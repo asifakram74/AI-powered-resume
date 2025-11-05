@@ -1,12 +1,12 @@
 import { CVData } from '@/types/cv-data';
 import { Mail, Phone, MapPin, Globe, Calendar, Award, Briefcase, GraduationCap, User, Star } from 'lucide-react';
 
-interface ModernTemplate8Props {
+interface ModernTemplate4Props {
   data: CVData;
   isPreview?: boolean;
 }
 
-export default function ModernTemplate8({ data }: ModernTemplate8Props) {
+export default function ModernTemplate4({ data }: ModernTemplate4Props) {
   const formatDate = (date: string) => {
     if (!date) return "";
     const monthNames = [
@@ -403,4 +403,4 @@ export default function ModernTemplate8({ data }: ModernTemplate8Props) {
   );
 }
 
-export { ModernTemplate8 };
+export { ModernTemplate4 };

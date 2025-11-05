@@ -81,19 +81,19 @@ const templates: CVTemplate[] = [
   category: "modern",
 },
 {
-  id: "modern-7",
+  id: "modern-2",
   name: "Modern LOREN",
   description: "Dark blue curved sidebar with elegant design",
   category: "modern",
 },
 {
-  id: "modern-8",
+  id: "modern-3",
   name: "Modern LILLY",
   description: "Light blue sidebar with rounded contact section",
   category: "modern",
 },
 {
-  id: "modern-6",
+  id: "modern-4",
   name: "Modern MIKE",
   description: "Blue sidebar with professional white layout",
   category: "modern",
@@ -125,7 +125,7 @@ const templates: CVTemplate[] = [
 },
 
 {
-  id: "creative-1",
+  id: "creative",
   name: "Creative SOFIA",
   description: "Clean layout with name positioned on left side",
   category: "creative",

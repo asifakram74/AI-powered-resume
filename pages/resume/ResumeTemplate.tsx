@@ -17,9 +17,9 @@ import { MinimalTemplate2 } from "../../components/templates/minimal-template2";
 import { MinimalTemplate3 } from "../../components/templates/minimal-template3";
 import { MinimalTemplate4 } from "../../components/templates/minimal-template-4";
 import {CreativeTemplate4}from "../../components/templates/creative-template-4";
-import {ModernTemplate6} from "../../components/templates/modern-template-6";
-import {ModernTemplate7} from "../../components/templates/modern-template-7";
-import {ModernTemplate8} from "../../components/templates/modern-template-8";
+// import {ModernTemplate2} from "../../components/templates/modern-template-2";
+import {ModernTemplate3} from "../../components/templates/modern-template-3";
+import {ModernTemplate4} from "../../components/templates/modern-template-4";
 import {CreativeTemplate} from "../../components/templates/creative-template";
 import type { CVData } from "../../types/cv-data";
 
@@ -44,16 +44,15 @@ export default function ResumeTemplate({
     creative: CreativeTemplate,
     minimal: MinimalTemplate,
     "modern-2": ModernTemplate2,
-    "creative-1": CreativeTemplate,
     "creative-2": CreativeTemplate2,
     "creative-3": CreativeTemplate3,
     "creative-4": CreativeTemplate4,
     "minimal-6": MinimalTemplate6,
     "minimal-7": MinimalTemplate7,
     // "modern-5": ModernTemplate5,
-    "modern-6": ModernTemplate6,
-    "modern-7": ModernTemplate7,
-    "modern-8": ModernTemplate8,
+    // "modern-6": ModernTemplate6,
+    "modern-3": ModernTemplate3,
+    "modern-4": ModernTemplate4,
     // "modern-9": ModernTemplate9,
     "classic-2": ClassicTemplate2,
     "classic-3": ClassicTemplate3,

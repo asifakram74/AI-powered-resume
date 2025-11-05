@@ -3,12 +3,12 @@
 import { Mail, Phone, MapPin, ExternalLink, Github, Calendar, Award } from "lucide-react"
 import type { CVData } from "../../types/cv-data"
 
-interface ModernTemplate6Props {
+interface ModernTemplate2Props {
   data: CVData
   isPreview?: boolean
 }
 
-export function ModernTemplate6({ data, isPreview = false }: ModernTemplate6Props) {
+export function ModernTemplate2({ data, isPreview = false }: ModernTemplate2Props) {
 const formatDate = (date: string) => {
   if (!date) return "";
   const monthNames = [
