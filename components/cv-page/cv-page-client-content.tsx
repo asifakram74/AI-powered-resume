@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 import { Button } from "../../components/ui/button"
-import { Card, CardContent } from "../../components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card"
 import { ArrowLeft, Sparkles, TrendingUp, Loader2, Brain, CheckCircle, AlertCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { getPersonaById, type PersonaResponse } from "../../lib/redux/service/pasonaService"
@@ -281,6 +281,7 @@ export function CVPageClientContent() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [showEditPopup, setShowEditPopup] = useState(false)
   const [isViewMode, setIsViewMode] = useState(false) // Add this state
+  const [filter, setFilter] = useState<"all" | "modern" | "classic" | "creative" | "minimal">("all")
 
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -292,6 +293,10 @@ export function CVPageClientContent() {
   const dispatch = useAppDispatch()
   const { user } = useAppSelector((state) => state.auth)
   const cvPreviewRef = useRef<HTMLDivElement>(null)
+  const filteredTemplates = templates.filter((template) => {
+    if (filter === "all") return true
+    return template.category === filter
+  })
 
   const renderActivePage = () => {
     switch (activePage) {
@@ -708,7 +713,10 @@ export function CVPageClientContent() {
 
       try {
         const htmlContent = wrapHtmlWithStyles(cvElement.outerHTML)
-        const filename = `${persona?.full_name || "resume"}-cv.${format}`
+        const filename =
+          format === "png"
+            ? `${selectedTemplate?.id || "resume"}.png`
+            : `${persona?.full_name || "resume"}-cv.${format}`
 
         if (format === "pdf") {
           const result = await exportToPDFViaBrowserless(htmlContent, filename, undefined,)
@@ -955,14 +963,16 @@ export function CVPageClientContent() {
                   />
                 </div>
 
-                {/* Template Selection for Updates */}
-                {existingCV && !isViewMode && (
-                  <CVTemplateSelector
-                    templates={templates}
-                    selectedTemplate={selectedTemplate}
-                    hasUnsavedChanges={hasUnsavedChanges}
-                    onSelect={handleTemplateSelect}
-                  />
+                {/* Template Selection with Category Filter (mirrors ChooseResumeTemplte) */}
+                {!isViewMode && (
+                  <div className="mt-2">
+                    <CVTemplateSelector
+                      templates={templates}
+                      selectedTemplate={selectedTemplate}
+                      hasUnsavedChanges={hasUnsavedChanges}
+                      onSelect={handleTemplateSelect}
+                    />
+                  </div>
                 )}
 
                 {selectedTemplate && aiResponse && (

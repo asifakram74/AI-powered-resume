@@ -1,269 +1,147 @@
-import type { CVData } from "../../../types/cv-data";
-import { Mail, Phone, MapPin, Globe, Calendar, Award, Briefcase, GraduationCap, User, Star } from 'lucide-react';
+"use client"
+
+import { Mail, Phone, MapPin, ExternalLink, Github } from "lucide-react"
+import type { CVData } from "../../../types/cv-data"
 
 interface ModernTemplate4Props {
-  data: CVData;
-  isPreview?: boolean;
+  data: CVData
+  isPreview?: boolean
 }
 
-export default function ModernTemplate4({ data }: ModernTemplate4Props) {
+export function ModernTemplate4({ data, isPreview = false }: ModernTemplate4Props) {
   const formatDate = (date: string) => {
-    if (!date) return "";
-    const monthNames = [
-      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-    ];
-    
-    const isoMatch = /^(\d{4})-(\d{1,2})(?:-\d{1,2})?$/.exec(date);
+    if (!date) return ""
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+    const isoMatch = /^(\d{4})-(\d{1,2})(?:-\d{1,2})?$/.exec(date)
     if (isoMatch) {
-      const year = isoMatch[1];
-      const month = Math.max(1, Math.min(12, Number.parseInt(isoMatch[2], 10)));
-      return `${monthNames[month - 1]} ${year}`;
+      const year = isoMatch[1]
+      const month = Math.max(1, Math.min(12, Number.parseInt(isoMatch[2], 10)))
+      return `${monthNames[month - 1]} ${year}`
     }
-    
-    const slashMatch = /^(\d{1,2})\/(\d{4})$/.exec(date);
+
+    const slashMatch = /^(\d{1,2})\/(\d{4})$/.exec(date)
     if (slashMatch) {
-      const month = Math.max(1, Math.min(12, Number.parseInt(slashMatch[1], 10)));
-      const year = slashMatch[2];
-      return `${monthNames[month - 1]} ${year}`;
+      const month = Math.max(1, Math.min(12, Number.parseInt(slashMatch[1], 10)))
+      const year = slashMatch[2]
+      return `${monthNames[month - 1]} ${year}`
     }
-    
-    const monTextMatch = /^([A-Za-z]{3,})\s+(\d{4})$/.exec(date);
-    if (monTextMatch) return date;
-    
-    return date;
-  };
+
+    const monTextMatch = /^([A-Za-z]{3,})\s+(\d{4})$/.exec(date)
+    if (monTextMatch) return date
+
+    return date
+  }
 
   return (
-    <div className="w-full mx-auto bg-white shadow-lg print:shadow-none print:max-w-full print:mx-0">
+    <div className="flex max-w-full mx-auto min-h-screen bg-white print:min-h-0 print:shadow-none print:bg-white">
       <style jsx global>{`
         @media print {
-          @page {
-            size: A4;
-          }
           body {
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
             background: white;
           }
-          .print-break-inside-avoid {
-            break-inside: avoid;
-          }
-          .print-break-after-auto {
-            break-after: auto;
-          }
-          .print-break-before-auto {
-            break-before: auto;
-          }
-          .print-break-before-page {
-            break-before: page;
-          }
-          .print-break-after-page {
-            break-after: page;
-          }
-          .avoid-break-inside {
-            break-inside: avoid;
-          }
-          .allow-break-inside {
-            break-inside: auto;
-          }
-          
-          /* Force colors in print */
-          .print-bg-blue-50 {
-            background-color: #eff6ff !important;
-          }
-          .print-bg-blue-100 {
-            background-color: #dbeafe !important;
-          }
-          .print-bg-gradient-blue {
-            background: linear-gradient(to bottom, #eff6ff, #dbeafe) !important;
+          // .print-break-inside-avoid {
+          //   break-inside: avoid;
+          // }
+          .sidebar-bg {
+            background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%) !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
         }
       `}</style>
 
-      <div className="flex min-h-[297mm] print:min-h-0">
-        {/* Left Column - Light Blue Sidebar */}
-        <div className="w-1/3 bg-gradient-to-b from-blue-50 to-blue-100 p-8 print:p-6 print:from-blue-50 print:to-blue-100 print-bg-gradient-blue print:break-inside-avoid">
+      {/* Sidebar - Teal gradient */}
+      <div className="w-1/3 bg-gradient-to-br from-teal-600 to-teal-700 text-white p-7 print:break-inside-avoid sidebar-bg">
+        <div className="space-y-6 print:space-y-5 sticky top-0">
           {/* Profile Picture */}
-          {data.personalInfo?.profilePicture && (
-            <div className="mb-6 print:mb-4 avoid-break-inside">
-              <div className="w-32 h-32 mx-auto bg-white rounded-2xl p-2 shadow-md print:shadow-sm print:w-28 print:h-28">
-                <img
-                  src={data.personalInfo.profilePicture}
-                  alt="Profile"
-                  className="w-full h-full rounded-xl object-cover"
-                />
-              </div>
+          {data.personalInfo.profilePicture && (
+            <div className="text-center print-break-inside-avoid mb-2">
+              <img
+                src={data.personalInfo.profilePicture || "/placeholder.svg"}
+                alt={data.personalInfo.fullName}
+                className="w-32 h-32 rounded-full mx-auto object-cover border-4 border-white print:border-white print:w-24 print:h-24"
+              />
             </div>
           )}
 
-          {/* Name */}
-          <div className="text-center mb-8 print:mb-6 avoid-break-inside">
-            <h1 className="text-3xl font-bold text-blue-900 mb-2 print:text-2xl">
-              {data.personalInfo?.fullName} 
-            </h1>
-            <p className="text-lg text-blue-700 font-medium print:text-base">
-              {data.personalInfo?.jobTitle}
-            </p>
-          </div>
-
-          {/* Contact Information */}
-          <div className="bg-white rounded-2xl p-6 mb-8 shadow-sm print:p-4 print:mb-6 print:rounded-lg avoid-break-inside">
-            <h2 className="text-lg font-semibold text-blue-900 mb-4 print:text-base print:mb-3">
-              CONTACT
-            </h2>
-            <div className="space-y-3 print:space-y-2">
-              {data.personalInfo?.email && (
-                <div className="flex items-center space-x-3 print:space-x-2">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center print:w-6 print:h-6">
-                    <Mail className="w-4 h-4 text-blue-600 print:w-3 print:h-3" />
-                  </div>
-                  <span className="text-sm text-gray-700 print:text-xs break-all">{data.personalInfo.email}</span>
-                </div>
-              )}
-              {data.personalInfo?.phone && (
-                <div className="flex items-center space-x-3 print:space-x-2">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center print:w-6 print:h-6">
-                    <Phone className="w-4 h-4 text-blue-600 print:w-3 print:h-3" />
-                  </div>
-                  <span className="text-sm text-gray-700 print:text-xs">{data.personalInfo.phone}</span>
-                </div>
-              )}
-              {(data.personalInfo?.address || data.personalInfo?.city) && (
-                <div className="flex items-center space-x-3 print:space-x-2">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center print:w-6 print:h-6">
-                    <MapPin className="w-4 h-4 text-blue-600 print:w-3 print:h-3" />
-                  </div>
-                  <span className="text-sm text-gray-700 print:text-xs">
-                    {[data.personalInfo.address, data.personalInfo.city, data.personalInfo.country].filter(Boolean).join(', ')}
-                  </span>
-                </div>
-              )}
-              {(data.personalInfo?.linkedin || data.personalInfo?.github) && (
-                <div className="flex items-center space-x-3 print:space-x-2">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center print:w-6 print:h-6">
-                    <Globe className="w-4 h-4 text-blue-600 print:w-3 print:h-3" />
-                  </div>
-                  <span className="text-sm text-gray-700 print:text-xs break-all">
-                    {data.personalInfo.linkedin || data.personalInfo.github}
-                  </span>
-                </div>
-              )}
+          {/* Contact Info */}
+          <div className="print-break-inside-avoid">
+            <h2 className="text-sm font-black mb-3 text-white print:text-white uppercase tracking-wider">Contact</h2>
+            <div className="space-y-2.5 text-sm">
+              <div className="flex items-center space-x-3">
+                <Mail className="w-4 h-4 text-white print:text-white flex-shrink-0" />
+                <span className="break-all text-xs">{data.personalInfo.email}</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Phone className="w-4 h-4 text-white print:text-white flex-shrink-0" />
+                <span className="text-xs">{data.personalInfo.phone}</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <MapPin className="w-4 h-4 text-white print:text-white flex-shrink-0" />
+                <span className="text-xs">
+                  {(data.personalInfo.city || data.personalInfo.country) && (
+                    <span>
+                      {data.personalInfo.city && data.personalInfo.country
+                        ? `${data.personalInfo.city}, ${data.personalInfo.country}`
+                        : data.personalInfo.city || data.personalInfo.country}
+                    </span>
+                  )}
+                </span>
+              </div>
             </div>
           </div>
 
           {/* Skills */}
-          {data.skills && (data.skills.technical?.length > 0 || data.skills.soft?.length > 0) && (
-            <div className="bg-white rounded-2xl p-6 mb-8 shadow-sm print:p-4 print:mb-6 print:rounded-lg avoid-break-inside">
-              <h2 className="text-lg font-semibold text-blue-900 mb-4 print:text-base print:mb-3">
-                SKILLS
-              </h2>
-              <div className="space-y-4 print:space-y-3">
-                {data.skills.technical?.slice(0, 8).map((skill: string, index: number) => (
-                  <div key={`tech-${index}`} className="print-break-inside-avoid">
-                    <div className="flex justify-between items-center mb-2 print:mb-1">
-                      <span className="text-sm font-medium text-gray-700 print:text-xs">{skill}</span>
-                      <span className="text-xs text-blue-600 font-medium print:text-xs">Technical</span>
-                    </div>
-                    <div className="w-full bg-blue-50 rounded-full h-2 print:h-1.5">
-                      <div
-                        className="bg-gradient-to-r from-blue-400 to-blue-600 h-2 rounded-full transition-all duration-300 print:h-1.5"
-                        style={{ width: '80%' }}
-                      ></div>
-                    </div>
+          <div className="print-break-inside-avoid">
+            <h2 className="text-sm font-black mb-3 text-white print:text-white uppercase tracking-wider">Skills</h2>
+            <div className="space-y-3">
+              {data.skills.technical.length > 0 && (
+                <div>
+                  <h3 className="font-bold mb-2 text-xs text-teal-100">Technical</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {data.skills.technical.map((skill, index) => (
+                      <span
+                        key={index}
+                        className="bg-white text-teal-700 px-2 py-1 rounded text-xs font-semibold print:bg-white print:text-teal-700"
+                      >
+                        {skill}
+                      </span>
+                    ))}
                   </div>
-                ))}
-                {data.skills.soft?.slice(0, 4).map((skill: string, index: number) => (
-                  <div key={`soft-${index}`} className="print-break-inside-avoid">
-                    <div className="flex justify-between items-center mb-2 print:mb-1">
-                      <span className="text-sm font-medium text-gray-700 print:text-xs">{skill}</span>
-                      <span className="text-xs text-blue-600 font-medium print:text-xs">Soft</span>
-                    </div>
-                    <div className="w-full bg-blue-50 rounded-full h-2 print:h-1.5">
-                      <div
-                        className="bg-gradient-to-r from-blue-400 to-blue-600 h-2 rounded-full transition-all duration-300 print:h-1.5"
-                        style={{ width: '70%' }}
-                      ></div>
-                    </div>
+                </div>
+              )}
+              {data.skills.soft.length > 0 && (
+                <div>
+                  <h3 className="font-bold mb-2 text-xs text-teal-100">Soft Skills</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {data.skills.soft.map((skill, index) => (
+                      <span
+                        key={index}
+                        className="bg-teal-500 text-white px-2 py-1 rounded text-xs font-semibold print:bg-teal-500"
+                      >
+                        {skill}
+                      </span>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
 
           {/* Languages */}
-          {data.languages && data.languages.length > 0 && (
-            <div className="bg-white rounded-2xl p-6 shadow-sm print:p-4 print:rounded-lg avoid-break-inside">
-              <h2 className="text-lg font-semibold text-blue-900 mb-4 print:text-base print:mb-3">
-                LANGUAGES
+          {data.languages.length > 0 && (
+            <div className="print-break-inside-avoid">
+              <h2 className="text-sm font-black mb-3 text-white print:text-white uppercase tracking-wider">
+                Languages
               </h2>
-              <div className="space-y-3 print:space-y-2">
-                {data.languages.map((language, index) => (
-                  <div key={index} className="flex justify-between items-center print-break-inside-avoid">
-                    <span className="text-sm font-medium text-gray-700 print:text-xs">{language.name}</span>
-                    <span className="text-xs text-blue-600 font-medium print:text-xs">{language.proficiency}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Right Column - Main Content */}
-        <div className="flex-1 p-8 print:p-6 print:break-inside-avoid">
-          {/* Profile Summary */}
-          {data.personalInfo?.summary && (
-            <div className="mb-8 print:mb-6 avoid-break-inside">
-              <h2 className="text-xl font-bold text-blue-900 mb-4 flex items-center print:text-lg print:mb-3">
-                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-3 print:w-5 print:h-5">
-                  <User className="w-4 h-4 text-blue-600 print:w-3 print:h-3" />
-                </div>
-                PROFILE
-              </h2>
-              <p className="text-gray-700 leading-relaxed print:text-sm print:leading-normal">{data.personalInfo.summary}</p>
-            </div>
-          )}
-
-          {/* Work Experience */}
-          {data.experience && data.experience.length > 0 && (
-            <div className="mb-8 print:mb-6 avoid-break-inside">
-              <h2 className="text-xl font-bold text-blue-900 mb-4 flex items-center print:text-lg print:mb-3">
-                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-3 print:w-5 print:h-5">
-                  <Briefcase className="w-4 h-4 text-blue-600 print:w-3 print:h-3" />
-                </div>
-                WORK EXPERIENCE
-              </h2>
-              <div className="space-y-6 print:space-y-4">
-                {data.experience.map((exp, index) => (
-                  <div key={index} className="relative pl-6 print-break-inside-avoid">
-                    <div className="absolute left-0 top-2 w-3 h-3 bg-blue-500 rounded-full print:w-2 print:h-2"></div>
-                    <div className="absolute left-1.5 top-5 w-0.5 h-full bg-blue-200 print:left-1"></div>
-                    <div className="bg-blue-50 rounded-lg p-4 print:p-3 print-bg-blue-50">
-                      <div className="flex justify-between items-start mb-2 print:mb-1">
-                        <div>
-                          <h3 className="text-lg font-semibold text-blue-900 print:text-base">{exp.jobTitle}</h3>
-                          <p className="text-blue-700 font-medium print:text-sm">{exp.companyName}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm text-blue-600 flex items-center print:text-xs">
-                            <Calendar className="w-4 h-4 mr-1 print:w-3 print:h-3" />
-                            {formatDate(exp.startDate)} - {exp.current ? 'Present' : formatDate(exp.endDate)}
-                          </p>
-                          {exp.location && (
-                            <p className="text-sm text-gray-500 print:text-xs">{exp.location}</p>
-                          )}
-                        </div>
-                      </div>
-                      {exp.responsibilities && exp.responsibilities.length > 0 && (
-                        <div className="text-gray-700 text-sm leading-relaxed print:text-xs">
-                          <ul className="list-disc list-inside space-y-1 print:space-y-0.5">
-                            {exp.responsibilities.slice(0, 4).map((responsibility, idx) => (
-                              <li key={idx} className="print-break-inside-avoid">{responsibility}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
+              <div className="space-y-2">
+                {data.languages.map((lang) => (
+                  <div key={lang.id} className="flex justify-between text-xs">
+                    <span className="text-teal-100">{lang.name}</span>
+                    <span className="font-bold text-white print:text-white">{lang.proficiency}</span>
                   </div>
                 ))}
               </div>
@@ -271,71 +149,138 @@ export default function ModernTemplate4({ data }: ModernTemplate4Props) {
           )}
 
           {/* Education */}
-          {data.education && data.education.length > 0 && (
-            <div className="mb-8 print:mb-6 avoid-break-inside">
-              <h2 className="text-xl font-bold text-blue-900 mb-4 flex items-center print:text-lg print:mb-3">
-                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-3 print:w-5 print:h-5">
-                  <GraduationCap className="w-4 h-4 text-blue-600 print:w-3 print:h-3" />
+          <div className="print-break-inside-avoid">
+            <h2 className="text-sm font-black mb-3 text-white print:text-white uppercase tracking-wider">Education</h2>
+            <div className="space-y-3">
+              {data.education.map((edu) => (
+                <div key={edu.id} className="text-xs print-break-inside-avoid">
+                  <h3 className="font-bold text-white">{edu.degree}</h3>
+                  <p className="text-teal-100 print:text-teal-100">{edu.institutionName}</p>
+                  {edu.graduationDate && <p className="text-teal-200">{formatDate(edu.graduationDate)}</p>}
                 </div>
-                EDUCATION
+              ))}
+            </div>
+          </div>
+
+          {/* Interests */}
+          {data.additional.interests.length > 0 && (
+            <div className="print-break-inside-avoid">
+              <h2 className="text-sm font-black mb-3 text-white print:text-white uppercase tracking-wider">
+                Interests
               </h2>
-              <div className="space-y-4 print:space-y-3">
-                {data.education.map((edu, index) => (
-                  <div key={index} className="bg-blue-50 rounded-lg p-4 print:p-3 print-bg-blue-50 print-break-inside-avoid">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="text-lg font-semibold text-blue-900 print:text-base">{edu.degree}</h3>
-                        <p className="text-blue-700 print:text-sm">{edu.institutionName}</p>
-                        {edu.gpa && (
-                          <p className="text-sm text-gray-600 print:text-xs">GPA: {edu.gpa}</p>
-                        )}
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-blue-600 flex items-center print:text-xs">
-                          <Calendar className="w-4 h-4 mr-1 print:w-3 print:h-3" />
-                          {formatDate(edu.graduationDate)}
-                        </p>
-                        {edu.location && (
-                          <p className="text-sm text-gray-500 print:text-xs">{edu.location}</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+              <div className="flex flex-wrap gap-2">
+                {data.additional.interests.map((interest, index) => (
+                  <span
+                    key={index}
+                    className="bg-teal-500 text-white px-2 py-1 rounded text-xs font-semibold print:bg-teal-500"
+                  >
+                    {interest}
+                  </span>
                 ))}
               </div>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 p-8 print:p-6 print:break-inside-avoid bg-gray-50">
+        <div className="space-y-6 print:space-y-4">
+          {/* Header */}
+          <div className="pb-4 mb-6 print-break-inside-avoid">
+            <h1 className="text-4xl font-black text-gray-900 mb-1 print:text-gray-900 print:text-2xl">
+              {data.personalInfo.fullName}
+            </h1>
+            <div className="h-1 w-20 bg-gradient-to-r from-teal-500 to-teal-600 mb-3"></div>
+            <h2 className="text-lg text-teal-600 font-bold mb-3 print:text-teal-600">{data.personalInfo.jobTitle}</h2>
+            <p className="text-gray-700 leading-relaxed text-sm print:text-gray-700">{data.personalInfo.summary}</p>
+          </div>
+
+          {/* Experience */}
+          <div className="print-break-inside-avoid">
+            <h2 className="text-lg font-black text-gray-900 mb-4 print:text-gray-900 uppercase tracking-wide">
+              Experience
+            </h2>
+            <div className="space-y-4">
+              {data.experience.map((exp) => (
+                <div
+                  key={exp.id}
+                  className="bg-white rounded-lg p-4 border-l-4 border-teal-500 print-break-inside-avoid print:border-teal-500"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <h3 className="text-base font-bold text-gray-900 print:text-gray-900">{exp.jobTitle}</h3>
+                      <p className="text-teal-600 font-semibold text-sm print:text-teal-600">{exp.companyName}</p>
+                    </div>
+                    {(formatDate(exp.startDate) || exp.current || formatDate(exp.endDate)) && (
+                      <span className="text-gray-500 text-xs print:text-gray-500 whitespace-nowrap">
+                        {formatDate(exp.startDate)}
+                        {formatDate(exp.startDate) && (exp.current || formatDate(exp.endDate)) ? " - " : ""}
+                        {exp.current ? "Present" : formatDate(exp.endDate)}
+                      </span>
+                    )}
+                  </div>
+                  <ul className="text-gray-700 leading-relaxed space-y-1 text-sm print:text-gray-700">
+                    {exp.responsibilities.map((resp, index) => (
+                      <li key={index} className="flex items-start">
+                        <span className="text-teal-500 mr-2 print:text-teal-500">●</span>
+                        <span>{resp}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
 
           {/* Projects */}
-          {data.projects && data.projects.length > 0 && (
-            <div className="mb-8 print:mb-6 avoid-break-inside">
-              <h2 className="text-xl font-bold text-blue-900 mb-4 flex items-center print:text-lg print:mb-3">
-                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-3 print:w-5 print:h-5">
-                  <Star className="w-4 h-4 text-blue-600 print:w-3 print:h-3" />
-                </div>
-                PROJECTS
+          {data.projects.length > 0 && (
+            <div className="print-break-inside-avoid">
+              <h2 className="text-lg font-black text-gray-900 mb-4 print:text-gray-900 uppercase tracking-wide">
+                Projects
               </h2>
-              <div className="space-y-4 print:space-y-3">
-                {data.projects.map((project, index) => (
-                  <div key={index} className="bg-blue-50 rounded-lg p-4 print:p-3 print-bg-blue-50 print-break-inside-avoid">
-                    <div className="flex justify-between items-start mb-2 print:mb-1">
-                      <h3 className="text-lg font-semibold text-blue-900 print:text-base">{project.name}</h3>
-                    </div>
-                    {project.description && (
-                      <p className="text-gray-700 text-sm leading-relaxed mb-3 print:text-xs print:mb-2">{project.description}</p>
-                    )}
-                    {project.technologies && project.technologies.length > 0 && (
-                      <div className="flex flex-wrap gap-2 print:gap-1">
-                        {project.technologies.slice(0, 6).map((tech, techIndex) => (
-                          <span
-                            key={techIndex}
-                            className="px-3 py-1 bg-blue-200 text-blue-800 text-xs rounded-full font-medium print:px-2 print:py-0.5 print:text-xs"
-                          >
-                            {tech}
-                          </span>
-                        ))}
+              <div className="space-y-4">
+                {data.projects.map((project) => (
+                  <div key={project.id} className="bg-white rounded-lg p-4 print-break-inside-avoid">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h3 className="text-sm font-bold text-gray-900 print:text-gray-900">{project.name}</h3>
+                        <p className="text-teal-600 font-medium text-xs print:text-teal-600">{project.role}</p>
                       </div>
-                    )}
+                      <div className="flex space-x-2">
+                        {project.liveDemoLink && (
+                          <a
+                            href={project.liveDemoLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-teal-500 hover:text-teal-700 print:text-teal-500"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                        )}
+                        {project.githubLink && (
+                          <a
+                            href={project.githubLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-gray-600 hover:text-gray-800 print:text-gray-600"
+                          >
+                            <Github className="w-4 h-4" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-gray-700 mb-2 text-xs print:text-gray-700">{project.description}</p>
+                    <div className="flex flex-wrap gap-1">
+                      {project.technologies.map((tech, index) => (
+                        <span
+                          key={index}
+                          className="bg-teal-50 text-teal-700 px-2 py-0.5 rounded text-xs font-semibold print:bg-teal-50 print:text-teal-700"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -343,64 +288,31 @@ export default function ModernTemplate4({ data }: ModernTemplate4Props) {
           )}
 
           {/* Certifications */}
-          {data.certifications && data.certifications.length > 0 && (
-            <div className="mb-8 print:mb-6 avoid-break-inside">
-              <h2 className="text-xl font-bold text-blue-900 mb-4 flex items-center print:text-lg print:mb-3">
-                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-3 print:w-5 print:h-5">
-                  <Award className="w-4 h-4 text-blue-600 print:w-3 print:h-3" />
-                </div>
-                CERTIFICATIONS
+          {data.certifications.length > 0 && (
+            <div className="print-break-inside-avoid">
+              <h2 className="text-lg font-black text-gray-900 mb-4 print:text-gray-900 uppercase tracking-wide">
+                Certifications & Awards
               </h2>
-              <div className="space-y-3 print:space-y-2">
-                {data.certifications.map((cert, index) => (
-                  <div key={index} className="bg-blue-50 rounded-lg p-4 print:p-3 print-bg-blue-50 print-break-inside-avoid">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-semibold text-blue-900 print:text-sm">{cert.title}</h3>
-                        <p className="text-blue-700 text-sm print:text-xs">{cert.issuingOrganization}</p>
-                      </div>
-                      {cert.dateObtained && (
-                        <p className="text-sm text-blue-600 flex items-center print:text-xs">
-                          <Calendar className="w-4 h-4 mr-1 print:w-3 print:h-3" />
-                          {formatDate(cert.dateObtained)}
-                        </p>
-                      )}
+              <div className="bg-white rounded-lg p-4 space-y-3">
+                {data.certifications.map((cert) => (
+                  <div
+                    key={cert.id}
+                    className="flex justify-between items-center print-break-inside-avoid border-b border-gray-100 pb-3 last:pb-0 last:border-b-0"
+                  >
+                    <div>
+                      <h3 className="font-semibold text-gray-900 text-sm print:text-gray-900">{cert.title}</h3>
+                      <p className="text-gray-600 text-xs print:text-gray-600">{cert.issuingOrganization}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-gray-500 text-xs print:text-gray-500">{formatDate(cert.dateObtained)}</span>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
           )}
-
-          {/* Additional Information */}
-          {data.additional && (
-            <div className="mb-8 print:mb-6 avoid-break-inside">
-              <h2 className="text-xl font-bold text-blue-900 mb-4 print:text-lg print:mb-3">
-                ADDITIONAL INFORMATION
-              </h2>
-              <div className="space-y-4 print:space-y-3">
-                {data.additional.interests && data.additional.interests.length > 0 && (
-                  <div className="bg-blue-50 rounded-lg p-4 print:p-3 print-bg-blue-50">
-                    <h3 className="font-semibold text-blue-900 mb-3 print:text-sm print:mb-2">Interests</h3>
-                    <div className="flex flex-wrap gap-2 print:gap-1">
-                      {data.additional.interests.slice(0, 6).map((interest, index) => (
-                        <span
-                          key={index}
-                          className="px-3 py-1 bg-blue-200 text-blue-800 text-sm rounded-full print:px-2 print:py-0.5 print:text-xs"
-                        >
-                          {interest}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
-  );
+  )
 }
-
-export { ModernTemplate4 };

@@ -95,23 +95,7 @@ export function ModernTemplate({
           }
         }
         
-        /* Additional CSS for multi-page layout */
-        @media print {
-          .cv-container {
-            display: flex;
-            width: 100%;
-          }
-          .sidebar-print {
-            width: 33.333%;
-            background: #1e293b !important;
-            color: white !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-          }
-          .main-content-print {
-            width: 66.667%;
-          }
-        }
+      
       `}</style>
 
       {/* Sidebar - Made more compact */}
