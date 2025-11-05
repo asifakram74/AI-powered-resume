@@ -1,11 +1,12 @@
 import type { CVData } from "../../types/cv-data"
 
-interface MinimalTemplateProps {
+interface MinimalTemplate5Props {
   data: CVData
   isPreview?: boolean
+  profileImage?: string
 }
 
-export function MinimalTemplate({ data, isPreview = false }: MinimalTemplateProps) {
+export function MinimalTemplate5({ data, isPreview = false, profileImage }: MinimalTemplate5Props) {
   const formatDate = (date: string) => {
     if (!date) return ""
     const s = date.trim()
@@ -52,18 +53,28 @@ export function MinimalTemplate({ data, isPreview = false }: MinimalTemplateProp
   return (
     <div className="flex min-h-screen bg-white">
       {/* Left Sidebar */}
-      <div className="w-80 bg-slate-900 text-white p-10">
+      <div className="w-80 bg-indigo-950 text-white p-10">
+        {profileImage && (
+          <div className="mb-8">
+            <img
+              src={profileImage || "/placeholder.svg"}
+              alt={data.personalInfo.fullName}
+              className="w-32 h-32 rounded-lg object-cover mx-auto border-4 border-pink-500"
+            />
+          </div>
+        )}
+
         {/* Header */}
         <div className="mb-10">
           <h1 className="text-3xl font-bold mb-1">{data.personalInfo.fullName}</h1>
-          <div className="h-1 w-12 bg-amber-500 mb-4"></div>
-          <p className="text-slate-300">{data.personalInfo.jobTitle}</p>
+          <div className="h-1 w-12 bg-pink-500 mb-4"></div>
+          <p className="text-indigo-200">{data.personalInfo.jobTitle}</p>
         </div>
 
         {/* Contact */}
-        <div className="mb-10 pb-10 border-b border-slate-700">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-amber-500 mb-4">Contact</h3>
-          <div className="space-y-3 text-sm text-slate-300">
+        <div className="mb-10 pb-10 border-b border-indigo-800">
+          <h3 className="text-sm font-bold uppercase tracking-wider text-pink-400 mb-4">Contact</h3>
+          <div className="space-y-3 text-sm text-indigo-200">
             <p className="break-words">{data.personalInfo.email}</p>
             <p>{data.personalInfo.phone}</p>
             {data.personalInfo.city && data.personalInfo.country && (
@@ -76,12 +87,12 @@ export function MinimalTemplate({ data, isPreview = false }: MinimalTemplateProp
 
         {/* Technical Skills */}
         {data.skills.technical.length > 0 && (
-          <div className="mb-10 pb-10 border-b border-slate-700">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-amber-500 mb-4">Technical</h3>
-            <div className="space-y-2 text-sm text-slate-300">
+          <div className="mb-10 pb-10 border-b border-indigo-800">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-pink-400 mb-4">Technical</h3>
+            <div className="space-y-2 text-sm text-indigo-200">
               {data.skills.technical.map((skill, i) => (
                 <div key={i} className="flex items-center">
-                  <span className="w-2 h-2 bg-amber-500 rounded-full mr-2"></span>
+                  <span className="w-2 h-2 bg-pink-500 rounded-full mr-2"></span>
                   {skill}
                 </div>
               ))}
@@ -91,12 +102,12 @@ export function MinimalTemplate({ data, isPreview = false }: MinimalTemplateProp
 
         {/* Soft Skills */}
         {data.skills.soft.length > 0 && (
-          <div className="mb-10 pb-10 border-b border-slate-700">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-amber-500 mb-4">Skills</h3>
-            <div className="space-y-2 text-sm text-slate-300">
+          <div className="mb-10 pb-10 border-b border-indigo-800">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-pink-400 mb-4">Skills</h3>
+            <div className="space-y-2 text-sm text-indigo-200">
               {data.skills.soft.map((skill, i) => (
                 <div key={i} className="flex items-center">
-                  <span className="w-2 h-2 bg-amber-500 rounded-full mr-2"></span>
+                  <span className="w-2 h-2 bg-pink-500 rounded-full mr-2"></span>
                   {skill}
                 </div>
               ))}
@@ -107,12 +118,12 @@ export function MinimalTemplate({ data, isPreview = false }: MinimalTemplateProp
         {/* Languages */}
         {data.languages.length > 0 && (
           <div>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-amber-500 mb-4">Languages</h3>
-            <div className="space-y-2 text-sm text-slate-300">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-pink-400 mb-4">Languages</h3>
+            <div className="space-y-2 text-sm text-indigo-200">
               {data.languages.map((lang) => (
                 <div key={lang.id} className="flex justify-between">
                   <span>{lang.name}</span>
-                  <span className="text-amber-500">{lang.proficiency}</span>
+                  <span className="text-pink-400">{lang.proficiency}</span>
                 </div>
               ))}
             </div>
@@ -129,14 +140,14 @@ export function MinimalTemplate({ data, isPreview = false }: MinimalTemplateProp
 
         {/* Experience */}
         <div className="mb-10">
-          <h2 className="text-xl font-bold text-slate-800 mb-6 pb-3 border-b-2 border-amber-600">EXPERIENCE</h2>
+          <h2 className="text-xl font-bold text-slate-800 mb-6 pb-3 border-b-2 border-indigo-600">EXPERIENCE</h2>
           <div className="space-y-8">
             {data.experience.map((exp) => (
               <div key={exp.id}>
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">{exp.jobTitle}</h3>
-                    <p className="text-amber-700 font-medium">{exp.companyName}</p>
+                    <p className="text-indigo-700 font-medium">{exp.companyName}</p>
                   </div>
                   <span className="text-sm text-gray-600">
                     {formatDate(exp.startDate)}
@@ -159,12 +170,12 @@ export function MinimalTemplate({ data, isPreview = false }: MinimalTemplateProp
 
         {/* Education */}
         <div className="mb-10">
-          <h2 className="text-xl font-bold text-slate-800 mb-6 pb-3 border-b-2 border-amber-600">EDUCATION</h2>
+          <h2 className="text-xl font-bold text-slate-800 mb-6 pb-3 border-b-2 border-indigo-600">EDUCATION</h2>
           <div className="space-y-6">
             {data.education.map((edu) => (
               <div key={edu.id}>
                 <h3 className="font-semibold text-gray-900">{edu.degree}</h3>
-                <p className="text-amber-700">{edu.institutionName}</p>
+                <p className="text-indigo-700">{edu.institutionName}</p>
                 <div className="flex justify-between text-sm text-gray-600 mt-1">
                   <span>{edu.location}</span>
                   <span>{formatDate(edu.graduationDate)}</span>
@@ -177,12 +188,12 @@ export function MinimalTemplate({ data, isPreview = false }: MinimalTemplateProp
         {/* Projects */}
         {data.projects.length > 0 && (
           <div className="mb-10">
-            <h2 className="text-xl font-bold text-slate-800 mb-6 pb-3 border-b-2 border-amber-600">PROJECTS</h2>
+            <h2 className="text-xl font-bold text-slate-800 mb-6 pb-3 border-b-2 border-indigo-600">PROJECTS</h2>
             <div className="space-y-6">
               {data.projects.map((project) => (
                 <div key={project.id}>
                   <h3 className="font-semibold text-gray-900">{project.name}</h3>
-                  <p className="text-amber-700 text-sm">{project.role}</p>
+                  <p className="text-indigo-700 text-sm">{project.role}</p>
                   <p className="text-gray-700 text-sm my-2">{project.description}</p>
                   <p className="text-gray-600 text-xs">{project.technologies.join(" • ")}</p>
                 </div>
@@ -194,7 +205,7 @@ export function MinimalTemplate({ data, isPreview = false }: MinimalTemplateProp
         {/* Certifications */}
         {data.certifications.length > 0 && (
           <div>
-            <h2 className="text-xl font-bold text-slate-800 mb-6 pb-3 border-b-2 border-amber-600">CERTIFICATIONS</h2>
+            <h2 className="text-xl font-bold text-slate-800 mb-6 pb-3 border-b-2 border-indigo-600">CERTIFICATIONS</h2>
             <div className="space-y-3">
               {data.certifications.map((cert) => (
                 <div key={cert.id} className="flex justify-between items-start">

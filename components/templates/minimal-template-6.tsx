@@ -1,11 +1,11 @@
 import type { CVData } from "../../types/cv-data"
 
-interface ModernTemplate3Props {
+interface MinimalTemplate6Props {
   data: CVData
   isPreview?: boolean
 }
 
-export function ModernTemplate3({ data, isPreview = false }: ModernTemplate3Props) {
+export function MinimalTemplate6({ data, isPreview = false }: MinimalTemplate6Props) {
   const formatDate = (date: string) => {
     if (!date) return ""
     const s = date.trim()
@@ -220,10 +220,7 @@ export function ModernTemplate3({ data, isPreview = false }: ModernTemplate3Prop
               )}
             </div>
           )}
-        </div>
-
-        {/* Footer */}
-       
+        </div>       
       </div>
     </div>
   )

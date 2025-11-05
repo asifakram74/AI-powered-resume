@@ -40,15 +40,6 @@ export default function ModernTemplate8({ data }: ModernTemplate8Props) {
         @media print {
           @page {
             size: A4;
-            margin: 0.3in;
-          }
-          @page :first {
-            margin-top: 0.3in;
-            margin-bottom: 0.3in;
-          }
-          @page :not(:first) {
-            margin-top: 0.3in;
-            margin-bottom: 0.3in;
           }
           body {
             -webkit-print-color-adjust: exact;

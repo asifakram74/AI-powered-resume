@@ -1,3 +1,6 @@
+"use client"
+
+import { Mail, Phone, MapPin, User, Briefcase, FolderOpen, ExternalLink, Github, Award } from "lucide-react"
 import type { CVData } from "../../types/cv-data"
 
 interface CreativeTemplateProps {
@@ -7,218 +10,349 @@ interface CreativeTemplateProps {
 
 export function CreativeTemplate({ data, isPreview = false }: CreativeTemplateProps) {
   const formatDate = (date: string) => {
-    if (!date) return ""
-    const s = date.trim()
-    if (!s) return ""
-
-    const normalized = s.replace(/[\u2012-\u2015\u2212]/g, "-")
-
-    if (/^\d{4}$/.test(normalized)) return normalized
-
-    const monthNames = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ]
-
-    const isoMatch = normalized.match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?$/)
-    if (isoMatch) {
-      const year = isoMatch[1]
-      const month = Math.max(1, Math.min(12, Number.parseInt(isoMatch[2], 10)))
-      return `${monthNames[month - 1]} ${year}`
-    }
-
-    const slashMatch = normalized.match(/^(\d{1,2})\/(\d{4})$/)
-    if (slashMatch) {
-      const month = Math.max(1, Math.min(12, Number.parseInt(slashMatch[1], 10)))
-      const year = slashMatch[2]
-      return `${monthNames[month - 1]} ${year}`
-    }
-
-    if (/^([A-Za-z]{3,9})\s+\d{4}$/.test(normalized)) return normalized
-
-    return normalized
-  }
+    if (!date) return "";
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    
+    const isoMatch = /^(\d{4})-(\d{1,2})(?:-\d{1,2})?$/.exec(date);
+    if (isoMatch) return `${monthNames[parseInt(isoMatch[2])-1]} ${isoMatch[1]}`;
+    
+    const slashMatch = /^(\d{1,2})\/(\d{4})$/.exec(date);
+    if (slashMatch) return `${monthNames[parseInt(slashMatch[1])-1]} ${slashMatch[2]}`;
+    
+    return date;
+  };
 
   return (
-    <div className="min-h-screen bg-stone-50">
-      {/* Elegant Header */}
-      <div className="bg-white border-b-2 border-stone-300 px-12 py-16">
-        <div className="max-w-5xl mx-auto">
-          <h1 className="text-6xl font-serif text-stone-900 mb-1 font-thin">{data.personalInfo.fullName}</h1>
-          <div className="h-px w-20 bg-rose-400 mb-6"></div>
-          <p className="text-lg text-stone-600 font-light">{data.personalInfo.jobTitle}</p>
+    <div className="bg-white min-h-screen font-sans">
+      {/* Print Styles */}
+      <style jsx global>{`
+        @media print {
+          @page {
+            size: A4;
+            margin: 0.5in;
+          }
+          body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+        }
+      `}</style>
 
-          <div className="grid grid-cols-3 gap-8 mt-10 text-xs">
-            <div>
-              <p className="text-stone-500 font-semibold uppercase tracking-wider mb-1">Email</p>
-              <p className="text-stone-700 break-words">{data.personalInfo.email}</p>
-            </div>
-            <div>
-              <p className="text-stone-500 font-semibold uppercase tracking-wider mb-1">Phone</p>
-              <p className="text-stone-700">{data.personalInfo.phone}</p>
-            </div>
-            {(data.personalInfo.city || data.personalInfo.country) && (
-              <div>
-                <p className="text-stone-500 font-semibold uppercase tracking-wider mb-1">Location</p>
-                <p className="text-stone-700">
-                  {data.personalInfo.city && data.personalInfo.country
-                    ? `${data.personalInfo.city}, ${data.personalInfo.country}`
-                    : data.personalInfo.city || data.personalInfo.country}
-                </p>
-              </div>
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 via-blue-75 p-6 mb-6 rounded-b-2xl">
+        <div className="flex items-center gap-6 max-w-6xl mx-auto">
+          <img
+            src={data.personalInfo.profilePicture || "https://img.freepik.com/free-photo/emotions-people-concept-headshot-serious-looking-handsome-man-with-beard-looking-confident-determined_1258-26730.jpg"}
+            alt="Profile"
+            className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
+          />
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold text-slate-800 tracking-wide uppercase mb-1">
+              {data.personalInfo.fullName}
+            </h1>
+            {data.personalInfo.jobTitle && (
+              <h2 className="text-xl text-slate-600 font-medium">
+                {data.personalInfo.jobTitle}
+              </h2>
             )}
           </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="max-w-5xl mx-auto px-12 py-14">
-        {/* Summary */}
-        <div className="mb-14">
-          <p className="text-stone-700 leading-relaxed font-light text-lg">{data.personalInfo.summary}</p>
-        </div>
-
-        {/* Experience */}
-        <div className="mb-14">
-          <h2 className="text-sm font-serif text-stone-900 uppercase tracking-widest mb-10 pb-3 border-b border-rose-300">
-            Professional Experience
-          </h2>
-          <div className="space-y-12">
-            {data.experience.map((exp) => (
-              <div key={exp.id}>
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <h3 className="text-xl font-serif text-stone-900">{exp.jobTitle}</h3>
-                    <p className="text-rose-600 font-light italic">{exp.companyName}</p>
-                  </div>
-                  <span className="text-xs text-stone-600">
-                    {formatDate(exp.startDate)}
-                    {formatDate(exp.startDate) && (exp.current || formatDate(exp.endDate)) ? " – " : ""}
-                    {exp.current ? "Present" : formatDate(exp.endDate)}
-                  </span>
-                </div>
-                {exp.location && <p className="text-xs text-stone-600 mb-3 font-light">{exp.location}</p>}
-                <ul className="text-stone-700 space-y-2 ml-4">
-                  {exp.responsibilities.map((resp, index) => (
-                    <li key={index} className="list-disc text-sm font-light">
-                      {resp}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Education */}
-        <div className="mb-14">
-          <h2 className="text-sm font-serif text-stone-900 uppercase tracking-widest mb-10 pb-3 border-b border-rose-300">
-            Education
-          </h2>
-          <div className="space-y-8">
-            {data.education.map((edu) => (
-              <div key={edu.id} className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-serif text-stone-900">{edu.degree}</h3>
-                  <p className="text-rose-600 font-light">{edu.institutionName}</p>
-                  {edu.location && <p className="text-xs text-stone-600 mt-1 font-light">{edu.location}</p>}
-                  {edu.gpa && <p className="text-xs text-stone-600 font-light">GPA: {edu.gpa}</p>}
-                </div>
-                {edu.graduationDate && (
-                  <span className="text-xs text-stone-600 font-light">{formatDate(edu.graduationDate)}</span>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Skills */}
-        <div className="mb-14">
-          <h2 className="text-sm font-serif text-stone-900 uppercase tracking-widest mb-10 pb-3 border-b border-rose-300">
-            Core Competencies
-          </h2>
-          <div className="space-y-8">
-            {data.skills.technical.length > 0 && (
-              <div>
-                <p className="font-serif text-stone-900 mb-3">Technical</p>
-                <p className="text-stone-700 font-light text-sm">{data.skills.technical.join(" • ")}</p>
-              </div>
-            )}
-            {data.skills.soft.length > 0 && (
-              <div>
-                <p className="font-serif text-stone-900 mb-3">Professional</p>
-                <p className="text-stone-700 font-light text-sm">{data.skills.soft.join(" • ")}</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Projects */}
-        {data.projects.length > 0 && (
-          <div className="mb-14">
-            <h2 className="text-sm font-serif text-stone-900 uppercase tracking-widest mb-10 pb-3 border-b border-rose-300">
-              Notable Projects
+      {/* Main Content */}
+      <div className="flex flex-col lg:flex-row px-4 gap-6 max-w-6xl mx-auto">
+        {/* Left Sidebar */}
+        <div className="lg:w-1/3 space-y-6">
+          {/* Contact */}
+          <div className="bg-blue-50 rounded-xl p-4 shadow-sm">
+            <h2 className="text-lg font-bold text-slate-800 border-b-2 border-slate-300 pb-2 mb-3">
+              CONTACT
             </h2>
-            <div className="space-y-8">
-              {data.projects.map((project) => (
-                <div key={project.id}>
-                  <h3 className="font-serif text-stone-900">{project.name}</h3>
-                  <p className="text-rose-600 font-light text-sm italic mb-2">{project.role}</p>
-                  <p className="text-stone-700 font-light text-sm mb-2">{project.description}</p>
-                  <p className="text-stone-600 text-xs font-light">{project.technologies.join(" • ")}</p>
+            <div className="space-y-2 text-sm text-slate-700">
+              <div className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-slate-600" />
+                <span>{data.personalInfo.phone}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-slate-600" />
+                <span className="break-all">{data.personalInfo.email}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-slate-600" />
+                <span>
+                  {data.personalInfo.city && data.personalInfo.country 
+                    ? `${data.personalInfo.city}, ${data.personalInfo.country}`
+                    : data.personalInfo.city || data.personalInfo.country}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Skills */}
+          <div className="bg-blue-50 rounded-xl p-4 shadow-sm">
+            <h2 className="text-lg font-bold text-slate-800 border-b-2 border-slate-300 pb-2 mb-3">
+              SKILLS
+            </h2>
+            <div className="space-y-4">
+              {/* Technical Skills */}
+              {data.skills.technical.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-2 text-sm text-slate-700">
+                    Technical Skills
+                  </h3>
+                  <div className="space-y-2">
+                    {data.skills.technical.map((skill, index) => (
+                      <div key={index} className="flex items-center">
+                        <div className="w-2 h-2 bg-slate-600 rounded-full mr-3"></div>
+                        <span className="text-sm text-slate-700">{skill}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Soft Skills */}
+              {data.skills.soft.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-2 text-sm text-slate-700">
+                    Soft Skills
+                  </h3>
+                  <div className="space-y-2">
+                    {data.skills.soft.map((skill, index) => (
+                      <div key={index} className="flex items-center">
+                        <div className="w-2 h-2 bg-slate-600 rounded-full mr-3"></div>
+                        <span className="text-sm text-slate-700">{skill}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Languages */}
+          {data.languages.length > 0 && (
+            <div className="bg-blue-50 rounded-xl p-4 shadow-sm">
+              <h2 className="text-lg font-bold text-slate-800 border-b-2 border-slate-300 pb-2 mb-3">
+                LANGUAGES
+              </h2>
+              <div className="space-y-2 text-sm text-slate-700">
+                {data.languages.map((lang) => (
+                  <div key={lang.id} className="flex justify-between">
+                    <span>{lang.name}</span>
+                    <span className="text-slate-600">{lang.proficiency}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Education */}
+          <div className="bg-blue-50 rounded-xl p-4 shadow-sm">
+            <h2 className="text-lg font-bold text-slate-800 border-b-2 border-slate-300 pb-2 mb-3">
+              EDUCATION
+            </h2>
+            <div className="space-y-4 text-sm text-slate-700">
+              {data.education.map((edu) => (
+                <div key={edu.id}>
+                  <h3 className="font-semibold mb-1 text-sm">{edu.degree}</h3>
+                  <p className="text-slate-600 mb-1 text-xs">{edu.institutionName}</p>
+                  {edu.location && (
+                    <p className="text-slate-500 mb-1 text-xs">{edu.location}</p>
+                  )}
+                  {edu.graduationDate && (
+                    <p className="text-slate-500 mb-1 text-xs">
+                      {formatDate(edu.graduationDate)}
+                    </p>
+                  )}
+                  {edu.gpa && (
+                    <p className="text-slate-500 text-xs">GPA: {edu.gpa}</p>
+                  )}
                 </div>
               ))}
             </div>
           </div>
-        )}
 
-        {/* Languages & Certifications */}
-        {(data.languages.length > 0 || data.certifications.length > 0) && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-            {data.languages.length > 0 && (
-              <div>
-                <h2 className="text-sm font-serif text-stone-900 uppercase tracking-widest mb-6 pb-3 border-b border-rose-300">
-                  Languages
-                </h2>
-                <div className="space-y-3">
-                  {data.languages.map((lang) => (
-                    <div key={lang.id} className="flex justify-between">
-                      <span className="text-stone-900 font-light">{lang.name}</span>
-                      <span className="text-rose-600 font-light">{lang.proficiency}</span>
-                    </div>
-                  ))}
-                </div>
+          {/* Interests */}
+          {data.additional.interests.length > 0 && (
+            <div className="bg-blue-50 rounded-xl p-4 shadow-sm">
+              <h2 className="text-lg font-bold text-slate-800 border-b-2 border-slate-300 pb-2 mb-3">
+                INTERESTS
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {data.additional.interests.map((interest, index) => (
+                  <span
+                    key={index}
+                    className="bg-slate-700 text-white px-3 py-1 rounded-full text-xs"
+                  >
+                    {interest}
+                  </span>
+                ))}
               </div>
-            )}
+            </div>
+          )}
+        </div>
 
-            {data.certifications.length > 0 && (
-              <div>
-                <h2 className="text-sm font-serif text-stone-900 uppercase tracking-widest mb-6 pb-3 border-b border-rose-300">
-                  Certifications
-                </h2>
-                <div className="space-y-3">
-                  {data.certifications.map((cert) => (
-                    <div key={cert.id}>
-                      <p className="font-serif text-stone-900">{cert.title}</p>
-                      <p className="text-stone-600 text-xs font-light">{cert.issuingOrganization}</p>
-                      <p className="text-rose-600 text-xs font-light">{formatDate(cert.dateObtained)}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+        {/* Right Content */}
+        <div className="lg:flex-1 space-y-6">
+          {/* Profile */}
+          <div>
+            <div className="flex items-center mb-3">
+              <User className="w-5 h-5 bg-slate-700 text-white rounded-full p-1 mr-3" />
+              <h2 className="text-xl font-bold text-slate-800 border-b-2 border-slate-300 pb-1 flex-1">
+                PROFILE
+              </h2>
+            </div>
+            <div className="relative pl-6">
+              <div className="absolute left-3 top-0 bottom-0 w-px bg-gray-300"></div>
+              <div className="absolute left-2.5 top-1.5 w-2 h-2 bg-slate-700 rounded-full"></div>
+              <p className="text-gray-700 leading-relaxed text-sm">
+                {data.personalInfo.summary}
+              </p>
+            </div>
           </div>
-        )}
+
+          {/* Work Experience */}
+          <div>
+            <div className="flex items-center mb-3">
+              <Briefcase className="w-5 h-5 bg-slate-700 text-white rounded-full p-1 mr-3" />
+              <h2 className="text-xl font-bold text-slate-800 border-b-2 border-slate-300 pb-1 flex-1">
+                WORK EXPERIENCE
+              </h2>
+            </div>
+
+            <div className="relative pl-6">
+              <div className="absolute left-3 top-0 bottom-0 w-px bg-gray-300"></div>
+              
+              {data.experience.map((exp, index) => (
+                <div key={exp.id} className="relative mb-4">
+                  <div className="absolute -left-2 top-1.5 w-2 h-2 bg-slate-700 rounded-full"></div>
+                  
+                  <div className="mb-2">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="text-base font-bold text-slate-800 mb-1">
+                          {exp.jobTitle}
+                        </h3>
+                        <p className="text-gray-600 font-medium mb-1 text-sm">
+                          {exp.companyName}
+                        </p>
+                        {exp.location && (
+                          <p className="text-gray-500 text-xs">{exp.location}</p>
+                        )}
+                      </div>
+                      <span className="text-gray-500 text-sm whitespace-nowrap">
+                        {formatDate(exp.startDate)} - {exp.current ? 'Present' : formatDate(exp.endDate)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1 text-sm text-gray-700 pl-3">
+                    {exp.responsibilities.map((resp, idx) => (
+                      <p key={idx}>{resp}</p>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Projects */}
+          {data.projects.length > 0 && (
+            <div>
+              <div className="flex items-center mb-3">
+                <FolderOpen className="w-5 h-5 bg-slate-700 text-white rounded-full p-1 mr-3" />
+                <h2 className="text-xl font-bold text-slate-800 border-b-2 border-slate-300 pb-1 flex-1">
+                  PROJECTS
+                </h2>
+              </div>
+
+              <div className="relative pl-6">
+                <div className="absolute left-3 top-0 bottom-0 w-px bg-gray-300"></div>
+                
+                {data.projects.map((project) => (
+                  <div key={project.id} className="relative mb-4">
+                    <div className="absolute -left-2 top-1.5 w-2 h-2 bg-slate-700 rounded-full"></div>
+
+                    <div className="mb-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-base font-bold text-slate-800 mb-1">
+                            {project.name}
+                          </h3>
+                          <p className="text-gray-600 font-medium mb-1 text-sm">
+                            {project.role}
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          {project.liveDemoLink && (
+                            <ExternalLink className="w-4 h-4 text-blue-500" />
+                          )}
+                          {project.githubLink && (
+                            <Github className="w-4 h-4 text-gray-500" />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {project.description && (
+                      <p className="text-gray-700 text-sm mb-3 whitespace-pre-line">
+                        {project.description}
+                      </p>
+                    )}
+
+                    <div className="flex flex-wrap gap-2">
+                      {project.technologies.map((tech, idx) => (
+                        <span
+                          key={idx}
+                          className="bg-blue-100 text-slate-800 px-2 py-1 rounded text-xs"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Certifications */}
+          {data.certifications.length > 0 && (
+            <div>
+              <div className="flex items-center mb-3">
+                <Award className="w-5 h-5 bg-slate-700 text-white rounded-full p-1 mr-3" />
+                <h2 className="text-xl font-bold text-slate-800 border-b-2 border-slate-300 pb-1 flex-1">
+                  CERTIFICATIONS & AWARDS
+                </h2>
+              </div>
+
+              <div className="relative pl-6">
+                <div className="absolute left-3 top-0 bottom-0 w-px bg-gray-300"></div>
+                
+                {data.certifications.map((cert) => (
+                  <div key={cert.id} className="relative mb-3">
+                    <div className="absolute -left-2 top-1.5 w-2 h-2 bg-slate-700 rounded-full"></div>
+
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="text-sm font-bold text-slate-800 mb-1">
+                          {cert.title}
+                        </h3>
+                        <p className="text-gray-600 text-sm">
+                          {cert.issuingOrganization}
+                        </p>
+                      </div>
+                      <span className="text-gray-500 text-xs">
+                        {formatDate(cert.dateObtained)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

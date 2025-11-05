@@ -46,7 +46,6 @@ const formatDate = (date: string) => {
         @media print {
           @page {
             size: A4;
-            margin: 0.5in;
           }
           .print\\:break-inside-avoid {
             break-inside: avoid;

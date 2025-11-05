@@ -1,27 +1,26 @@
 "use client";
 
-import type { CVData } from "../../types/cv-data";
 import { ModernTemplate } from "../../components/templates/modern-template";
 import { ClassicTemplate } from "../../components/templates/classic-template";
-import { MinimalTemplate } from "../../components/templates/minimal-template";
-import { CreativeTemplate } from "../../components/templates/creative-template";
+import { CreativeTemplate2 } from "../../components/templates/creative-template-2";
+import { CreativeTemplate3 } from "../../components/templates/creative-template-3";
 import { ModernTemplate2 } from "../../components/templates/modern-template2";
-import { ModernTemplate3 } from "../../components/templates/modern-template3";
-import { ModernTemplate4 } from "../../components/templates/modern-template-4";
+import { MinimalTemplate6 } from "../../components/templates/minimal-template-6";
+import { MinimalTemplate7 } from "../../components/templates/minimal-template-7";
 import { ClassicTemplate2 } from "../../components/templates/classic-template-2";
 import { ClassicTemplate3 } from "../../components/templates/classic-template-3";
 import { ClassicTemplate4 } from "../../components/templates/classic-template-4";
-import { CreativeTemplate2 } from "../../components/templates/creative-template-2";
-import { CreativeTemplate3 } from "../../components/templates/creative-template-3";
-import { CreativeTemplate4 } from "../../components/templates/creative-template-4";
+import { MinimalTemplate } from "../../components/templates/minimal-template";
+import { MinimalTemplate5 } from "../../components/templates/minimal-template-5";
+import { MinimalTemplate8 } from "../../components/templates/minimal-template-8";
 import { MinimalTemplate2 } from "../../components/templates/minimal-template2";
 import { MinimalTemplate3 } from "../../components/templates/minimal-template3";
 import { MinimalTemplate4 } from "../../components/templates/minimal-template-4";
-import {ModernTemplate5}from "../../components/templates/modern-template-5";
+import {CreativeTemplate4}from "../../components/templates/creative-template-4";
 import {ModernTemplate6} from "../../components/templates/modern-template-6";
 import {ModernTemplate7} from "../../components/templates/modern-template-7";
 import {ModernTemplate8} from "../../components/templates/modern-template-8";
-import {ModernTemplate9} from "../../components/templates/modern-template-9";
+import {CreativeTemplate} from "../../components/templates/creative-template";
 import { sampleCVData } from "../../lib/sample-cv-data";
 import { useRef } from "react";
 
@@ -33,7 +32,7 @@ interface CVTemplate {
 }
 
 interface CVPreviewProps {
-  data?: CVData;
+  data?: typeof sampleCVData;
   template?: CVTemplate;
 }
 
@@ -62,38 +61,42 @@ export function CVPreview({
         return <CreativeTemplate data={data} />;
       case "modern-2":
         return <ModernTemplate2 data={data} />;
-      case "modern-3":
-        return <ModernTemplate3 data={data} />;
+      case "minimal-6":
+        return <MinimalTemplate6 data={data} />;
       case "classic-2":
         return <ClassicTemplate2 data={data} />;
       case "classic-3":
         return <ClassicTemplate3 data={data} />;
-      case "creative-2":
-        return <CreativeTemplate2 data={data} />;
-      case "creative-3":
-        return <CreativeTemplate3 data={data} />;
+      case "minimal-1":
+        return <MinimalTemplate data={data} />;
+      case "minimal-5":
+        return <MinimalTemplate5 data={data} />;
       case "minimal-2":
         return <MinimalTemplate2 data={data} />;
       case "minimal-3":
         return <MinimalTemplate3 data={data} />;
-      case "modern-4":
-        return <ModernTemplate4 data={data} />;
+      case "minimal-7":
+        return <MinimalTemplate7 data={data} />;
       case "classic-4":
         return <ClassicTemplate4 data={data} />;
-      case "creative-4":
-        return <CreativeTemplate4 data={data} />;
+      case "minimal-8":
+        return <MinimalTemplate8 data={data} />;
       case "minimal-4":
         return <MinimalTemplate4 data={data} />;
-      case "modern-5":
-        return <ModernTemplate5 data={data} />;
+      case "creative-4":
+        return <CreativeTemplate4 data={data} />;
       case "modern-6":
         return <ModernTemplate6 data={data} />;
       case "modern-7":
         return <ModernTemplate7 data={data} />;
       case "modern-8":
         return <ModernTemplate8 data={data} />;
-      case "modern-9":
-        return <ModernTemplate9 data={data} />;
+      case "creative-1":
+        return <CreativeTemplate data={data} />;
+      case "creative-2":
+        return <CreativeTemplate2 data={data} />;
+      case "creative-3":
+        return <CreativeTemplate3 data={data} />;
       default:
         return <ModernTemplate data={data} />;
     }

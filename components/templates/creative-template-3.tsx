@@ -3,10 +3,9 @@ import type { CVData } from "../../types/cv-data"
 interface CreativeTemplate3Props {
   data: CVData
   isPreview?: boolean
-  profileImage?: string
 }
 
-export function CreativeTemplate3({ data, isPreview = false, profileImage }: CreativeTemplate3Props) {
+export function CreativeTemplate3({ data, isPreview = false }: CreativeTemplate3Props) {
   const formatDate = (date: string) => {
     if (!date) return ""
     const s = date.trim()
@@ -51,114 +50,67 @@ export function CreativeTemplate3({ data, isPreview = false, profileImage }: Cre
   }
 
   return (
-    <div className="flex min-h-screen bg-white">
-      {/* Left Sidebar */}
-      <div className="w-80 bg-indigo-950 text-white p-10">
-        {profileImage && (
-          <div className="mb-8">
-            <img
-              src={profileImage || "/placeholder.svg"}
-              alt={data.personalInfo.fullName}
-              className="w-32 h-32 rounded-lg object-cover mx-auto border-4 border-pink-500"
-            />
-          </div>
-        )}
+    <div className="min-h-screen bg-stone-50">
+      {/* Elegant Header */}
+      <div className="bg-white border-b-2 border-stone-300 px-12 py-16">
+        <div className="max-w-5xl mx-auto">
+          <h1 className="text-6xl font-serif text-stone-900 mb-1 font-thin">{data.personalInfo.fullName}</h1>
+          <div className="h-px w-20 bg-rose-400 mb-6"></div>
+          <p className="text-lg text-stone-600 font-light">{data.personalInfo.jobTitle}</p>
 
-        {/* Header */}
-        <div className="mb-10">
-          <h1 className="text-3xl font-bold mb-1">{data.personalInfo.fullName}</h1>
-          <div className="h-1 w-12 bg-pink-500 mb-4"></div>
-          <p className="text-indigo-200">{data.personalInfo.jobTitle}</p>
-        </div>
-
-        {/* Contact */}
-        <div className="mb-10 pb-10 border-b border-indigo-800">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-pink-400 mb-4">Contact</h3>
-          <div className="space-y-3 text-sm text-indigo-200">
-            <p className="break-words">{data.personalInfo.email}</p>
-            <p>{data.personalInfo.phone}</p>
-            {data.personalInfo.city && data.personalInfo.country && (
-              <p>
-                {data.personalInfo.city}, {data.personalInfo.country}
-              </p>
+          <div className="grid grid-cols-3 gap-8 mt-10 text-xs">
+            <div>
+              <p className="text-stone-500 font-semibold uppercase tracking-wider mb-1">Email</p>
+              <p className="text-stone-700 break-words">{data.personalInfo.email}</p>
+            </div>
+            <div>
+              <p className="text-stone-500 font-semibold uppercase tracking-wider mb-1">Phone</p>
+              <p className="text-stone-700">{data.personalInfo.phone}</p>
+            </div>
+            {(data.personalInfo.city || data.personalInfo.country) && (
+              <div>
+                <p className="text-stone-500 font-semibold uppercase tracking-wider mb-1">Location</p>
+                <p className="text-stone-700">
+                  {data.personalInfo.city && data.personalInfo.country
+                    ? `${data.personalInfo.city}, ${data.personalInfo.country}`
+                    : data.personalInfo.city || data.personalInfo.country}
+                </p>
+              </div>
             )}
           </div>
         </div>
-
-        {/* Technical Skills */}
-        {data.skills.technical.length > 0 && (
-          <div className="mb-10 pb-10 border-b border-indigo-800">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-pink-400 mb-4">Technical</h3>
-            <div className="space-y-2 text-sm text-indigo-200">
-              {data.skills.technical.map((skill, i) => (
-                <div key={i} className="flex items-center">
-                  <span className="w-2 h-2 bg-pink-500 rounded-full mr-2"></span>
-                  {skill}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Soft Skills */}
-        {data.skills.soft.length > 0 && (
-          <div className="mb-10 pb-10 border-b border-indigo-800">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-pink-400 mb-4">Skills</h3>
-            <div className="space-y-2 text-sm text-indigo-200">
-              {data.skills.soft.map((skill, i) => (
-                <div key={i} className="flex items-center">
-                  <span className="w-2 h-2 bg-pink-500 rounded-full mr-2"></span>
-                  {skill}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Languages */}
-        {data.languages.length > 0 && (
-          <div>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-pink-400 mb-4">Languages</h3>
-            <div className="space-y-2 text-sm text-indigo-200">
-              {data.languages.map((lang) => (
-                <div key={lang.id} className="flex justify-between">
-                  <span>{lang.name}</span>
-                  <span className="text-pink-400">{lang.proficiency}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Right Content */}
-      <div className="flex-1 p-10">
+      {/* Content */}
+      <div className="max-w-5xl mx-auto px-12 py-14">
         {/* Summary */}
-        <div className="mb-10">
-          <p className="text-gray-700 leading-relaxed">{data.personalInfo.summary}</p>
+        <div className="mb-14">
+          <p className="text-stone-700 leading-relaxed font-light text-lg">{data.personalInfo.summary}</p>
         </div>
 
         {/* Experience */}
-        <div className="mb-10">
-          <h2 className="text-xl font-bold text-slate-800 mb-6 pb-3 border-b-2 border-indigo-600">EXPERIENCE</h2>
-          <div className="space-y-8">
+        <div className="mb-14">
+          <h2 className="text-sm font-serif text-stone-900 uppercase tracking-widest mb-10 pb-3 border-b border-rose-300">
+            Professional Experience
+          </h2>
+          <div className="space-y-12">
             {data.experience.map((exp) => (
               <div key={exp.id}>
-                <div className="flex justify-between items-start mb-2">
+                <div className="flex justify-between items-start mb-3">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900">{exp.jobTitle}</h3>
-                    <p className="text-indigo-700 font-medium">{exp.companyName}</p>
+                    <h3 className="text-xl font-serif text-stone-900">{exp.jobTitle}</h3>
+                    <p className="text-rose-600 font-light italic">{exp.companyName}</p>
                   </div>
-                  <span className="text-sm text-gray-600">
+                  <span className="text-xs text-stone-600">
                     {formatDate(exp.startDate)}
-                    {formatDate(exp.startDate) && (exp.current || formatDate(exp.endDate)) ? " - " : ""}
+                    {formatDate(exp.startDate) && (exp.current || formatDate(exp.endDate)) ? " – " : ""}
                     {exp.current ? "Present" : formatDate(exp.endDate)}
                   </span>
                 </div>
-                {exp.location && <p className="text-sm text-gray-600 mb-2">{exp.location}</p>}
-                <ul className="text-gray-700 space-y-1 ml-4">
+                {exp.location && <p className="text-xs text-stone-600 mb-3 font-light">{exp.location}</p>}
+                <ul className="text-stone-700 space-y-2 ml-4">
                   {exp.responsibilities.map((resp, index) => (
-                    <li key={index} className="list-disc text-sm">
+                    <li key={index} className="list-disc text-sm font-light">
                       {resp}
                     </li>
                   ))}
@@ -169,54 +121,102 @@ export function CreativeTemplate3({ data, isPreview = false, profileImage }: Cre
         </div>
 
         {/* Education */}
-        <div className="mb-10">
-          <h2 className="text-xl font-bold text-slate-800 mb-6 pb-3 border-b-2 border-indigo-600">EDUCATION</h2>
-          <div className="space-y-6">
+        <div className="mb-14">
+          <h2 className="text-sm font-serif text-stone-900 uppercase tracking-widest mb-10 pb-3 border-b border-rose-300">
+            Education
+          </h2>
+          <div className="space-y-8">
             {data.education.map((edu) => (
-              <div key={edu.id}>
-                <h3 className="font-semibold text-gray-900">{edu.degree}</h3>
-                <p className="text-indigo-700">{edu.institutionName}</p>
-                <div className="flex justify-between text-sm text-gray-600 mt-1">
-                  <span>{edu.location}</span>
-                  <span>{formatDate(edu.graduationDate)}</span>
+              <div key={edu.id} className="flex justify-between items-start">
+                <div>
+                  <h3 className="font-serif text-stone-900">{edu.degree}</h3>
+                  <p className="text-rose-600 font-light">{edu.institutionName}</p>
+                  {edu.location && <p className="text-xs text-stone-600 mt-1 font-light">{edu.location}</p>}
+                  {edu.gpa && <p className="text-xs text-stone-600 font-light">GPA: {edu.gpa}</p>}
                 </div>
+                {edu.graduationDate && (
+                  <span className="text-xs text-stone-600 font-light">{formatDate(edu.graduationDate)}</span>
+                )}
               </div>
             ))}
           </div>
         </div>
 
+        {/* Skills */}
+        <div className="mb-14">
+          <h2 className="text-sm font-serif text-stone-900 uppercase tracking-widest mb-10 pb-3 border-b border-rose-300">
+            Core Competencies
+          </h2>
+          <div className="space-y-8">
+            {data.skills.technical.length > 0 && (
+              <div>
+                <p className="font-serif text-stone-900 mb-3">Technical</p>
+                <p className="text-stone-700 font-light text-sm">{data.skills.technical.join(" • ")}</p>
+              </div>
+            )}
+            {data.skills.soft.length > 0 && (
+              <div>
+                <p className="font-serif text-stone-900 mb-3">Professional</p>
+                <p className="text-stone-700 font-light text-sm">{data.skills.soft.join(" • ")}</p>
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Projects */}
         {data.projects.length > 0 && (
-          <div className="mb-10">
-            <h2 className="text-xl font-bold text-slate-800 mb-6 pb-3 border-b-2 border-indigo-600">PROJECTS</h2>
-            <div className="space-y-6">
+          <div className="mb-14">
+            <h2 className="text-sm font-serif text-stone-900 uppercase tracking-widest mb-10 pb-3 border-b border-rose-300">
+              Notable Projects
+            </h2>
+            <div className="space-y-8">
               {data.projects.map((project) => (
                 <div key={project.id}>
-                  <h3 className="font-semibold text-gray-900">{project.name}</h3>
-                  <p className="text-indigo-700 text-sm">{project.role}</p>
-                  <p className="text-gray-700 text-sm my-2">{project.description}</p>
-                  <p className="text-gray-600 text-xs">{project.technologies.join(" • ")}</p>
+                  <h3 className="font-serif text-stone-900">{project.name}</h3>
+                  <p className="text-rose-600 font-light text-sm italic mb-2">{project.role}</p>
+                  <p className="text-stone-700 font-light text-sm mb-2">{project.description}</p>
+                  <p className="text-stone-600 text-xs font-light">{project.technologies.join(" • ")}</p>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* Certifications */}
-        {data.certifications.length > 0 && (
-          <div>
-            <h2 className="text-xl font-bold text-slate-800 mb-6 pb-3 border-b-2 border-indigo-600">CERTIFICATIONS</h2>
-            <div className="space-y-3">
-              {data.certifications.map((cert) => (
-                <div key={cert.id} className="flex justify-between items-start">
-                  <div>
-                    <p className="font-semibold text-gray-900">{cert.title}</p>
-                    <p className="text-gray-600 text-sm">{cert.issuingOrganization}</p>
-                  </div>
-                  <span className="text-sm text-gray-600">{formatDate(cert.dateObtained)}</span>
+        {/* Languages & Certifications */}
+        {(data.languages.length > 0 || data.certifications.length > 0) && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+            {data.languages.length > 0 && (
+              <div>
+                <h2 className="text-sm font-serif text-stone-900 uppercase tracking-widest mb-6 pb-3 border-b border-rose-300">
+                  Languages
+                </h2>
+                <div className="space-y-3">
+                  {data.languages.map((lang) => (
+                    <div key={lang.id} className="flex justify-between">
+                      <span className="text-stone-900 font-light">{lang.name}</span>
+                      <span className="text-rose-600 font-light">{lang.proficiency}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
+
+            {data.certifications.length > 0 && (
+              <div>
+                <h2 className="text-sm font-serif text-stone-900 uppercase tracking-widest mb-6 pb-3 border-b border-rose-300">
+                  Certifications
+                </h2>
+                <div className="space-y-3">
+                  {data.certifications.map((cert) => (
+                    <div key={cert.id}>
+                      <p className="font-serif text-stone-900">{cert.title}</p>
+                      <p className="text-stone-600 text-xs font-light">{cert.issuingOrganization}</p>
+                      <p className="text-rose-600 text-xs font-light">{formatDate(cert.dateObtained)}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
