@@ -106,7 +106,7 @@ const templates: CVTemplate[] = [
 },
 
 {
-  id: "minimal-1",
+  id: "minimal",
   name: "Minimal 1",
   description: "A new creative design for professionals",
   category: "minimal",

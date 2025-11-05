@@ -66,7 +66,7 @@ export function CVPreview({
         return <ClassicTemplate2 data={data} />;
       case "classic-3":
         return <ClassicTemplate3 data={data} />;
-      case "minimal-1":
+      case "minimal":
         return <MinimalTemplate data={data} />;
       case "minimal-5":
         return <MinimalTemplate5 data={data} />;

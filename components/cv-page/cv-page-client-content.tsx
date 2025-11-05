@@ -150,15 +150,9 @@ const templates: CVTemplate[] = [
 },
 
 {
-  id: "minimal-1",
-  name: "Minimal 1",
+  id: "minimal",
+  name: "Minimal",
   description: "A new creative design for professionals",
-  category: "minimal",
-},
-{
-  id: "minimal-5",
-  name: "Minimal 5",
-  description: "Another creative design option",
   category: "minimal",
 },
 {
@@ -173,17 +167,22 @@ const templates: CVTemplate[] = [
   description: "Another variation of the minimal layout",
   category: "minimal",
 },
-
-{
-  id: "minimal-6",
-  name: "Minimal 6",
-  description: "Another modern design option",
-  category: "minimal",
-},
 {
   id: "minimal-4",
   name: "Minimal Clean 4",
   description: "Ultra-clean minimal design focusing on content",
+  category: "minimal",
+},
+{
+  id: "minimal-5",
+  name: "Minimal 5",
+  description: "Another creative design option",
+  category: "minimal",
+},
+{
+  id: "minimal-6",
+  name: "Minimal 6",
+  description: "Another modern design option",
   category: "minimal",
 },
 {
@@ -198,6 +197,7 @@ const templates: CVTemplate[] = [
   description: "Premium creative design for professionals",
   category: "minimal",
 },
+
 
 ]
 
