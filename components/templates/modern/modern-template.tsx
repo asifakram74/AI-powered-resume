@@ -48,15 +48,8 @@ export function ModernTemplate({
             print-color-adjust: exact;
             background: white;
           }
-          .print-break-inside-avoid {
-            break-inside: avoid;
-          }
-          .print-break-after-auto {
-            break-after: auto;
-          }
-          .print-break-before-auto {
-            break-before: auto;
-          }
+         
+       
           
           /* Fix for sidebar background on all pages */
           .sidebar-bg {

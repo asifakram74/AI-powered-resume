@@ -378,7 +378,7 @@ export function ProfilePage() {
                   </div>
                 </Button>
 
-                {profile?.plan_type?.toLowerCase() !== 'pro' && (
+                {profile?.plan_type?.toLowerCase() !== 'pro' && user?.role?.toLowerCase() !== 'admin' && (
                   <Button
                     className="w-full justify-start h-12 resumaic-gradient-green hover:opacity-90 button-press"
                     onClick={async () => {
