@@ -154,8 +154,8 @@ export function ModernTemplate4({ data, isPreview = false }: ModernTemplate4Prop
             <div className="space-y-3">
               {data.education.map((edu) => (
                 <div key={edu.id} className="text-xs print-break-inside-avoid">
-                  <h3 className="font-bold text-white">{edu.degree}</h3>
-                  <p className="text-teal-100 print:text-teal-100">{edu.institutionName}</p>
+                  <h3 className="font-bold text-white print-break-inside-avoid">{edu.degree}</h3>
+                  <p className="text-teal-100 print:text-teal-100 print-break-inside-avoid">{edu.institutionName}</p>
                   {edu.graduationDate && <p className="text-teal-200">{formatDate(edu.graduationDate)}</p>}
                 </div>
               ))}
@@ -198,19 +198,19 @@ export function ModernTemplate4({ data, isPreview = false }: ModernTemplate4Prop
 
           {/* Experience */}
           <div className="print-break-inside-avoid">
-            <h2 className="text-lg font-black text-gray-900 mb-4 print:text-gray-900 uppercase tracking-wide">
+            <h2 className="text-lg font-black text-gray-900 mb-4 print:text-gray-900 uppercase tracking-wide print-break-inside-avoid">
               Experience
             </h2>
-            <div className="space-y-4">
+            <div className="space-y-4 print-break-inside-avoid">
               {data.experience.map((exp) => (
                 <div
                   key={exp.id}
                   className="bg-white rounded-lg p-4 border-l-4 border-teal-500 print-break-inside-avoid print:border-teal-500"
                 >
-                  <div className="flex justify-between items-start mb-2">
+                  <div className="flex justify-between items-start mb-2 print-break-inside-avoid">
                     <div>
-                      <h3 className="text-base font-bold text-gray-900 print:text-gray-900">{exp.jobTitle}</h3>
-                      <p className="text-teal-600 font-semibold text-sm print:text-teal-600">{exp.companyName}</p>
+                      <h3 className="text-base font-bold text-gray-900 print:text-gray-900 print-break-inside-avoid">{exp.jobTitle}</h3>
+                      <p className="text-teal-600 font-semibold text-sm print:text-teal-600 print-break-inside-avoid">{exp.companyName}</p>
                     </div>
                     {(formatDate(exp.startDate) || exp.current || formatDate(exp.endDate)) && (
                       <span className="text-gray-500 text-xs print:text-gray-500 whitespace-nowrap">
@@ -222,9 +222,9 @@ export function ModernTemplate4({ data, isPreview = false }: ModernTemplate4Prop
                   </div>
                   <ul className="text-gray-700 leading-relaxed space-y-1 text-sm print:text-gray-700">
                     {exp.responsibilities.map((resp, index) => (
-                      <li key={index} className="flex items-start">
+                      <li key={index} className="flex items-start print-break-inside-avoid">
                         <span className="text-teal-500 mr-2 print:text-teal-500">●</span>
-                        <span>{resp}</span>
+                        <span className="print-break-inside-avoid">{resp}</span>
                       </li>
                     ))}
                   </ul>
