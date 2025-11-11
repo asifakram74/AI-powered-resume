@@ -18,6 +18,7 @@ import { Sparkles, X, Plus, Upload, User } from "lucide-react";
 import { Textarea } from "../../components/ui/textarea";
 import { Switch } from "../../components/ui/switch";
 import type { CVData } from "../../types/cv-data";
+import { isValidEmailFormat } from "../../lib/utils/email-validation";
 
 // Helper function to validate and format URLs
 const formatUrl = (url: string): string => {
@@ -96,6 +97,7 @@ export function PersonaForm({
   onCancel,
 }: PersonaFormProps) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [errors, setErrors] = useState<{ fullName?: string; jobTitle?: string; email?: string }>({});
 
   // Form state with default empty structure
   const [formData, setFormData] = useState<Omit<CVData, "id" | "createdAt">>({
@@ -489,6 +491,27 @@ export function PersonaForm({
   };
 
   const generatePersona = async () => {
+    // Required field validation
+    const newErrors: { fullName?: string; jobTitle?: string; email?: string } = {};
+    if (!formData.personalInfo.fullName.trim()) {
+      newErrors.fullName = "Full Name is mandatory";
+    }
+    if (!formData.personalInfo.jobTitle.trim()) {
+      newErrors.jobTitle = "Job Title is mandatory";
+    }
+    if (!formData.personalInfo.email.trim()) {
+      newErrors.email = "Email is mandatory";
+    } else if (!isValidEmailFormat(formData.personalInfo.email.trim())) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toast("Please fill the mandatory fields");
+      return;
+    }
+
+    setErrors({});
     setIsGenerating(true);
 
     // Validate and format URLs
@@ -602,7 +625,12 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                   }))
                 }
                 placeholder="John Doe"
+                aria-invalid={Boolean(errors.fullName)}
+                className={errors.fullName ? "border-red-500 focus-visible:ring-red-500" : ""}
               />
+              {errors.fullName && (
+                <p className="text-sm text-red-600">{errors.fullName}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label>Job Title *</Label>
@@ -618,7 +646,12 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                   }))
                 }
                 placeholder="Software Engineer"
+                aria-invalid={Boolean(errors.jobTitle)}
+                className={errors.jobTitle ? "border-red-500 focus-visible:ring-red-500" : ""}
               />
+              {errors.jobTitle && (
+                <p className="text-sm text-red-600">{errors.jobTitle}</p>
+              )}
             </div>
           </div>
 
@@ -638,7 +671,12 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                   }))
                 }
                 placeholder="john@example.com"
+                aria-invalid={Boolean(errors.email)}
+                className={errors.email ? "border-red-500 focus-visible:ring-red-500" : ""}
               />
+              {errors.email && (
+                <p className="text-sm text-red-600">{errors.email}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label>Phone</Label>
@@ -1508,7 +1546,6 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
               />
             </div>
           </div>
-
           <div className="space-y-2">
             <Label>Project Description</Label>
             <Textarea
