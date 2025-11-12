@@ -262,7 +262,9 @@ export function UserList({ user }: PageProps) {
       user?.name?.toLowerCase().includes(searchLower) ||
       user?.email?.toLowerCase().includes(searchLower) ||
       user?.role?.toLowerCase().includes(searchLower) ||
-      user?.plan?.toLowerCase().includes(searchLower) ||
+      user?.plan_type
+      
+      ?.toLowerCase().includes(searchLower) ||
       String(user?.status)?.toLowerCase().includes(searchLower)
     )
   })
@@ -464,7 +466,7 @@ export function UserList({ user }: PageProps) {
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline" className="border-[#70E4A8]/30 text-[#2D3639] font-sans">
-                            {user.plan}
+                            {user.plan_type}
                           </Badge>
                         </TableCell>
                         {/* <TableCell>

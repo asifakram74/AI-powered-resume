@@ -267,9 +267,8 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
           </CardContent>
         </Card>
       )}
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <form onSubmit={handleSubmit} className="">
+        <div className="">
           {/* Basic Information Card */}
           <Card className="hover:shadow-lg transition-shadow duration-300 border-2 border-transparent hover:border-[#70E4A8]/20">
             <CardHeader>
@@ -382,82 +381,7 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
           </Card>
 
           {/* Subscription & Preferences Card */}
-          <Card className="hover:shadow-lg transition-shadow duration-300 border-2 border-transparent hover:border-[#70E4A8]/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 font-rubik text-[#2D3639]">
-                <Briefcase className="h-5 w-5 text-[#70E4A8]" />
-                Subscription & Preferences
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="plan" className="font-rubik text-[#2D3639]">
-                  Plan *
-                </Label>
-                <select
-                  id="plan"
-                  name="plan"
-                  value={formData.plan}
-                  onChange={handleChange}
-                  className={`flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm font-inter ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#70E4A8] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${hasFieldError("plan") ? "border-red-500" : "border-[#70E4A8]/30"}`}
-                  required
-                >
-                  {plans.map((plan) => (
-                    <option key={plan.value} value={plan.value}>
-                      {plan.label}
-                    </option>
-                  ))}
-                </select>
-                {getFieldError("plan") && <p className="text-sm text-red-600 font-inter">{getFieldError("plan")}</p>}
-              </div>
-
-              <div className="space-y-2">
-                {/* <Label htmlFor="plan_type" className="font-rubik text-[#2D3639]">
-                  Plan Type *
-                </Label> */}
-                {/* <select
-                  id="plan_type"
-                  name="plan_type"
-                  value={formData.plan_type}
-                  onChange={handleChange}
-                  className={`flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm font-inter ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#70E4A8] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${hasFieldError("plan_type") ? "border-red-500" : "border-[#70E4A8]/30"}`}
-                  required
-                >
-                  {planTypes.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select> */}
-                {getFieldError("plan_type") && (
-                  <p className="text-sm text-red-600 font-inter">{getFieldError("plan_type")}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="language" className="font-rubik text-[#2D3639]">
-                  Language *
-                </Label>
-                <select
-                  id="language"
-                  name="language"
-                  value={formData.language}
-                  onChange={handleChange}
-                  className={`flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm font-inter ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#70E4A8] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${hasFieldError("language") ? "border-red-500" : "border-[#70E4A8]/30"}`}
-                  required
-                >
-                  {languages.map((lang) => (
-                    <option key={lang.value} value={lang.value}>
-                      {lang.label}
-                    </option>
-                  ))}
-                </select>
-                {getFieldError("language") && (
-                  <p className="text-sm text-red-600 font-inter">{getFieldError("language")}</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+        
         </div>
 
         {/* Quick Tips */}

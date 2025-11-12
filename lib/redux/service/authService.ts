@@ -175,4 +175,10 @@ linkedinLogin: async (code: string): Promise<AuthResponse> => {
     const response = await api.post("/reset-password", payload)
     return response.data
   },
+
+  // Resend Email Verification (Login/Account verification)
+  resendEmailVerification: async (email: string): Promise<{ message: string }> => {
+    const response = await api.post("/resend-email-verification", { email })
+    return response.data
+  },
 }

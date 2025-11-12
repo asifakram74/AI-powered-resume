@@ -191,6 +191,19 @@ export const resetPasswordWithToken = createAsyncThunk<ForgotPasswordResponse, R
   }
 )
 
+// Resend Email Verification for logged-in users
+export const resendEmailVerification = createAsyncThunk<{ message: string }, string>(
+  "auth/resendEmailVerification",
+  async (email, { rejectWithValue }) => {
+    try {
+      const response = await AuthService.resendEmailVerification(email)
+      return response
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || "Failed to resend verification email")
+    }
+  }
+)
+
 const authSlice = createSlice({
   name: "auth",
   initialState,  reducers: {

@@ -10,9 +10,13 @@ import ATSCheckerPage from "../../pages/ats/ats-checker-page"
 import { ProfilePage } from "../../pages/profile/profile-page"
 import { UserList } from "../../pages/UsersManagement/UserList"
 import ProtectedRoute from "../../components/auth/ProtectedRoute"
-import { useAppSelector } from "../../lib/redux/hooks"
+import { useAppSelector, useAppDispatch } from "../../lib/redux/hooks"
 import { useRouter } from "next/navigation"
 import { Menu } from "lucide-react"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../../components/ui/dialog"
+import { Button } from "../../components/ui/button"
+import { logoutUser, resendEmailVerification } from "../../lib/redux/slices/authSlice"
+import { showSuccessToast, showErrorToast } from "../../components/ui/toast"
 // import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 
 export interface PageProps {
@@ -34,6 +38,8 @@ export default function DashboardPage() {
   const [isClient, setIsClient] = useState(false)
   const { user } = useAppSelector((state) => state.auth)
   const router = useRouter()
+  const dispatch = useAppDispatch()
+  const [resendLoading, setResendLoading] = useState(false)
 
   // Load saved active page from localStorage on component mount
   useEffect(() => {
@@ -71,6 +77,36 @@ useEffect(() => {
 
   const isAdmin = user?.role?.toLowerCase() === "admin"
 
+  const isEmailVerified = Boolean(user?.email_verified_at)
+
+  const handleResendVerification = async () => {
+    if (!user?.email) return
+    try {
+      setResendLoading(true)
+      const result = await dispatch(resendEmailVerification(user.email))
+      if (resendEmailVerification.fulfilled.match(result)) {
+        showSuccessToast("Verification Email Sent", "Check your inbox to verify.")
+      } else {
+        const message = typeof result.payload === 'string' ? result.payload : 'Failed to resend verification'
+        showErrorToast("Error", message)
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unexpected error'
+      showErrorToast("Error", message)
+    } finally {
+      setResendLoading(false)
+    }
+  }
+
+  const handleLogout = async () => {
+    try {
+      await dispatch(logoutUser())
+      router.push('/auth/signin')
+    } catch {
+      // noop
+    }
+  }
+
   const renderActivePage = () => {
     // if (!isClient) {
     //   // return <LoadingSpinner />
@@ -104,6 +140,42 @@ useEffect(() => {
             user={user}
           />
           <main className="flex-1 bg-gray-50 relative">
+            {/* Blocking modal for unverified email */}
+            {!isEmailVerified && (
+              <Dialog open>
+                <DialogContent className="max-w-md p-0 overflow-hidden border-0 shadow-xl rounded-xl">
+                  <div className="relative resumaic-gradient-green p-6 text-white rounded-t-xl animate-pulse-glow">
+                    <div className="flex items-center gap-3">
+                      <DialogTitle className="text-lg font-semibold">Email Verification Required</DialogTitle>
+                    </div>
+                    <DialogDescription className="mt-2 text-sm opacity-90">
+                      Your email is not verified. Please verify to use Resumaic.
+                    </DialogDescription>
+                  </div>
+                  <div className="p-6 bg-white">
+                    <div className="space-y-3">
+                      <Button
+                        className="w-full resumaic-gradient-green text-white hover:opacity-90 button-press"
+                        onClick={handleResendVerification}
+                        disabled={resendLoading}
+                      >
+                        {resendLoading ? 'Sending…' : 'Resend Verification Link'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full border-2 border-[#70E4A8] text-[#2d3639] hover:bg-[#70E4A8]/10"
+                        onClick={handleLogout}
+                      >
+                        Logout
+                      </Button>
+                      <p className="text-xs text-gray-500 mt-2 text-center">
+                        You cannot interact with other features until verification.
+                      </p>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
             {/* Mobile Header with Sidebar Trigger */}
             <div className="lg:hidden flex items-center justify-between p-4 bg-white border-b border-gray-200 sticky top-0 z-40">
               <SidebarTrigger className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
