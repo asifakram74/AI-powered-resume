@@ -11,6 +11,7 @@ import {
   type VerifyOTPResponse,
   type ResetPasswordData,
 } from "../service/authService"
+import { getUserById as getUserByIdApi } from "../service/userService"
 
 interface AuthState {
   user: User | null
@@ -200,6 +201,21 @@ export const resendEmailVerification = createAsyncThunk<{ message: string }, str
       return response
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || "Failed to resend verification email")
+    }
+  }
+)
+
+// Refresh user data from server (e.g., after email verification)
+export const refreshUserById = createAsyncThunk<User, number>(
+  "auth/refreshUserById",
+  async (id, { rejectWithValue }) => {
+    try {
+      const serverUser = await getUserByIdApi(id)
+      const updatedUser = serverUser as unknown as User
+      localStorage.setItem("user", JSON.stringify(updatedUser))
+      return updatedUser
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || "Failed to refresh user")
     }
   }
 )
@@ -436,6 +452,13 @@ const authSlice = createSlice({
       .addCase(resetPasswordWithToken.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload as string
+      })
+      // Refresh User
+      .addCase(refreshUserById.fulfilled, (state, action) => {
+        state.user = action.payload
+      })
+      .addCase(refreshUserById.rejected, (state, action) => {
+        state.error = (action.payload as string) || "Failed to refresh user"
       })
   },
 })

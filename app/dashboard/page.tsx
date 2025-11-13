@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation"
 import { Menu } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../../components/ui/dialog"
 import { Button } from "../../components/ui/button"
-import { logoutUser, resendEmailVerification } from "../../lib/redux/slices/authSlice"
+import { logoutUser, resendEmailVerification, refreshUserById } from "../../lib/redux/slices/authSlice"
 import { showSuccessToast, showErrorToast } from "../../components/ui/toast"
 // import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 
@@ -107,6 +107,25 @@ useEffect(() => {
     }
   }
 
+  // Refresh user on mount and when window gains focus, so email verification changes reflect
+  useEffect(() => {
+    if (user?.id) {
+      dispatch(refreshUserById(Number(user.id)))
+    }
+  }, [dispatch, user?.id])
+
+  useEffect(() => {
+    const onFocus = () => {
+      if (user?.id) {
+        dispatch(refreshUserById(Number(user.id)))
+      }
+    }
+    window.addEventListener('focus', onFocus)
+    return () => {
+      window.removeEventListener('focus', onFocus)
+    }
+  }, [dispatch, user?.id])
+
   const renderActivePage = () => {
     // if (!isClient) {
     //   // return <LoadingSpinner />
@@ -142,39 +161,41 @@ useEffect(() => {
           <main className="flex-1 bg-gray-50 relative">
             {/* Blocking modal for unverified email */}
             {!isEmailVerified && (
-              <Dialog open>
-                <DialogContent className="max-w-md p-0 overflow-hidden border-0 shadow-xl rounded-xl">
-                  <div className="relative resumaic-gradient-green p-6 text-white rounded-t-xl animate-pulse-glow">
-                    <div className="flex items-center gap-3">
-                      <DialogTitle className="text-lg font-semibold">Email Verification Required</DialogTitle>
-                    </div>
-                    <DialogDescription className="mt-2 text-sm opacity-90">
-                      Your email is not verified. Please verify to use Resumaic.
-                    </DialogDescription>
-                  </div>
-                  <div className="p-6 bg-white">
-                    <div className="space-y-3">
-                      <Button
-                        className="w-full resumaic-gradient-green text-white hover:opacity-90 button-press"
-                        onClick={handleResendVerification}
-                        disabled={resendLoading}
-                      >
-                        {resendLoading ? 'Sending…' : 'Resend Verification Link'}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="w-full border-2 border-[#70E4A8] text-[#2d3639] hover:bg-[#70E4A8]/10"
-                        onClick={handleLogout}
-                      >
-                        Logout
-                      </Button>
-                      <p className="text-xs text-gray-500 mt-2 text-center">
-                        You cannot interact with other features until verification.
-                      </p>
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
+            <Dialog open>
+  <DialogContent className="max-w-md p-0 overflow-hidden border-0 shadow-xl rounded-xl">
+    <div className="relative resumaic-gradient-green p-6 text-white rounded-t-xl animate-pulse-glow">
+      <div className="flex items-center gap-3">
+        <DialogTitle className="text-lg font-semibold text-white">
+          Email Verification Required
+        </DialogTitle>
+      </div>
+      <DialogDescription className="mt-2 text-sm text-white/90">
+        Your email is not verified. Please verify to use Resumaic.
+      </DialogDescription>
+    </div>
+    <div className="p-6 bg-white">
+      <div className="flex gap-3">
+        <Button
+          className="flex-1 resumaic-gradient-green text-white hover:opacity-90 button-press"
+          onClick={handleResendVerification}
+          disabled={resendLoading}
+        >
+          {resendLoading ? 'Sending…' : 'Resend Verification Link'}
+        </Button>
+        <Button
+          variant="outline"
+          className="flex-1 border-2 border-gray-300 text-gray-800 bg-white hover:bg-gray-100 hover:text-gray-900"
+          onClick={handleLogout}
+        >
+          Logout
+        </Button>
+      </div>
+      <p className="text-xs text-gray-400 mt-3 text-center">
+        You cannot interact with other features until verification.
+      </p>
+    </div>
+  </DialogContent>
+</Dialog>
             )}
             {/* Mobile Header with Sidebar Trigger */}
             <div className="lg:hidden flex items-center justify-between p-4 bg-white border-b border-gray-200 sticky top-0 z-40">

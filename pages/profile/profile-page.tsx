@@ -421,12 +421,12 @@ export function ProfilePage() {
                       )}
 
                       {/* Role summary */}
-                      {user?.role && (
+                      {/* {user?.role && (
                         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700">
                           <Shield className="h-4 w-4 text-blue-600 dark:text-blue-300" />
                           <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Role: {user.role}</span>
                         </div>
-                      )}
+                      )} */}
                     </div>
                   </div>
                 </div>
