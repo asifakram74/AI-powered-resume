@@ -35,7 +35,7 @@ export function CreativeTemplate({ data, isPreview = false }: CreativeTemplatePr
 
   return (
     <div className="w-full mx-auto min-h-screen bg-slate-50 print:min-h-0 print:bg-white">
-     
+
 
       <div className="p-10 print:p-6 bg-white shadow-lg print:shadow-none">
         {/* Header Section */}

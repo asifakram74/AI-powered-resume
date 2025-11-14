@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { SidebarProvider, SidebarTrigger } from "../../components/ui/sidebar"
 import { Sidebar } from "../../components/dashboard/sidebar"
-import  CreatePersonaPage  from "../../pages/persona/PersonaList"
+import CreatePersonaPage from "../../pages/persona/PersonaList"
 import { ResumePage } from "../../pages/resume/ResumeList"
 import { CoverLetterPage } from "../../pages/cover-letter/CoverLetterList"
 import ATSCheckerPage from "../../pages/ats/ats-checker-page"
@@ -55,25 +55,25 @@ export default function DashboardPage() {
     setActivePage(page)
     localStorage.setItem('dashboardActivePage', page)
   }
-// In your dashboard page
-useEffect(() => {
-  const token = localStorage.getItem('token');
-  const userStr = localStorage.getItem('user');
-  
-  if (!token || !userStr) {
-    router.push('/auth/signin');
-    return;
-  }
-  
-  try {
-    const user = JSON.parse(userStr);
-    if (!user.id) {
+  // In your dashboard page
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userStr = localStorage.getItem('user');
+
+    if (!token || !userStr) {
+      router.push('/auth/signin');
+      return;
+    }
+
+    try {
+      const user = JSON.parse(userStr);
+      if (!user.id) {
+        router.push('/auth/signin');
+      }
+    } catch (e) {
       router.push('/auth/signin');
     }
-  } catch (e) {
-    router.push('/auth/signin');
-  }
-}, [router]);
+  }, [router]);
 
   const isAdmin = user?.role?.toLowerCase() === "admin"
 
@@ -107,24 +107,35 @@ useEffect(() => {
     }
   }
 
-  // Refresh user on mount and when window gains focus, so email verification changes reflect
-  useEffect(() => {
-    if (user?.id) {
-      dispatch(refreshUserById(Number(user.id)))
-    }
-  }, [dispatch, user?.id])
+  // Refresh user once on mount if email is unverified.
+  // Avoid refreshing on window focus to prevent interruptions (e.g., after file picker).
+  const hasRefreshed = useRef(false)
 
   useEffect(() => {
-    const onFocus = () => {
-      if (user?.id) {
+    if (!hasRefreshed.current && user?.id && !user?.email_verified_at) {
+      hasRefreshed.current = true
+      dispatch(refreshUserById(Number(user.id)))
+    }
+  }, [dispatch, user?.id, user?.email_verified_at])
+
+  // Optional: refresh when tab becomes visible, only if still unverified.
+  // This avoids focus-triggered refreshes that can disrupt uploads.
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (
+        document.visibilityState === 'visible' &&
+        user?.id &&
+        !user?.email_verified_at
+      ) {
         dispatch(refreshUserById(Number(user.id)))
       }
     }
-    window.addEventListener('focus', onFocus)
+
+    document.addEventListener('visibilitychange', onVisibilityChange)
     return () => {
-      window.removeEventListener('focus', onFocus)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
     }
-  }, [dispatch, user?.id])
+  }, [dispatch, user?.id, user?.email_verified_at])
 
   const renderActivePage = () => {
     // if (!isClient) {
@@ -161,41 +172,41 @@ useEffect(() => {
           <main className="flex-1 bg-gray-50 relative">
             {/* Blocking modal for unverified email */}
             {!isEmailVerified && (
-            <Dialog open>
-  <DialogContent className="max-w-md p-0 overflow-hidden border-0 shadow-xl rounded-xl">
-    <div className="relative resumaic-gradient-green p-6 text-white rounded-t-xl animate-pulse-glow">
-      <div className="flex items-center gap-3">
-        <DialogTitle className="text-lg font-semibold text-white">
-          Email Verification Required
-        </DialogTitle>
-      </div>
-      <DialogDescription className="mt-2 text-sm text-white/90">
-        Your email is not verified. Please verify to use Resumaic.
-      </DialogDescription>
-    </div>
-    <div className="p-6 bg-white">
-      <div className="flex gap-3">
-        <Button
-          className="flex-1 resumaic-gradient-green text-white hover:opacity-90 button-press"
-          onClick={handleResendVerification}
-          disabled={resendLoading}
-        >
-          {resendLoading ? 'Sending…' : 'Resend Verification Link'}
-        </Button>
-        <Button
-          variant="outline"
-          className="flex-1 border-2 border-gray-300 text-gray-800 bg-white hover:bg-gray-100 hover:text-gray-900"
-          onClick={handleLogout}
-        >
-          Logout
-        </Button>
-      </div>
-      <p className="text-xs text-gray-400 mt-3 text-center">
-        You cannot interact with other features until verification.
-      </p>
-    </div>
-  </DialogContent>
-</Dialog>
+              <Dialog open>
+                <DialogContent className="max-w-md p-0 overflow-hidden border-0 shadow-xl rounded-xl">
+                  <div className="relative resumaic-gradient-green p-6 text-white rounded-t-xl animate-pulse-glow">
+                    <div className="flex items-center gap-3">
+                      <DialogTitle className="text-lg font-semibold text-white">
+                        Email Verification Required
+                      </DialogTitle>
+                    </div>
+                    <DialogDescription className="mt-2 text-sm text-white/90">
+                      Your email is not verified. Please verify to use Resumaic.
+                    </DialogDescription>
+                  </div>
+                  <div className="p-6 bg-white">
+                    <div className="flex gap-3">
+                      <Button
+                        className="flex-1 resumaic-gradient-green text-white hover:opacity-90 button-press"
+                        onClick={handleResendVerification}
+                        disabled={resendLoading}
+                      >
+                        {resendLoading ? 'Sending…' : 'Resend Verification Link'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="flex-1 border-2 border-gray-300 text-gray-800 bg-white hover:bg-gray-100 hover:text-gray-900"
+                        onClick={handleLogout}
+                      >
+                        Logout
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-3 text-center">
+                      You cannot interact with other features until verification.
+                    </p>
+                  </div>
+                </DialogContent>
+              </Dialog>
             )}
             {/* Mobile Header with Sidebar Trigger */}
             <div className="lg:hidden flex items-center justify-between p-4 bg-white border-b border-gray-200 sticky top-0 z-40">
@@ -212,7 +223,7 @@ useEffect(() => {
               </h1>
               <div className="w-9" /> {/* Spacer for centering */}
             </div>
-            
+
             {/* Main Content */}
             <div className="p-6">
               {renderActivePage()}

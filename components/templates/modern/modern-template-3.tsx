@@ -66,7 +66,6 @@ export function ModernTemplate3({ data, isPreview = false }: ModernTemplateProps
               />
             </div>
           )}
-
           {/* Contact Info */}
           <div className="print-break-inside-avoid">
             <h2 className="text-sm font-black mb-3 text-amber-400 print:text-amber-400 uppercase">Contact</h2>
@@ -93,7 +92,6 @@ export function ModernTemplate3({ data, isPreview = false }: ModernTemplateProps
               </div>
             </div>
           </div>
-
           {/* Skills */}
           <div className="print-break-inside-avoid">
             <h2 className="text-sm font-black mb-3 text-amber-400 print:text-amber-400 uppercase">Skills</h2>

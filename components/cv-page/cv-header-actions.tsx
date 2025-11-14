@@ -36,9 +36,8 @@ export function CVHeaderActions({
             onClick={onRegenerate}
             disabled={isRegenerating}
             variant="outline"
-            className={`flex items-center gap-2 bg-transparent transition-all duration-200 ${
-              isRegenerating ? "bg-blue-50 border-blue-200 text-blue-700 shadow-md" : "hover:bg-gray-50"
-            }`}
+            className={`flex items-center gap-2 bg-transparent transition-all duration-200 ${isRegenerating ? "bg-blue-50 border-blue-200 text-blue-700 shadow-md" : "hover:bg-gray-50"
+              }`}
           >
             {isRegenerating ? (
               <Loader2 className="h-4 w-4 animate-spin text-blue-600" />

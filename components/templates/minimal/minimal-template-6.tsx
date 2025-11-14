@@ -219,7 +219,7 @@ export function MinimalTemplate6({ data, isPreview = false }: MinimalTemplate6Pr
               )}
             </div>
           )}
-        </div>       
+        </div>
       </div>
     </div>
   )

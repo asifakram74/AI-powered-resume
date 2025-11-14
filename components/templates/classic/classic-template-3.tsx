@@ -1,17 +1,4 @@
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 import type { CVData } from "../../../types/cv-data";
 
 interface ClassicTemplate3Props {

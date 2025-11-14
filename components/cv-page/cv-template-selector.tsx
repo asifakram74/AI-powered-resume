@@ -26,7 +26,7 @@ export function CVTemplateSelector({ templates, selectedTemplate, hasUnsavedChan
   return (
     <Card>
       <CardContent className="p-4 space-y-4">
-    
+
 
         <div className="flex flex-wrap items-center justify-center gap-3 py-1">
           {["all", "modern", "classic", "creative", "minimal"].map((category) => (
@@ -41,7 +41,7 @@ export function CVTemplateSelector({ templates, selectedTemplate, hasUnsavedChan
             </Button>
           ))}
         </div>
-            <div className="flex justify-end items-center">
+        <div className="flex justify-end items-center">
           {hasUnsavedChanges && (
             <span className="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded">Unsaved changes</span>
           )}
@@ -51,11 +51,10 @@ export function CVTemplateSelector({ templates, selectedTemplate, hasUnsavedChan
           {filteredTemplates.map((template) => (
             <div
               key={template.id}
-              className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
-                selectedTemplate?.id === template.id
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-200 hover:border-gray-300"
-              }`}
+              className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-md ${selectedTemplate?.id === template.id
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-200 hover:border-gray-300"
+                }`}
               onClick={() => onSelect(template)}
             >
               <h4 className="font-medium text-sm text-center">{template.name}</h4>
