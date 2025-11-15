@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useFaceDetection } from "../../hooks/use-face-detection";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -14,7 +15,7 @@ import {
   SelectValue,
 } from "../../components/ui/select";
 import { Badge } from "../../components/ui/badge";
-import { Sparkles, X, Plus, Upload, User } from "lucide-react";
+import { Sparkles, X, Plus, Upload, User, Check } from "lucide-react";
 import { Textarea } from "../../components/ui/textarea";
 import { Switch } from "../../components/ui/switch";
 import type { CVData } from "../../types/cv-data";
@@ -181,6 +182,9 @@ export function PersonaForm({
   const [profilePicturePreview, setProfilePicturePreview] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Use face detection hook
+  const { modelsLoaded, faceDetected, detectionErrorMessage, runFaceDetection } = useFaceDetection();
+
   // Load prefilled data when component mounts or prefilledData changes
   useEffect(() => {
     if (prefilledData) {
@@ -244,7 +248,7 @@ export function PersonaForm({
   };
 
   // Profile picture handlers
-  const handleProfilePictureChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleProfilePictureChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
@@ -266,13 +270,28 @@ export function PersonaForm({
         event.target.value = "";
         return;
       }
-
-      setProfilePictureFile(file);
       
-      // Create preview
+      // Ensure models are ready
+      if (!modelsLoaded) {
+        toast("Loading face detection models. Please try again in a moment.");
+        return;
+      }
+
+      // Read file and run face detection
       const reader = new FileReader();
-      reader.onload = (e) => {
-        setProfilePicturePreview(e.target?.result as string);
+      reader.onload = async (e) => {
+        const dataUrl = e.target?.result as string;
+        const ok = await runFaceDetection(dataUrl);
+        if (!ok) {
+          toast.error(detectionErrorMessage || "Please upload a clear photo with a visible face.");
+          event.target.value = "";
+          setProfilePictureFile(null);
+          setProfilePicturePreview("");
+          return;
+        }
+        // Passed detection
+        setProfilePictureFile(file);
+        setProfilePicturePreview(dataUrl);
       };
       reader.readAsDataURL(file);
     }
@@ -838,6 +857,45 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                 </p>
               </div>
             </div>
+            {faceDetected === false && (
+              <div className="mt-3">
+                <div className="rounded-md border bg-white p-3">
+                  <p className="text-xs font-semibold text-gray-700 text-center">TIPS</p>
+                  <div className="mt-2 flex items-center justify-center gap-4">
+                    {/* Avoid example */}
+                    <div className="text-center">
+                      <div className="relative w-16 h-16 rounded-md overflow-hidden border border-red-400">
+                        <img src="/i1.webp" alt="Avoid example" className="w-full h-full object-cover" />
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5">
+                          {/* <X className="w-3 h-3" /> */}
+                        </span>
+                      </div>
+                      <span className="mt-1 block text-xs text-red-600">Avoid</span>
+                    </div>
+                    {/* Good example 1 */}
+                    <div className="text-center">
+                      <div className="relative w-16 h-16 rounded-md overflow-hidden border border-green-400">
+                        <img src="/i2.webp" alt="Good example 1" className="w-full h-full object-cover" />
+                        <span className="absolute -top-1 -right-1 bg-green-500 text-white rounded-full p-0.5">
+                          {/* <Check className="w-3 h-3" /> */}
+                        </span>
+                      </div>
+                      <span className="mt-1 block text-xs text-green-600">Good</span>
+                    </div>
+                    {/* Good example 2 */}
+                    <div className="text-center">
+                      <div className="relative w-16 h-16 rounded-md overflow-hidden border border-green-400">
+                        <img src="/i3.webp" alt="Good example 2" className="w-full h-full object-cover" />
+                        <span className="absolute -top-1 -right-1 bg-green-500 text-white rounded-full p-0.5">
+                          {/* <Check className="w-3 h-3" /> */}
+                        </span>
+                      </div>
+                      <span className="mt-1 block text-xs text-green-600">Good</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">

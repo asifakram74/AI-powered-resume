@@ -143,6 +143,7 @@ export function Sidebar({
   const isAdmin = user?.role?.toLowerCase() === "admin"
   const maxResumes = 3
   const progressPercentage = Math.min((resumeCount / maxResumes) * 100, 100)
+  const isProUser = profile?.plan_type?.toLowerCase() === 'pro'
 
   // Function to get user initials
   const getInitials = (name?: string) => {
@@ -230,7 +231,9 @@ export function Sidebar({
                       {item.label}
                     </span>
                   </div>
-                  {item.badge && !(item.id === "ats-checker" && profile?.plan_type?.toLowerCase() === "pro") && (
+                  {item.badge && (
+                    item.badge === 'Pro' ? (!!profile && !isProUser) : true
+                  ) && (
                     <Badge
                       className={`text-xs px-3 py-1 font-bold rounded-full ${item.badgeColor || "bg-gray-100 text-gray-700"}`}
                     >
@@ -272,7 +275,7 @@ export function Sidebar({
             </DropdownMenuContent>
           </DropdownMenu>
         ) : !isAdmin ? (
-          profile?.plan_type?.toLowerCase() !== 'pro' && (
+          !!profile && !isProUser && (
             <div className="p-5 rounded-2xl bg-gradient-to-br from-green-50/80 via-white to-orange-50/30 border border-green-200/50">
               <div className="flex items-center gap-3 mb-3">
                 <div className="p-2.5 rounded-xl resumaic-gradient-green shadow-lg">

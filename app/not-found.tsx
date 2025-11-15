@@ -2,16 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faHome,
-  faSearch,
-  faExclamationTriangle,
-  faRocket,
-  faStar,
-  faTools,
-  faArrowLeft
-} from '@fortawesome/free-solid-svg-icons';
+import { Home, Search, AlertTriangle, Rocket, Star, Wrench } from 'lucide-react';
 
 interface FloatingElement {
   id: number;
@@ -162,23 +153,19 @@ const NotFound = () => {
 
             {/* Floating Icons around 404 - keep them subtle (no heavy up/down) */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <FontAwesomeIcon
-                icon={faExclamationTriangle}
+              <AlertTriangle
                 className="absolute text-yellow-500 text-2xl"
                 style={{ top: '18%', left: '8%', transform: 'translateY(0)', transition: 'transform 0.6s ease-in-out', animationDelay: '0.5s' }}
               />
-              <FontAwesomeIcon
-                icon={faRocket}
+              <Rocket
                 className="absolute text-emerald-500 text-xl"
                 style={{ top: '28%', right: '14%', transform: 'translateY(0)', animationDelay: '1s' }}
               />
-              <FontAwesomeIcon
-                icon={faStar}
+              <Star
                 className="absolute text-green-300 text-lg"
                 style={{ bottom: '24%', left: '20%', transform: 'translateY(0)', animationDelay: '1.5s' }}
               />
-              <FontAwesomeIcon
-                icon={faTools}
+              <Wrench
                 className="absolute text-emerald-600 text-xl"
                 style={{ bottom: '18%', right: '10%', transform: 'translateY(0)', animationDelay: '2s' }}
               />
@@ -204,7 +191,7 @@ const NotFound = () => {
                 background: 'linear-gradient(90deg, #4fbf86, #74d19d)'
               }}
             >
-              <FontAwesomeIcon icon={faHome} className="mr-2" />
+              <Home className="mr-2 inline-block" />
               Go Home
             </button>
           </div>
