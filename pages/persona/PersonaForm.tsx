@@ -565,7 +565,7 @@ export function PersonaForm({
     };
 
     // Simulate API call
-    setTimeout(() => {
+    setTimeout(async () => {
       const persona = `Professional Summary for ${updatedFormData.personalInfo.fullName
         }:
 
@@ -616,8 +616,9 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
         // profile picture file is passed separately via onPersonaGenerated
       };
 
+      // Await parent handler to finish creating persona and uploading profile image
+      await Promise.resolve(onPersonaGenerated(newPersona, profilePictureFile));
       setIsGenerating(false);
-      onPersonaGenerated(newPersona, profilePictureFile);
     }, 3000);
   };
 
@@ -862,20 +863,11 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                 <div className="rounded-md border bg-white p-3">
                   <p className="text-xs font-semibold text-gray-700 text-center">TIPS</p>
                   <div className="mt-2 flex items-center justify-center gap-4">
-                    {/* Avoid example */}
-                    <div className="text-center">
-                      <div className="relative w-16 h-16 rounded-md overflow-hidden border border-red-400">
-                        <img src="/i1.webp" alt="Avoid example" className="w-full h-full object-cover" />
-                        <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5">
-                          {/* <X className="w-3 h-3" /> */}
-                        </span>
-                      </div>
-                      <span className="mt-1 block text-xs text-red-600">Avoid</span>
-                    </div>
+                 
                     {/* Good example 1 */}
                     <div className="text-center">
                       <div className="relative w-16 h-16 rounded-md overflow-hidden border border-green-400">
-                        <img src="/i2.webp" alt="Good example 1" className="w-full h-full object-cover" />
+                        <img src="/men2.png" alt="Good example 1" className="w-full h-full object-cover" />
                         <span className="absolute -top-1 -right-1 bg-green-500 text-white rounded-full p-0.5">
                           {/* <Check className="w-3 h-3" /> */}
                         </span>
@@ -885,12 +877,22 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                     {/* Good example 2 */}
                     <div className="text-center">
                       <div className="relative w-16 h-16 rounded-md overflow-hidden border border-green-400">
-                        <img src="/i3.webp" alt="Good example 2" className="w-full h-full object-cover" />
+                        <img src="/men.png" alt="Good example 2" className="w-full h-full object-cover" />
                         <span className="absolute -top-1 -right-1 bg-green-500 text-white rounded-full p-0.5">
                           {/* <Check className="w-3 h-3" /> */}
                         </span>
                       </div>
                       <span className="mt-1 block text-xs text-green-600">Good</span>
+                    </div>
+                       {/* Avoid example */}
+                    <div className="text-center">
+                      <div className="relative w-16 h-16 rounded-md overflow-hidden border border-red-400">
+                        <img src="/men3.png" alt="Avoid example" className="w-full h-full object-cover" />
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5">
+                          {/* <X className="w-3 h-3" /> */}
+                        </span>
+                      </div>
+                      <span className="mt-1 block text-xs text-red-600">Avoid</span>
                     </div>
                   </div>
                 </div>
