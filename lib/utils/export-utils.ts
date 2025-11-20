@@ -101,62 +101,16 @@ export const wrapHtmlWithStyles = (innerHTML: string): string => {
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       ${inlineStyles}
-      /* Ensure background colors and borders are preserved when printing to PDF */
-      :root {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-      }
-      * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
-      /* Remove any shadows or drop-shadow filters during export */
-      #cv-export-root, #cv-export-root * {
-        box-shadow: none !important;
-        filter: none !important;
-      }
+      :root { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
       @media print {
-       @page {
-  size: A4;
-  /* top | right | bottom | left */
-  margin: 0.2in 0in 0.2in 0in; /* adds 0.5in margin at bottom */
-}
-        html, body, #cv-export-root {
-          -webkit-print-color-adjust: exact !important;
-          print-color-adjust: exact !important;
-          background: white !important;
-        }
-        /* Also remove shadows for print explicitly */
-        #cv-export-root, #cv-export-root * {
-          box-shadow: none !important;
-          filter: none !important;
-        }
-        /* Explicitly map commonly used amber utilities to hex values */
-        .bg-amber-600 { background-color: #d97706 !important; }
-        .border-amber-600 { border-color: #d97706 !important; }
-        .text-amber-700 { color: #b45309 !important; }
-        /* Print helpers */
-        .print\\:break-inside-avoid {
-          break-inside: avoid;
-        }
-        .print\\:break-before-page {
-          break-before: page;
-        }
-        .print\\:break-after-avoid {
-          break-after: avoid;
-        }
-        .print\\:page-start-pad {
-          padding-top: 0.3in;
-        }
-        .print\\:mt-4 {
-          margin-top: 1rem;
-        }
-        .print\\:shadow-none {
-          box-shadow: none;
-        }
-        .print\\:min-h-0 {
-          min-height: 0;
-        }
+        @page { size: A4; margin: 0; }
+        .cv-measure { display: none !important; }
+        .print\\:break-inside-avoid { break-inside: avoid; }
+        .print\\:break-before-page { break-before: page; }
+        .print\\:break-after-avoid { break-after: avoid; }
+        .print\\:shadow-none { box-shadow: none; }
+        .print\\:min-h-0 { min-height: 0; }
       }
     </style>
   </head>

@@ -25,7 +25,8 @@ import { CVPageLoading } from "./cv-page-loading"
 import { CVHeaderActions } from "./cv-header-actions"
 import { CVTemplateSelector } from "./cv-template-selector"
 import { CVPreviewSection } from "./cv-preview-section"
-import { exportToPDFViaBrowserless, exportToPNGViaBrowserless, wrapHtmlWithStyles } from "@/lib/utils/export-utils"
+import jsPDF from "jspdf"
+import * as htmlToImage from "html-to-image"
 
 interface OptimizedCV {
   personalInfo: {
@@ -74,30 +75,30 @@ interface CVTemplate {
 }
 
 const templates: CVTemplate[] = [
- {
-  id: "modern",
-  name: "Modern Professional",
-  description: "Clean, modern design perfect for tech and business professionals",
-  category: "modern",
-},
-{
-  id: "modern-2",
-  name: "Modern LOREN",
-  description: "Dark blue curved sidebar with elegant design",
-  category: "modern",
-},
-{
-  id: "modern-3",
-  name: "Modern LILLY",
-  description: "Light blue sidebar with rounded contact section",
-  category: "modern",
-},
-{
-  id: "modern-4",
-  name: "Modern MIKE",
-  description: "Blue sidebar with professional white layout",
-  category: "modern",
-},
+//  {
+//   id: "modern",
+//   name: "Modern Professional",
+//   description: "Clean, modern design perfect for tech and business professionals",
+//   category: "modern",
+// },
+// {
+//   id: "modern-2",
+//   name: "Modern LOREN",
+//   description: "Dark blue curved sidebar with elegant design",
+//   category: "modern",
+// },
+// {
+//   id: "modern-3",
+//   name: "Modern LILLY",
+//   description: "Light blue sidebar with rounded contact section",
+//   category: "modern",
+// },
+// {
+//   id: "modern-4",
+//   name: "Modern MIKE",
+//   description: "Blue sidebar with professional white layout",
+//   category: "modern",
+// },
 
 {
   id: "classic",
@@ -124,79 +125,79 @@ const templates: CVTemplate[] = [
   category: "classic",
 },
 
-{
-  id: "creative",
-  name: "Creative SOFIA",
-  description: "Clean layout with name positioned on left side",
-  category: "creative",
-},
-{
-  id: "creative-2",
-  name: "Creative Minimal Clean",
-  description: "Simple, clean layout focusing on content",
-  category: "creative",
-},
-{
-  id: "creative-3",
-  name: "Creative Designer",
-  description: "Eye-catching design for creative professionals",
-  category: "creative",
-},
-{
-  id: "creative-4",
-  name: "Creative JAY",
-  description: "Gray sidebar with clean white main content",
-  category: "creative",
-},
+// {
+//   id: "creative",
+//   name: "Creative SOFIA",
+//   description: "Clean layout with name positioned on left side",
+//   category: "creative",
+// },
+// {
+//   id: "creative-2",
+//   name: "Creative Minimal Clean",
+//   description: "Simple, clean layout focusing on content",
+//   category: "creative",
+// },
+// {
+//   id: "creative-3",
+//   name: "Creative Designer",
+//   description: "Eye-catching design for creative professionals",
+//   category: "creative",
+// },
+// {
+//   id: "creative-4",
+//   name: "Creative JAY",
+//   description: "Gray sidebar with clean white main content",
+//   category: "creative",
+// },
 
-{
-  id: "minimal",
-  name: "Minimal",
-  description: "A new creative design for professionals",
-  category: "minimal",
-},
-{
-  id: "minimal-2",
-  name: "Minimal Clean 2",
-  description: "An updated minimal layout focusing on content",
-  category: "minimal",
-},
-{
-  id: "minimal-3",
-  name: "Minimal Clean 3",
-  description: "Another variation of the minimal layout",
-  category: "minimal",
-},
-{
-  id: "minimal-4",
-  name: "Minimal Clean 4",
-  description: "Ultra-clean minimal design focusing on content",
-  category: "minimal",
-},
-{
-  id: "minimal-5",
-  name: "Minimal 5",
-  description: "Another creative design option",
-  category: "minimal",
-},
-{
-  id: "minimal-6",
-  name: "Minimal 6",
-  description: "Another modern design option",
-  category: "minimal",
-},
-{
-  id: "minimal-7",
-  name: "Minimal 7",
-  description: "Advanced modern design for professionals",
-  category: "minimal",
-},
-{
-  id: "minimal-8",
-  name: "Minimal 8",
-  description: "Premium creative design for professionals",
-  category: "minimal",
-},
+// {
+//   id: "minimal",
+//   name: "Minimal",
+//   description: "A new creative design for professionals",
+//   category: "minimal",
+// },
+// {
+//   id: "minimal-2",
+//   name: "Minimal Clean 2",
+//   description: "An updated minimal layout focusing on content",
+//   category: "minimal",
+// },
+// {
+//   id: "minimal-3",
+//   name: "Minimal Clean 3",
+//   description: "Another variation of the minimal layout",
+//   category: "minimal",
+// },
+// {
+//   id: "minimal-4",
+//   name: "Minimal Clean 4",
+//   description: "Ultra-clean minimal design focusing on content",
+//   category: "minimal",
+// },
+// {
+//   id: "minimal-5",
+//   name: "Minimal 5",
+//   description: "Another creative design option",
+//   category: "minimal",
+// },
+// {
+//   id: "minimal-6",
+//   name: "Minimal 6",
+//   description: "Another modern design option",
+//   category: "minimal",
+// },
+// {
+//   id: "minimal-7",
+//   name: "Minimal 7",
+//   description: "Advanced modern design for professionals",
+//   category: "minimal",
+// },
+// {
+//   id: "minimal-8",
+//   name: "Minimal 8",
+//   description: "Premium creative design for professionals",
+//   category: "minimal",
+// },
 
 
 ]
@@ -712,25 +713,75 @@ export function CVPageClientContent() {
       )
 
       try {
-        const htmlContent = wrapHtmlWithStyles(cvElement.outerHTML)
         const filename =
           format === "png"
             ? `${selectedTemplate?.id || "resume"}.png`
             : `${persona?.full_name || "resume"}-cv.${format}`
 
         if (format === "pdf") {
-          const result = await exportToPDFViaBrowserless(htmlContent, filename, undefined,)
-          if (!result.success) {
-            throw new Error(result.error || 'PDF export failed')
+          const pageEls = Array.from(cvElement.querySelectorAll('.a4-page')) as HTMLElement[]
+          if (pageEls.length > 0) {
+            const pdf = new jsPDF('p', 'mm', 'a4')
+            const pageWidth = pdf.internal.pageSize.getWidth()
+
+            for (let i = 0; i < pageEls.length; i++) {
+              const pageEl = pageEls[i]
+              const dataUrl = await htmlToImage.toPng(pageEl, {
+                quality: 1,
+                pixelRatio: 2,
+                backgroundColor: '#ffffff',
+                skipFonts: true,
+              })
+              const img = new Image()
+              await new Promise<void>((resolve) => {
+                img.onload = () => resolve()
+                img.src = dataUrl
+              })
+              const mmPerPx = pageWidth / img.width
+              const imgHeightMm = img.height * mmPerPx
+              pdf.addImage(dataUrl, 'PNG', 0, 0, pageWidth, imgHeightMm)
+              if (i < pageEls.length - 1) pdf.addPage()
+            }
+
+            pdf.save(filename)
+          } else {
+            const dataUrl = await htmlToImage.toPng(cvElement, {
+              quality: 1,
+              pixelRatio: 2,
+              backgroundColor: '#ffffff',
+              skipFonts: true,
+            })
+            const pdf = new jsPDF('p', 'mm', 'a4')
+            const pageWidth = pdf.internal.pageSize.getWidth()
+            const img = new Image()
+            await new Promise<void>((resolve) => {
+              img.onload = () => resolve()
+              img.src = dataUrl
+            })
+            const mmPerPx = pageWidth / img.width
+            const imgHeightMm = img.height * mmPerPx
+            pdf.addImage(dataUrl, 'PNG', 0, 0, pageWidth, imgHeightMm)
+            pdf.save(filename)
           }
         } else if (format === "png") {
-          await exportToPNGViaBrowserless(htmlContent, filename)
+          const dataUrl = await htmlToImage.toPng(cvElement, {
+            quality: 1,
+            pixelRatio: 2,
+            backgroundColor: '#ffffff',
+            skipFonts: true,
+          })
+          const link = document.createElement('a')
+          link.href = dataUrl
+          link.download = filename
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
         } else if (format === "docx") {
           // Keep existing DOCX export flow via backend
           const response = await fetch(`https://backendserver.resumaic.com/api/cv-export/docx`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ html: htmlContent, filename }),
+            body: JSON.stringify({ html: cvElement.outerHTML, filename }),
           })
           if (!response.ok) {
             const errorData = await response.json()

@@ -73,7 +73,7 @@ export function Sidebar({
           {user && (
             <div className="mt-4 p-3 bg-gray-50 rounded-lg">
               <p className="text-sm font-medium text-gray-900">{user.name}</p>
-              <p className="text-xs text-gray-500">{user.email}</p>
+              <p className="text-xs text-gray-500 break-all">{user.email}</p>
             </div>
           )}
         </SidebarHeader>

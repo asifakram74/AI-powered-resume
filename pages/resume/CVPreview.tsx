@@ -21,7 +21,10 @@ import {ModernTemplate3} from "../../components/templates/modern/modern-template
 import {ModernTemplate4} from "../../components/templates/modern/modern-template-4";
 import {CreativeTemplate} from "../../components/templates/creative/creative-template";
 import { sampleCVData } from "../../lib/sample-cv-data";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { Button } from "../../components/ui/button";
+import jsPDF from "jspdf";
+import * as htmlToImage from "html-to-image";
 
 interface CVTemplate {
   id: string;
@@ -47,68 +50,127 @@ export function CVPreview({
   template = defaultTemplate,
 }: CVPreviewProps) {
   const previewRef = useRef<HTMLDivElement>(null);
+  const [exporting, setExporting] = useState(false);
 
   const renderTemplate = () => {
     switch (template?.id) {
       case "modern":
-        return <ModernTemplate data={data} />;
+        return <ModernTemplate data={data} isPreview />;
       case "classic":
-        return <ClassicTemplate data={data} />;
+        return <ClassicTemplate data={data} isPreview />;
       case "minimal":
-        return <MinimalTemplate data={data} />;
+        return <MinimalTemplate data={data} isPreview />;
       case "creative":
-        return <CreativeTemplate data={data} />;
+        return <CreativeTemplate data={data} isPreview />;
       case "modern-2":
-        return <ModernTemplate2 data={data} />;
+        return <ModernTemplate2 data={data} isPreview />;
       case "minimal-6":
-        return <MinimalTemplate6 data={data} />;
+        return <MinimalTemplate6 data={data} isPreview />;
       case "classic-2":
-        return <ClassicTemplate2 data={data} />;
+        return <ClassicTemplate2 data={data} isPreview />;
       case "classic-3":
-        return <ClassicTemplate3 data={data} />;
+        return <ClassicTemplate3 data={data} isPreview />;
       case "minimal":
-        return <MinimalTemplate data={data} />;
+        return <MinimalTemplate data={data} isPreview />;
       case "minimal-5":
-        return <MinimalTemplate5 data={data} />;
+        return <MinimalTemplate5 data={data} isPreview />;
       case "minimal-2":
-        return <MinimalTemplate2 data={data} />;
+        return <MinimalTemplate2 data={data} isPreview />;
       case "minimal-3":
-        return <MinimalTemplate3 data={data} />;
+        return <MinimalTemplate3 data={data} isPreview />;
       case "minimal-7":
-        return <MinimalTemplate7 data={data} />;
+        return <MinimalTemplate7 data={data} isPreview />;
       case "classic-4":
-        return <ClassicTemplate4 data={data} />;
+        return <ClassicTemplate4 data={data} isPreview />;
       case "minimal-8":
-        return <MinimalTemplate8 data={data} />;
+        return <MinimalTemplate8 data={data} isPreview />;
       case "minimal-4":
-        return <MinimalTemplate4 data={data} />;
+        return <MinimalTemplate4 data={data} isPreview />;
       case "creative-4":
-        return <CreativeTemplate4 data={data} />;
+        return <CreativeTemplate4 data={data} isPreview />;
       case "modern-2":
-        return <ModernTemplate2 data={data} />;
+        return <ModernTemplate2 data={data} isPreview />;
       case "modern-3":
-        return <ModernTemplate3 data={data} />;
+        return <ModernTemplate3 data={data} isPreview />;
       case "modern-4":
-        return <ModernTemplate4 data={data} />;
+        return <ModernTemplate4 data={data} isPreview />;
       case "creative":
-        return <CreativeTemplate data={data} />;
+        return <CreativeTemplate data={data} isPreview />;
       case "creative-2":
-        return <CreativeTemplate2 data={data} />;
+        return <CreativeTemplate2 data={data} isPreview />;
       case "creative-3":
-        return <CreativeTemplate3 data={data} />;
+        return <CreativeTemplate3 data={data} isPreview />;
       default:
-        return <ModernTemplate data={data} />;
+        return <ModernTemplate data={data} isPreview />;
+    }
+  };
+
+  const handleExportPDF = async () => {
+    try {
+      setExporting(true);
+      const el = document.getElementById("cv-preview-content");
+      if (!el) return;
+
+      const base = (data as any)?.personalInfo?.fullName || template?.id || "resume";
+      const safe = String(base).toLowerCase().replace(/\s+/g, "-");
+      const filename = `${safe}-preview.pdf`;
+
+      const pageEls = Array.from(el.querySelectorAll('.a4-page')) as HTMLElement[];
+      if (pageEls.length > 0) {
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = pdf.internal.pageSize.getWidth();
+
+        for (let i = 0; i < pageEls.length; i++) {
+          const pageEl = pageEls[i];
+          const dataUrl = await htmlToImage.toPng(pageEl, {
+            quality: 1,
+            pixelRatio: 2,
+            backgroundColor: '#ffffff',
+            skipFonts: true,
+          });
+          const img = new Image();
+          await new Promise<void>((resolve) => {
+            img.onload = () => resolve();
+            img.src = dataUrl;
+          });
+          const mmPerPx = pageWidth / img.width;
+          const imgHeightMm = img.height * mmPerPx;
+          pdf.addImage(dataUrl, 'PNG', 0, 0, pageWidth, imgHeightMm);
+          if (i < pageEls.length - 1) pdf.addPage();
+        }
+
+        pdf.save(filename);
+      } else {
+        const dataUrl = await htmlToImage.toPng(el, {
+          quality: 1,
+          pixelRatio: 2,
+          backgroundColor: '#ffffff',
+          skipFonts: true,
+        });
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const img = new Image();
+        await new Promise<void>((resolve) => {
+          img.onload = () => resolve();
+          img.src = dataUrl;
+        });
+        const mmPerPx = pageWidth / img.width;
+        const imgHeightMm = img.height * mmPerPx;
+        pdf.addImage(dataUrl, 'PNG', 0, 0, pageWidth, imgHeightMm);
+        pdf.save(filename);
+      }
+    } finally {
+      setExporting(false);
     }
   };
 
   return (
     <div className="relative">
-      {/* Preview Container */}
       <div className="overflow-auto border rounded-lg bg-gray-50 p-4 print:p-0 print:border-0">
         <div
           ref={previewRef}
           id="cv-preview-content"
-          className="bg-white shadow-lg mx-auto"
+          className="mx-auto w-[210mm] print:w-[210mm] print:shadow-none"
         >
           {renderTemplate()}
         </div>

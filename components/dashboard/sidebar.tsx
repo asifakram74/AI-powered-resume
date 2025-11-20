@@ -198,7 +198,8 @@ export function Sidebar({
             </Avatar>
             <div>
               <p className="text-sm font-medium text-gray-900">{profile?.name || user?.name}</p>
-              <p className="text-xs text-gray-500">{profile?.email || user?.email}</p>
+              <p className="text-xs text-gray-500 break-all">{profile?.email || user?.email}</p>
+              
               {
                 user?.role?.toLowerCase() === 'admin' && (
                   <Badge className="bg-gradient-to-br resumaic-gradient-green text-white text-xs">
