@@ -7,8 +7,16 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../..
 import { Button } from "../../components/ui/button"
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react"
 
+function useSafeSearchParams() {
+  try {
+    return useSearchParams()
+  } catch (error) {
+    return null
+  }
+}
+
 export default function VerifyEmailPage() {
-  const searchParams = useSearchParams()
+  const searchParams = useSafeSearchParams()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [success, setSuccess] = useState<boolean | null>(null)
