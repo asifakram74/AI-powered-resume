@@ -1,3 +1,5 @@
+import webpack from "next/dist/compiled/webpack/webpack.js";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
@@ -17,7 +19,7 @@ const nextConfig = {
       { module: /node_modules[\\/]face-api.js/ },
       { module: /node_modules[\\/]@tensorflow/ },
       { message: /Can't resolve 'encoding'/ },
-      { message: /Can't resolve 'fs'/ }
+      { message: /Can't resolve 'fs'/ },
     ];
 
     if (!isServer) {
@@ -34,10 +36,10 @@ const nextConfig = {
         encoding: false,
       };
 
-      // ⭐ IMPORTANT FIX — use config.webpack.IgnorePlugin
+      // ⭐ Use the internal Webpack, properly imported
       config.plugins = [
         ...(config.plugins || []),
-        new config.webpack.IgnorePlugin({ resourceRegExp: /^encoding$/ }),
+        new webpack.IgnorePlugin({ resourceRegExp: /^encoding$/ }),
       ];
     }
 
