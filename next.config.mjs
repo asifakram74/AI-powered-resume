@@ -12,21 +12,12 @@ const nextConfig = {
   output: 'export',
 
   webpack: (config, { isServer }) => {
-
-    // ⛔ Hide specific warnings
+    // Hide specific warnings
     config.ignoreWarnings = [
-      {
-        module: /node_modules[\\/]face-api.js/,
-      },
-      {
-        module: /node_modules[\\/]@tensorflow/,
-      },
-      {
-        message: /Can't resolve 'encoding'/,
-      },
-      {
-        message: /Can't resolve 'fs'/,
-      }
+      { module: /node_modules[\\/]face-api.js/ },
+      { module: /node_modules[\\/]@tensorflow/ },
+      { message: /Can't resolve 'encoding'/ },
+      { message: /Can't resolve 'fs'/ }
     ];
 
     if (!isServer) {
@@ -43,14 +34,15 @@ const nextConfig = {
         encoding: false,
       };
 
+      // ⭐ IMPORTANT FIX — use config.webpack.IgnorePlugin
       config.plugins = [
         ...(config.plugins || []),
-        new webpack.IgnorePlugin({ resourceRegExp: /^encoding$/ }),
+        new config.webpack.IgnorePlugin({ resourceRegExp: /^encoding$/ }),
       ];
     }
 
     return config;
   },
-}
+};
 
-export default nextConfig
+export default nextConfig;
