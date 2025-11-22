@@ -1,3 +1,5 @@
+import webpack from 'webpack'
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
@@ -9,7 +11,48 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  output: 'export', // 👈 this tells Next.js to generate static files
+  output: 'export',
+
+  webpack: (config, { isServer }) => {
+
+    // ⛔ Hide specific warnings
+    config.ignoreWarnings = [
+      {
+        module: /node_modules[\\/]face-api.js/,
+      },
+      {
+        module: /node_modules[\\/]@tensorflow/,
+      },
+      {
+        message: /Can't resolve 'encoding'/,
+      },
+      {
+        message: /Can't resolve 'fs'/,
+      }
+    ];
+
+    if (!isServer) {
+      config.resolve.alias = {
+        ...(config.resolve.alias || {}),
+        fs: false,
+        encoding: false,
+        'node-fetch': false,
+      };
+
+      config.resolve.fallback = {
+        ...(config.resolve.fallback || {}),
+        fs: false,
+        encoding: false,
+      };
+
+      config.plugins = [
+        ...(config.plugins || []),
+        new webpack.IgnorePlugin({ resourceRegExp: /^encoding$/ }),
+      ];
+    }
+
+    return config;
+  },
 }
 
 export default nextConfig

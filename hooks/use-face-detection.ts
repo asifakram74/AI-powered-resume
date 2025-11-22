@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import * as faceapi from "face-api.js";
+
+let faceapiModule: typeof import("face-api.js") | null = null;
+
+async function getFaceApi() {
+  if (!faceapiModule) {
+    faceapiModule = await import("face-api.js");
+  }
+  return faceapiModule;
+}
 
 export function useFaceDetection() {
   const [modelsLoaded, setModelsLoaded] = useState<boolean>(false);
@@ -7,10 +15,11 @@ export function useFaceDetection() {
   const [faceScore, setFaceScore] = useState<number | null>(null);
   const [detectionErrorMessage, setDetectionErrorMessage] = useState<string | null>(null);
 
-  // Load face-api models on mount (local fallback to CDN)
   useEffect(() => {
     let isMounted = true;
     const loadModels = async () => {
+      if (typeof window === "undefined") return;
+      const faceapi = await getFaceApi();
       const LOCAL_URL = "/models/face_detection";
       const CDN_URL = "https://justadudewhohacks.github.io/face-api.js/models";
       try {
@@ -37,6 +46,13 @@ export function useFaceDetection() {
     setFaceDetected(null);
     setFaceScore(null);
     setDetectionErrorMessage(null);
+
+    if (typeof window === "undefined") {
+      setFaceDetected(false);
+      setDetectionErrorMessage("Face detection is unavailable in this environment.");
+      return false;
+    }
+    const faceapi = await getFaceApi();
 
     const img = document.createElement("img");
     img.src = dataUrl;
