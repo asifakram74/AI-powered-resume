@@ -233,7 +233,7 @@ export function Sidebar({
                     </span>
                   </div>
                   {item.badge && (
-                    item.badge === 'Pro' ? (!isProUser) : true
+                    item.badge === 'Pro' ? (!isProUser && !isAdmin) : true
                   ) && (
                     <Badge
                       className={`text-xs px-3 py-1 font-bold rounded-full ${item.badgeColor || "bg-gray-100 text-gray-700"}`}

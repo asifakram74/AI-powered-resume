@@ -407,8 +407,8 @@ export function ProfilePage() {
                   <div className="text-center space-y-2">
                     <p className="text-sm font-medium text-gray-900 dark:text-white">Account Status</p>
                     <div className="flex items-center justify-center gap-3 flex-wrap">
-                      {/* Email verification indicator based on email_verified_at */}
-                      {user?.email_verified_at ? (
+                      {/* Email verification indicator based on account status */}
+                      {user?.status?.toLowerCase() === 'active' ? (
                         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700">
                           <BadgeCheck className="h-4 w-4 text-green-600 dark:text-green-300" />
                           <span className="text-sm font-medium text-green-700 dark:text-green-300">Email Verified</span>
@@ -416,7 +416,7 @@ export function ProfilePage() {
                       ) : (
                         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700">
                           <div className="h-4 w-4 rounded-full bg-yellow-400"></div>
-                          <span className="text-sm font-medium text-yellow-700 dark:text-yellow-300">Email Verification Pending</span>
+                          <span className="text-sm font-medium text-yellow-700 dark:text-yellow-300">Email Not Verified</span>
                         </div>
                       )}
 
