@@ -36,10 +36,9 @@ const nextConfig = {
         encoding: false,
       };
 
-      // ⭐⭐ FIX: use `.default`
+      // ❌ Removed IgnorePlugin — this was causing the error
       config.plugins = [
         ...(config.plugins || []),
-        new webpack.IgnorePlugin.default({ resourceRegExp: /^encoding$/ }),
       ];
     }
 
