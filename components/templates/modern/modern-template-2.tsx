@@ -41,266 +41,326 @@ export function ModernTemplate2({ data, isPreview = false }: ModernTemplate2Prop
     return date
   }
 
-  const Sidebar = () => (
+  const Sidebar = ({ hideContent = false }: { hideContent?: boolean }) => (
     <div className="w-1/3 bg-slate-950 text-white p-6 print:break-inside-avoid print:bg-slate-950 sidebar-container sidebar-bg">
-      <div className="space-y-6 print:space-y-4 sticky top-0">
-        {/* Profile Picture */}
-        {data.personalInfo.profilePicture && (
-          <div className="text-center print-break-inside-avoid mb-4">
-            <img
-              src={data.personalInfo.profilePicture || "/placeholder.svg"}
-              alt={data.personalInfo.fullName}
-              className="w-28 h-28 rounded-full mx-auto object-cover border-4 border-emerald-500 print:border-emerald-500 print:w-24 print:h-24"
-            />
-          </div>
-        )}
-
-        {/* Contact Info */}
-        <div className="print-break-inside-avoid">
-          <h2 className="text-base font-bold mb-3 text-emerald-400 print:text-emerald-400">CONTACT</h2>
-          <div className="space-y-2 text-sm">
-            <div className="flex items-center space-x-3">
-              <Mail className="w-4 h-4 text-emerald-400 print:text-emerald-400 flex-shrink-0" />
-              <span className="break-all text-xs">{data.personalInfo.email}</span>
-            </div>
-            <div className="flex items-center space-x-3">
-              <Phone className="w-4 h-4 text-emerald-400 print:text-emerald-400 flex-shrink-0" />
-              <span className="text-xs">{data.personalInfo.phone}</span>
-            </div>
-            <div className="flex items-center space-x-3">
-              <MapPin className="w-4 h-4 text-emerald-400 print:text-emerald-400 flex-shrink-0" />
-              <span className="text-xs">
-                {(data.personalInfo.city || data.personalInfo.country) && (
-                  <span>
-                    {data.personalInfo.city && data.personalInfo.country
-                      ? `${data.personalInfo.city}, ${data.personalInfo.country}`
-                      : data.personalInfo.city || data.personalInfo.country}
-                  </span>
-                )}
-              </span>
-            </div>
-          </div>
+      {hideContent ? (
+        // Empty sidebar - only background color remains
+        <div className="space-y-6 print:space-y-4 sticky top-0">
+          {/* Empty content */}
         </div>
+      ) : (
+        <div className="space-y-6 print:space-y-4 sticky top-0">
+          {/* Profile Picture */}
+          {data.personalInfo.profilePicture && (
+            <div className="text-center print-break-inside-avoid mb-4">
+              <img
+                src={data.personalInfo.profilePicture || "/placeholder.svg"}
+                alt={data.personalInfo.fullName}
+                className="w-28 h-28 rounded-full mx-auto object-cover border-4 border-emerald-500 print:border-emerald-500 print:w-24 print:h-24"
+              />
+            </div>
+          )}
 
-        {/* Skills */}
-        <div className="print-break-inside-avoid">
-          <h2 className="text-base font-bold mb-3 text-emerald-400 print:text-emerald-400">SKILLS</h2>
-          <div className="space-y-3">
-            {data.skills.technical.length > 0 && (
-              <div>
-                <h3 className="font-semibold mb-2 text-xs text-gray-300">Technical</h3>
-                <div className="flex flex-wrap gap-2">
-                  {data.skills.technical.map((skill, index) => (
-                    <span
-                      key={index}
-                      className="bg-emerald-600 text-white px-2 py-1 rounded text-xs print:bg-emerald-600"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-            {data.skills.soft.length > 0 && (
-              <div>
-                <h3 className="font-semibold mb-2 text-xs text-gray-300">Soft Skills</h3>
-                <div className="flex flex-wrap gap-2">
-                  {data.skills.soft.map((skill, index) => (
-                    <span
-                      key={index}
-                      className="bg-slate-700 text-white px-2 py-1 rounded text-xs print:bg-slate-700"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Languages */}
-        {data.languages.length > 0 && (
+          {/* Contact Info */}
           <div className="print-break-inside-avoid">
-            <h2 className="text-base font-bold mb-3 text-emerald-400 print:text-emerald-400">LANGUAGES</h2>
-            <div className="space-y-2">
-              {data.languages.map((lang) => (
-                <div key={lang.id} className="flex justify-between text-xs">
-                  <span className="text-gray-300">{lang.name}</span>
-                  <span className="text-emerald-300 print:text-emerald-300">{lang.proficiency}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Education */}
-        <div className="print-break-inside-avoid">
-          <h2 className="text-base font-bold mb-3 text-emerald-400 print:text-emerald-400">EDUCATION</h2>
-          <div className="space-y-3">
-            {data.education.map((edu) => (
-              <div key={edu.id} className="text-xs print-break-inside-avoid">
-                <h3 className="font-semibold text-gray-100">{edu.degree}</h3>
-                <p className="text-emerald-300 print:text-emerald-300">{edu.institutionName}</p>
-                {edu.graduationDate && <p className="text-gray-400">{formatDate(edu.graduationDate)}</p>}
+            <h2 className="text-base font-bold mb-3 text-emerald-400 print:text-emerald-400">CONTACT</h2>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center space-x-3">
+                <Mail className="w-4 h-4 text-emerald-400 print:text-emerald-400 flex-shrink-0" />
+                <span className="break-all text-xs">{data.personalInfo.email}</span>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Interests */}
-        {data.additional.interests.length > 0 && (
-          <div className="print-break-inside-avoid">
-            <h2 className="text-base font-bold mb-3 text-emerald-400 print:text-emerald-400">INTERESTS</h2>
-            <div className="flex flex-wrap gap-2">
-              {data.additional.interests.map((interest, index) => (
-                <span key={index} className="bg-slate-700 text-white px-2 py-1 rounded text-xs print:bg-slate-700">
-                  {interest}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-
-  const MainContent = () => (
-    <div className="flex-1 p-8 print:p-6 print:break-inside-avoid">
-      <div className="space-y-6 print:space-y-4">
-        {/* Header */}
-        <div className="border-b-2 border-gray-200 pb-4 mb-6 print-break-inside-avoid print:border-gray-200">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2 print:text-gray-900 print:text-2xl">
-            {data.personalInfo.fullName}
-          </h1>
-          <h2 className="text-lg text-emerald-600 font-semibold mb-3 print:text-emerald-600">
-            {data.personalInfo.jobTitle}
-          </h2>
-          <p className="text-gray-700 leading-relaxed text-sm print:text-gray-700">{data.personalInfo.summary}</p>
-        </div>
-
-        {/* Experience */}
-        <div className="print-break-inside-avoid">
-          <h2 className="text-xl font-bold text-gray-900 mb-4 print:text-gray-900">EXPERIENCE</h2>
-          <div className="space-y-4">
-            {data.experience.map((exp) => (
-              <div
-                key={exp.id}
-                className="border-l-4 border-emerald-500 pl-4 print-break-inside-avoid print:border-emerald-500"
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h3 className="text-base font-bold text-gray-900 print:text-gray-900">{exp.jobTitle}</h3>
-                    <p className="text-emerald-600 font-semibold text-sm print:text-emerald-600">{exp.companyName}</p>
-                  </div>
-                  {(formatDate(exp.startDate) || exp.current || formatDate(exp.endDate)) && (
-                    <span className="text-gray-500 text-xs print:text-gray-500 whitespace-nowrap">
-                      {formatDate(exp.startDate)}
-                      {formatDate(exp.startDate) && (exp.current || formatDate(exp.endDate)) ? " - " : ""}
-                      {exp.current ? "Present" : formatDate(exp.endDate)}
+              <div className="flex items-center space-x-3">
+                <Phone className="w-4 h-4 text-emerald-400 print:text-emerald-400 flex-shrink-0" />
+                <span className="text-xs">{data.personalInfo.phone}</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <MapPin className="w-4 h-4 text-emerald-400 print:text-emerald-400 flex-shrink-0" />
+                <span className="text-xs">
+                  {(data.personalInfo.city || data.personalInfo.country) && (
+                    <span>
+                      {data.personalInfo.city && data.personalInfo.country
+                        ? `${data.personalInfo.city}, ${data.personalInfo.country}`
+                        : data.personalInfo.city || data.personalInfo.country}
                     </span>
                   )}
-                </div>
-                <ul className="text-gray-700 leading-relaxed space-y-1 text-sm print:text-gray-700">
-                  {exp.responsibilities.map((resp, index) => (
-                    <li key={index} className="flex items-start">
-                      <span className="text-emerald-500 mr-2 print:text-emerald-500">→</span>
-                      <span>{resp}</span>
-                    </li>
-                  ))}
-                </ul>
+                </span>
               </div>
-            ))}
+            </div>
           </div>
-        </div>
 
-        {/* Projects */}
-        {data.projects.length > 0 && (
+          {/* Skills */}
           <div className="print-break-inside-avoid">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 print:text-gray-900">PROJECTS</h2>
-            <div className="space-y-4">
-              {data.projects.map((project) => (
-                <div
-                  key={project.id}
-                  className="border rounded-lg p-4 print-break-inside-avoid print:border-gray-300 hover:shadow-lg transition-shadow"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <h3 className="text-sm font-bold text-gray-900 print:text-gray-900">{project.name}</h3>
-                      <p className="text-emerald-600 font-medium text-xs print:text-emerald-600">{project.role}</p>
-                    </div>
-                    <div className="flex space-x-2">
-                      {project.liveDemoLink && (
-                        <a
-                          href={project.liveDemoLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-emerald-500 hover:text-emerald-700 print:text-emerald-500"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
-                      )}
-                      {project.githubLink && (
-                        <a
-                          href={project.githubLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-gray-600 hover:text-gray-800 print:text-gray-600"
-                        >
-                          <Github className="w-4 h-4" />
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                  <p className="text-gray-700 mb-2 text-xs print:text-gray-700">{project.description}</p>
-                  <div className="flex flex-wrap gap-1">
-                    {project.technologies.map((tech, index) => (
+            <h2 className="text-base font-bold mb-3 text-emerald-400 print:text-emerald-400">SKILLS</h2>
+            <div className="space-y-3">
+              {data.skills.technical.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-2 text-xs text-gray-300">Technical</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {data.skills.technical.map((skill, index) => (
                       <span
                         key={index}
-                        className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-xs print:bg-slate-100 print:text-slate-700"
+                        className="bg-emerald-600 text-white px-2 py-1 rounded text-xs print:bg-emerald-600"
                       >
-                        {tech}
+                        {skill}
                       </span>
                     ))}
                   </div>
                 </div>
-              ))}
+              )}
+              {data.skills.soft.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-2 text-xs text-gray-300">Soft Skills</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {data.skills.soft.map((skill, index) => (
+                      <span
+                        key={index}
+                        className="bg-slate-700 text-white px-2 py-1 rounded text-xs print:bg-slate-700"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        )}
 
-        {/* Certifications */}
-        {data.certifications.length > 0 && (
+          {/* Languages */}
+          {data.languages.length > 0 && (
+            <div className="print-break-inside-avoid">
+              <h2 className="text-base font-bold mb-3 text-emerald-400 print:text-emerald-400">LANGUAGES</h2>
+              <div className="space-y-2">
+                {data.languages.map((lang) => (
+                  <div key={lang.id} className="flex justify-between text-xs">
+                    <span className="text-gray-300">{lang.name}</span>
+                    <span className="text-emerald-300 print:text-emerald-300">{lang.proficiency}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Education */}
           <div className="print-break-inside-avoid">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 print:text-gray-900">CERTIFICATIONS & AWARDS</h2>
-            <div className="space-y-2">
-              {data.certifications.map((cert) => (
-                <div key={cert.id} className="flex justify-between items-center print-break-inside-avoid">
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-sm print:text-gray-900">{cert.title}</h3>
-                    <p className="text-gray-600 text-xs print:text-gray-600">{cert.issuingOrganization}</p>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-gray-500 text-xs print:text-gray-500">{formatDate(cert.dateObtained)}</span>
-                  </div>
+            <h2 className="text-base font-bold mb-3 text-emerald-400 print:text-emerald-400">EDUCATION</h2>
+            <div className="space-y-3">
+              {data.education.map((edu) => (
+                <div key={edu.id} className="text-xs print-break-inside-avoid">
+                  <h3 className="font-semibold text-gray-100">{edu.degree}</h3>
+                  <p className="text-emerald-300 print:text-emerald-300">{edu.institutionName}</p>
+                  {edu.graduationDate && <p className="text-gray-400">{formatDate(edu.graduationDate)}</p>}
                 </div>
               ))}
             </div>
           </div>
-        )}
+
+          {/* Interests */}
+          {data.additional.interests.length > 0 && (
+            <div className="print-break-inside-avoid">
+              <h2 className="text-base font-bold mb-3 text-emerald-400 print:text-emerald-400">INTERESTS</h2>
+              <div className="flex flex-wrap gap-2">
+                {data.additional.interests.map((interest, index) => (
+                  <span key={index} className="bg-slate-700 text-white px-2 py-1 rounded text-xs print:bg-slate-700">
+                    {interest}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+
+  const MainContent = ({ content }: { content: React.ReactNode }) => (
+    <div className="flex-1 p-8 print:p-6 print:break-inside-avoid">
+      <div className="space-y-6 print:space-y-4">
+        {content}
       </div>
     </div>
   )
 
-  const Layout = () => (
-    <div className="flex max-w-full mx-auto min-h-screen bg-white print:min-h-0 print:shadow-none print:bg-white">
-      <Sidebar />
-      <MainContent />
+  const HeaderSection = () => (
+    <div className="border-b-2 border-gray-200 pb-4 mb-6 print-break-inside-avoid print:border-gray-200">
+      <h1 className="text-4xl font-bold text-gray-900 mb-2 print:text-gray-900 print:text-2xl">
+        {data.personalInfo.fullName}
+      </h1>
+      <h2 className="text-lg text-emerald-600 font-semibold mb-3 print:text-emerald-600">
+        {data.personalInfo.jobTitle}
+      </h2>
+      <p className="text-gray-700 leading-relaxed text-sm print:text-gray-700">{data.personalInfo.summary}</p>
+    </div>
+  )
+
+  const ExperienceSection = () => (
+    <div className="print-break-inside-avoid">
+      <h2 className="text-xl font-bold text-gray-900 mb-4 print:text-gray-900">EXPERIENCE</h2>
+      <div className="space-y-4">
+        {data.experience.map((exp) => (
+          <div
+            key={exp.id}
+            className="border-l-4 border-emerald-500 pl-4 print-break-inside-avoid print:border-emerald-500"
+          >
+            <div className="flex justify-between items-start mb-2">
+              <div>
+                <h3 className="text-base font-bold text-gray-900 print:text-gray-900">{exp.jobTitle}</h3>
+                <p className="text-emerald-600 font-semibold text-sm print:text-emerald-600">{exp.companyName}</p>
+              </div>
+              {(formatDate(exp.startDate) || exp.current || formatDate(exp.endDate)) && (
+                <span className="text-gray-500 text-xs print:text-gray-500 whitespace-nowrap">
+                  {formatDate(exp.startDate)}
+                  {formatDate(exp.startDate) && (exp.current || formatDate(exp.endDate)) ? " - " : ""}
+                  {exp.current ? "Present" : formatDate(exp.endDate)}
+                </span>
+              )}
+            </div>
+            <ul className="text-gray-700 leading-relaxed space-y-1 text-sm print:text-gray-700">
+              {exp.responsibilities.map((resp, index) => (
+                <li key={index} className="flex items-start">
+                  <span className="text-emerald-500 mr-2 print:text-emerald-500">→</span>
+                  <span>{resp}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+
+  const ProjectsSection = () => (
+    <div className="print-break-inside-avoid">
+      <h2 className="text-xl font-bold text-gray-900 mb-4 print:text-gray-900">PROJECTS</h2>
+      <div className="space-y-4">
+        {data.projects.map((project) => (
+          <div
+            key={project.id}
+            className="border rounded-lg p-4 print-break-inside-avoid print:border-gray-300 hover:shadow-lg transition-shadow"
+          >
+            <div className="flex justify-between items-start mb-2">
+              <div>
+                <h3 className="text-sm font-bold text-gray-900 print:text-gray-900">{project.name}</h3>
+                <p className="text-emerald-600 font-medium text-xs print:text-emerald-600">{project.role}</p>
+              </div>
+              <div className="flex space-x-2">
+                {project.liveDemoLink && (
+                  <a
+                    href={project.liveDemoLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-emerald-500 hover:text-emerald-700 print:text-emerald-500"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                )}
+                {project.githubLink && (
+                  <a
+                    href={project.githubLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-600 hover:text-gray-800 print:text-gray-600"
+                  >
+                    <Github className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
+            </div>
+            <p className="text-gray-700 mb-2 text-xs print:text-gray-700">{project.description}</p>
+            <div className="flex flex-wrap gap-1">
+              {project.technologies.map((tech, index) => (
+                <span
+                  key={index}
+                  className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-xs print:bg-slate-100 print:text-slate-700"
+                >
+                  {tech}
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+
+  const CertificationsSection = () => (
+    <div className="print-break-inside-avoid">
+      <h2 className="text-xl font-bold text-gray-900 mb-4 print:text-gray-900">CERTIFICATIONS & AWARDS</h2>
+      <div className="space-y-2">
+        {data.certifications.map((cert) => (
+          <div key={cert.id} className="flex justify-between items-center print-break-inside-avoid">
+            <div>
+              <h3 className="font-semibold text-gray-900 text-sm print:text-gray-900">{cert.title}</h3>
+              <p className="text-gray-600 text-xs print:text-gray-600">{cert.issuingOrganization}</p>
+            </div>
+            <div className="text-right">
+              <span className="text-gray-500 text-xs print:text-gray-500">{formatDate(cert.dateObtained)}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+
+  const TwoColumnLayout = ({ 
+    sidebar, 
+    main, 
+    hideSidebarContent = false 
+  }: { 
+    sidebar: React.ReactNode; 
+    main: React.ReactNode;
+    hideSidebarContent?: boolean;
+  }) => (
+    <div className="flex min-h-[297mm] bg-white w-[210mm]">
+      <Sidebar hideContent={hideSidebarContent} />
+      {main}
     </div>
   )
 
   const blocks = useMemo(() => {
-    return [<Layout key="layout" />];
+    const items: React.ReactNode[] = [];
+    
+    // First page with sidebar and main content
+    items.push(
+      <TwoColumnLayout
+        key="page-1"
+        sidebar={<Sidebar />}
+        main={
+          <MainContent 
+            content={
+              <>
+                <HeaderSection />
+                <ExperienceSection />
+              </>
+            }
+          />
+        }
+      />
+    );
+
+    // Additional pages for remaining content
+    const remainingContent = [];
+    
+    if (data.projects.length > 0) {
+      remainingContent.push(<ProjectsSection key="projects-section" />);
+    }
+
+    if (data.certifications.length > 0) {
+      remainingContent.push(<CertificationsSection key="certifications-section" />);
+    }
+
+    // Add remaining content to additional pages if needed
+    if (remainingContent.length > 0) {
+      items.push(
+        <TwoColumnLayout
+          key="page-2"
+          hideSidebarContent={true} // This hides the sidebar content on second page
+          sidebar={<div />} // Empty sidebar prop since we're using hideSidebarContent
+          main={<MainContent content={<div className="space-y-8">{remainingContent}</div>} />}
+        />
+      );
+    }
+
+    return items;
   }, [data]);
 
   useLayoutEffect(() => {
@@ -308,6 +368,7 @@ export function ModernTemplate2({ data, isPreview = false }: ModernTemplate2Prop
     const newPages: React.ReactNode[][] = [];
     let currentPage: React.ReactNode[] = [];
     let currentHeight = 0;
+    
     const pushPage = () => {
       if (currentPage.length > 0) {
         newPages.push(currentPage);
@@ -315,35 +376,72 @@ export function ModernTemplate2({ data, isPreview = false }: ModernTemplate2Prop
         currentHeight = 0;
       }
     };
+    
     const elements = Array.from(containerRef.current.children) as HTMLElement[];
+    
     elements.forEach((el, index) => {
       const style = window.getComputedStyle(el);
       const marginTop = parseFloat(style.marginTop) || 0;
       const marginBottom = parseFloat(style.marginBottom) || 0;
       const elementHeight = el.offsetHeight + marginTop + marginBottom;
+      
       if (currentHeight + elementHeight > CONTENT_HEIGHT_PX) {
         pushPage();
       }
+      
       currentPage.push(blocks[index]);
       currentHeight += elementHeight;
     });
-    if (currentPage.length > 0) newPages.push(currentPage);
+    
+    if (currentPage.length > 0) {
+      newPages.push(currentPage);
+    }
+    
     setPages(newPages);
   }, [blocks]);
 
   return (
     <div className="flex flex-col items-center gap-8 pb-20 print:block print:gap-0 print:pb-0">
-      <div ref={containerRef} className="cv-measure fixed top-0 left-0 w-[210mm] p-12 opacity-0 pointer-events-none z-[-999]" style={{ visibility: "hidden" }}>
+      {/* Hidden measurement container */}
+      <div 
+        ref={containerRef} 
+        className="cv-measure fixed top-0 left-0 w-[210mm] p-12 opacity-0 pointer-events-none z-[-999]" 
+        style={{ visibility: "hidden" }}
+      >
         {blocks}
       </div>
+      
+      {/* Render actual pages */}
       {pages.length === 0 ? (
-        <div className="w-[210mm] min-h-[297mm] bg-white"></div>
+        <div className="w-[210mm] min-h-[297mm] bg-white">
+          <TwoColumnLayout
+            sidebar={<Sidebar />}
+            main={
+              <MainContent 
+                content={
+                  <>
+                    <HeaderSection />
+                    <ExperienceSection />
+                    {data.projects.length > 0 && <ProjectsSection />}
+                    {data.certifications.length > 0 && <CertificationsSection />}
+                  </>
+                }
+              />
+            }
+          />
+        </div>
       ) : (
         pages.map((pageContent, i) => (
-          <div key={i} className="a4-page w-[210mm] min-h-[297mm] bg-white text-slate-900 relative print:shadow-none" style={{ breakAfter: i < pages.length - 1 ? "page" : "auto" }}>
+          <div 
+            key={i} 
+            className="a4-page w-[210mm] min-h-[297mm] bg-white text-slate-900 relative print:shadow-none" 
+            style={{ breakAfter: i < pages.length - 1 ? "page" : "auto" }}
+          >
             {pageContent}
             {pages.length > 1 && (
-              <div className="absolute bottom-4 right-12 text-[10px] text-slate-400 print:hidden">Page {i + 1} of {pages.length}</div>
+              <div className="absolute bottom-4 right-12 text-[10px] text-slate-400 print:hidden">
+                Page {i + 1} of {pages.length}
+              </div>
             )}
           </div>
         ))

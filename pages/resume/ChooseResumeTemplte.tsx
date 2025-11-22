@@ -30,30 +30,30 @@ interface CVTemplate {
 }
 
 const templates: CVTemplate[] = [
- {
-  id: "modern",
-  name: "Modern Professional",
-  description: "Clean, modern design perfect for tech and business professionals",
-  category: "modern",
-},
-{
-  id: "modern-2",
-  name: "Modern LOREN",
-  description: "Dark blue curved sidebar with elegant design",
-  category: "modern",
-},
-{
-  id: "modern-3",
-  name: "Modern LILLY",
-  description: "Light blue sidebar with rounded contact section",
-  category: "modern",
-},
-{
-  id: "modern-4",
-  name: "Modern MIKE",
-  description: "Blue sidebar with professional white layout",
-  category: "modern",
-},
+//  {
+//   id: "modern",
+//   name: "Modern Professional",
+//   description: "Clean, modern design perfect for tech and business professionals",
+//   category: "modern",
+// },
+// {
+//   id: "modern-2",
+//   name: "Modern LOREN",
+//   description: "Dark blue curved sidebar with elegant design",
+//   category: "modern",
+// },
+// {
+//   id: "modern-3",
+//   name: "Modern LILLY",
+//   description: "Light blue sidebar with rounded contact section",
+//   category: "modern",
+// },
+// {
+//   id: "modern-4",
+//   name: "Modern MIKE",
+//   description: "Blue sidebar with professional white layout",
+//   category: "modern",
+// },
 
 {
   id: "classic",
@@ -105,12 +105,12 @@ const templates: CVTemplate[] = [
   category: "creative",
 },
 
-{
-  id: "minimal",
-  name: "Minimal",
-  description: "A new creative design for professionals",
-  category: "minimal",
-},
+// {
+//   id: "minimal",
+//   name: "Minimal",
+//   description: "A new creative design for professionals",
+//   category: "minimal",
+// },
 {
   id: "minimal-2",
   name: "Minimal Clean 2",
@@ -123,38 +123,39 @@ const templates: CVTemplate[] = [
   description: "Another variation of the minimal layout",
   category: "minimal",
 },
-{
-  id: "minimal-4",
-  name: "Minimal Clean 4",
-  description: "Ultra-clean minimal design focusing on content",
-  category: "minimal",
-},
-{
-  id: "minimal-5",
-  name: "Minimal 5",
-  description: "Another creative design option",
-  category: "minimal",
-},
-{
-  id: "minimal-6",
-  name: "Minimal 6",
-  description: "Another modern design option",
-  category: "minimal",
-},
-{
-  id: "minimal-7",
-  name: "Minimal 7",
-  description: "Advanced modern design for professionals",
-  category: "minimal",
-},
-{
-  id: "minimal-8",
-  name: "Minimal 8",
-  description: "Premium creative design for professionals",
-  category: "minimal",
-},
-]
+// {
+//   id: "minimal-4",
+//   name: "Minimal Clean 4",
+//   description: "Ultra-clean minimal design focusing on content",
+//   category: "minimal",
+// },
+// {
+//   id: "minimal-5",
+//   name: "Minimal 5",
+//   description: "Another creative design option",
+//   category: "minimal",
+// },
+// {
+//   id: "minimal-6",
+//   name: "Minimal 6",
+//   description: "Another modern design option",
+//   category: "minimal",
+// },
+// {
+//   id: "minimal-7",
+//   name: "Minimal 7",
+//   description: "Advanced modern design for professionals",
+//   category: "minimal",
+// },
+// {
+//   id: "minimal-8",
+//   name: "Minimal 8",
+//   description: "Premium creative design for professionals",
+//   category: "minimal",
+// },
 
+
+]
 const dashboardMenuItems = [
   {
     id: "create-persona",

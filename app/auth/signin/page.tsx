@@ -30,6 +30,8 @@ export default function SignInPage() {
   const [rememberMe, setRememberMe] = useState(false)
   const [linkedInLoading, setLinkedInLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
+  const [oauthProvider, setOauthProvider] = useState<"google" | "linkedin" | null>(null)
+  const [oauthStatus, setOauthStatus] = useState<"idle" | "loading" | "error">("idle")
 
   const router = useRouter()
   const searchParams = useSafeSearchParams()
@@ -81,6 +83,9 @@ export default function SignInPage() {
 
   // For LinkedIn login
   const handleLinkedInSignIn = () => {
+    setLinkedInLoading(true)
+    setOauthProvider("linkedin")
+    setOauthStatus("loading")
     localStorage.setItem("oauth_provider", "linkedin");
     const randomState = `secureRandom${Math.floor(Math.random() * 10000)}${Date.now()}`;
     localStorage.setItem('linkedin_oauth_state', randomState);
@@ -92,6 +97,9 @@ export default function SignInPage() {
   }
 
   const handleGoogleSignIn = () => {
+    setGoogleLoading(true)
+    setOauthProvider("google")
+    setOauthStatus("loading")
     localStorage.setItem("oauth_provider", "google");
     const randomState = `secureRandom${Math.floor(Math.random() * 10000)}${Date.now()}`;
     localStorage.setItem("google_oauth_state", randomState);
@@ -110,12 +118,15 @@ export default function SignInPage() {
 
         if (code && state) {
           setLinkedInLoading(true);
+          setOauthProvider("linkedin")
+          setOauthStatus("loading")
 
           const storedState = localStorage.getItem('linkedin_oauth_state');
 
           if (state !== storedState) {
             console.error('Invalid state parameter - possible CSRF attack');
             setLinkedInLoading(false);
+            setOauthStatus("error")
 
             const cleanUrl = window.location.pathname;
             window.history.replaceState({}, document.title, cleanUrl);
@@ -132,22 +143,25 @@ export default function SignInPage() {
             if (loginWithLinkedIn.fulfilled.match(result)) {
               console.log('LinkedIn login successful');
               console.log('User ID from backend:', result.payload.user.id);
-              console.log('Token in localStorage:', localStorage.getItem('token'));
-              console.log('User in localStorage:', localStorage.getItem('user'));
-              showSuccessToast("Signed in with LinkedIn", "Welcome back!");
+            console.log('Token in localStorage:', localStorage.getItem('token'));
+            console.log('User in localStorage:', localStorage.getItem('user'));
+            showSuccessToast("Signed in with LinkedIn", "Welcome back!");
+            setOauthStatus("idle")
 
-              router.push('/dashboard');
-            } else {
-              console.error('LinkedIn login failed:', result.payload);
-              const message = typeof result.payload === 'string' ? result.payload : 'LinkedIn sign-in failed';
-              showErrorToast("LinkedIn Sign-in Error", message);
-            }
-          } catch (error) {
-            console.error('Error during LinkedIn authentication:', error);
-            const message = error instanceof Error ? error.message : 'Unexpected error during LinkedIn sign-in';
+            router.push('/dashboard');
+          } else {
+            console.error('LinkedIn login failed:', result.payload);
+            const message = typeof result.payload === 'string' ? result.payload : 'LinkedIn sign-in failed';
             showErrorToast("LinkedIn Sign-in Error", message);
-          } finally {
-            setLinkedInLoading(false);
+            setOauthStatus("error")
+          }
+        } catch (error) {
+          console.error('Error during LinkedIn authentication:', error);
+          const message = error instanceof Error ? error.message : 'Unexpected error during LinkedIn sign-in';
+          showErrorToast("LinkedIn Sign-in Error", message);
+          setOauthStatus("error")
+        } finally {
+          setLinkedInLoading(false);
 
             const cleanUrl = window.location.pathname;
             window.history.replaceState({}, document.title, cleanUrl);
@@ -164,11 +178,14 @@ export default function SignInPage() {
 
         if (token) {
           setGoogleLoading(true);
+          setOauthProvider("google")
+          setOauthStatus("loading")
 
           try {
             const storedState = localStorage.getItem("google_oauth_state");
             if (state && state !== storedState) {
               console.error("Invalid state parameter - possible CSRF attack");
+              setOauthStatus("error")
               return;
             }
 
@@ -208,11 +225,13 @@ export default function SignInPage() {
             const cleanUrl = window.location.pathname;
             window.history.replaceState({}, document.title, cleanUrl);
             showSuccessToast("Signed in with Google", "Welcome back!");
+            setOauthStatus("idle")
             router.push("/dashboard");
           } catch (err) {
             console.error("Error during Google login:", err);
             const message = err instanceof Error ? err.message : 'Unexpected error during Google sign-in';
             showErrorToast("Google Sign-in Error", message);
+            setOauthStatus("error")
           } finally {
             setGoogleLoading(false);
           }
@@ -221,6 +240,8 @@ export default function SignInPage() {
 
         if (code) {
           setGoogleLoading(true);
+          setOauthProvider("google")
+          setOauthStatus("loading")
 
           try {
             const result = await dispatch(loginWithGoogle(code));
@@ -229,15 +250,18 @@ export default function SignInPage() {
               const cleanUrl = window.location.pathname;
               window.history.replaceState({}, document.title, cleanUrl);
               showSuccessToast("Signed in with Google", "Welcome back!");
+              setOauthStatus("idle")
               router.push("/dashboard");
             } else {
               const message = typeof result.payload === 'string' ? result.payload : 'Google sign-in failed';
               showErrorToast("Google Sign-in Error", message);
+              setOauthStatus("error")
             }
           } catch (err) {
             console.error("Error during Google login:", err);
             const message = err instanceof Error ? err.message : 'Unexpected error during Google sign-in';
             showErrorToast("Google Sign-in Error", message);
+            setOauthStatus("error")
           } finally {
             setGoogleLoading(false);
           }
@@ -275,10 +299,24 @@ export default function SignInPage() {
           <CardDescription>Sign in to your CV Builder AI account</CardDescription>
         </CardHeader>
         <CardContent>
-          {linkedInLoading ? (
-            <div className="flex flex-col items-center justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-4" />
-              <p className="text-gray-600">Completing LinkedIn authentication...</p>
+          {oauthStatus !== "idle" ? (
+            <div className="flex flex-col items-center justify-center py-10">
+              <Loader2 className="h-9 w-9 animate-spin text-emerald-600 mb-4" />
+              <p className="text-gray-700 font-medium">
+                {oauthStatus === "loading" ? `Completing ${oauthProvider ?? ''} authentication...` : `${oauthProvider ?? 'OAuth'} authentication failed`}
+              </p>
+              {oauthStatus === "error" && (
+                <Button
+                  onClick={() => {
+                    setOauthStatus("idle");
+                    setOauthProvider(null);
+                    localStorage.removeItem("oauth_provider");
+                  }}
+                  className="mt-4 resumaic-gradient-green text-white hover:opacity-90"
+                >
+                  Back to Sign In
+                </Button>
+              )}
             </div>
           ) : (
             <>
@@ -398,6 +436,7 @@ export default function SignInPage() {
                 <Button
                   variant="outline"
                   onClick={handleLinkedInSignIn}
+                  disabled={linkedInLoading}
                   className="w-full flex items-center justify-center gap-2"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">

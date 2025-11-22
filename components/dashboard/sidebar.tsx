@@ -233,7 +233,7 @@ export function Sidebar({
                     </span>
                   </div>
                   {item.badge && (
-                    item.badge === 'Pro' ? (!!profile && !isProUser) : true
+                    item.badge === 'Pro' ? (!isProUser) : true
                   ) && (
                     <Badge
                       className={`text-xs px-3 py-1 font-bold rounded-full ${item.badgeColor || "bg-gray-100 text-gray-700"}`}
@@ -269,14 +269,14 @@ export function Sidebar({
                 <FileText className="mr-2 h-4 w-4" />
                 <span>DOCX</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={onExportPNG} className="rounded-xl">
+              {/* <DropdownMenuItem onClick={onExportPNG} className="rounded-xl">
                 <FileText className="mr-2 h-4 w-4" />
                 <span>PNG</span>
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
             </DropdownMenuContent>
           </DropdownMenu>
         ) : !isAdmin ? (
-          !!profile && !isProUser && (
+          !!user && !isProUser && (
             <div className="p-5 rounded-2xl bg-gradient-to-br from-green-50/80 via-white to-orange-50/30 border border-green-200/50">
               <div className="flex items-center gap-3 mb-3">
                 <div className="p-2.5 rounded-xl resumaic-gradient-green shadow-lg">
