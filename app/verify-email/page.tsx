@@ -95,6 +95,7 @@ export default function VerifyEmailPage() {
               </ul>
             </div>
           )}
+          
 
           {!loading && (
             <div className="flex gap-3">
