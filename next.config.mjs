@@ -14,7 +14,7 @@ const nextConfig = {
   output: 'export',
 
   webpack: (config, { isServer }) => {
-    // Hide specific warnings
+
     config.ignoreWarnings = [
       { module: /node_modules[\\/]face-api.js/ },
       { module: /node_modules[\\/]@tensorflow/ },
@@ -36,10 +36,10 @@ const nextConfig = {
         encoding: false,
       };
 
-      // ⭐ Use the internal Webpack, properly imported
+      // ⭐⭐ FIX: use `.default`
       config.plugins = [
         ...(config.plugins || []),
-        new webpack.IgnorePlugin({ resourceRegExp: /^encoding$/ }),
+        new webpack.IgnorePlugin.default({ resourceRegExp: /^encoding$/ }),
       ];
     }
 
