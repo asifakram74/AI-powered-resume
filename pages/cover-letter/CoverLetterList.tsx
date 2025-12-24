@@ -58,7 +58,7 @@ import {
 } from "../../lib/redux/service/resumeService"
 import { getAllPersonas, getPersonas, type PersonaResponse } from "../../lib/redux/service/pasonaService"
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog"
-import { PageProps } from "../../app/dashboard/page";
+import { PageProps } from "../../types/page-props";
 import { createCheckoutSession } from "../../lib/redux/service/paymentService";
 
 export function CoverLetterPage({ user }: PageProps) {

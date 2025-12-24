@@ -27,8 +27,8 @@ const PDFUploader = ({ onDataExtracted, onProcessingStart }: PDFUploaderProps) =
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Fixed height for consistent layout
-  const cardHeight = "h-32"; // Fixed height for all states
+  // Compact height for better UX
+  const cardHeight = "h-auto min-h-[5rem]";
 
   // Simulate progress updates with proper limits
   useEffect(() => {
@@ -88,21 +88,21 @@ const PDFUploader = ({ onDataExtracted, onProcessingStart }: PDFUploaderProps) =
 
   const getStepDescription = (step: string) => {
     const stepDescriptions: { [key: string]: string } = {
-      "Uploading file...": "Securely transferring your resume to our servers...",
-      "Extracting text...": "Reading and extracting text content from your PDF...",
-      "Analyzing with AI...": "Our AI is analyzing your skills, experience, and qualifications...",
-      "Organizing data...": "Structuring your information into a professional format...",
-      "Finalizing...": "Almost done! Preparing your resume data..."
+      "Uploading file...": "Securely transferring your resume...",
+      "Extracting text...": "Reading text content...",
+      "Analyzing with AI...": "Analyzing skills & experience...",
+      "Organizing data...": "Structuring information...",
+      "Finalizing...": "Almost done..."
     };
-    return stepDescriptions[step] || "Processing your resume...";
+    return stepDescriptions[step] || "Processing...";
   };
 
   const getFriendlyMessage = (progress: number) => {
-    if (progress < 25) return "Getting started with your resume...";
-    if (progress < 50) return "Reading through your experience and skills...";
-    if (progress < 75) return "Analyzing your qualifications in detail...";
-    if (progress < 90) return "Putting the final touches...";
-    return "Almost there!";
+    if (progress < 25) return "Starting...";
+    if (progress < 50) return "Reading details...";
+    if (progress < 75) return "Analyzing...";
+    if (progress < 90) return "Finalizing...";
+    return "Done!";
   };
 
   // Ensure progress never exceeds 100%
@@ -283,16 +283,16 @@ const PDFUploader = ({ onDataExtracted, onProcessingStart }: PDFUploaderProps) =
 
   return (
     <div className="space-y-2">
-      {/* Main Upload Card - Fixed Height */}
+      {/* Main Upload Card - Compact Design */}
       <Card
         className={cn(
-          "border-2 border-dashed p-6 text-center transition-all duration-200 cursor-pointer",
-          cardHeight, // Fixed height
-          "flex items-center justify-center", // Center content vertically
-          isDragOver ? "border-emerald-500 bg-emerald-50 scale-[1.02]" : "border-gray-300",
-          file && !isProcessing && !error ? "border-emerald-500 bg-emerald-50" : "",
-          error ? "border-red-300 bg-red-50" : "",
-          isProcessing ? "pointer-events-none border-emerald-300 bg-emerald-50" : "hover:border-emerald-400 hover:bg-emerald-50"
+          "border border-dashed transition-all duration-200 cursor-pointer overflow-hidden",
+          cardHeight,
+          "flex items-center justify-center",
+          isDragOver ? "border-emerald-500 bg-emerald-50/50" : "border-gray-200 hover:border-emerald-400 hover:bg-emerald-50/30",
+          file && !isProcessing && !error ? "border-emerald-500 bg-emerald-50/50" : "",
+          error ? "border-red-300 bg-red-50/50" : "",
+          isProcessing ? "pointer-events-none border-emerald-300 bg-emerald-50/30" : ""
         )}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
@@ -308,55 +308,51 @@ const PDFUploader = ({ onDataExtracted, onProcessingStart }: PDFUploaderProps) =
           disabled={isProcessing}
         />
 
-        <div className="flex flex-col items-center space-y-2 w-full">
+        <div className="w-full px-4 py-3">
           {error ? (
-            <>
-              <AlertCircle className="h-8 w-8 text-red-500" />
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-red-700">Upload Failed</p>
-                <p className="text-xs text-red-600 line-clamp-2">{error}</p>
+            <div className="flex items-center space-x-3 text-red-600">
+              <AlertCircle className="h-5 w-5 flex-shrink-0" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium">Upload Failed</p>
+                <p className="text-xs opacity-90 truncate">{error}</p>
               </div>
-            </>
+            </div>
           ) : file && !isProcessing ? (
-            <>
-              <CheckCircle2 className="h-8 w-8 text-emerald-600" />
-              <div className="space-y-1">
-                <p className="text-xs font-medium text-emerald-700">Ready to Analyze</p>
-                <p className="text-xs text-gray-600 truncate max-w-[200px]">{file.name}</p>
+            <div className="flex items-center space-x-3 text-emerald-700">
+              <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium">Ready to Analyze</p>
+                <p className="text-xs opacity-90 truncate">{file.name}</p>
               </div>
-            </>
+            </div>
           ) : isProcessing ? (
-            <>
-              <Loader2 className="h-8 w-8 text-emerald-600 animate-spin" />
-              <div className="space-y-2 w-full max-w-[280px]">
-                <p className="text-xs font-medium text-gray-800">{getFriendlyMessage(safeProgress)}</p>
-                
-                {/* Progress Bar */}
-                <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+            <div className="flex items-center space-x-3 w-full">
+              <Loader2 className="h-5 w-5 text-emerald-600 animate-spin flex-shrink-0" />
+              <div className="flex-1 space-y-1.5 min-w-0">
+                <div className="flex justify-between text-xs">
+                  <span className="font-medium text-gray-700 truncate mr-2">{getFriendlyMessage(safeProgress)}</span>
+                  <span className="text-gray-500 tabular-nums">{Math.round(safeProgress)}%</span>
+                </div>
+                <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
                   <div 
-                    className="bg-emerald-600 h-full rounded-full transition-all duration-500 ease-out"
+                    className="bg-emerald-500 h-full rounded-full transition-all duration-500 ease-out"
                     style={{ width: `${safeProgress}%` }}
                   />
                 </div>
-                
-                <div className="flex justify-between text-xs text-gray-500">
-                  <span>Processing...</span>
-                  <span>{Math.round(safeProgress)}%</span>
-                </div>
               </div>
-            </>
+            </div>
           ) : (
-            <>
-              <div className="p-3 rounded-full bg-emerald-100">
-                <Upload className="h-6 w-6 text-emerald-600" />
+            <div className="flex items-center justify-center space-x-3 py-1">
+              <div className="p-2 rounded-full bg-emerald-100/50 flex-shrink-0">
+                <Upload className="h-4 w-4 text-emerald-600" />
               </div>
-              <div className="space-y-1">
-                <p className="text-xs font-medium text-gray-800">Upload your CV (PDF)</p>
-                <p className="text-xs text-gray-600">
-                  Drag & drop or click to browse
+              <div className="text-left">
+                <p className="text-sm font-medium text-gray-700">Upload CV (PDF)</p>
+                <p className="text-[10px] text-gray-500">
+                  Drag & drop or click
                 </p>
               </div>
-            </>
+            </div>
           )}
         </div>
       </Card>

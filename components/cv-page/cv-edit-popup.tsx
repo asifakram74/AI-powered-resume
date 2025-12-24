@@ -12,7 +12,7 @@ import {
 } from "../../components/ui/dialog";
 import { ScrollArea } from "../../components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
-import { Plus, Trash2, Save, X } from "lucide-react";
+import { Plus, Trash2, Save, X, Upload } from "lucide-react";
 import { uploadPersonaProfilePicture } from "../../lib/redux/service/pasonaService";
 
 interface OptimizedCV {
@@ -278,14 +278,17 @@ export function CVEditPopup({
                         />
                         <Button
                           type="button"
-                          variant="secondary"
+                          variant="outline"
+                          size="sm"
+                          className="h-9 px-4"
                           onClick={() => {
                             const input = document.getElementById("profile-image-input") as HTMLInputElement | null;
                             input?.click();
                           }}
                           disabled={isUploadingImage}
                         >
-                          {isUploadingImage ? "Uploading..." : "Upload Image"}
+                          <Upload className="w-4 h-4 mr-2" />
+                          {isUploadingImage ? "Uploading..." : "Change"}
                         </Button>
                       </label>
                       <p className="text-xs text-gray-500 mt-1">Supported: JPG, PNG. Updates persona image used in templates.</p>

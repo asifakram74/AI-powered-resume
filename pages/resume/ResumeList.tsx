@@ -59,7 +59,7 @@ import { CVWizard } from "./AddEditResume";
 import { toast } from "sonner";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { Crown, UserCircle } from "lucide-react";
-import { PageProps } from "../../app/dashboard/page";
+import { PageProps } from "../../types/page-props";
 import { createCheckoutSession } from "../../lib/redux/service/paymentService";
 import { getAllPersonas, getPersonas, type PersonaResponse } from "../../lib/redux/service/pasonaService";
 

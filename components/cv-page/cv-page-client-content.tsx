@@ -282,6 +282,7 @@ export function CVPageClientContent() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [showEditPopup, setShowEditPopup] = useState(false)
   const [isViewMode, setIsViewMode] = useState(false) // Add this state
+  const [jobDescription, setJobDescription] = useState("")
   const [filter, setFilter] = useState<"all" | "modern" | "classic" | "creative" | "minimal">("all")
 
   const searchParams = useSearchParams()
@@ -363,6 +364,7 @@ export function CVPageClientContent() {
           // Fetch existing CV data
           const cvData = await getCVById(cvId)
           setExistingCV(cvData)
+          setJobDescription(cvData.job_description || "")
 
           // Set template from the CV data
           const template = templates.find((t) => t.id === cvData.layout_id) || defaultTemplate
@@ -386,6 +388,18 @@ export function CVPageClientContent() {
 
           setIsLoading(false)
           return
+        }
+
+        // Handle new CV creation - check session storage for data from wizard
+        if (typeof window !== "undefined" && !existingCV) {
+          const wizardJobDesc = sessionStorage.getItem("cv_wizard_job_description")
+          if (wizardJobDesc) {
+            setJobDescription(wizardJobDesc)
+            // Optional: Clear it so it doesn't persist forever, but maybe keep it in case of refresh?
+            // sessionStorage.removeItem("cv_wizard_job_description") 
+          }
+          
+          // We can also check for title if we want to pre-set it, but title is usually set on save
         }
 
         if (!personaId) {
@@ -843,12 +857,21 @@ export function CVPageClientContent() {
     )
 
     try {
+      // Get title from session storage if creating new CV and no existingCV
+      let titleToUse = existingCV?.title || `${persona.full_name}'s AI CV - ${selectedTemplate.name}`;
+      if (!existingCV && typeof window !== "undefined") {
+        const wizardTitle = sessionStorage.getItem("cv_wizard_title");
+        if (wizardTitle) {
+          titleToUse = wizardTitle;
+        }
+      }
+
       const cvDataToSave: CreateCVData = {
         user_id: user.id.toString(),
         layout_id: selectedTemplate.id,
         personas_id: persona.id.toString(),
-        title: `${persona.full_name}'s AI CV - ${selectedTemplate.name}`,
-        job_description: "AI-generated CV based on persona",
+        title: titleToUse,
+        job_description: jobDescription || "AI-generated CV based on persona",
         generated_content: JSON.stringify(aiResponse.optimizedCV),
       }
 
@@ -860,16 +883,17 @@ export function CVPageClientContent() {
 
         toast.dismiss(loadingToastId)
         showSuccessToast("CV Updated Successfully! 🎉", "Your changes have been saved and are ready to use")
+        
+        // Redirect back to resume list
+        router.push("/dashboard/resumes")
       } else {
         // Create new CV
         const newCV = await createCV(cvDataToSave)
         setExistingCV(newCV)
         setHasUnsavedChanges(false)
 
-        // Update URL to include the new CV ID
-        const url = new URL(window.location.href)
-        url.searchParams.set("cvId", newCV.id)
-        router.replace(url.toString())
+        // Redirect back to resume list instead of staying on page
+        router.push("/dashboard/resumes")
 
         toast.dismiss(loadingToastId)
         showSuccessToast(
@@ -921,8 +945,8 @@ export function CVPageClientContent() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="w-full max-w-md">
+      <div className="min-h-screen max-w-full bg-gray-50 flex items-center justify-center">
+        <Card className=" max-w-full">
           <CardContent className="text-center p-6">
             <div className="text-gray-500 mb-4">
               <TrendingUp className="h-12 w-12 mx-auto" />
@@ -992,8 +1016,8 @@ export function CVPageClientContent() {
             onExportPNG={exportAsPNG}
             exportMode={true}
           />
-          <main className="flex-1 p-6 bg-gray-50">
-            <div className="flex flex-col gap-6">
+          <main className="flex-1 p-6 bg-gray-50 overflow-y-auto flex flex-col items-center">
+            <div className="flex flex-col gap-6 max-w-7xl w-full">
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">

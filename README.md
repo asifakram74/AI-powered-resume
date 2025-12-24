@@ -33,10 +33,10 @@ A modern, full-stack application for creating professional resumes with AI optim
    NEXT_PUBLIC_API_URL=https://backendcv.onlinetoolpot.com
    
    # Laravel API URL for authentication on staging
-   NEXT_PUBLIC_API_URL=https://stagingbackend.resumaic.com
+   NEXT_PUBLIC_API_URL=https://backendcv.onlinetoolpot.com
    
    # Node.js API URL for AI operations on production
-   NEXT_PUBLIC_NODEJS_API_URL=  https://backendserver.resumaic.com
+   NEXT_PUBLIC_NODEJS_API_URL=https://backendserver.resumaic.com
 
    # Node.js API URL for AI operations on staging
    NEXT_PUBLIC_NODEJS_API_URL=https://stagingnode.resumaic.com
@@ -180,10 +180,10 @@ A modern, full-stack application for creating professional resumes with AI optim
    NEXT_PUBLIC_API_URL=https://backendcv.onlinetoolpot.com/api
 
    # Laravel API URL for authentication on staging
-   NEXT_PUBLIC_API_URL=https://stagingbackend.resumaic.com/api
+   NEXT_PUBLIC_API_URL=https://backendcv.onlinetoolpot.com/api
 
    # Node.js API URL for AI operations on production
-   NEXT_PUBLIC_NODEJS_API_URL=  https://backendserver.resumaic.com
+   NEXT_PUBLIC_NODEJS_API_URL=https://backendserver.resumaic.com
 
    # Node.js API URL for AI operations on staging
    NEXT_PUBLIC_NODEJS_API_URL=https://stagingnode.resumaic.com
@@ -218,10 +218,10 @@ A modern, full-stack application for creating professional resumes with AI optim
 NEXT_PUBLIC_API_URL=https://backendcv.onlinetoolpot.com/api
 
 # Laravel API URL for authentication on staging
-NEXT_PUBLIC_API_URL=https://stagingbackend.resumaic.com/api
+NEXT_PUBLIC_API_URL=https://backendcv.onlinetoolpot.com/api
 
 # Node.js API URL for AI operations on production
-NEXT_PUBLIC_NODEJS_API_URL=  https://backendserver.resumaic.com
+NEXT_PUBLIC_NODEJS_API_URL=https://backendserver.resumaic.com
 
 # Node.js API URL for AI operations on staging
 NEXT_PUBLIC_NODEJS_API_URL=https://stagingnode.resumaic.com

@@ -36,7 +36,7 @@ export default function VerifyEmailPage() {
 
     const verify = async () => {
       try {
-        const res = await fetch(`https://backendcv.onlinetoolpot.com/public/api/verify-email-address?token=${token}`)
+        const res = await fetch(`https://stagingbackend.resumaic.com/public/api/verify-email-address?token=${token}`)
         const data = await res.json()
         if (data && (data.status === true || data.success === true)) {
           setSuccess(true)

@@ -14,9 +14,7 @@ import {
   FileText,
   Upload,
   Linkedin,
-  CheckCircle,
   AlertCircle,
-  Loader2,
   Sparkles,
 } from "lucide-react";
 import type { CVData } from "../../types/cv-data";

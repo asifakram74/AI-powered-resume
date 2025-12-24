@@ -225,23 +225,14 @@ export function ProfilePage() {
               </div>
             </div>
 
-            {/* Action Buttons */}
+            {/* Administrator Badge on the Right */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
-              <Button 
-                variant="outline" 
-                className="flex-1 sm:flex-none sm:min-w-[140px] h-11 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" 
-                onClick={() => setShowEditModal(true)}
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Profile
-              </Button>
-              <Button 
-                className="flex-1 sm:flex-none sm:min-w-[160px] h-11 resumaic-gradient-green hover:opacity-90 button-press shadow-md transition-all" 
-                onClick={() => setShowPasswordDialog(true)}
-              >
-                <Shield className="h-4 w-4 mr-2" />
-                Change Password
-              </Button>
+              {user?.role?.toLowerCase() === 'admin' && (
+                <Badge className="flex items-center  px-3 py-1 rounded-full resumaic-gradient-orange text-white font-medium border-0 shadow-sm h-8 min-w-[140px] justify-center text-sm">
+                  <Crown className="h-2 w-2" />
+                  <span>Administrator</span>
+                </Badge>
+              )}
             </div>
           </div>
         </div>

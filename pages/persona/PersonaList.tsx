@@ -63,7 +63,7 @@ import { createCheckoutSession } from "../../lib/redux/service/paymentService";
 import { toast } from "sonner";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { Crown, UserCircle } from "lucide-react";
-import { PageProps } from "../../app/dashboard/page";
+import { PageProps } from "../../types/page-props";
 
 function CreatePersonaPage({ user }: PageProps) {
   const [personas, setPersonas] = useState<CVData[]>([])

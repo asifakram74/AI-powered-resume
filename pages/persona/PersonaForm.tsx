@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "../../components/ui/select";
 import { Badge } from "../../components/ui/badge";
-import { Sparkles, X, Plus, Upload, User, Check } from "lucide-react";
+import { Sparkles, X, Plus, Upload, User, Check, Pencil } from "lucide-react";
 import { Textarea } from "../../components/ui/textarea";
 import { Switch } from "../../components/ui/switch";
 import type { CVData } from "../../types/cv-data";
@@ -176,6 +176,12 @@ export function PersonaForm({
   const [skillInput, setSkillInput] = useState("");
   const [skillType, setSkillType] = useState<"technical" | "soft">("technical");
   const [interestInput, setInterestInput] = useState("");
+
+  // Editing states
+  const [editingExperienceId, setEditingExperienceId] = useState<string | null>(null);
+  const [editingEducationId, setEditingEducationId] = useState<string | null>(null);
+  const [editingCertificationId, setEditingCertificationId] = useState<string | null>(null);
+  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
 
   // Profile picture state
   const [profilePictureFile, setProfilePictureFile] = useState<File | null>(null);
@@ -356,17 +362,35 @@ export function PersonaForm({
 
   const addExperience = () => {
     if (currentExperience.jobTitle && currentExperience.companyName) {
-      setFormData((prev) => ({
-        ...prev,
-        experience: [
-          ...prev.experience,
-          {
-            ...currentExperience,
-            endDate: currentExperience.current ? "" : currentExperience.endDate,
-            id: Date.now().toString(),
-          },
-        ],
-      }));
+      if (editingExperienceId) {
+        setFormData((prev) => ({
+          ...prev,
+          experience: prev.experience.map((exp) =>
+            exp.id === editingExperienceId
+              ? {
+                  ...currentExperience,
+                  endDate: currentExperience.current ? "" : currentExperience.endDate,
+                  id: editingExperienceId,
+                }
+              : exp
+          ),
+        }));
+        setEditingExperienceId(null);
+        toast.success("Experience updated successfully");
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          experience: [
+            ...prev.experience,
+            {
+              ...currentExperience,
+              endDate: currentExperience.current ? "" : currentExperience.endDate,
+              id: Date.now().toString(),
+            },
+          ],
+        }));
+        toast.success("Experience added successfully");
+      }
       setCurrentExperience({
         jobTitle: "",
         companyName: "",
@@ -376,9 +400,40 @@ export function PersonaForm({
         startDate: "",
         endDate: "",
         current: false,
-        responsibilities: [],
+        responsibilities: [""],
       });
     }
+  };
+
+  const handleEditExperience = (exp: any) => {
+    setCurrentExperience({
+      jobTitle: exp.jobTitle || "",
+      companyName: exp.companyName || "",
+      location: exp.location || "",
+      employmentType: exp.employmentType || "",
+      industry: exp.industry || "",
+      startDate: exp.startDate || "",
+      endDate: exp.endDate || "",
+      current: exp.current || false,
+      responsibilities: exp.responsibilities || [""],
+    });
+    setEditingExperienceId(exp.id);
+    toast.info("Editing Experience. Please update the fields above.");
+  };
+
+  const cancelEditExperience = () => {
+    setEditingExperienceId(null);
+    setCurrentExperience({
+      jobTitle: "",
+      companyName: "",
+      location: "",
+      employmentType: "",
+      industry: "",
+      startDate: "",
+      endDate: "",
+      current: false,
+      responsibilities: [""],
+    });
   };
 
   const removeExperience = (id: string) => {
@@ -390,16 +445,33 @@ export function PersonaForm({
 
   const addEducation = () => {
     if (currentEducation.degree && currentEducation.institutionName) {
-      setFormData((prev) => ({
-        ...prev,
-        education: [
-          ...prev.education,
-          {
-            ...currentEducation,
-            id: Date.now().toString(),
-          },
-        ],
-      }));
+      if (editingEducationId) {
+        setFormData((prev) => ({
+          ...prev,
+          education: prev.education.map((edu) =>
+            edu.id === editingEducationId
+              ? {
+                  ...currentEducation,
+                  id: editingEducationId,
+                }
+              : edu
+          ),
+        }));
+        setEditingEducationId(null);
+        toast.success("Education updated successfully");
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          education: [
+            ...prev.education,
+            {
+              ...currentEducation,
+              id: Date.now().toString(),
+            },
+          ],
+        }));
+        toast.success("Education added successfully");
+      }
       setCurrentEducation({
         degree: "",
         institutionName: "",
@@ -410,6 +482,33 @@ export function PersonaForm({
         additionalInfo: "",
       });
     }
+  };
+
+  const handleEditEducation = (edu: any) => {
+    setCurrentEducation({
+      degree: edu.degree || "",
+      institutionName: edu.institutionName || "",
+      location: edu.location || "",
+      graduationDate: edu.graduationDate || "",
+      gpa: edu.gpa || "",
+      honors: edu.honors || "",
+      additionalInfo: edu.additionalInfo || "",
+    });
+    setEditingEducationId(edu.id);
+    toast.info("Editing Education. Please update the fields above.");
+  };
+
+  const cancelEditEducation = () => {
+    setEditingEducationId(null);
+    setCurrentEducation({
+      degree: "",
+      institutionName: "",
+      location: "",
+      graduationDate: "",
+      gpa: "",
+      honors: "",
+      additionalInfo: "",
+    });
   };
 
   const removeEducation = (id: string) => {
@@ -450,16 +549,33 @@ export function PersonaForm({
       currentCertification.title &&
       currentCertification.issuingOrganization
     ) {
-      setFormData((prev) => ({
-        ...prev,
-        certifications: [
-          ...prev.certifications,
-          {
-            ...currentCertification,
-            id: Date.now().toString(),
-          },
-        ],
-      }));
+      if (editingCertificationId) {
+        setFormData((prev) => ({
+          ...prev,
+          certifications: prev.certifications.map((cert) =>
+            cert.id === editingCertificationId
+              ? {
+                  ...currentCertification,
+                  id: editingCertificationId,
+                }
+              : cert
+          ),
+        }));
+        setEditingCertificationId(null);
+        toast.success("Certification updated successfully");
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          certifications: [
+            ...prev.certifications,
+            {
+              ...currentCertification,
+              id: Date.now().toString(),
+            },
+          ],
+        }));
+        toast.success("Certification added successfully");
+      }
       setCurrentCertification({
         title: "",
         issuingOrganization: "",
@@ -467,6 +583,27 @@ export function PersonaForm({
         verificationLink: "",
       });
     }
+  };
+
+  const handleEditCertification = (cert: any) => {
+    setCurrentCertification({
+      title: cert.title || "",
+      issuingOrganization: cert.issuingOrganization || "",
+      dateObtained: cert.dateObtained || "",
+      verificationLink: cert.verificationLink || "",
+    });
+    setEditingCertificationId(cert.id);
+    toast.info("Editing Certification. Please update the fields above.");
+  };
+
+  const cancelEditCertification = () => {
+    setEditingCertificationId(null);
+    setCurrentCertification({
+      title: "",
+      issuingOrganization: "",
+      dateObtained: "",
+      verificationLink: "",
+    });
   };
 
   const removeCertification = (id: string) => {
@@ -478,19 +615,39 @@ export function PersonaForm({
 
   const addProject = () => {
     if (currentProject.name && currentProject.role) {
-      setFormData((prev) => ({
-        ...prev,
-        projects: [
-          ...prev.projects,
-          {
-            ...currentProject,
-            id: Date.now().toString(),
-            technologies: currentProject.technologies.filter((tech) =>
-              tech.trim()
-            ),
-          },
-        ],
-      }));
+      if (editingProjectId) {
+        setFormData((prev) => ({
+          ...prev,
+          projects: prev.projects.map((project) =>
+            project.id === editingProjectId
+              ? {
+                  ...currentProject,
+                  id: editingProjectId,
+                  technologies: currentProject.technologies.filter((tech) =>
+                    tech.trim()
+                  ),
+                }
+              : project
+          ),
+        }));
+        setEditingProjectId(null);
+        toast.success("Project updated successfully");
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          projects: [
+            ...prev.projects,
+            {
+              ...currentProject,
+              id: Date.now().toString(),
+              technologies: currentProject.technologies.filter((tech) =>
+                tech.trim()
+              ),
+            },
+          ],
+        }));
+        toast.success("Project added successfully");
+      }
       setCurrentProject({
         name: "",
         role: "",
@@ -500,6 +657,31 @@ export function PersonaForm({
         githubLink: "",
       });
     }
+  };
+
+  const handleEditProject = (project: any) => {
+    setCurrentProject({
+      name: project.name || "",
+      role: project.role || "",
+      description: project.description || "",
+      technologies: project.technologies || [""],
+      liveDemoLink: project.liveDemoLink || "",
+      githubLink: project.githubLink || "",
+    });
+    setEditingProjectId(project.id);
+    toast.info("Editing Project. Please update the fields above.");
+  };
+
+  const cancelEditProject = () => {
+    setEditingProjectId(null);
+    setCurrentProject({
+      name: "",
+      role: "",
+      description: "",
+      technologies: [""],
+      liveDemoLink: "",
+      githubLink: "",
+    });
   };
 
   const removeProject = (id: string) => {
@@ -836,7 +1018,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                   <User className="w-8 h-8 text-gray-400" />
                 </div>
               )}
-              <div className="flex-1">
+              <div className="flex flex-col justify-center gap-2">
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -844,18 +1026,21 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                   onChange={handleProfilePictureChange}
                   className="hidden"
                 />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full"
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  {profilePictureFile ? 'Change Picture' : 'Upload Picture'}
-                </Button>
-                <p className="text-xs text-gray-500 mt-1">
-                  Supported formats: JPG, PNG, GIF (max 5MB)
-                </p>
+                <div className="flex items-center gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="h-9 px-4"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    {profilePictureFile ? 'Change' : 'Upload Picture'}
+                  </Button>
+                  <p className="text-xs text-gray-500">
+                    JPG, PNG, GIF (max 5MB)
+                  </p>
+                </div>
               </div>
             </div>
             {faceDetected === false && (
@@ -1117,35 +1302,63 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
           </div>
 
           <div className="flex flex-col sm:flex-row gap-2">
-            <Button
-              type="button"
-              onClick={addExperience}
-              className="flex-1"
-              disabled={
-                !currentExperience.companyName ||
-                !currentExperience.jobTitle
-              }
-            >
-              Add Experience
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setCurrentExperience({
-                jobTitle: "",
-                companyName: "",
-                location: "",
-                employmentType: "",
-                industry: "",
-                startDate: "",
-                endDate: "",
-                current: false,
-                responsibilities: []
-              })}
-              className="flex-1"
-            >
-              Clear
-            </Button>
+            {editingExperienceId ? (
+              <>
+                <Button
+                  type="button"
+                  onClick={addExperience}
+                  className="flex-1"
+                  disabled={
+                    !currentExperience.companyName ||
+                    !currentExperience.jobTitle
+                  }
+                >
+                  Update Experience
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={cancelEditExperience}
+                  className="flex-1"
+                >
+                  Cancel Edit
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  type="button"
+                  onClick={addExperience}
+                  className="flex-1"
+                  disabled={
+                    !currentExperience.companyName ||
+                    !currentExperience.jobTitle
+                  }
+                >
+                  Add Experience
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() =>
+                    setCurrentExperience({
+                      jobTitle: "",
+                      companyName: "",
+                      location: "",
+                      employmentType: "",
+                      industry: "",
+                      startDate: "",
+                      endDate: "",
+                      current: false,
+                      responsibilities: [],
+                    })
+                  }
+                  className="flex-1"
+                >
+                  Clear
+                </Button>
+              </>
+            )}
           </div>
 
           {formData.experience.length > 0 && (
@@ -1164,15 +1377,24 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                     </div>
                   )}
                   </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => removeExperience(exp.id)}
-                    className="ml-2 flex-shrink-0"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+                  <div className="flex gap-2 ml-2 flex-shrink-0">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditExperience(exp)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeExperience(exp.id)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -1187,7 +1409,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-2">
-            <Select value={skillType} onValueChange={(value) => setSkillType(value as "technical" | "soft")}>
+            {/* <Select value={skillType} onValueChange={(value) => setSkillType(value as "technical" | "soft")}>
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue />
               </SelectTrigger>
@@ -1195,7 +1417,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                 <SelectItem value="technical">Technical</SelectItem>
                 <SelectItem value="soft">Soft Skills</SelectItem>
               </SelectContent>
-            </Select>
+            </Select> */}
             <div className="flex flex-col sm:flex-row gap-2 flex-1">
               <Input
                 value={skillInput}
@@ -1213,7 +1435,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
 
           <div className="space-y-3">
             <div>
-              <Label className="text-sm font-medium">Technical Skills:</Label>
+              <Label className="text-sm font-medium">Your Skills:</Label>
               <div className="flex flex-wrap gap-2 mt-2">
                 {formData.skills.technical.map((skill, index) => (
                   <Badge
@@ -1234,7 +1456,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
               </div>
             </div>
 
-            <div>
+            {/* <div>
               <Label className="text-sm font-medium">Soft Skills:</Label>
               <div className="flex flex-wrap gap-2 mt-2">
                 {formData.skills.soft.map((skill, index) => (
@@ -1254,7 +1476,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                   </Badge>
                 ))}
               </div>
-            </div>
+            </div> */}
           </div>
         </CardContent>
       </Card>
@@ -1440,10 +1662,39 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             />
           </div>
 
-          <Button onClick={addEducation} variant="outline" size="sm" className="w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-1" />
-            Add Education
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            {editingEducationId ? (
+              <>
+                <Button
+                  onClick={addEducation}
+                  variant="default"
+                  size="sm"
+                  className="w-full sm:w-auto"
+                >
+                  <span className="h-4 w-4 mr-1" />
+                  Update Education
+                </Button>
+                <Button
+                  onClick={cancelEditEducation}
+                  variant="outline"
+                  size="sm"
+                  className="w-full sm:w-auto"
+                >
+                  Cancel Edit
+                </Button>
+              </>
+            ) : (
+              <Button
+                onClick={addEducation}
+                variant="outline"
+                size="sm"
+                className="w-full sm:w-auto"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add Education
+              </Button>
+            )}
+          </div>
 
           {formData.education.length > 0 && (
             <div className="space-y-2">
@@ -1458,15 +1709,24 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                       {edu.location} | {edu.graduationDate}
                     </div>
                   </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => removeEducation(edu.id)}
-                    className="ml-2 flex-shrink-0"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+                  <div className="flex gap-2 ml-2 flex-shrink-0">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditEducation(edu)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeEducation(edu.id)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -1540,10 +1800,39 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             </div>
           </div>
 
-          <Button onClick={addCertification} variant="outline" size="sm" className="w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-1" />
-            Add Certification
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            {editingCertificationId ? (
+              <>
+                <Button
+                  onClick={addCertification}
+                  variant="default"
+                  size="sm"
+                  className="w-full sm:w-auto"
+                >
+                  <span className="h-4 w-4 mr-1" />
+                  Update Certification
+                </Button>
+                <Button
+                  onClick={cancelEditCertification}
+                  variant="outline"
+                  size="sm"
+                  className="w-full sm:w-auto"
+                >
+                  Cancel Edit
+                </Button>
+              </>
+            ) : (
+              <Button
+                onClick={addCertification}
+                variant="outline"
+                size="sm"
+                className="w-full sm:w-auto"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add Certification
+              </Button>
+            )}
+          </div>
 
           {formData.certifications.length > 0 && (
             <div className="space-y-2">
@@ -1556,15 +1845,24 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                       {cert.issuingOrganization} | {cert.dateObtained}
                     </div>
                   </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => removeCertification(cert.id)}
-                    className="ml-2 flex-shrink-0"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+                  <div className="flex gap-2 ml-2 flex-shrink-0">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditCertification(cert)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeCertification(cert.id)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -1725,10 +2023,39 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             </div>
           </div>
 
-          <Button onClick={addProject} variant="outline" size="sm" className="w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-1" />
-            Add Project
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            {editingProjectId ? (
+              <>
+                <Button
+                  onClick={addProject}
+                  variant="default"
+                  size="sm"
+                  className="w-full sm:w-auto"
+                >
+                  <span className="h-4 w-4 mr-1" />
+                  Update Project
+                </Button>
+                <Button
+                  onClick={cancelEditProject}
+                  variant="outline"
+                  size="sm"
+                  className="w-full sm:w-auto"
+                >
+                  Cancel Edit
+                </Button>
+              </>
+            ) : (
+              <Button
+                onClick={addProject}
+                variant="outline"
+                size="sm"
+                className="w-full sm:w-auto"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add Project
+              </Button>
+            )}
+          </div>
 
           {formData.projects.length > 0 && (
             <div className="space-y-2">
@@ -1744,15 +2071,24 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                       {project.technologies.join(", ")}
                     </div>
                   </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => removeProject(project.id)}
-                    className="ml-2 flex-shrink-0"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+                  <div className="flex gap-2 ml-2 flex-shrink-0">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditProject(project)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeProject(project.id)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>

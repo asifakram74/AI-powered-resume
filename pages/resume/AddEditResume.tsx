@@ -208,6 +208,13 @@ export function CVWizard({
               {selectedTemplate && selectedPersonaId && (
                 <Button
                   onClick={() => {
+                    // Save form data to localStorage to pass to the next page
+                    const currentValues = getValues();
+                    if (typeof window !== "undefined") {
+                      sessionStorage.setItem("cv_wizard_job_description", currentValues.job_description || "");
+                      sessionStorage.setItem("cv_wizard_title", currentValues.title || "");
+                    }
+                    
                     router.push(
                       `/create-cv?personaId=${selectedPersonaId}&templateId=${selectedTemplate.id}`
                     );

@@ -56,9 +56,11 @@ function useResumeCount(userId: string | number | undefined) {
   return { resumeCount, loading }
 }
 
+import { usePathname } from "next/navigation"
+
 interface SidebarProps {
-  activePage: string
-  setActivePage: (page: string) => void
+  activePage?: string
+  setActivePage?: (page: string) => void
   user: {
     id: string | number;
     role?: string;
@@ -75,23 +77,27 @@ interface SidebarProps {
 const regularMenuItems = [
   {
     id: "create-persona",
+    path: "/dashboard/create-persona",
     label: "Persona",
     icon: Sparkles,
   },
   {
     id: "resumes",
+    path: "/dashboard/resumes",
     label: "Resumes",
     badge: "AI",
     icon: FileText,
   },
   {
     id: "cover-letter",
+    path: "/dashboard/cover-letter",
     label: "Cover Letters",
     badge: "AI",
     icon: Mail,
   },
   {
     id: "ats-checker",
+    path: "/dashboard/ats-checker",
     label: "ATS Checker",
     icon: CheckCircle,
     badge: "Pro",
@@ -99,6 +105,7 @@ const regularMenuItems = [
   },
   {
     id: "profile",
+    path: "/dashboard/profile",
     label: "Profile",
     icon: UserCircle,
     badge: "",
@@ -109,6 +116,7 @@ const regularMenuItems = [
 const adminMenuItems = [
   {
     id: "users",
+    path: "/dashboard/users",
     label: "User Management",
     icon: Users,
     badge: "",
@@ -117,7 +125,7 @@ const adminMenuItems = [
 ]
 
 export function Sidebar({
-  activePage,
+  activePage: propActivePage,
   setActivePage,
   user,
   onExportPDF,
@@ -128,6 +136,7 @@ export function Sidebar({
   const [isMounted, setIsMounted] = useState(false)
   const dispatch = useAppDispatch()
   const router = useRouter()
+  const pathname = usePathname()
   const { profile } = useAppSelector((state) => state.auth)
   const { resumeCount, loading } = useResumeCount(user?.id)
 
@@ -144,6 +153,9 @@ export function Sidebar({
   const maxResumes = 3
   const progressPercentage = Math.min((resumeCount / maxResumes) * 100, 100)
   const isProUser = profile?.plan_type?.toLowerCase() === 'pro'
+
+  // Determine active page based on prop or pathname
+  const activePage = propActivePage || regularMenuItems.find(item => pathname?.includes(item.path))?.id || adminMenuItems.find(item => pathname?.includes(item.path))?.id || "create-persona"
 
   // Function to get user initials
   const getInitials = (name?: string) => {
@@ -166,13 +178,6 @@ export function Sidebar({
           <Link href="/" >
             <Image src="/Resumic.png" alt="Logo" width={200} height={120} className="cursor-pointer" />
           </Link>
-          {/* <p className="text-xs text-gray-500 font-medium">AI Resume Builder</p> */}
-
-          {/* <div className="animate-fade-in-up">
-              <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                Resumaic
-              </h1>
-            </div> */}
         </div>
 
         {(user || profile) && (
@@ -198,11 +203,10 @@ export function Sidebar({
             </Avatar>
             <div>
               <p className="text-sm font-medium text-gray-900">{profile?.name || user?.name}</p>
-              <p className="text-xs text-gray-500 break-all">{profile?.email || user?.email}</p>
               
               {
                 user?.role?.toLowerCase() === 'admin' && (
-                  <Badge className="bg-gradient-to-br resumaic-gradient-green text-white text-xs">
+                  <Badge className="resumaic-gradient-orange text-white text-xs">
                     Administrator
                   </Badge>
                 )}
@@ -216,37 +220,68 @@ export function Sidebar({
           <SidebarMenu className="space-y-1">
             {[...regularMenuItems, ...(isAdmin ? adminMenuItems : [])].map((item, index) => (
               <SidebarMenuItem key={item.id} className={`animate-fade-in-up animation-delay-${(index + 1) * 100}`}>
-                <SidebarMenuButton
-                  onClick={() => setActivePage(item.id)}
-                  isActive={activePage === item.id}
-                  className={`
-                    w-full justify-start gap-3 px-4 py-3.5 text-left rounded-2xl transition-all duration-300
-                    data-[active=true]:resumaic-gradient-subtle data-[active=true]:text-gray-900 data-[active=true]:shadow-xl 
-                    data-[active=true]:border data-[active=true]:border-green-200/50
-                    cursor-pointer transform
-                  `}
-                >
-                  <div className="flex items-center gap-3 flex-1">
-                    <item.icon className="h-5 w-5 text-gray-600 group-data-[active=true]:text-green-700" />
-                    <span className="font-semibold text-gray-700 data-[active=true]:text-gray-900">
-                      {item.label}
-                    </span>
-                  </div>
-                  {item.badge && (
-                    item.badge === 'Pro' ? (!isProUser && !isAdmin) : true
-                  ) && (
-                    <Badge
-                      className={`text-xs px-3 py-1 font-bold rounded-full ${item.badgeColor || "bg-gray-100 text-gray-700"}`}
+                {setActivePage ? (
+                  <SidebarMenuButton
+                    onClick={() => setActivePage(item.id)}
+                    isActive={activePage === item.id}
+                    className={`
+                      w-full justify-start gap-3 px-4 py-3.5 text-left rounded-2xl transition-all duration-300
+                      data-[active=true]:resumaic-gradient-subtle data-[active=true]:text-gray-900 data-[active=true]:shadow-xl 
+                      data-[active=true]:border data-[active=true]:border-green-200/50
+                      cursor-pointer transform
+                    `}
+                  >
+                    <div className="flex items-center gap-3 flex-1">
+                      <item.icon className="h-5 w-5 text-gray-600 group-data-[active=true]:text-green-700" />
+                      <span className="font-semibold text-gray-700 data-[active=true]:text-gray-900">
+                        {item.label}
+                      </span>
+                    </div>
+                    {item.badge && (
+                      item.badge === 'Pro' ? (!isProUser && !isAdmin) : true
+                    ) && (
+                      <Badge
+                        className={`text-xs px-3 py-1 font-bold rounded-full ${item.badgeColor || "bg-gray-100 text-gray-700"}`}
+                      >
+                        {item.badge}
+                      </Badge>
+                    )}
+                  </SidebarMenuButton>
+                ) : (
+                  <Link href={item.path} className="w-full block">
+                    <SidebarMenuButton
+                      isActive={activePage === item.id}
+                      className={`
+                        w-full justify-start gap-3 px-4 py-3.5 text-left rounded-2xl transition-all duration-300
+                        data-[active=true]:resumaic-gradient-subtle data-[active=true]:text-gray-900 data-[active=true]:shadow-xl 
+                        data-[active=true]:border data-[active=true]:border-green-200/50
+                        cursor-pointer transform
+                      `}
                     >
-                      {item.badge}
-                    </Badge>
-                  )}
-                </SidebarMenuButton>
+                      <div className="flex items-center gap-3 flex-1">
+                        <item.icon className="h-5 w-5 text-gray-600 group-data-[active=true]:text-green-700" />
+                        <span className="font-semibold text-gray-700 data-[active=true]:text-gray-900">
+                          {item.label}
+                        </span>
+                      </div>
+                      {item.badge && (
+                        item.badge === 'Pro' ? (!isProUser && !isAdmin) : true
+                      ) && (
+                        <Badge
+                          className={`text-xs px-3 py-1 font-bold rounded-full ${item.badgeColor || "bg-gray-100 text-gray-700"}`}
+                        >
+                          {item.badge}
+                        </Badge>
+                      )}
+                    </SidebarMenuButton>
+                  </Link>
+                )}
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
+
 
       <SidebarFooter className="p-4 mt-auto space-y-4">
         {exportMode ? (
