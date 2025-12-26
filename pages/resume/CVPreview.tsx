@@ -165,12 +165,12 @@ export function CVPreview({
   };
 
   return (
-    <div className="relative max-w-full">
-      <div className="max-w-full overflow-auto border rounded-lg bg-gray-50 p-4 print:p-0 print:border-0">
+    <div className=" w-full">
+      <div className="w-full pt-8 overflow-auto border rounded-lg bg-gray-50 print:p-0 print:border-0">
         <div
           ref={previewRef}
-          id="cv-preview-content max-w-full"
-          className="mx-auto w-[210mm] print:w-[210mm] print:shadow-none"
+          id="cv-preview-content"
+          className="mx-auto print:shadow-none"
         >
           {renderTemplate()}
         </div>

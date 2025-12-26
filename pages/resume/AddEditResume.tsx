@@ -28,6 +28,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "../../components/ui/dialog";
 import { CVTemplates } from "./ChooseResumeTemplte";
 import { useForm } from "react-hook-form";
@@ -182,49 +183,41 @@ export function CVWizard({
         open={showTemplateSelector}
         onOpenChange={setShowTemplateSelector}
       >
-        <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto w-[70vw] ">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold mb-4">
-              Choose a Template
-            </DialogTitle>
-            <p className="text-sm text-gray-500 mb-6">
-              Select a template for your CV. You can preview each template
-              before making your selection.
-            </p>
-          </DialogHeader>
-          <CVTemplates
-            onTemplateSelect={handleTemplateSelect}
-            selectedTemplate={selectedTemplate?.id || ""}
-          />
-          <div className="flex justify-between items-center mt-4">
-            <Button
-              variant="outline"
-              onClick={() => setShowTemplateSelector(false)}
-            >
-              Cancel
-            </Button>
-
-            <div className="flex gap-2">
-              {selectedTemplate && selectedPersonaId && (
-                <Button
-                  onClick={() => {
-                    // Save form data to localStorage to pass to the next page
-                    const currentValues = getValues();
-                    if (typeof window !== "undefined") {
-                      sessionStorage.setItem("cv_wizard_job_description", currentValues.job_description || "");
-                      sessionStorage.setItem("cv_wizard_title", currentValues.title || "");
-                    }
-                    
-                    router.push(
-                      `/create-cv?personaId=${selectedPersonaId}&templateId=${selectedTemplate.id}`
-                    );
-                  }}
-                  className="resumaic-gradient-green hover:opacity-90  button-press"
-                >
-                  Create AI CV
-                </Button>
-              )}
+        <DialogContent className="w-[80vw] !max-w-none h-[90vh] flex flex-col">
+          <DialogHeader className="px-6   flex flex-row items-center justify-between">
+            <div className="flex flex-col gap-1">
+              <DialogTitle className="text-2xl font-bold">
+                Choose a Template
+              </DialogTitle>
+              <DialogDescription>
+                Select a template to get started with your resume.
+              </DialogDescription>
             </div>
+            {selectedTemplate && selectedPersonaId && (
+              <Button
+                onClick={() => {
+                  // Save form data to localStorage to pass to the next page
+                  const currentValues = getValues();
+                  if (typeof window !== "undefined") {
+                    sessionStorage.setItem("cv_wizard_job_description", currentValues.job_description || "");
+                    sessionStorage.setItem("cv_wizard_title", currentValues.title || "");
+                  }
+
+                  router.push(
+                    `/create-cv?personaId=${selectedPersonaId}&templateId=${selectedTemplate.id}`
+                  );
+                }}
+                className="resumaic-gradient-green hover:opacity-90 button-press"
+              >
+                Create CV
+              </Button>
+            )}
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto min-h-0 -mx-3 px-6">
+            <CVTemplates
+              onTemplateSelect={handleTemplateSelect}
+              selectedTemplate={selectedTemplate?.id || ""}
+            />
           </div>
         </DialogContent>
       </Dialog>

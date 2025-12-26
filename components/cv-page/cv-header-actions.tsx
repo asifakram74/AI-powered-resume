@@ -11,6 +11,7 @@ type Props = {
   onEdit: () => void
   onRegenerate: () => void
   onSave: () => void
+  onChangeTemplate?: () => void
 }
 
 export function CVHeaderActions({
@@ -22,17 +23,24 @@ export function CVHeaderActions({
   onEdit,
   onRegenerate,
   onSave,
+  onChangeTemplate,
 }: Props) {
   return (
     <div className="flex items-center gap-3">
       {!isViewMode && aiResponse && (
         <>
+          {onChangeTemplate && (
+            <Button onClick={onChangeTemplate} variant="outline" className="flex items-center gap-2 bg-transparent">
+              {/* <span className="h-4 w-4 flex items-center justify-center">🎨</span> */}
+              Change Template
+            </Button>
+          )}
           <Button onClick={onEdit} variant="outline" className="flex items-center gap-2 bg-transparent">
             <Edit className="h-4 w-4" />
             Edit Details
           </Button>
 
-          <Button
+          {/* <Button
             onClick={onRegenerate}
             disabled={isRegenerating}
             variant="outline"
@@ -45,15 +53,8 @@ export function CVHeaderActions({
               <RefreshCw className="h-4 w-4" />
             )}
             {isRegenerating ? "Regenerating..." : "Regenerate"}
-          </Button>
+          </Button> */}
         </>
-      )}
-
-      {!isViewMode && (
-        <Button onClick={onSave} disabled={isSaving || !aiResponse} className="flex items-center gap-2">
-          {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-          {isSaving ? "Saving..." : existingCV ? "Update CV" : "Save CV"}
-        </Button>
       )}
     </div>
   )

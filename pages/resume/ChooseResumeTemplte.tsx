@@ -2,12 +2,8 @@
 import { useState } from "react";
 import {
   Card,
-  CardContent,
-  CardDescription,
   CardHeader,
-  CardTitle,
 } from "../../components/ui/card";
-import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
 import {
   Check,
@@ -229,27 +225,11 @@ export function CVTemplates({
   };
 
   return (
-    <div className="min-h-screen bg-white rounded-lg shadow-lg">
+    <div className="min-h-screen bg-white rounded-lg ">
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="text-center mb-12">
-          <Badge className="mb-4 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 border-blue-200">
-            <Sparkles className="h-3 w-3 mr-1" />
-            Professional Templates
-          </Badge>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Choose Your Perfect{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Resume Template
-            </span>
-          </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Select from our professionally designed templates that pass ATS
-            systems and impress recruiters
-          </p>
-        </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         {/* Template Selection */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Filter Buttons */}
           <div className="flex flex-wrap justify-center gap-2">
             {["all", "modern", "classic", "creative", "minimal"].map(
@@ -267,56 +247,37 @@ export function CVTemplates({
             )}
           </div>
           {/* Templates Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-6 w-full">
+          <div className="grid grid-cols-2 gap-6 w-full">
             {filteredTemplates.map((template) => {
               const isSelected = selectedTemplate === template.id;
               return (
-                <Card
+                <div
                   key={template.id}
-                  className={`cursor-pointer h-full w-full transition-all duration-200 hover:shadow-lg ${isSelected ? "ring-2 ring-blue-900 border-blue-900" : ""
-                    }`}
+                  className="cursor-pointer mt-2 flex justify-center items-center relative group"
                   onClick={() => onTemplateSelect(template)}
                 >
-                  <CardHeader className="">
-                    <div className="relative">
-                      <div className="w-full overflow-hidden rounded-lg">
-                        <div className="flex items-center justify-center">
-                          <div className="h-64 w-full">
-                            <div className="relative w-full h-full flex items-center justify-center p-2">
-                              <Image
-                                src={`/templates/${template.id}.png`}
-                                alt={`${template.name} Template Preview`}
-                                width={300}
-                                height={450}
-                                className="object-contain w-full h-full shadow-md border border-blue-900"
-                              />
-                            </div>
-                          </div>
+                  <div className={`relative rounded-lg transition-all duration-200 aspect-[210/297] w-full max-w-[350px] ${isSelected
+                      ? "ring-4 ring-blue-600 scale-105 shadow-xl"
+                      : "ring-2 ring-green-100 hover:ring-green-300 hover:scale-105 hover:shadow-lg"
+                    }`}>
+                    <Image
+                      src={`/templates/${template.id}.png`}
+                      alt={template.name}
+                      width={800}
+                      height={1131}
+                      quality={100}
+                      priority
+                      className="object-contain w-full h-full rounded-lg"
+                    />
+                    {isSelected && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="bg-blue-600 rounded-full p-2 shadow-lg animate-in zoom-in duration-200">
+                          <Check className="h-6 w-6 text-white" />
                         </div>
                       </div>
-                      {isSelected && (
-                        <div className="absolute inset-0 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                          <div className="bg-blue-500 rounded-full p-2">
-                            <Check className="h-4 w-4 text-white" />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-4 pt-0">
-                    <CardTitle className="text-base mb-1">
-                      {template.name}
-                    </CardTitle>
-                    <CardDescription className="text-sm mb-3">
-                      {template.description}
-                    </CardDescription>
-                    <div className="flex items-center justify-between">
-                      <Badge variant="secondary" className="capitalize">
-                        {template.category}
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
+                    )}
+                  </div>
+                </div>
               );
             })}
           </div>

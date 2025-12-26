@@ -10,7 +10,7 @@ import { getPersonaById, type PersonaResponse } from "../../lib/redux/service/pa
 import type { CVData } from "../../types/cv-data"
 import { useAppDispatch, useAppSelector } from "../../lib/redux/hooks"
 import { logoutUser } from "../../lib/redux/slices/authSlice"
-import { SidebarProvider } from "../../components/ui/sidebar"
+import { SidebarProvider, SidebarInset } from "../../components/ui/sidebar"
 import { Sidebar } from "../../components/dashboard/sidebar"
 import CreatePersonaPage from "../../pages/persona/PersonaList"
 import { ResumePage } from "../../pages/resume/ResumeList"
@@ -23,10 +23,17 @@ import { CVEditPopup } from "./cv-edit-popup"
 
 import { CVPageLoading } from "./cv-page-loading"
 import { CVHeaderActions } from "./cv-header-actions"
-import { CVTemplateSelector } from "./cv-template-selector"
 import { CVPreviewSection } from "./cv-preview-section"
 import jsPDF from "jspdf"
 import * as htmlToImage from "html-to-image"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "../../components/ui/dialog"
+import { CVTemplates } from "../../pages/resume/ChooseResumeTemplte"
 
 interface OptimizedCV {
   personalInfo: {
@@ -281,9 +288,9 @@ export function CVPageClientContent() {
   const [existingCV, setExistingCV] = useState<CV | null>(null)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [showEditPopup, setShowEditPopup] = useState(false)
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false)
   const [isViewMode, setIsViewMode] = useState(false) // Add this state
   const [jobDescription, setJobDescription] = useState("")
-  const [filter, setFilter] = useState<"all" | "modern" | "classic" | "creative" | "minimal">("all")
 
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -295,10 +302,6 @@ export function CVPageClientContent() {
   const dispatch = useAppDispatch()
   const { user } = useAppSelector((state) => state.auth)
   const cvPreviewRef = useRef<HTMLDivElement>(null)
-  const filteredTemplates = templates.filter((template) => {
-    if (filter === "all") return true
-    return template.category === filter
-  })
 
   const renderActivePage = () => {
     switch (activePage) {
@@ -324,6 +327,7 @@ export function CVPageClientContent() {
   const handleTemplateSelect = (template: CVTemplate) => {
     setSelectedTemplate(template)
     setHasUnsavedChanges(true)
+    setShowTemplateSelector(false)
     const url = new URL(window.location.href)
     url.searchParams.set("templateId", template.id)
     router.replace(url.toString())
@@ -361,29 +365,39 @@ export function CVPageClientContent() {
 
       try {
         if (cvId) {
-          // Fetch existing CV data
           const cvData = await getCVById(cvId)
           setExistingCV(cvData)
           setJobDescription(cvData.job_description || "")
 
-          // Set template from the CV data
           const template = templates.find((t) => t.id === cvData.layout_id) || defaultTemplate
           setSelectedTemplate(template)
 
-          // Parse the generated content if it exists
+          let personaData: PersonaResponse | null = null
+          if (cvData.personas_id) {
+            personaData = await getPersonaById(Number.parseInt(cvData.personas_id))
+            setPersona(personaData)
+          }
+
           if (cvData.generated_content) {
             const parsedContent = JSON.parse(cvData.generated_content)
             setAiResponse({
               optimizedCV: parsedContent,
               suggestions: [],
-              improvementScore: 80, // Default score for existing CVs
+              improvementScore: 80,
             })
-          }
-
-          // Fetch persona data if available
-          if (cvData.personas_id) {
-            const personaData = await getPersonaById(Number.parseInt(cvData.personas_id))
-            setPersona(personaData)
+          } else if (personaData) {
+            const personaText = convertPersonaToText(personaData)
+            const response = await fetch("https://backendserver.resumaic.com/api/optimize-cv", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ extractedText: personaText }),
+            })
+            if (response.ok) {
+              const aiData = await response.json()
+              setAiResponse(aiData)
+            } else {
+              console.error("Failed to regenerate AI content for existing CV:", response.status)
+            }
           }
 
           setIsLoading(false)
@@ -835,26 +849,34 @@ export function CVPageClientContent() {
   const handleDocxExport = async () => {
     await handleExport("docx")
   }
-  const handleSaveCV = async () => {
+  const handleSaveCV = async (isAutoSave: boolean = false) => {
     if (!aiResponse || !selectedTemplate || !persona || !user?.id) {
-      showErrorToast("Save Failed", "Missing required data. Please regenerate your CV and try again.")
+      if (!isAutoSave) {
+        showErrorToast("Save Failed", "Missing required data. Please regenerate your CV and try again.")
+      }
       return
     }
 
     // Check CV limit for free plan users (only for new CVs); allow admin unlimited
     if (!existingCV && user?.plan === "free" && (user as any)?.profile?.cvs_count >= 3 && (user?.role?.toLowerCase() !== 'admin')) {
-      showErrorToast(
-        "CV Limit Reached",
-        "Free plan allows only 3 resumes. Upgrade to pro for unlimited.",
-      )
+      if (!isAutoSave) {
+        showErrorToast(
+          "CV Limit Reached",
+          "Free plan allows only 3 resumes. Upgrade to pro for unlimited.",
+        )
+      }
       return
     }
 
     setIsSaving(true)
-    const loadingToastId = showLoadingToast(
-      existingCV ? "Updating your CV..." : "Saving your CV...",
-      "Securing your professional profile",
-    )
+    let loadingToastId: string | number | undefined
+    
+    if (!isAutoSave) {
+      loadingToastId = showLoadingToast(
+        existingCV ? "Updating your CV..." : "Saving your CV...",
+        "Securing your professional profile",
+      )
+    }
 
     try {
       // Get title from session storage if creating new CV and no existingCV
@@ -881,33 +903,50 @@ export function CVPageClientContent() {
         setExistingCV(updatedCV)
         setHasUnsavedChanges(false)
 
-        toast.dismiss(loadingToastId)
-        showSuccessToast("CV Updated Successfully! 🎉", "Your changes have been saved and are ready to use")
-        
-        // Redirect back to resume list
-        router.push("/dashboard/resumes")
+        if (!isAutoSave && loadingToastId) {
+          toast.dismiss(loadingToastId)
+          showSuccessToast("CV Updated Successfully! 🎉", "Your changes have been saved and are ready to use")
+          
+          // Redirect back to resume list
+          router.push("/dashboard/resumes")
+        }
       } else {
         // Create new CV
         const newCV = await createCV(cvDataToSave)
         setExistingCV(newCV)
         setHasUnsavedChanges(false)
 
-        // Redirect back to resume list instead of staying on page
-        router.push("/dashboard/resumes")
-
-        toast.dismiss(loadingToastId)
-        showSuccessToast(
-          "CV Created Successfully! 🚀",
-          "Your professional CV is now saved and ready to impress employers",
-        )
+        if (!isAutoSave && loadingToastId) {
+          toast.dismiss(loadingToastId)
+          showSuccessToast(
+            "CV Created Successfully! 🚀",
+            "Your professional CV is now saved and ready to impress employers",
+          )
+        }
       }
     } catch (saveError: any) {
-      toast.dismiss(loadingToastId)
-      showErrorToast("Save Failed", saveError?.message || "Unable to save CV. Please try again.")
+      if (!isAutoSave && loadingToastId) {
+        toast.dismiss(loadingToastId)
+        showErrorToast("Save Failed", saveError?.message || "Unable to save CV. Please try again.")
+      } else {
+        console.error("Auto-save failed:", saveError)
+      }
     } finally {
       setIsSaving(false)
     }
   }
+
+  // Auto-save effect
+  useEffect(() => {
+    if (hasUnsavedChanges && aiResponse && selectedTemplate && persona && !isSaving) {
+      const timer = setTimeout(() => {
+        handleSaveCV(true)
+      }, 2000)
+
+      return () => clearTimeout(timer)
+    }
+  }, [hasUnsavedChanges, aiResponse, selectedTemplate, persona, isSaving, jobDescription])
+
 
   const handleUpdateTitle = async (newTitle: string) => {
     if (!existingCV || !newTitle.trim()) return
@@ -988,7 +1027,6 @@ export function CVPageClientContent() {
   return (
     <ProtectedRoute>
       <SidebarProvider>
-        <div className="flex min-h-screen">
           <Sidebar
             user={user}
             activePage="cv-export"
@@ -1016,8 +1054,8 @@ export function CVPageClientContent() {
             onExportPNG={exportAsPNG}
             exportMode={true}
           />
-          <main className="flex-1 p-6 bg-gray-50 overflow-y-auto flex flex-col items-center">
-            <div className="flex flex-col gap-6 max-w-7xl w-full">
+          <SidebarInset className="p-6 bg-gray-50 overflow-y-auto flex flex-col items-center">
+            <div className="flex flex-col gap-6 max-w-full w-full">
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
@@ -1035,20 +1073,10 @@ export function CVPageClientContent() {
                     onEdit={() => setShowEditPopup(true)}
                     onRegenerate={handleRegenerateCV}
                     onSave={handleSaveCV}
+                    onChangeTemplate={() => setShowTemplateSelector(true)}
                   />
                 </div>
 
-                {/* Template Selection with Category Filter (mirrors ChooseResumeTemplte) */}
-                {!isViewMode && (
-                  <div className="mt-2">
-                    <CVTemplateSelector
-                      templates={templates}
-                      selectedTemplate={selectedTemplate}
-                      hasUnsavedChanges={hasUnsavedChanges}
-                      onSelect={handleTemplateSelect}
-                    />
-                  </div>
-                )}
 
                 {selectedTemplate && aiResponse && (
                   <CVPreviewSection
@@ -1057,6 +1085,25 @@ export function CVPageClientContent() {
                     convertToCVData={convertToCVData}
                     isRegenerating={isRegenerating}
                   />
+                )}
+                {selectedTemplate && !aiResponse && (
+                  <Card className="mt-4">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between gap-4">
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">No preview available</h3>
+                          <p className="text-gray-600">Generate the CV preview from your persona to continue.</p>
+                        </div>
+                        <Button onClick={handleRegenerateCV} disabled={isRegenerating}>
+                          {isRegenerating ? (
+                            <span className="flex items-center"><Loader2 className="h-4 w-4 mr-2 animate-spin" />Generating</span>
+                          ) : (
+                            "Generate Preview"
+                          )}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                 )}
               </div>
 
@@ -1081,6 +1128,30 @@ export function CVPageClientContent() {
               )} */}
             </div>
 
+            <Dialog
+              open={showTemplateSelector}
+              onOpenChange={setShowTemplateSelector}
+            >
+              <DialogContent className="w-[80vw] !max-w-none h-[90vh] flex flex-col">
+                <DialogHeader className="px-6 flex flex-row items-center justify-between">
+                  <div className="flex flex-col gap-1">
+                    <DialogTitle className="text-2xl font-bold">
+                      Choose a Template
+                    </DialogTitle>
+                    <DialogDescription>
+                      Select a template to update your resume layout.
+                    </DialogDescription>
+                  </div>
+                </DialogHeader>
+                <div className="flex-1 overflow-y-auto min-h-0 -mx-3 px-6">
+                  <CVTemplates
+                    onTemplateSelect={handleTemplateSelect}
+                    selectedTemplate={selectedTemplate?.id || ""}
+                  />
+                </div>
+              </DialogContent>
+            </Dialog>
+
             {aiResponse && (
               <CVEditPopup
                 isOpen={showEditPopup}
@@ -1095,8 +1166,7 @@ export function CVPageClientContent() {
                 }}
               />
             )}
-          </main>
-        </div>
+          </SidebarInset>
       </SidebarProvider>
     </ProtectedRoute>
   )
