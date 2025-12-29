@@ -1,5 +1,17 @@
-import { redirect } from "next/navigation"
+"use client"
+
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 
 export default function DashboardPage() {
-  redirect("/dashboard/create-persona")
+  const router = useRouter()
+
+  useEffect(() => {
+    router.replace("/dashboard/create-persona")
+  }, [router])
+
+  return (
+  <>
+  </>
+  )
 }

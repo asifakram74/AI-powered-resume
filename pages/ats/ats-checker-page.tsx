@@ -27,7 +27,6 @@ import {
   DropdownMenuItem,
 } from "../../components/ui/dropdown-menu";
 import { toast } from "sonner";
-
 import { PDFUploader } from "./PDFUploader";
 import {
   Dialog,
@@ -243,7 +242,6 @@ export default function ATSCheckerPage() {
             resolve(void 0);
           };
         });
-
         const pageDataUrl = pageCanvas.toDataURL('image/png', 1.0);
 
         // Add the cropped image to the PDF page
@@ -257,7 +255,6 @@ export default function ATSCheckerPage() {
           undefined,
           'FAST'
         );
-
         position += availableHeight;
         currentPage++;
       }

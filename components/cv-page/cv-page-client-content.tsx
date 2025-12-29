@@ -749,13 +749,18 @@ export function CVPageClientContent() {
         if (format === "pdf") {
           const pageEls = Array.from(cvElement.querySelectorAll('.a4-page')) as HTMLElement[]
           if (pageEls.length > 0) {
-            const pdf = new jsPDF('p', 'mm', 'a4')
+            const pdf = new jsPDF({
+              orientation: 'p',
+              unit: 'mm',
+              format: 'a4',
+              compress: true
+            })
             const pageWidth = pdf.internal.pageSize.getWidth()
 
             for (let i = 0; i < pageEls.length; i++) {
               const pageEl = pageEls[i]
-              const dataUrl = await htmlToImage.toPng(pageEl, {
-                quality: 1,
+              const dataUrl = await htmlToImage.toJpeg(pageEl, {
+                quality: 0.8,
                 pixelRatio: 2,
                 backgroundColor: '#ffffff',
                 skipFonts: true,
@@ -767,14 +772,14 @@ export function CVPageClientContent() {
               })
               const mmPerPx = pageWidth / img.width
               const imgHeightMm = img.height * mmPerPx
-              pdf.addImage(dataUrl, 'PNG', 0, 0, pageWidth, imgHeightMm)
+              pdf.addImage(dataUrl, 'JPEG', 0, 0, pageWidth, imgHeightMm)
               if (i < pageEls.length - 1) pdf.addPage()
             }
 
             pdf.save(filename)
           } else {
-            const dataUrl = await htmlToImage.toPng(cvElement, {
-              quality: 1,
+            const dataUrl = await htmlToImage.toJpeg(cvElement, {
+              quality: 0.95,
               pixelRatio: 2,
               backgroundColor: '#ffffff',
               skipFonts: true,
@@ -788,7 +793,7 @@ export function CVPageClientContent() {
             })
             const mmPerPx = pageWidth / img.width
             const imgHeightMm = img.height * mmPerPx
-            pdf.addImage(dataUrl, 'PNG', 0, 0, pageWidth, imgHeightMm)
+            pdf.addImage(dataUrl, 'JPEG', 0, 0, pageWidth, imgHeightMm)
             pdf.save(filename)
           }
         } else if (format === "png") {
@@ -975,7 +980,7 @@ export function CVPageClientContent() {
     setAiResponse((prev) => (prev ? { ...prev, optimizedCV: updatedData } : null))
     setHasUnsavedChanges(true)
     setShowEditPopup(false)
-    showInfoToast("CV Updated! 📝", "Your changes look great! Remember to save to keep them permanent.")
+    showInfoToast("CV Updated! 📝", "Your changes have been applied successfully.")
   }
 
   if (isLoading) {
@@ -1076,8 +1081,6 @@ export function CVPageClientContent() {
                     onChangeTemplate={() => setShowTemplateSelector(true)}
                   />
                 </div>
-
-
                 {selectedTemplate && aiResponse && (
                   <CVPreviewSection
                     selectedTemplate={selectedTemplate}
@@ -1106,28 +1109,7 @@ export function CVPageClientContent() {
                   </Card>
                 )}
               </div>
-
-              {/* {aiResponse?.improvementScore && (
-                <Card className="mb-6">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-4">
-                      <div className="flex-shrink-0">
-                        <div className="w-16 h-16 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center">
-                          <span className="text-white font-bold text-lg">{aiResponse.improvementScore}%</span>
-                        </div>
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold">Improvement Score</h3>
-                        <p className="text-gray-600">
-                          Your CV has been enhanced with AI optimization using the {selectedTemplate?.name} template.
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )} */}
             </div>
-
             <Dialog
               open={showTemplateSelector}
               onOpenChange={setShowTemplateSelector}

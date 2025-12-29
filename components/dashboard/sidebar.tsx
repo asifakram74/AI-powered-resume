@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { FileText, Mail, CheckCircle, UserCircle, Sparkles, BarChart3, LogOut, ChevronDown, Users } from "lucide-react"
+import { FileText, Mail, CheckCircle, UserCircle, Sparkles, BarChart3, LogOut, ChevronDown, Users, Crown } from "lucide-react"
 import Link from "next/link"
 import {
   Sidebar as SidebarPrimitive,
@@ -67,6 +67,7 @@ interface SidebarProps {
     name?: string;
     email?: string;
     profilePicture?: string;
+    plan_type?: string;
   } | null
   onExportPDF?: () => Promise<void>
   onExportDOCX?: () => Promise<void>
@@ -152,7 +153,7 @@ export function Sidebar({
   const isAdmin = user?.role?.toLowerCase() === "admin"
   const maxResumes = 3
   const progressPercentage = Math.min((resumeCount / maxResumes) * 100, 100)
-  const isProUser = profile?.plan_type?.toLowerCase() === 'pro'
+  const isProUser = profile?.plan_type?.toLowerCase() === 'pro' || user?.plan_type?.toLowerCase() === 'pro'
 
   // Determine active page based on prop or pathname
   const activePage = propActivePage || regularMenuItems.find(item => pathname?.includes(item.path))?.id || adminMenuItems.find(item => pathname?.includes(item.path))?.id || "create-persona"
@@ -181,7 +182,7 @@ export function Sidebar({
         </div>
 
         {(user || profile) && (
-          <div className="mt-4 p-3 bg-gray-50 rounded-lg flex items-top gap-3">
+          <div className="mt-4 p-3 bg-gray-50 rounded-lg flex items-center gap-3">
             <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
               <AvatarFallback
                 className={`font-semibold ${
@@ -311,40 +312,60 @@ export function Sidebar({
             </DropdownMenuContent>
           </DropdownMenu>
         ) : !isAdmin ? (
-          !!user && !isProUser && (
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-green-50/80 via-white to-orange-50/30 border border-green-200/50">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2.5 rounded-xl resumaic-gradient-green shadow-lg">
-                  <BarChart3 className="h-4 w-4 text-white" />
+          <>
+            {!!user && !isProUser && (
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-green-50/80 via-white to-orange-50/30 border border-green-200/50">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2.5 rounded-xl resumaic-gradient-green shadow-lg">
+                    <BarChart3 className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-gray-900">Usage Stats</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-gray-900">Usage Stats</p>
-                </div>
-              </div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-gray-600">
-                  Resumes created
-                </span>
-                {loading ? (
-                  <div className="h-4 w-10 bg-gray-200 rounded animate-pulse"></div>
-                ) : (
-                  <span className="text-sm font-bold">
-                    {resumeCount}/{maxResumes}
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-medium text-gray-600">
+                    Resumes created
                   </span>
-                )}
+                  {loading ? (
+                    <div className="h-4 w-10 bg-gray-200 rounded animate-pulse"></div>
+                  ) : (
+                    <span className="text-sm font-bold">
+                      {resumeCount}/{maxResumes}
+                    </span>
+                  )}
+                </div>
+                <div className="w-full bg-gray-200/80 rounded-full h-2 shadow-inner">
+                  {loading ? (
+                    <div className="h-2 rounded-full bg-gray-300 animate-pulse"></div>
+                  ) : (
+                    <div
+                      className="resumaic-gradient-green h-2 rounded-full shadow-sm transition-all duration-700 ease-out"
+                      style={{ width: `${progressPercentage}%` }}
+                    ></div>
+                  )}
+                </div>
               </div>
-              <div className="w-full bg-gray-200/80 rounded-full h-2 shadow-inner">
-                {loading ? (
-                  <div className="h-2 rounded-full bg-gray-300 animate-pulse"></div>
-                ) : (
-                  <div
-                    className="resumaic-gradient-green h-2 rounded-full shadow-sm transition-all duration-700 ease-out"
-                    style={{ width: `${progressPercentage}%` }}
-                  ></div>
-                )}
+            )}
+            
+            {!!user && isProUser && (
+              <div className="p-3 rounded-2xl bg-gradient-to-br from-orange-50/50 via-white to-orange-50/20 border border-orange-100 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl resumaic-gradient-green shadow-md">
+                    <Crown className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-gray-800 leading-none mb-0.5">
+                      Pro Plan
+                    </p>
+                    <p className="text-[10px] text-gray-500 font-medium">
+                      All features active
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
-          )
+            )}
+          </>
         ) : null}
         
         <Button
