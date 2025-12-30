@@ -149,7 +149,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex min-h-screen w-full">
           <Sidebar user={user} />
           <main className="flex-1 bg-gray-50 relative">
-            {requiresPasswordSetup && (
+            {requiresPasswordSetup && user?.role?.toLowerCase() !== 'admin' && (
               <Dialog open>
                 <DialogContent className="max-w-md p-0 overflow-hidden border-0 shadow-xl rounded-xl">
                   <div className="relative resumaic-gradient-green p-6 text-white rounded-t-xl animate-pulse-glow">
