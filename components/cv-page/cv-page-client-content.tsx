@@ -395,6 +395,7 @@ export function CVPageClientContent() {
             if (response.ok) {
               const aiData = await response.json()
               setAiResponse(aiData)
+              setHasUnsavedChanges(true)
             } else {
               console.error("Failed to regenerate AI content for existing CV:", response.status)
             }
@@ -475,6 +476,7 @@ export function CVPageClientContent() {
           }
 
           setAiResponse(aiData)
+          setHasUnsavedChanges(true) // Trigger auto-save for initial generation
         }
       } catch (err: any) {
         console.error("Error:", err)
@@ -943,14 +945,16 @@ export function CVPageClientContent() {
 
   // Auto-save effect
   useEffect(() => {
-    if (hasUnsavedChanges && aiResponse && selectedTemplate && persona && !isSaving) {
+    // Only auto-save if we have all necessary data and unsaved changes
+    if (hasUnsavedChanges && aiResponse && selectedTemplate && persona && !isSaving && !isRegenerating) {
+      // Small delay to debounce rapid changes, but short enough to feel automatic
       const timer = setTimeout(() => {
         handleSaveCV(true)
-      }, 2000)
+      }, 1000)
 
       return () => clearTimeout(timer)
     }
-  }, [hasUnsavedChanges, aiResponse, selectedTemplate, persona, isSaving, jobDescription])
+  }, [hasUnsavedChanges, aiResponse, selectedTemplate, persona, isSaving, isRegenerating, jobDescription])
 
 
   const handleUpdateTitle = async (newTitle: string) => {

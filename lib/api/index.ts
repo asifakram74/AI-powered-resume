@@ -35,7 +35,14 @@ api.interceptors.request.use(
   (config) => {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem("token")
-      if (token) config.headers.Authorization = `Bearer ${token}`
+      if (token && token !== "undefined" && token !== "null") {
+        config.headers.Authorization = `Bearer ${token}`
+        // Ensure Accept header is always present for every request
+        config.headers.Accept = "application/json"
+        config.headers["X-Requested-With"] = "XMLHttpRequest"
+      } else {
+        console.warn("No valid token found in localStorage")
+      }
     }
     return config
   },

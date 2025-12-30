@@ -17,7 +17,7 @@ import { Label } from "../../components/ui/label"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isClient, setIsClient] = useState(false)
-  const { user } = useAppSelector((state: RootState) => state.auth)
+  const { user, requiresPasswordSetup } = useAppSelector((state: RootState) => state.auth)
   const router = useRouter()
   const pathname = usePathname()
   const dispatch = useAppDispatch()
@@ -95,7 +95,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       setResendLoading(false)
     }
   }
-
   const handleLogout = async () => {
     try {
       await dispatch(logoutUser())
@@ -150,8 +149,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex min-h-screen w-full">
           <Sidebar user={user} />
           <main className="flex-1 bg-gray-50 relative">
-            {/* Blocking modal for social login users to set password */}
-            {isSocialLogin && (
+            {requiresPasswordSetup && (
               <Dialog open>
                 <DialogContent className="max-w-md p-0 overflow-hidden border-0 shadow-xl rounded-xl">
                   <div className="relative resumaic-gradient-green p-6 text-white rounded-t-xl animate-pulse-glow">

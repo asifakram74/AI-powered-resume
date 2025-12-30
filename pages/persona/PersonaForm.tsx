@@ -1291,7 +1291,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                         }
                         className="w-full sm:w-auto"
                       >
-                        <span className="h-4 w-4 mr-1" />
+                <Plus className="h-4 w-4 mr-1" />
                         Add
                       </Button>
                     )}
@@ -1335,6 +1335,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                     !currentExperience.jobTitle
                   }
                 >
+                <Plus className="h-4 w-4 mr-1" />
                   Add Experience
                 </Button>
                 <Button
@@ -1354,6 +1355,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                     })
                   }
                   className="flex-1"
+
                 >
                   Clear
                 </Button>
@@ -1427,7 +1429,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                 className="flex-1"
               />
               <Button onClick={addSkill} size="sm" variant="outline" className="flex-shrink-0 w-full sm:w-auto">
-                <span className="h-4 w-4 mr-1" />
+                <Plus className="h-4 w-4 mr-1" />
                 Add
               </Button>
             </div>

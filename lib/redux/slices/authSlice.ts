@@ -10,6 +10,7 @@ import {
   type ForgotPasswordResponse,
   type VerifyOTPResponse,
   type ResetPasswordData,
+  checkPasswordSetFlag,
 } from "../service/authService"
 import { getUserById as getUserByIdApi } from "../service/userService"
 
@@ -17,6 +18,7 @@ interface AuthState {
   user: User | null
   profile: ProfileResponse | null
   token: string | null
+  requiresPasswordSetup: boolean
   loading: boolean
   error: string | null
 }
@@ -25,9 +27,21 @@ const initialState: AuthState = {
   user: null,
   profile: null,
   token: null,
+  requiresPasswordSetup: false,
   loading: false,
   
   error: null,
+}
+
+// Helper function to check if password setup is required
+const checkRequiresPasswordSetup = (user: User | null): boolean => {
+  if (!user) return false
+  
+  const isSocialLogin = user.source === 'Google' || user.source === 'Linkedin'
+  if (!isSocialLogin) return false
+  
+  // Check if password was already set (from localStorage)
+  return !checkPasswordSetFlag()
 }
 
 export const loginUser = createAsyncThunk<AuthResponse, LoginCredentials>(
@@ -155,7 +169,6 @@ export const setPassword = createAsyncThunk(
     }
   }
 )
-
 export const deleteAccount = createAsyncThunk(
   "auth/deleteAccount",
   async (_, { rejectWithValue }) => {
@@ -166,7 +179,6 @@ export const deleteAccount = createAsyncThunk(
     }
   }
 )
-
 // Forgot Password Flow
 export const verifyEmailForReset = createAsyncThunk<ForgotPasswordResponse, string>(
   "auth/verifyEmailForReset",
@@ -275,6 +287,10 @@ const authSlice = createSlice({
     setCredentials: (state, action: PayloadAction<{ token: string; user: User }>) => {
       state.token = action.payload.token
       state.user = action.payload.user
+      state.requiresPasswordSetup = checkRequiresPasswordSetup(action.payload.user)
+    },
+    setRequiresPasswordSetup: (state, action: PayloadAction<boolean>) => {
+      state.requiresPasswordSetup = action.payload
     },
     clearError: (state) => {
       state.error = null
@@ -286,7 +302,9 @@ const authSlice = createSlice({
       if (token && userStr) {
         try {
           state.token = token
-          state.user = JSON.parse(userStr)
+          const user = JSON.parse(userStr)
+          state.user = user
+          state.requiresPasswordSetup = checkRequiresPasswordSetup(user)
         } catch (e) {
           console.error("Failed to parse stored user data:", e)
           localStorage.removeItem("token")
@@ -306,6 +324,7 @@ const authSlice = createSlice({
         state.loading = false
         state.user = action.payload.user
         state.token = action.payload.token
+        state.requiresPasswordSetup = checkRequiresPasswordSetup(action.payload.user)
         state.profile = null
       })
       .addCase(loginUser.rejected, (state, action) => {
@@ -456,6 +475,7 @@ const authSlice = createSlice({
         state.token = null
         state.error = null
         state.loading = false
+        state.requiresPasswordSetup = false
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.loading = false

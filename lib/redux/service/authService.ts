@@ -75,8 +75,7 @@ export type LoginCredentials = {
 export type RegisterData = {
   name: string
   email: string
-
-    password: string
+  password: string
   source?: "Webiste" | "Google" | "Linkedin"
 }
 
@@ -101,14 +100,46 @@ export type ResetPasswordData = {
   password: string
 }
 
+export const markPasswordAsSet = (): void => {
+  localStorage.setItem('password_set', 'true')
+}
+
+export const clearPasswordSetFlag = (): void => {
+  localStorage.removeItem('password_set')
+}
+
+export const checkPasswordSetFlag = (): boolean => {
+  return localStorage.getItem('password_set') === 'true'
+}
+
 export const AuthService = {
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
     const response = await api.post("/login", credentials)
+    
+    // For social login users, check if they've set password before
+    if (response.data.user.source && 
+        (response.data.user.source === 'Google' || response.data.user.source === 'Linkedin')) {
+      
+      // Check localStorage for password set flag
+      const passwordWasSet = checkPasswordSetFlag()
+      
+      // If we have no record, it's a new session - start fresh
+      if (!passwordWasSet) {
+        clearPasswordSetFlag()
+      }
+    }
+    
     return response.data
   },
 
   register: async (userData: RegisterData): Promise<RegisterResponse> => {
     const response = await api.post("/register", userData)
+    
+    // For social signups, don't mark password as set
+    if (userData.source && userData.source !== 'Webiste') {
+      clearPasswordSetFlag()
+    }
+    
     return response.data
   },
 
@@ -116,6 +147,8 @@ export const AuthService = {
     await api.post("/logout")
     localStorage.removeItem("token")
     localStorage.removeItem("user")
+    // Optionally clear password_set flag on logout
+    // clearPasswordSetFlag()
   },
 
   getProfile: async (): Promise<ProfileResponse> => {
@@ -134,21 +167,40 @@ export const AuthService = {
 
   setPassword: async (password: string): Promise<void> => {
     await api.post("/settings/set-password", { password, password_confirmation: password })
+    
+    // Mark password as set in localStorage
+    markPasswordAsSet()
+    
+    // Also update user object in localStorage if exists
+    const userStr = localStorage.getItem('user')
+    if (userStr) {
+      const user = JSON.parse(userStr)
+      // We don't have has_set_password in User type, so just update localStorage user if needed
+      // user.has_set_password = true 
+      localStorage.setItem('user', JSON.stringify(user))
+    }
   },
 
   deleteAccount: async (): Promise<void> => {
     await api.delete("/me")
   },
 
-linkedinLogin: async (code: string): Promise<AuthResponse> => {
-  const redirectUri = window.location.origin + window.location.pathname;
-  const response = await api.post("/linkedin/token", { code, redirect_uri: redirectUri });
-  return response.data;
-},
-
+  linkedinLogin: async (code: string): Promise<AuthResponse> => {
+    const redirectUri = window.location.origin + window.location.pathname;
+    const response = await api.post("/linkedin/token", { code, redirect_uri: redirectUri });
+    
+    // Clear password set flag for new LinkedIn login
+    clearPasswordSetFlag()
+    
+    return response.data;
+  },
 
   googleLogin: async (code: string): Promise<AuthResponse> => {
     const response = await api.post("/google-login", { code })
+    
+    // Clear password set flag for new Google login
+    clearPasswordSetFlag()
+    
     return response.data
   },
 

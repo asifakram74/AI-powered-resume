@@ -206,9 +206,11 @@ export function ProfilePage() {
                   </h1>
                   
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700">
-                      <span>{profile.plan_type}</span>
-                    </Badge>
+                    {user?.role?.toLowerCase() !== 'admin' && (
+                      <Badge className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700">
+                        <span>{profile.plan_type}</span>
+                      </Badge>
+                    )}
 
                     {profile.status === 'verified' && (
                       <Badge className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 text-green-700 dark:text-green-300 font-medium">
@@ -313,19 +315,21 @@ export function ProfilePage() {
                     </div>
                   </div>
                   
-                  <div className="space-y-3 sm:col-span-2">
-                    <Label className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                      <Star className="h-4 w-4 text-gray-500" />
-                      Account Type
-                    </Label>
-                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">
-                          {profile.plan_type}
-                        </p>
+                  {user?.role?.toLowerCase() !== 'admin' && (
+                    <div className="space-y-3 sm:col-span-2">
+                      <Label className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                        <Star className="h-4 w-4 text-gray-500" />
+                        Account Type
+                      </Label>
+                      <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">
+                            {profile.plan_type}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
