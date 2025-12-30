@@ -129,7 +129,11 @@ export const AuthService = {
   },
 
   changePassword: async (oldPassword: string, newPassword: string): Promise<void> => {
-    await api.post("/change-password", { old_password: oldPassword, new_password: newPassword })
+    await api.post("/settings/change-password", { current_password: oldPassword, new_password: newPassword, new_password_confirmation: newPassword })
+  },
+
+  setPassword: async (password: string): Promise<void> => {
+    await api.post("/settings/set-password", { password, password_confirmation: password })
   },
 
   deleteAccount: async (): Promise<void> => {

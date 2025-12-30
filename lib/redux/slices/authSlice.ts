@@ -37,6 +37,7 @@ export const loginUser = createAsyncThunk<AuthResponse, LoginCredentials>(
       const response = await AuthService.login(credentials)
       localStorage.setItem("token", response.token)
       localStorage.setItem("user", JSON.stringify(response.user))
+      localStorage.setItem("loginMethod", "email")
       return response
     } catch (error: any) {
       // Check for specific error status codes to provide clear messages
@@ -144,6 +145,17 @@ export const changePassword = createAsyncThunk(
   }
 )
 
+export const setPassword = createAsyncThunk(
+  "auth/setPassword",
+  async (password: string, { rejectWithValue }) => {
+    try {
+      await AuthService.setPassword(password)
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || "Failed to set password")
+    }
+  }
+)
+
 export const deleteAccount = createAsyncThunk(
   "auth/deleteAccount",
   async (_, { rejectWithValue }) => {
@@ -205,17 +217,41 @@ export const resendEmailVerification = createAsyncThunk<{ message: string }, str
   }
 )
 
-// Refresh user data from server (e.g., after email verification)
+// Refresh user data from server (using Profile API instead of User ID API)
 export const refreshUserById = createAsyncThunk<User, number>(
   "auth/refreshUserById",
-  async (id, { rejectWithValue }) => {
+  async (id, { rejectWithValue, getState }) => {
     try {
-      const serverUser = await getUserByIdApi(id)
-      const updatedUser = serverUser as unknown as User
+      // Fetch profile data which is accessible to authenticated users
+      const profile = await AuthService.getProfile()
+      
+      // Get current user from state to merge
+      const state = getState() as any
+      const currentUser = state.auth.user as User
+      
+      if (!currentUser) {
+        throw new Error("No current user found in state")
+      }
+
+      // Merge profile data with current user
+      // If status is active, we ensure email_verified_at is set to bypass verification popup
+      const updatedUser: User = {
+        ...currentUser,
+        name: profile.name || currentUser.name,
+        email: profile.email || currentUser.email,
+        status: profile.status || currentUser.status,
+        plan_type: profile.plan_type || currentUser.plan_type,
+        // If status is active, treat as verified
+        email_verified_at: (profile.status?.toLowerCase() === 'active' && !currentUser.email_verified_at) 
+          ? new Date().toISOString() 
+          : currentUser.email_verified_at
+      }
+
       localStorage.setItem("user", JSON.stringify(updatedUser))
       return updatedUser
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || "Failed to refresh user")
+      // If profile fetch fails, it might be auth issue
+      return rejectWithValue(error.response?.data?.message || "Failed to refresh user profile")
     }
   }
 )
@@ -226,6 +262,7 @@ const authSlice = createSlice({
     clearAuth: (state) => {
       localStorage.removeItem("token")
       localStorage.removeItem("user")
+      localStorage.removeItem("loginMethod")
       state.user = null
       state.profile = null
       state.token = null
@@ -376,6 +413,19 @@ const authSlice = createSlice({
         state.error = null
       })
       .addCase(changePassword.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+      // Set Password
+      .addCase(setPassword.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(setPassword.fulfilled, (state) => {
+        state.loading = false
+        state.error = null
+      })
+      .addCase(setPassword.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload as string
       })

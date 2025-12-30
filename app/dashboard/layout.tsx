@@ -4,25 +4,34 @@ import { useState, useEffect, useRef } from "react"
 import { SidebarProvider, SidebarTrigger } from "../../components/ui/sidebar"
 import { Sidebar } from "../../components/dashboard/sidebar"
 import ProtectedRoute from "../../components/auth/ProtectedRoute"
+import { RootState } from "../../lib/redux/store"
 import { useAppSelector, useAppDispatch } from "../../lib/redux/hooks"
 import { useRouter, usePathname } from "next/navigation"
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "../../components/ui/dialog"
 import { Button } from "../../components/ui/button"
-import { logoutUser, resendEmailVerification, refreshUserById } from "../../lib/redux/slices/authSlice"
+import { logoutUser, resendEmailVerification, refreshUserById, setPassword } from "../../lib/redux/slices/authSlice"
 import { showSuccessToast, showErrorToast } from "../../components/ui/toast"
 import { Menu } from "lucide-react"
+import { Input } from "../../components/ui/input"
+import { Label } from "../../components/ui/label"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isClient, setIsClient] = useState(false)
-  const { user } = useAppSelector((state) => state.auth)
+  const { user } = useAppSelector((state: RootState) => state.auth)
   const router = useRouter()
   const pathname = usePathname()
   const dispatch = useAppDispatch()
   const [resendLoading, setResendLoading] = useState(false)
+  const [password, setPasswordState] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [isSettingPassword, setIsSettingPassword] = useState(false)
+  const [loginMethod, setLoginMethod] = useState<string | null>(null)
 
   useEffect(() => {
     setIsClient(true)
+    setLoginMethod(localStorage.getItem('loginMethod'))
   }, [])
+
 
   // Auth check
   useEffect(() => {
@@ -44,8 +53,30 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [router]);
 
-  const isEmailVerified = Boolean(user?.email_verified_at)
+  const isEmailVerified = Boolean(user?.email_verified_at) || user?.status?.toLowerCase() === 'active'
+  const isSocialLogin = loginMethod !== 'email' && (user?.source?.toLowerCase() === 'google' || user?.source?.toLowerCase() === 'linkedin')
+  const handleSetPassword = async () => {
+    if (password !== confirmPassword) {
+      showErrorToast("Error", "Passwords do not match")
+      return
+    }
+    if (password.length < 8) {
+      showErrorToast("Error", "Password must be at least 8 characters")
+      return
+    }
 
+    try {
+      setIsSettingPassword(true)
+      await dispatch(setPassword(password)).unwrap()
+      showSuccessToast("Success", "Password set successfully. Please login again.")
+
+      await handleLogout()
+    } catch (error) {
+      showErrorToast("Error", typeof error === 'string' ? error : "Failed to set password")
+    } finally {
+      setIsSettingPassword(false)
+    }
+  }
   const handleResendVerification = async () => {
     if (!user?.email) return
     try {
@@ -119,8 +150,68 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex min-h-screen w-full">
           <Sidebar user={user} />
           <main className="flex-1 bg-gray-50 relative">
+            {/* Blocking modal for social login users to set password */}
+            {isSocialLogin && (
+              <Dialog open>
+                <DialogContent className="max-w-md p-0 overflow-hidden border-0 shadow-xl rounded-xl">
+                  <div className="relative resumaic-gradient-green p-6 text-white rounded-t-xl animate-pulse-glow">
+                    <div className="flex items-center gap-3">
+                      <DialogTitle className="text-lg font-semibold text-white">
+                        Set Password Required
+                      </DialogTitle>
+                    </div>
+                    <DialogDescription className="mt-2 text-sm text-white/90">
+                      You are logged in via {user?.source}. Please set a password to secure your account.
+                    </DialogDescription>
+                  </div>
+                  <div className="p-6 bg-white space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="password">New Password</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPasswordState(e.target.value)}
+                        placeholder="Enter new password"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword">Confirm Password</Label>
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="Confirm new password"
+                      />
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                      <Button
+                        className="flex-1 resumaic-gradient-green text-white hover:opacity-90 button-press"
+                        onClick={handleSetPassword}
+                        disabled={isSettingPassword}
+                      >
+                        {isSettingPassword ? 'Updating...' : 'Update Password'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="flex-1 border-2 border-gray-300 text-gray-800 bg-white hover:bg-gray-100 hover:text-gray-900"
+                        onClick={handleLogout}
+                        disabled={isSettingPassword}
+                      >
+                        Logout
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-3 text-center">
+                      You will be logged out after setting your password.
+                    </p>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+
             {/* Blocking modal for unverified email */}
-            {!isEmailVerified && (
+            {!isEmailVerified && !isSocialLogin && (
               <Dialog open>
                 <DialogContent className="max-w-md p-0 overflow-hidden border-0 shadow-xl rounded-xl">
                   <div className="relative resumaic-gradient-green p-6 text-white rounded-t-xl animate-pulse-glow">
