@@ -186,7 +186,7 @@ export const AuthService = {
   },
 
   linkedinLogin: async (code: string): Promise<AuthResponse> => {
-    const redirectUri = window.location.origin + window.location.pathname;
+    const redirectUri = (window.location.origin + window.location.pathname).replace(/\/$/, "");
     const response = await api.post("/linkedin/token", { code, redirect_uri: redirectUri });
     
     // Clear password set flag for new LinkedIn login

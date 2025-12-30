@@ -110,8 +110,8 @@ export default function SignUpPage() {
     const randomState = `secureRandom${Math.floor(Math.random() * 10000)}${Date.now()}`;
     localStorage.setItem("google_oauth_state", randomState);
 
-    const redirectUri = window.location.origin + window.location.pathname;
-    window.location.href = `https://backendcv.onlinetoolpot.com/api/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    const redirectUri = (window.location.origin + window.location.pathname).replace(/\/$/, "");
+    window.location.href = `https://backendcv.onlinetoolpot.com/public/api/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
   };
 
   useEffect(() => {

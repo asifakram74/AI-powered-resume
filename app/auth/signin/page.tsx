@@ -90,7 +90,7 @@ export default function SignInPage() {
     const randomState = `secureRandom${Math.floor(Math.random() * 10000)}${Date.now()}`;
     localStorage.setItem('linkedin_oauth_state', randomState);
 
-    const redirectUri = window.location.origin + window.location.pathname;
+    const redirectUri = (window.location.origin + window.location.pathname).replace(/\/$/, "");
 
     const linkedInAuthUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=77980o5hpyil05&redirect_uri=${encodeURIComponent(redirectUri)}&scope=openid%20profile%20email&state=${randomState}`;
     window.location.href = linkedInAuthUrl;
@@ -104,9 +104,9 @@ export default function SignInPage() {
     const randomState = `secureRandom${Math.floor(Math.random() * 10000)}${Date.now()}`;
     localStorage.setItem("google_oauth_state", randomState);
 
-    const redirectUri = window.location.origin + window.location.pathname;
+    const redirectUri = (window.location.origin + window.location.pathname).replace(/\/$/, "");
     console.log("redirectUri",redirectUri)
-    window.location.href = `https://backendcv.onlinetoolpot.com/api/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    window.location.href = `https://backendcv.onlinetoolpot.com/public/api/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
   };
 
   useEffect(() => {
