@@ -55,17 +55,10 @@ export const loginUser = createAsyncThunk<AuthResponse, LoginCredentials>(
       return response
     } catch (error: any) {
       // Check for specific error status codes to provide clear messages
-      const errorMessage = error.response?.data?.message || "Login failed";
-      
-      // If the error is about the account being blocked, pass it through regardless of status code
-      if (errorMessage.toLowerCase().includes('blocked')) {
-        return rejectWithValue(errorMessage);
-      }
-
       if (error.response?.status === 401 || error.response?.status === 422) {
         return rejectWithValue("Invalid username or password")
       }
-      return rejectWithValue(errorMessage)
+      return rejectWithValue(error.response?.data?.message || "Login failed")
     }
   },
 )

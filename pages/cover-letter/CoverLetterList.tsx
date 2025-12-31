@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
+
 import { Input } from "../../components/ui/input"
 import { Label } from "../../components/ui/label"
 import { Textarea } from "../../components/ui/textarea"
@@ -59,8 +60,6 @@ import { getAllPersonas, getPersonas, type PersonaResponse } from "../../lib/red
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog"
 import { PageProps } from "../../types/page-props";
 import { createCheckoutSession } from "../../lib/redux/service/paymentService";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 
 export function CoverLetterPage({ user }: PageProps) {
   const [cvs, setCVs] = useState<CV[]>([])
@@ -83,7 +82,6 @@ export function CoverLetterPage({ user }: PageProps) {
   const userId = user?.id
   const [personaMap, setPersonaMap] = useState<Record<string, string>>({})
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false)
-  const pdfRef = useRef<HTMLDivElement>(null)
 
   const tones = [
     {
@@ -304,15 +302,13 @@ export function CoverLetterPage({ user }: PageProps) {
       let response: CoverLetter
       if (editingLetter) {
         response = await updateCoverLetter(editingLetter.id, letterData)
-        // Preserve the user object from the existing letter since the update response might not include it
-        setCoverLetters((prev) => prev.map((letter) => (letter.id === editingLetter.id ? { ...response, user: (letter as any).user } : letter)))
+        setCoverLetters((prev) => prev.map((letter) => (letter.id === editingLetter.id ? response : letter)))
         toast.success("Cover letter updated successfully!", {
           description: "Your changes have been saved.",
         })
       } else {
         response = await createCoverLetter(letterData)
-        // Attach current user to the new letter for immediate display
-        setCoverLetters((prev) => [{ ...response, user: user }, ...prev])
+        setCoverLetters((prev) => [response, ...prev])
         toast.success("Cover letter created successfully!", {
           description: "Your AI-generated cover letter has been saved.",
         })
@@ -393,238 +389,11 @@ export function CoverLetterPage({ user }: PageProps) {
     })
   }
 
-  // Client-side PDF generation with proper spacing
-  const generatePDF = async (letter: CoverLetter) => {
-    try {
-      toast.info("Generating PDF...", {
-        description: "Please wait while we create your PDF document.",
-      });
-
-      // Create a temporary div for PDF generation
-      const tempDiv = document.createElement('div');
-      tempDiv.style.position = 'absolute';
-      tempDiv.style.left = '-9999px';
-      tempDiv.style.top = '0';
-      tempDiv.style.width = '210mm'; // A4 width
-      tempDiv.style.padding = '20mm'; // Add padding for margins
-      tempDiv.style.fontFamily = 'Arial, sans-serif';
-      tempDiv.style.lineHeight = '1.6';
-      tempDiv.style.fontSize = '12pt';
-      tempDiv.style.color = '#000';
-      tempDiv.style.backgroundColor = 'white';
-      
-      // Format the content with proper HTML
-      const formattedContent = letter.generated_letter
-        .split('\n')
-        .map(line => {
-          if (line.trim() === '') {
-            return '<div style="height: 12px;"></div>'; // Paragraph spacing
-          }
-          return `<div>${line}</div>`;
-        })
-        .join('');
-
-      tempDiv.innerHTML = `
-        <div style="margin-bottom: 40px;">
-          ${formattedContent}
-        </div>
-      `;
-
-      document.body.appendChild(tempDiv);
-
-      // Use html2canvas to capture the content
-      const canvas = await html2canvas(tempDiv, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff'
-      });
-
-      // Remove the temporary div
-      document.body.removeChild(tempDiv);
-
-      // Create PDF with jsPDF
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-
-      // Add margins to the PDF
-      const marginLeft = 20;
-      const marginRight = 20;
-      const marginTop = 20;
-      const marginBottom = 20;
-      
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      
-      // Calculate content dimensions
-      const imgWidth = pageWidth - marginLeft - marginRight;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      let position = 0;
-      let currentPage = 1;
-      
-      while (position < imgHeight) {
-        // Add new page if not the first page
-        if (position > 0) {
-          pdf.addPage();
-          currentPage++;
-          
-          // Add top margin for new pages
-          pdf.setFillColor(255, 255, 255);
-          pdf.rect(0, 0, pageWidth, marginTop, 'F');
-        }
-        
-        // Calculate slice height for current page
-        const sliceHeight = Math.min(imgHeight - position, pageHeight - marginTop - marginBottom);
-        
-        // Create canvas slice
-        const sliceCanvas = document.createElement('canvas');
-        sliceCanvas.width = canvas.width;
-        sliceCanvas.height = (sliceHeight * canvas.width) / imgWidth;
-        
-        const ctx = sliceCanvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(
-            canvas,
-            0,
-            (position * canvas.width) / imgWidth,
-            canvas.width,
-            (sliceHeight * canvas.width) / imgWidth,
-            0,
-            0,
-            canvas.width,
-            (sliceHeight * canvas.width) / imgWidth
-          );
-        }
-        
-        const imgData = sliceCanvas.toDataURL('image/jpeg', 1.0);
-        
-        // Add image to PDF with margins
-        pdf.addImage(
-          imgData,
-          'JPEG',
-          marginLeft,
-          marginTop,
-          imgWidth,
-          sliceHeight
-        );
-        
-        position += sliceHeight;
-      }
-
-      // Save the PDF
-      const filename = getCoverLetterFilename(letter, 'pdf');
-      pdf.save(filename);
-
-      toast.success("PDF generated successfully!", {
-        description: "Your cover letter has been saved as a PDF file.",
-      });
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      toast.error("Failed to generate PDF", {
-        description: "Please try again or use another export format.",
-      });
-    }
-  };
-
-  // Alternative: Direct jsPDF text generation (better for text-only)
-  const generatePDFWithText = (letter: CoverLetter) => {
-    try {
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-
-      // Set margins
-      const marginLeft = 20;
-      const marginRight = 20;
-      const marginTop = 20; // Extra top margin for first page
-      const marginTopSubsequent = 20; // Even more margin for subsequent pages
-      const lineHeight = 7;
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const maxWidth = pageWidth - marginLeft - marginRight;
-      
-      let y = marginTop;
-      let currentPage = 1;
-      
-      // Add date
-      // const date = new Date().toLocaleDateString('en-US', { 
-      //   year: 'numeric', 
-      //   month: 'long', 
-      //   day: 'numeric' 
-      // });
-      
-      // pdf.setFontSize(11);
-      // pdf.text(date, marginLeft, y);
-      // y += lineHeight * 2;
-      
-      // Set font size before calculating lines to ensure correct width usage
-      pdf.setFontSize(12);
-
-      // Split content into paragraphs to handle justification
-      const paragraphs = letter.generated_letter.split('\n');
-
-      for (let p = 0; p < paragraphs.length; p++) {
-        const paragraph = paragraphs[p];
-        
-        // Handle empty lines (paragraph breaks)
-        if (!paragraph.trim()) {
-          y += lineHeight;
-          continue;
-        }
-
-        const lines = pdf.splitTextToSize(paragraph, maxWidth);
-        
-        for (let i = 0; i < lines.length; i++) {
-          // Check if we need a new page
-          if (y + lineHeight > pageHeight - marginRight) {
-            pdf.addPage();
-            currentPage++;
-            y = marginTopSubsequent; // Reset Y with larger margin for new pages
-          }
-          
-          // Justify text: apply justify alignment to all lines except the last line of a paragraph
-          if (i < lines.length - 1) {
-            pdf.text(lines[i], marginLeft, y, { maxWidth: maxWidth, align: "justify" });
-          } else {
-            pdf.text(lines[i], marginLeft, y);
-          }
-          y += lineHeight;
-        }
-      }
-      
-      // Save the PDF
-      const filename = getCoverLetterFilename(letter, 'pdf');
-      pdf.save(filename);
-
-      toast.success("PDF generated successfully!", {
-        description: "Your cover letter has been saved as a PDF file.",
-      });
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      toast.error("Failed to generate PDF", {
-        description: "Please try again or use another export format.",
-      });
-    }
-  };
-
   const handleExportCoverLetter = async (letter: CoverLetter, format: 'pdf' | 'docx' | 'png') => {
     try {
-      if (format === 'pdf') {
-        // Use client-side PDF generation
-        generatePDFWithText(letter);
-        return;
-      }
-      
-      // For other formats, use the existing backend
-      const filename = getCoverLetterFilename(letter, format);
+      const filename = getCoverLetterFilename(letter, format)
 
-      const response = await fetch(`https://backendserver.resumaic.com/api/cover-letter-export/${format}`, {
+      const response = await fetch(`  https://backendserver.resumaic.com/api/cover-letter-export/${format}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -795,11 +564,40 @@ export function CoverLetterPage({ user }: PageProps) {
                   )}
 
                   <div className="space-y-4">
+                    {/* <div>
+                      <Label className="text-sm font-medium">Tone</Label>
+                      {isViewMode ? (
+                        <Badge variant="outline" className="ml-2">
+                          {currentTone}
+                        </Badge>
+                      ) : (
+                        <Select value={currentTone} onValueChange={setCurrentTone} disabled={isViewMode}>
+                          <SelectTrigger className="w-[180px] mt-1">
+                            <SelectValue placeholder="Select tone" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {tones.map(
+                              (tone: {
+                                id: string
+                                name: string
+                                description: string
+                                example: string
+                              }) => (
+                                <SelectItem key={tone.id} value={tone.id}>
+                                  {tone.name}
+                                </SelectItem>
+                              ),
+                            )}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </div> */}
                     <div>
                       <Label className="text-sm font-medium">{isViewMode ? "Cover Letter" : "Edit Cover Letter"}</Label>
                       <Textarea
                         value={generatedLetter}
                         rows={10}
+
                         onChange={(e) => !isViewMode && setGeneratedLetter(e.target.value)}
                         className="min-h-[400px] mt-2"
                         placeholder="Your cover letter will appear here..."
@@ -831,6 +629,21 @@ export function CoverLetterPage({ user }: PageProps) {
 
                     {!isViewMode && (
                       <div className="flex gap-2">
+                        {/* <Button
+                          variant="outline"
+                          onClick={() => {
+                            const tempLetter = {
+                              ...(editingLetter || {}),
+                              generated_letter: generatedLetter,
+                              job_description: currentJobDescription,
+                              tone: currentTone,
+                            } as CoverLetter
+                            handleDownload(tempLetter)
+                          }}
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Download
+                        </Button> */}
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="outline" className="button-press">
@@ -880,7 +693,7 @@ export function CoverLetterPage({ user }: PageProps) {
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                        <Button onClick={handleSaveLetter} className="resumaic-gradient-green hover:opacity-90 button-press">
+                        <Button onClick={handleSaveLetter} className="resumaic-gradient-green hover:opacity-90  button-press">
                           <FileText className="h-4 w-4 mr-2" />
                           {editingLetter ? "Update Cover Letter" : "Save Cover Letter"}
                         </Button>
@@ -917,7 +730,7 @@ export function CoverLetterPage({ user }: PageProps) {
                         </DropdownMenu>
                         <Button
                           onClick={() => handleEdit(viewingLetter)}
-                          className="resumaic-gradient-green hover:opacity-90 button-press"
+                          className="resumaic-gradient-green hover:opacity-90  button-press"
                         >
                           <Edit className="h-4 w-4 mr-2" />
                           Edit
@@ -940,7 +753,7 @@ export function CoverLetterPage({ user }: PageProps) {
                   <DialogTitle className="text-lg font-semibold">Upgrade Required</DialogTitle>
                 </div>
                 <DialogDescription className="mt-2 text-sm opacity-90">
-                  You've reached the maximum number of cover letters for the Free plan. Upgrade your plan to create more!
+                  You’ve reached the maximum number of cover letters for the Free plan. Upgrade your plan to create more!
                 </DialogDescription>
                 <div className="absolute -right-10 -top-10 w-32 h-32 resumaic-gradient-orange rounded-full blur-2xl opacity-30" />
               </div>
@@ -1239,6 +1052,13 @@ export function CoverLetterPage({ user }: PageProps) {
                         </p>
                       </div>
 
+                      {/* <div>
+                        <Label className="text-sm font-medium">Cover Letter Preview</Label>
+                        <p className="text-sm text-gray-600 mt-1 line-clamp-3">
+                          {letter.generated_letter.substring(0, 150)}...
+                        </p>
+                      </div> */}
+
                       <div>
                         <Label className="text-sm font-medium">Tone</Label>
                         <div className="flex flex-wrap gap-1 mt-1">
@@ -1253,6 +1073,7 @@ export function CoverLetterPage({ user }: PageProps) {
                       </div>
 
                       <div className="flex gap-2 items-center">
+
                         <Button
                           variant="outline"
                           size="sm"
@@ -1356,6 +1177,7 @@ export function CoverLetterPage({ user }: PageProps) {
       )}
 
       {/* Tips */}
+      {/* Quick Tips */}
       <Card className="animate-slide-up-delay-3 hover:shadow-lg transition-all duration-300">
         <CardHeader>
           <CardTitle className="flex items-center gap-3 font-rubik text-[#2D3639]">
@@ -1367,6 +1189,7 @@ export function CoverLetterPage({ user }: PageProps) {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Tip 1 */}
             <div className="flex items-start gap-4 animate-fade-in-stagger" style={{ animationDelay: "100ms" }}>
               <div className="rounded-full bg-[#70E4A8]/20 p-3 animate-float" style={{ animationDelay: "0s" }}>
                 <Target className="h-5 w-5 text-[#70E4A8]" />
@@ -1379,6 +1202,7 @@ export function CoverLetterPage({ user }: PageProps) {
               </div>
             </div>
 
+            {/* Tip 2 */}
             <div className="flex items-start gap-4 animate-fade-in-stagger" style={{ animationDelay: "200ms" }}>
               <div className="rounded-full bg-[#EA580C]/20 p-3 animate-float" style={{ animationDelay: "0.5s" }}>
                 <Sparkles className="h-5 w-5 text-[#EA580C]" />
@@ -1389,6 +1213,7 @@ export function CoverLetterPage({ user }: PageProps) {
               </div>
             </div>
 
+            {/* Tip 3 */}
             <div className="flex items-start gap-4 animate-fade-in-stagger" style={{ animationDelay: "300ms" }}>
               <div className="rounded-full bg-blue-100 p-3 animate-float" style={{ animationDelay: "1s" }}>
                 <FileText className="h-5 w-5 text-blue-600" />

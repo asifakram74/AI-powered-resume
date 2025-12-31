@@ -11,13 +11,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../..
 import { Eye, EyeOff, Mail, Lock, Loader2, AlertCircle } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "../../../lib/redux/hooks"
 import { loginUser, clearError, loginWithLinkedIn, loginWithGoogle, setCredentials } from "../../../lib/redux/slices/authSlice"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "../../../components/ui/dialog"
 import { Alert, AlertDescription } from "../../../components/ui/alert"
 import { showSuccessToast, showErrorToast } from "../../../components/ui/toast"
 import Image from "next/image"
@@ -39,25 +32,10 @@ export default function SignInPage() {
   const [googleLoading, setGoogleLoading] = useState(false)
   const [oauthProvider, setOauthProvider] = useState<"google" | "linkedin" | null>(null)
   const [oauthStatus, setOauthStatus] = useState<"idle" | "loading" | "error">("idle")
-  const [showBlockedModal, setShowBlockedModal] = useState(false);
-  const [blockedMessage, setBlockedMessage] = useState("");
 
   const router = useRouter()
   const searchParams = useSafeSearchParams()
   const safeSearchParams = searchParams || new URLSearchParams();
-
-  useEffect(() => {
-    // Check both searchParams and direct window location to ensure we catch the error
-    const params = new URLSearchParams(window.location.search);
-    const errorMsg = safeSearchParams.get("error") || params.get("error");
-    
-    if (errorMsg && errorMsg.toLowerCase().includes("blocked")) {
-      console.log("Blocked error detected:", errorMsg);
-      setBlockedMessage(errorMsg);
-      setShowBlockedModal(true);
-      // We will clean the URL when the modal is closed to ensure the user sees why they are there
-    }
-  }, [safeSearchParams]);
 
   const dispatch = useAppDispatch()
   const { loading, error, token } = useAppSelector((state) => state.auth)
@@ -174,13 +152,7 @@ export default function SignInPage() {
           } else {
             console.error('LinkedIn login failed:', result.payload);
             const message = typeof result.payload === 'string' ? result.payload : 'LinkedIn sign-in failed';
-            
-            if (message.toLowerCase().includes('blocked')) {
-              setBlockedMessage(message);
-              setShowBlockedModal(true);
-            } else {
-              showErrorToast("LinkedIn Sign-in Error", message);
-            }
+            showErrorToast("LinkedIn Sign-in Error", message);
             setOauthStatus("error")
           }
         } catch (error) {
@@ -282,13 +254,7 @@ export default function SignInPage() {
               router.push("/dashboard");
             } else {
               const message = typeof result.payload === 'string' ? result.payload : 'Google sign-in failed';
-              
-              if (message.toLowerCase().includes('blocked')) {
-                setBlockedMessage(message);
-                setShowBlockedModal(true);
-              } else {
-                showErrorToast("Google Sign-in Error", message);
-              }
+              showErrorToast("Google Sign-in Error", message);
               setOauthStatus("error")
             }
           } catch (err) {
@@ -316,13 +282,7 @@ export default function SignInPage() {
       router.push("/dashboard")
     } else if (loginUser.rejected.match(result)) {
       const message = typeof result.payload === 'string' ? result.payload : 'Invalid credentials'
-      
-      if (message.toLowerCase().includes('blocked')) {
-        setBlockedMessage(message)
-        setShowBlockedModal(true)
-      } else {
-        showErrorToast("Sign-in Error", message)
-      }
+      showErrorToast("Sign-in Error", message)
     }
   }
 
@@ -498,34 +458,6 @@ export default function SignInPage() {
           )}
         </CardContent>
       </Card>
-      <Dialog open={showBlockedModal} onOpenChange={(open) => {
-          setShowBlockedModal(open);
-          if (!open) {
-            const cleanUrl = window.location.pathname;
-            window.history.replaceState({}, document.title, cleanUrl);
-          }
-        }}>
-          <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-red-600">
-              <AlertCircle className="h-6 w-6" />
-              Account Blocked
-            </DialogTitle>
-            <DialogDescription className="pt-4 text-base">
-              {blockedMessage || "Your account has been blocked. Please contact support for assistance."}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end mt-4">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowBlockedModal(false)}
-              className="w-full sm:w-auto"
-            >
-              Close
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

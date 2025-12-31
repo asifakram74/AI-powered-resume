@@ -751,7 +751,7 @@ export function UserList({ user }: PageProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold font-sans text-[#2D3639]">
-              {getUsersArray().filter((u) => u.status === "Active").length}
+              {getUsersArray().filter((u) => u.status === "active").length}
             </div>
             <p className="text-xs text-gray-500 font-sans">Currently active accounts</p>
           </CardContent>
@@ -763,7 +763,7 @@ export function UserList({ user }: PageProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold font-sans text-[#2D3639]">
-              {getUsersArray().filter((u) => u.role === "Admin").length}
+              {getUsersArray().filter((u) => u.role === "admin").length}
             </div>
             <p className="text-xs text-gray-500 font-sans">Users with admin privileges</p>
           </CardContent>
