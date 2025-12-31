@@ -211,11 +211,11 @@ export function CoverLetterPage({ user }: PageProps) {
       console.log('Making request to:', '  https://backendserver.resumaic.com/api/cover-letter-generation');
       console.log('Selected tone:', tone);
       console.log('Tone type:', typeof tone);
-      
+
       // Find the full tone data to get name and description
       const selectedToneData = tones.find(t => t.id === tone);
       console.log('Selected tone data:', selectedToneData);
-      
+
       const requestPayload = {
         jobDescription,
         tone,
@@ -225,7 +225,7 @@ export function CoverLetterPage({ user }: PageProps) {
         cvContent,
         cvData: selectedCV,
       };
-      
+
       console.log('Request payload:', requestPayload);
       console.log('Request payload size:', JSON.stringify(requestPayload).length);
 
@@ -392,7 +392,7 @@ export function CoverLetterPage({ user }: PageProps) {
   const handleExportCoverLetter = async (letter: CoverLetter, format: 'pdf' | 'docx' | 'png') => {
     try {
       const filename = getCoverLetterFilename(letter, format)
-      
+
       const response = await fetch(`  https://backendserver.resumaic.com/api/cover-letter-export/${format}`, {
         method: 'POST',
         headers: {
@@ -759,18 +759,18 @@ export function CoverLetterPage({ user }: PageProps) {
               </div>
               <div className="p-6 space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground list-none">
-  {[
-    { color: "resumaic-gradient-green", text: "Create more cover letters" },
-    { color: "resumaic-gradient-orange", text: "Unlock extra cover letters" },
-    { color: "resumaic-gradient-blue", text: "Unlock unlimited persona slots" },
-    { color: "resumaic-gradient-purple", text: "Boost your CV with AI-powered optimization" },
-  ].map((item, i) => (
-    <div key={i} className="flex items-center gap-2 list-none">
-      <span className={`size-1.5 rounded-full ${item.color}`} />
-      <span className="list-none">{item.text}</span>
-    </div>
-  ))}
-</div>
+                  {[
+                    { color: "resumaic-gradient-green", text: "Create more cover letters" },
+                    { color: "resumaic-gradient-orange", text: "Unlock extra cover letters" },
+                    { color: "resumaic-gradient-blue", text: "Unlock unlimited persona slots" },
+                    { color: "resumaic-gradient-purple", text: "Boost your CV with AI-powered optimization" },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-2 list-none">
+                      <span className={`size-1.5 rounded-full ${item.color}`} />
+                      <span className="list-none">{item.text}</span>
+                    </div>
+                  ))}
+                </div>
 
                 <div className="space-y-3">
                   <Button
@@ -849,10 +849,11 @@ export function CoverLetterPage({ user }: PageProps) {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Profile</TableHead>
+                      <TableHead>Resume</TableHead>
                       <TableHead>Job Description</TableHead>
                       <TableHead>Tone</TableHead>
-                      <TableHead>Created</TableHead>
-                      <TableHead>Actions</TableHead>
+                      <TableHead>Last Modified</TableHead>
+                      <TableHead className="text-right pr-5">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -889,13 +890,14 @@ export function CoverLetterPage({ user }: PageProps) {
                                 )}
                               </AvatarFallback>
                             </Avatar>
-                            <div>
-                              <div className="font-medium">Cover Letter</div>
-                              <div className="text-sm text-gray-600">
-                                {new Date(letter.created_at).toLocaleDateString()}
-                              </div>
-                            </div>
+                            <div className="font-medium">{(letter as any).user?.name || 'N/A'}</div>
                           </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="font-medium">
+                            {(letter as any).cv?.title?.length > 15
+                              ? `${(letter as any).cv.title.slice(0, 15)}...`
+                              : (letter as any).cv?.title}</div>
                         </TableCell>
                         <TableCell>
                           <div className="max-w-xs">
@@ -909,9 +911,9 @@ export function CoverLetterPage({ user }: PageProps) {
                             {letter.tone}
                           </Badge>
                         </TableCell>
-                        <TableCell>{new Date(letter.created_at).toLocaleDateString()}</TableCell>
+                        <TableCell>{new Date(letter.updated_at).toLocaleDateString()}</TableCell>
                         <TableCell>
-                          <div className="flex gap-1">
+                          <div className="flex gap-1 justify-end">
                             <Button
                               variant="ghost"
                               className="cursor-pointer"
@@ -923,18 +925,6 @@ export function CoverLetterPage({ user }: PageProps) {
                               title="View"
                             >
                               <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              className="cursor-pointer"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleEdit(letter)
-                              }}
-                              title="Edit"
-                            >
-                              <Edit className="h-4 w-4" />
                             </Button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -967,6 +957,18 @@ export function CoverLetterPage({ user }: PageProps) {
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
+                            <Button
+                              variant="ghost"
+                              className="cursor-pointer"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleEdit(letter)
+                              }}
+                              title="Edit"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
                             <ConfirmDialog
                               title="Delete Cover Letter"
                               description={`Are you sure you want to delete the cover letter ${letter.job_description || 'Untitled'}? This action is irreversible and cannot be undone.`}
@@ -1029,8 +1031,7 @@ export function CoverLetterPage({ user }: PageProps) {
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <CardTitle className="text-lg">Cover Letter #{letter.id}</CardTitle>
-                          <CardDescription>{letter.tone} tone</CardDescription>
+                          <CardTitle className="text-lg">{(letter as any).user?.name || 'N/A'}</CardTitle>
                         </div>
                       </div>
                     </div>
@@ -1038,18 +1039,25 @@ export function CoverLetterPage({ user }: PageProps) {
                   <CardContent>
                     <div className="space-y-4">
                       <div>
-                        {/* <Label className="text-sm font-medium">Job Description</Label> */}
+                        <Label className="text-sm font-medium">Job Description</Label>
                         <p className="text-sm text-gray-600 mt-1 line-clamp-3">
                           {letter.job_description.substring(0, 150)}...
                         </p>
                       </div>
 
                       <div>
+                        <Label className="text-sm font-medium">Resume</Label>
+                        <p className="text-sm text-gray-600 mt-1 line-clamp-3">
+                          {(letter as any).cv?.title}
+                        </p>
+                      </div>
+
+                      {/* <div>
                         <Label className="text-sm font-medium">Cover Letter Preview</Label>
                         <p className="text-sm text-gray-600 mt-1 line-clamp-3">
                           {letter.generated_letter.substring(0, 150)}...
                         </p>
-                      </div>
+                      </div> */}
 
                       <div>
                         <Label className="text-sm font-medium">Tone</Label>
@@ -1061,10 +1069,58 @@ export function CoverLetterPage({ user }: PageProps) {
                       </div>
 
                       <div className="text-xs text-gray-500">
-                        Created: {new Date(letter.created_at).toLocaleDateString()}
+                        Last Modified: {new Date(letter.updated_at).toLocaleDateString()}
                       </div>
 
                       <div className="flex gap-2 items-center">
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleView(letter)}
+                          className="bg-transparent p-2"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="cursor-pointer"
+                              title="Download"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            <DropdownMenuItem onClick={() => handleDownload(letter)}>
+                              <FileText className="h-4 w-4 mr-2" />
+                              Text (.txt)
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleExportCoverLetter(letter, 'pdf')}>
+                              <FileText className="h-4 w-4 mr-2" />
+                              PDF (.pdf)
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleExportCoverLetter(letter, 'docx')}>
+                              <FileText className="h-4 w-4 mr-2" />
+                              Word (.docx)
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleExportCoverLetter(letter, 'png')}>
+                              <FileText className="h-4 w-4 mr-2" />
+                              Image (.png)
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(letter)}
+                          className="bg-transparent p-2"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
                         <ConfirmDialog
                           title="Delete Cover Letter"
                           description={`Are you sure you want to delete this cover letter? This action is irreversible and cannot be undone.`}
@@ -1081,22 +1137,6 @@ export function CoverLetterPage({ user }: PageProps) {
                             </Button>
                           }
                         />
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(letter)}
-                          className="bg-transparent p-2"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleView(letter)}
-                          className="bg-transparent p-2"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
                       </div>
                     </div>
                   </CardContent>

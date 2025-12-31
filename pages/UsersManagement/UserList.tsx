@@ -263,8 +263,8 @@ export function UserList({ user }: PageProps) {
       user?.email?.toLowerCase().includes(searchLower) ||
       user?.role?.toLowerCase().includes(searchLower) ||
       user?.plan_type
-      
-      ?.toLowerCase().includes(searchLower) ||
+
+        ?.toLowerCase().includes(searchLower) ||
       String(user?.status)?.toLowerCase().includes(searchLower)
     )
   })
@@ -424,9 +424,9 @@ export function UserList({ user }: PageProps) {
                       <TableHead className="font-sans">Email</TableHead>
                       <TableHead className="font-sans">Role</TableHead>
                       <TableHead className="font-sans">Plan</TableHead>
-                      {/* <TableHead className="font-sans">Status</TableHead> */}
-                      {/* <TableHead className="font-sans">Verified</TableHead> */}
-                      <TableHead className="font-sans">Actions</TableHead>
+                      <TableHead className="font-sans">Status</TableHead>
+                      <TableHead className="font-sans">Verified</TableHead>
+                      <TableHead className="font-sans text-right pr-5">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -458,31 +458,38 @@ export function UserList({ user }: PageProps) {
                         </TableCell>
                         <TableCell>
                           <Badge
-                            variant={user.role === "admin" ? "default" : "secondary"}
-                            className="bg-[#70E4A8]/20 text-[#2D3639] hover:bg-[#70E4A8]/30 font-sans"
+                            variant="secondary"
+                            className="text-sm text-gray-600 font-sans"
                           >
                             {user.role}
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline" className="border-[#70E4A8]/30 text-[#2D3639] font-sans">
+                          <Badge variant="secondary" className="capitalize text-sm text-gray-600 font-sans ">
                             {user.plan_type}
                           </Badge>
                         </TableCell>
-                        {/* <TableCell>
+                        <TableCell>
                           <Badge
-                            variant={user.status === "active" ? "default" : "destructive"}
-                            className={`cursor-pointer font-sans ${
-                              user.status === "active"
-                                ? "bg-[#70E4A8]/20 text-[#2D3639] hover:bg-[#70E4A8]/30"
-                                : "bg-[#EA580C]/20 text-[#EA580C] hover:bg-[#EA580C]/30"
-                            }`}
+                            variant={
+                              user.status === "Active"
+                                ? "default"
+                                : user.status === "Block"
+                                  ? "destructive"
+                                  : "secondary"
+                            }
+                            className={`cursor-pointer font-sans ${user.status === "Active"
+                              ? "bg-[#70E4A8]/20 text-[#2D3639] hover:bg-[#70E4A8]/30 font-sans"
+                              : user.status === "Block"
+                                ? "bg-[#F87171]/20 text-[#DC2626] hover:bg-[#F87171]/30"
+                                : "text-xs bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20 hover:text-yellow-800 font-sans"
+                              }`}
                             onClick={() => toggleUserStatus(user)}
                           >
                             {user.status}
                           </Badge>
-                        </TableCell> */}
-                        {/* <TableCell>
+                        </TableCell>
+                        <TableCell>
                           {user.email_verified_at ? (
                             <Badge variant="secondary" className="bg-[#70E4A8]/20 text-[#2D3639] font-sans">
                               <Check className="h-3 w-3 mr-1" />
@@ -493,15 +500,15 @@ export function UserList({ user }: PageProps) {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleVerifyEmail(user.id)}
-                              className="text-xs text-[#EA580C] hover:text-[#EA580C] hover:bg-[#EA580C]/10 font-sans"
+                              className="text-xs bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20 hover:text-yellow-800 font-sans"
                             >
                               <X className="h-3 w-3 mr-1" />
                               Not Verified
                             </Button>
                           )}
-                        </TableCell> */}
+                        </TableCell>
                         <TableCell>
-                          <div className="flex gap-1">
+                          <div className="flex gap-1 justify-end">
                             <Button
                               variant="ghost"
                               size="sm"
@@ -563,21 +570,33 @@ export function UserList({ user }: PageProps) {
                     <div className="space-y-4">
                       <div>
                         <Label className="text-sm font-medium font-sans text-[#2D3639]">Role</Label>
-                        <p className="text-sm text-gray-600 font-sans">{user.role}</p>
+                        <Badge variant="secondary">
+                          <p className="text-sm text-gray-600 font-sans">{user.role}</p>
+                        </Badge>
                       </div>
 
                       <div>
                         <Label className="text-sm font-medium font-sans text-[#2D3639]">Plan</Label>
-                        <p className="text-sm text-gray-600 font-sans">{user.plan}</p>
+                        <Badge variant="secondary">
+                          <p className="text-sm text-gray-600 font-sans capitalize">{user.plan_type}</p>
+                        </Badge>
                       </div>
 
                       <div>
                         <Label className="text-sm font-medium font-sans text-[#2D3639]">Status</Label>
                         <Badge
-                          variant={user.status === "active" ? "default" : "destructive"}
-                          className={`cursor-pointer font-sans ${user.status === "active"
-                              ? "bg-[#70E4A8]/20 text-[#2D3639] hover:bg-[#70E4A8]/30"
-                              : "bg-[#EA580C]/20 text-[#EA580C] hover:bg-[#EA580C]/30"
+                          variant={
+                            user.status === "Active"
+                              ? "default"
+                              : user.status === "Block"
+                                ? "destructive"
+                                : "secondary"
+                          }
+                          className={`cursor-pointer font-sans ${user.status === "Active"
+                            ? "bg-[#70E4A8]/20 text-[#2D3639] hover:bg-[#70E4A8]/30"
+                            : user.status === "Block"
+                              ? "bg-[#F87171]/20 text-[#DC2626] hover:bg-[#F87171]/30"
+                              : "text-xs bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20 hover:text-yellow-800 font-sans"
                             }`}
                           onClick={() => toggleUserStatus(user)}
                         >
@@ -597,7 +616,7 @@ export function UserList({ user }: PageProps) {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleVerifyEmail(user.id)}
-                            className="text-xs text-[#EA580C] hover:text-[#EA580C] hover:bg-[#EA580C]/10 font-sans"
+                            className="text-xs bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20 hover:text-yellow-800 font-sans"
                           >
                             <X className="h-3 w-3 mr-1" />
                             Not Verified

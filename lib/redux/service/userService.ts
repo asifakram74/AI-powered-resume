@@ -30,7 +30,6 @@ export interface User {
   otp_count: number | null
   role: string
   status: string
-  
   plan: string
   email_verified_at: string
   plan_type: string
@@ -44,8 +43,6 @@ export interface User {
   email_updates: number
    source: string 
   is_verified?: boolean
-  
-  
 }
 
 export interface CreateUserData {
@@ -81,6 +78,17 @@ export interface UpdateUserData {
 export const getUsers = async (page = 1): Promise<UsersApiResponse> => {
   try {
     const response = await api.get(`/users?page=${page}`)
+    return response.data as UsersApiResponse
+  } catch (error) {
+    console.error("Error fetching users:", error)
+    throw error
+  }
+}
+
+// Replace the current getUsers function with this
+export const getAllUsers = async (): Promise<UsersApiResponse> => {
+  try {
+    const response = await api.get(`/users`)
     return response.data as UsersApiResponse
   } catch (error) {
     console.error("Error fetching users:", error)

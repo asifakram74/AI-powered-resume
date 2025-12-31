@@ -216,7 +216,7 @@ export function ResumePage({ user }: PageProps) {
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Create Resume
-                
+
               </Button>
             </DialogTrigger>
             <DialogContent
@@ -366,10 +366,11 @@ export function ResumePage({ user }: PageProps) {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Resume</TableHead>
+                      <TableHead>Persona</TableHead>
                       <TableHead>Template</TableHead>
-                      <TableHead>Created</TableHead>
-                      <TableHead>Updated</TableHead>
-                      <TableHead>Actions</TableHead>
+                      {/* <TableHead>Created</TableHead> */}
+                      <TableHead>Last Modified</TableHead>
+                      <TableHead className="text-right pr-5">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -403,8 +404,13 @@ export function ResumePage({ user }: PageProps) {
                               </AvatarFallback>
                             </Avatar>
                             <div>
-                              <div className="font-medium">{cv.title}</div>
+                              <div className="font-medium">{cv.title.length > 25 ? `${cv.title.substring(0, 25)}...` : cv.title}</div>
                             </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="font-medium">
+                            {(cv as any).persona?.full_name || 'N/A'}
                           </div>
                         </TableCell>
                         <TableCell>
@@ -412,14 +418,14 @@ export function ResumePage({ user }: PageProps) {
                             {cv.layout_id.replace("-", " ")}
                           </Badge>
                         </TableCell>
-                        <TableCell>
+                        {/* <TableCell>
                           {new Date(cv.created_at).toLocaleDateString()}
-                        </TableCell>
+                        </TableCell> */}
                         <TableCell>
                           {new Date(cv.updated_at).toLocaleDateString()}
                         </TableCell>
                         <TableCell>
-                          <div className="flex gap-1">
+                          <div className="flex gap-1 justify-end">
                             <Button
                               variant="ghost"
                               size="sm"
@@ -509,14 +515,20 @@ export function ResumePage({ user }: PageProps) {
                         {cv.layout_id.replace("-", " ")}
                       </Badge>
                     </div>
+                    <div>
+                      <Label className="text-sm font-medium">Persona</Label>
+                      <Badge variant="secondary" className="mt-1 capitalize">
+                        {(cv as any).persona?.full_name || 'N/A'}
+                      </Badge>
+                    </div>
 
                     <div className="text-xs text-gray-500">
-                      <div>
+                      {/* <div>
                         Created:{" "}
                         {new Date(cv.created_at).toLocaleDateString()}
-                      </div>
+                      </div> */}
                       <div>
-                        Updated:{" "}
+                        Last Modified:{" "}
                         {new Date(cv.updated_at).toLocaleDateString()}
                       </div>
                     </div>

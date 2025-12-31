@@ -128,7 +128,7 @@ const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
                 ? persona.additional
                 : [],
           },
-          createdAt: persona.created_at || new Date().toISOString(),
+          createdAt: persona.updated_at || new Date().toISOString(),
           generatedPersona: "",
         }));
 
@@ -220,7 +220,7 @@ const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
               ? data.additional
               : [],
         },
-        createdAt: data.created_at || new Date().toISOString(),
+        createdAt: data.updated_at || new Date().toISOString(),
       });
 
       setPrefilledData({
@@ -465,7 +465,7 @@ const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
               ? response.additional
               : [],
         },
-        createdAt: response.created_at || new Date().toISOString(),
+        createdAt: response.updated_at || new Date().toISOString(),
         generatedPersona: newPersona.generatedPersona,
       };
 
@@ -711,11 +711,11 @@ const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
                       <TableRow>
                         <TableHead className="w-[20%] px-4">Profile</TableHead>
                         <TableHead className="w-[15%] px-4">Job Title</TableHead>
-                        <TableHead className="w-[12%] px-4">Experience</TableHead>
-                        <TableHead className="w-[20%] px-4">Skills</TableHead>
-                        <TableHead className="w-[12%] px-4">Education</TableHead>
-                        <TableHead className="w-[11%] px-4">Created</TableHead>
-                        <TableHead className="w-[10%] px-4">Actions</TableHead>
+                        {/* <TableHead className="w-[12%] px-4">Experience</TableHead> */}
+                        {/* <TableHead className="w-[20%] px-4">Skills</TableHead> */}
+                        {/* <TableHead className="w-[12%] px-4">Education</TableHead> */}
+                        <TableHead className="w-[11%] px-4">Last Modified</TableHead>
+                        <TableHead className="w-[10%] px-4 text-right pr-5">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -737,7 +737,7 @@ const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
                                     }`}
                                 >
                                   {user?.role === 'admin' ? (
-                                    <Crown className="h-5 w-5 text-[#EA580C]" /> // Orange crown for admin
+                                    <Crown className="h-5 w-5 text-[#EA580C]" />
                                   ) : persona.personalInfo.fullName ? (
                                     persona.personalInfo.fullName.charAt(0).toUpperCase()
                                   ) : (
@@ -769,15 +769,15 @@ const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
                               {persona.personalInfo.jobTitle}
                             </div>
                           </TableCell>
-                          <TableCell className="w-[12%] px-4">
+                          {/* <TableCell className="w-[12%] px-4">
                             <div 
                               className="truncate cursor-help" 
                               title={`${persona.experience.length} positions`}
                             >
                               {persona.experience.length} positions
                             </div>
-                          </TableCell>
-                          <TableCell className="w-[20%] px-4">
+                          </TableCell> */}
+                          {/* <TableCell className="w-[20%] px-4">
                             <div className="flex flex-wrap gap-1 max-h-16 overflow-hidden">
                               {(Array.isArray(persona.skills.technical)
                                 ? persona.skills.technical.slice(0, 2)
@@ -803,15 +803,15 @@ const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
                                   </Badge>
                                 )}
                             </div>
-                          </TableCell>
-                          <TableCell className="w-[12%] px-4">
+                          </TableCell> */}
+                          {/* <TableCell className="w-[12%] px-4">
                             <div 
                               className="truncate cursor-help" 
                               title={`${persona.education.length} degrees`}
                             >
                               {persona.education.length} degrees
                             </div>
-                          </TableCell>
+                          </TableCell> */}
                           <TableCell className="w-[11%] px-4">
                             <div 
                               className="truncate cursor-help text-sm" 
@@ -824,8 +824,8 @@ const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
                               {new Date(persona.createdAt).toLocaleDateString()}
                             </div>
                           </TableCell>
-                          <TableCell className="w-[10%] px-4">
-                            <div className="flex gap-1 justify-center">
+                          <TableCell className="w-[10%] px-4 text-right">
+                            <div className="flex gap-1 justify-end">
                               <Button
                                 variant="ghost"
                                 className="cursor-pointer h-8 w-8 p-0"
@@ -914,7 +914,7 @@ const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
                         Experience
                       </Label>
                       <p className="text-sm text-gray-600">
-                        {persona.experience.length} positions
+                        {persona.experience.length}
                       </p>
                     </div>
 
@@ -940,7 +940,7 @@ const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
                       </div>
                     </div>
 
-                    <div>
+                    {/* <div>
                       <Label className="text-sm font-medium">Education</Label>
                       <p className="text-sm text-gray-600">
                         {persona.education.length} degrees
@@ -952,10 +952,10 @@ const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
                       <p className="text-sm text-gray-600">
                         {persona.languages.length} languages
                       </p>
-                    </div>
+                    </div> */}
 
                     <div className="text-xs text-gray-500">
-                      Created:{" "}
+                      Last Modified:{" "}
                       {new Date(persona.createdAt).toLocaleDateString()}
                     </div>
 
@@ -1002,6 +1002,14 @@ const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
                       </div> */}
 
                     <div className="flex gap-2 items-center">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(persona)}
+                        className="bg-transparent p-2"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
                       <ConfirmDialog
                         title="Delete Persona"
                         description={`Are you sure you want to delete the persona ${persona.personalInfo.fullName}? This action is irreversible and cannot be undone.`}
@@ -1018,14 +1026,6 @@ const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
                           </Button>
                         }
                       />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(persona)}
-                        className="bg-transparent p-2"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
                     </div>
                   </div>
                 </CardContent>
