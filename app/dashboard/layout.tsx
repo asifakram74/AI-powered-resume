@@ -55,28 +55,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const isEmailVerified = Boolean(user?.email_verified_at) || user?.status?.toLowerCase() === 'active'
   const isSocialLogin = loginMethod !== 'email' && (user?.source?.toLowerCase() === 'google' || user?.source?.toLowerCase() === 'linkedin')
-  const handleSetPassword = async () => {
-    if (password !== confirmPassword) {
-      showErrorToast("Error", "Passwords do not match")
-      return
-    }
-    if (password.length < 8) {
-      showErrorToast("Error", "Password must be at least 8 characters")
-      return
-    }
+  // const handleSetPassword = async () => {
+  //   if (password !== confirmPassword) {
+  //     showErrorToast("Error", "Passwords do not match")
+  //     return
+  //   }
+  //   if (password.length < 8) {
+  //     showErrorToast("Error", "Password must be at least 8 characters")
+  //     return
+  //   }
 
-    try {
-      setIsSettingPassword(true)
-      await dispatch(setPassword(password)).unwrap()
-      showSuccessToast("Success", "Password set successfully. Please login again.")
+  //   try {
+  //     setIsSettingPassword(true)
+  //     await dispatch(setPassword(password)).unwrap()
+  //     showSuccessToast("Success", "Password set successfully. Please login again.")
 
-      await handleLogout()
-    } catch (error) {
-      showErrorToast("Error", typeof error === 'string' ? error : "Failed to set password")
-    } finally {
-      setIsSettingPassword(false)
-    }
-  }
+  //     await handleLogout()
+  //   } catch (error) {
+  //     showErrorToast("Error", typeof error === 'string' ? error : "Failed to set password")
+  //   } finally {
+  //     setIsSettingPassword(false)
+  //   }
+  // }
   const handleResendVerification = async () => {
     if (!user?.email) return
     try {
@@ -149,7 +149,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex min-h-screen w-full">
           <Sidebar user={user} />
           <main className="flex-1 bg-gray-50 relative">
-            {requiresPasswordSetup && user?.role?.toLowerCase() !== 'admin' && (
+            {/* {requiresPasswordSetup && user?.role?.toLowerCase() !== 'admin' && 
               <Dialog open>
                 <DialogContent className="max-w-md p-0 overflow-hidden border-0 shadow-xl rounded-xl">
                   <div className="relative resumaic-gradient-green p-6 text-white rounded-t-xl animate-pulse-glow">
@@ -206,7 +206,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   </div>
                 </DialogContent>
               </Dialog>
-            )}
+            )} */}
 
             {/* Blocking modal for unverified email */}
             {!isEmailVerified && !isSocialLogin && (
