@@ -25,7 +25,8 @@ interface SetPasswordProps {
   onCancel?: () => void
 }
 
-export function SetPassword({
+// Change this to be the default export
+export default function SetPassword({
   open,
   onOpenChange,
   onCancel = () => { },

@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
 import { Badge } from "../../components/ui/badge"
 import { ChangePassword } from "./ChangePassword"
-import { SetPassword } from "./SetPassword"
+import  SetPassword  from "./SetPassword"
 import { getPersonas } from "../../lib/redux/service/pasonaService"
 import { getCVs } from "../../lib/redux/service/resumeService"
 import { getCoverLetters } from "../../lib/redux/service/coverLetterService"
