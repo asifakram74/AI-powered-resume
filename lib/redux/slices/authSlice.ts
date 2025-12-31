@@ -12,7 +12,7 @@ import {
   type ResetPasswordData,
   checkPasswordSetFlag,
 } from "../service/authService"
-import { setPassword, type SetPasswordData } from "../../api/settings"
+import { setPassword as setPasswordApi, type SetPasswordData } from "../../api/settings"
 import { getUserById as getUserByIdApi } from "../service/userService"
 
 interface AuthState {
