@@ -20,6 +20,11 @@ export interface ChangePasswordData {
   new_password_confirmation: string
 }
 
+export interface SetPasswordData {
+  password: string
+  password_confirmation: string
+}
+
 // 🟢 GET user settings
 export const getSettings = async (): Promise<UserSettings> => {
   try {
@@ -53,7 +58,18 @@ export const changePassword = async (data: ChangePasswordData): Promise<{ messag
   }
 }
 
-// 🟢 EXPORT account data
+// � SET password
+export const setPassword = async (data: SetPasswordData): Promise<{ message: string }> => {
+  try {
+    const response = await api.post("/settings/set-password", data)
+    return response.data
+  } catch (error) {
+    console.error("Error setting password:", error)
+    throw error
+  }
+}
+
+// �🟢 EXPORT account data
 export const exportAccountData = async (): Promise<{ message: string; download_url: string }> => {
   try {
     const response = await api.post("/settings/export-data")

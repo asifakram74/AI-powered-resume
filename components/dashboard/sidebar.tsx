@@ -21,7 +21,7 @@ import { Button } from "../../components/ui/button"
 import { Avatar, AvatarFallback } from "../../components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu"
 import { useAppDispatch, useAppSelector } from "../../lib/redux/hooks"
-import { logoutUser } from "../../lib/redux/slices/authSlice"
+import { logoutUser, fetchProfile } from "../../lib/redux/slices/authSlice"
 import { useRouter } from "next/navigation"
 import { getCVs } from "../../lib/redux/service/resumeService"
 
@@ -143,7 +143,10 @@ export function Sidebar({
 
   useEffect(() => {
     setIsMounted(true)
-  }, [])
+    if (localStorage.getItem('token')) {
+      dispatch(fetchProfile())
+    }
+  }, [dispatch])
 
   const handleLogout = async () => {
     await dispatch(logoutUser())
