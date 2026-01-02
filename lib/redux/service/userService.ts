@@ -31,6 +31,7 @@ export interface User {
   role: string
   status: string
   plan: string
+  first_login: boolean
   email_verified_at: string
   plan_type: string
   created_at: string
@@ -68,6 +69,7 @@ export interface UpdateUserData {
   role?: string
   status?: string
   plan?: string
+  first_login?: boolean
   plan_type?: string
   dark_mode?: number
   language?: string

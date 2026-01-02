@@ -30,17 +30,16 @@ const initialState: AuthState = {
   token: null,
   requiresPasswordSetup: false,
   loading: false,
-  
   error: null,
 }
 
 // Helper function to check if password setup is required
 const checkRequiresPasswordSetup = (user: User | null): boolean => {
   if (!user) return false
-  
+
   const isSocialLogin = user.source === 'Google' || user.source === 'Linkedin'
   if (!isSocialLogin) return false
-  
+
   // Check if password was already set (from localStorage)
   return !checkPasswordSetFlag()
 }
@@ -57,17 +56,27 @@ export const setUserPassword = createAsyncThunk<{ message: string }, SetPassword
   }
 )
 
+// Update loginUser async thunk
 export const loginUser = createAsyncThunk<AuthResponse, LoginCredentials>(
   "auth/loginUser",
-  async (credentials, { rejectWithValue }) => {
+  async (credentials, { rejectWithValue, dispatch }) => { // Add dispatch parameter
     try {
       const response = await AuthService.login(credentials)
       localStorage.setItem("token", response.token)
       localStorage.setItem("user", JSON.stringify(response.user))
       localStorage.setItem("loginMethod", "email")
+
+      // Fetch and store profile after successful login
+      try {
+        const profileResponse = await AuthService.getProfile()
+        localStorage.setItem("profile", JSON.stringify(profileResponse))
+      } catch (profileError) {
+        console.error("Failed to fetch profile on login:", profileError)
+        // Continue even if profile fetch fails
+      }
+
       return response
     } catch (error: any) {
-      // Check for specific error status codes to provide clear messages
       if (error.response?.status === 401 || error.response?.status === 422) {
         return rejectWithValue("Invalid username or password")
       }
@@ -76,6 +85,7 @@ export const loginUser = createAsyncThunk<AuthResponse, LoginCredentials>(
   },
 )
 
+// Update loginWithLinkedIn async thunk
 export const loginWithLinkedIn = createAsyncThunk<AuthResponse, string>(
   "auth/loginWithLinkedIn",
   async (code, { rejectWithValue }) => {
@@ -91,6 +101,14 @@ export const loginWithLinkedIn = createAsyncThunk<AuthResponse, string>(
       localStorage.setItem("token", response.token);
       localStorage.setItem("user", JSON.stringify(response.user));
 
+      // Fetch and store profile after successful LinkedIn login
+      try {
+        const profileResponse = await AuthService.getProfile()
+        localStorage.setItem("profile", JSON.stringify(profileResponse))
+      } catch (profileError) {
+        console.error("Failed to fetch profile on LinkedIn login:", profileError)
+      }
+
       return response;
     } catch (error: any) {
       console.error("LinkedIn login failed:", error);
@@ -99,6 +117,7 @@ export const loginWithLinkedIn = createAsyncThunk<AuthResponse, string>(
   }
 );
 
+// Update loginWithGoogle async thunk
 export const loginWithGoogle = createAsyncThunk<AuthResponse, string>(
   "auth/loginWithGoogle",
   async (code, { rejectWithValue }) => {
@@ -106,6 +125,15 @@ export const loginWithGoogle = createAsyncThunk<AuthResponse, string>(
       const response = await AuthService.googleLogin(code);
       localStorage.setItem("token", response.token);
       localStorage.setItem("user", JSON.stringify(response.user));
+
+      // Fetch and store profile after successful Google login
+      try {
+        const profileResponse = await AuthService.getProfile()
+        localStorage.setItem("profile", JSON.stringify(profileResponse))
+      } catch (profileError) {
+        console.error("Failed to fetch profile on Google login:", profileError)
+      }
+
       return response;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || "Google login failed");
@@ -135,6 +163,9 @@ export const registerUser = createAsyncThunk<RegisterResponse, RegisterData>(
 export const fetchProfile = createAsyncThunk<ProfileResponse>("auth/fetchProfile", async (_, { rejectWithValue }) => {
   try {
     const response = await AuthService.getProfile()
+
+    localStorage.setItem("profile", JSON.stringify(response))
+
     return response
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || "Failed to fetch profile")
@@ -146,6 +177,9 @@ export const updateProfile = createAsyncThunk<ProfileResponse, Partial<ProfileRe
   async (profileData, { rejectWithValue }) => {
     try {
       const response = await AuthService.updateProfile(profileData)
+
+      localStorage.setItem("profile", JSON.stringify(response))
+
       return response
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || "Failed to update profile")
@@ -156,6 +190,13 @@ export const updateProfile = createAsyncThunk<ProfileResponse, Partial<ProfileRe
 export const logoutUser = createAsyncThunk("auth/logout", async (_, { rejectWithValue }) => {
   try {
     await AuthService.logout()
+
+    // Clear all localStorage items
+    localStorage.removeItem("token")
+    localStorage.removeItem("user")
+    localStorage.removeItem("profile")
+    localStorage.removeItem("loginMethod")
+
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || "Logout failed")
   }
@@ -249,11 +290,11 @@ export const refreshUserById = createAsyncThunk<User, number>(
     try {
       // Fetch profile data which is accessible to authenticated users
       const profile = await AuthService.getProfile()
-      
+
       // Get current user from state to merge
       const state = getState() as any
       const currentUser = state.auth.user as User
-      
+
       if (!currentUser) {
         throw new Error("No current user found in state")
       }
@@ -267,8 +308,8 @@ export const refreshUserById = createAsyncThunk<User, number>(
         status: profile.status || currentUser.status,
         plan_type: profile.plan_type || currentUser.plan_type,
         // If status is active, treat as verified
-        email_verified_at: (profile.status?.toLowerCase() === 'active' && !currentUser.email_verified_at) 
-          ? new Date().toISOString() 
+        email_verified_at: (profile.status?.toLowerCase() === 'active' && !currentUser.email_verified_at)
+          ? new Date().toISOString()
           : currentUser.email_verified_at
       }
 
@@ -283,10 +324,11 @@ export const refreshUserById = createAsyncThunk<User, number>(
 
 const authSlice = createSlice({
   name: "auth",
-  initialState,  reducers: {
+  initialState, reducers: {
     clearAuth: (state) => {
       localStorage.removeItem("token")
       localStorage.removeItem("user")
+      localStorage.removeItem("profile")
       localStorage.removeItem("loginMethod")
       state.user = null
       state.profile = null
@@ -308,9 +350,12 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null
     },
+
+    // In the reducers section of createSlice
     restoreAuth: (state) => {
       const token = localStorage.getItem("token")
       const userStr = localStorage.getItem("user")
+      const profileStr = localStorage.getItem("profile") // Get profile from localStorage
 
       if (token && userStr) {
         try {
@@ -318,10 +363,16 @@ const authSlice = createSlice({
           const user = JSON.parse(userStr)
           state.user = user
           state.requiresPasswordSetup = checkRequiresPasswordSetup(user)
+
+          // Restore profile if available
+          if (profileStr) {
+            state.profile = JSON.parse(profileStr)
+          }
         } catch (e) {
           console.error("Failed to parse stored user data:", e)
           localStorage.removeItem("token")
           localStorage.removeItem("user")
+          localStorage.removeItem("profile") // Clean up profile too
         }
       }
     },

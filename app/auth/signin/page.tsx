@@ -38,7 +38,8 @@ export default function SignInPage() {
   const safeSearchParams = searchParams || new URLSearchParams();
 
   const dispatch = useAppDispatch()
-  const { loading, error, token } = useAppSelector((state) => state.auth)
+  const { loading, error, token, profile } = useAppSelector((state) => state.auth)
+
 
   useEffect(() => {
     dispatch(clearError())
@@ -47,6 +48,7 @@ export default function SignInPage() {
   useEffect(() => {
     const storedToken = localStorage.getItem('token')
     const storedUser = localStorage.getItem('user')
+    const storedProfile = localStorage.getItem('profile')
 
     if (storedToken && storedUser) {
       try {
@@ -105,7 +107,7 @@ export default function SignInPage() {
     localStorage.setItem("google_oauth_state", randomState);
 
     const redirectUri = (window.location.origin + window.location.pathname).replace(/\/$/, "");
-    console.log("redirectUri",redirectUri)
+    console.log("redirectUri", redirectUri)
     window.location.href = `https://backendcv.onlinetoolpot.com/public/api/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
   };
 
@@ -143,25 +145,25 @@ export default function SignInPage() {
             if (loginWithLinkedIn.fulfilled.match(result)) {
               console.log('LinkedIn login successful');
               console.log('User ID from backend:', result.payload.user.id);
-            console.log('Token in localStorage:', localStorage.getItem('token'));
-            console.log('User in localStorage:', localStorage.getItem('user'));
-            showSuccessToast("Signed in with LinkedIn", "Welcome back!");
-            setOauthStatus("idle")
+              console.log('Token in localStorage:', localStorage.getItem('token'));
+              console.log('User in localStorage:', localStorage.getItem('user'));
+              showSuccessToast("Signed in with LinkedIn", "Welcome back!");
+              setOauthStatus("idle")
 
-            router.push('/dashboard');
-          } else {
-            console.error('LinkedIn login failed:', result.payload);
-            const message = typeof result.payload === 'string' ? result.payload : 'LinkedIn sign-in failed';
+              router.push('/dashboard');
+            } else {
+              console.error('LinkedIn login failed:', result.payload);
+              const message = typeof result.payload === 'string' ? result.payload : 'LinkedIn sign-in failed';
+              showErrorToast("LinkedIn Sign-in Error", message);
+              setOauthStatus("error")
+            }
+          } catch (error) {
+            console.error('Error during LinkedIn authentication:', error);
+            const message = error instanceof Error ? error.message : 'Unexpected error during LinkedIn sign-in';
             showErrorToast("LinkedIn Sign-in Error", message);
             setOauthStatus("error")
-          }
-        } catch (error) {
-          console.error('Error during LinkedIn authentication:', error);
-          const message = error instanceof Error ? error.message : 'Unexpected error during LinkedIn sign-in';
-          showErrorToast("LinkedIn Sign-in Error", message);
-          setOauthStatus("error")
-        } finally {
-          setLinkedInLoading(false);
+          } finally {
+            setLinkedInLoading(false);
 
             const cleanUrl = window.location.pathname;
             window.history.replaceState({}, document.title, cleanUrl);
@@ -221,7 +223,7 @@ export default function SignInPage() {
                 dispatch(setCredentials({ token, user: { ...user, otp: null, otp_expiry: null, otp_count: 0, role: 'user', created_at: new Date().toISOString(), updated_at: new Date().toISOString(), is_verified: true, reset_token: null, reset_token_expiry: null, last_login: new Date().toISOString(), is_active: true, status: 'active', plan: 'free', email_verified_at: new Date().toISOString(), plan_type: 'monthly', trial_ends_at: null, subscription_ends_at: null, is_trial: false, is_premium: false } }));
               }
             }
-            
+
             const cleanUrl = window.location.pathname;
             window.history.replaceState({}, document.title, cleanUrl);
             showSuccessToast("Signed in with Google", "Welcome back!");
