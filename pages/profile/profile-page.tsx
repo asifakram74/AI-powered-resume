@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
 import { Badge } from "../../components/ui/badge"
 import { ChangePassword } from "./ChangePassword"
+import  SetPassword  from "./SetPassword"
 import { getPersonas } from "../../lib/redux/service/pasonaService"
 import { getCVs } from "../../lib/redux/service/resumeService"
 import { getCoverLetters } from "../../lib/redux/service/coverLetterService"
@@ -43,6 +44,7 @@ export function ProfilePage() {
   const [stats, setStats] = useState<StatItem[]>([])
   const [showEditModal, setShowEditModal] = useState(false)
   const [showPasswordDialog, setShowPasswordDialog] = useState(false)
+  const [showSetPasswordDialog, setShowSetPasswordDialog] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isUpdating, setIsUpdating] = useState(false)
   const [loadingError, setLoadingError] = useState<string | null>(null)
@@ -364,12 +366,31 @@ export function ProfilePage() {
                 <Button 
                   variant="outline" 
                   className="w-full justify-start h-12 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                  onClick={() => setShowPasswordDialog(true)}
+                  onClick={() => {
+                    const isSocialUser = user?.source?.toLowerCase() === 'google' || user?.source?.toLowerCase() === 'linkedin';
+                    const hasPassword = user?.has_password || (typeof window !== 'undefined' && localStorage.getItem('password_set') === 'true');
+                    
+                    if (isSocialUser && !hasPassword) {
+                      setShowSetPasswordDialog(true);
+                    } else {
+                      setShowPasswordDialog(true);
+                    }
+                  }}
                 >
                   <Shield className="h-4 w-4 mr-3 text-green-600" />
                   <div className="text-left">
-                    <p className="font-medium">Change Password</p>
-                    <p className="text-xs text-gray-500">Update your security</p>
+                    <p className="font-medium">
+                      {(user?.source?.toLowerCase() === 'google' || user?.source?.toLowerCase() === 'linkedin') && 
+                       !(user?.has_password || (typeof window !== 'undefined' && localStorage.getItem('password_set') === 'true'))
+                        ? 'Update Password' 
+                        : 'Change Password'}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {(user?.source?.toLowerCase() === 'google' || user?.source?.toLowerCase() === 'linkedin') && 
+                       !(user?.has_password || (typeof window !== 'undefined' && localStorage.getItem('password_set') === 'true'))
+                        ? 'Create a password for your account'
+                        : 'Update your security'}
+                    </p>
                   </div>
                 </Button>
 
@@ -525,9 +546,14 @@ export function ProfilePage() {
         </DialogContent>
       </Dialog>
 
-      <ChangePassword
-        open={showPasswordDialog}
-        onOpenChange={setShowPasswordDialog}
+      <ChangePassword 
+        open={showPasswordDialog} 
+        onOpenChange={setShowPasswordDialog} 
+      />
+      
+      <SetPassword
+        open={showSetPasswordDialog}
+        onOpenChange={setShowSetPasswordDialog}
       />
     </div>
   )

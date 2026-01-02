@@ -12,6 +12,7 @@ import {
   type ResetPasswordData,
   checkPasswordSetFlag,
 } from "../service/authService"
+import { setPassword as setPasswordApi, type SetPasswordData } from "../../api/settings"
 import { getUserById as getUserByIdApi } from "../service/userService"
 
 interface AuthState {
@@ -43,6 +44,18 @@ const checkRequiresPasswordSetup = (user: User | null): boolean => {
   // Check if password was already set (from localStorage)
   return !checkPasswordSetFlag()
 }
+
+export const setUserPassword = createAsyncThunk<{ message: string }, SetPasswordData>(
+  "auth/setUserPassword",
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AuthService.setPassword(data.password)
+      return { message: "Password set successfully" }
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || "Failed to set password")
+    }
+  }
+)
 
 export const loginUser = createAsyncThunk<AuthResponse, LoginCredentials>(
   "auth/loginUser",
@@ -315,6 +328,24 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Set User Password
+      .addCase(setUserPassword.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(setUserPassword.fulfilled, (state) => {
+        state.loading = false
+        state.requiresPasswordSetup = false
+        if (state.user) {
+          state.user = { ...state.user, has_password: true }
+          localStorage.setItem("user", JSON.stringify(state.user))
+        }
+      })
+      .addCase(setUserPassword.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+
       // Login User
       .addCase(loginUser.pending, (state) => {
         state.loading = true

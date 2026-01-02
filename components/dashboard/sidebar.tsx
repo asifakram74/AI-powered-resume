@@ -21,7 +21,7 @@ import { Button } from "../../components/ui/button"
 import { Avatar, AvatarFallback } from "../../components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu"
 import { useAppDispatch, useAppSelector } from "../../lib/redux/hooks"
-import { logoutUser } from "../../lib/redux/slices/authSlice"
+import { logoutUser, fetchProfile } from "../../lib/redux/slices/authSlice"
 import { useRouter } from "next/navigation"
 import { getCVs } from "../../lib/redux/service/resumeService"
 
@@ -143,7 +143,10 @@ export function Sidebar({
 
   useEffect(() => {
     setIsMounted(true)
-  }, [])
+    if (localStorage.getItem('token')) {
+      dispatch(fetchProfile())
+    }
+  }, [dispatch])
 
   const handleLogout = async () => {
     await dispatch(logoutUser())
@@ -223,6 +226,7 @@ export function Sidebar({
               <SidebarMenuItem key={item.id} className={`animate-fade-in-up animation-delay-${(index + 1) * 100}`}>
                 {setActivePage ? (
                   <SidebarMenuButton
+                    id={`tour-${item.id}`}
                     onClick={() => setActivePage(item.id)}
                     isActive={activePage === item.id}
                     className={`
@@ -251,6 +255,7 @@ export function Sidebar({
                 ) : (
                   <Link href={item.path} className="w-full block">
                     <SidebarMenuButton
+                      id={`tour-${item.id}`}
                       isActive={activePage === item.id}
                       className={`
                         w-full justify-start gap-3 px-4 py-3.5 text-left rounded-2xl transition-all duration-300

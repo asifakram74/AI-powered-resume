@@ -26,6 +26,7 @@ export type User = {
   reset_token_expiry?: string | null
   last_login?: string
   is_active?: boolean
+  has_password?: boolean
 }
 
 export type ProfileResponse = {
