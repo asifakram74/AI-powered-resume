@@ -34,6 +34,7 @@ export type ProfileResponse = {
   email: string
   phone?: string
   plan_type: string
+  role: string
   status: string
   cvs_count: number
   cover_letters_count: number

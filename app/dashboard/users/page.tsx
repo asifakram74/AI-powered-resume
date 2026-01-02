@@ -7,13 +7,13 @@ import { useEffect } from "react"
 import CreatePersonaPage from "../../../pages/persona/PersonaList"
 
 export default function Page() {
-  const { user } = useAppSelector((state) => state.auth)
+  const { profile } = useAppSelector((state) => state.auth)
   
-  const isAdmin = user?.role?.toLowerCase() === "admin"
+  const isAdmin = profile?.role?.toLowerCase() === "admin"
   
   if (!isAdmin) {
-      return <CreatePersonaPage user={user} />
+      return <CreatePersonaPage user={profile as any} />
   }
 
-  return <UserList user={user} />
+  return <UserList user={profile as any} />
 }

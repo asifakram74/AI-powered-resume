@@ -38,7 +38,7 @@ export default function SignInPage() {
   const safeSearchParams = searchParams || new URLSearchParams();
 
   const dispatch = useAppDispatch()
-  const { loading, error, token, profile } = useAppSelector((state) => state.auth)
+  const { loading, error, token } = useAppSelector((state) => state.auth)
 
 
   useEffect(() => {
@@ -48,7 +48,6 @@ export default function SignInPage() {
   useEffect(() => {
     const storedToken = localStorage.getItem('token')
     const storedUser = localStorage.getItem('user')
-    const storedProfile = localStorage.getItem('profile')
 
     if (storedToken && storedUser) {
       try {
