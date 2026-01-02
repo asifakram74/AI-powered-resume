@@ -225,6 +225,8 @@
   color: var(--color-foreground);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   border: 1px solid var(--color-border);
+  max-width: 400px;
+  width: 100%;
 }
 
 .dark .resumaic-driver-popover.driver-popover {
@@ -271,12 +273,14 @@
   cursor: pointer;
 }
 
-.resumaic-driver-popover .driver-popover-next-btn {
+.resumaic-driver-popover .driver-popover-next-btn,
+.resumaic-driver-popover .driver-popover-done-btn {
   background: linear-gradient(135deg, #70e4a8 0%, #4ade80 100%) !important;
   color: white !important;
 }
 
-.resumaic-driver-popover .driver-popover-next-btn:hover {
+.resumaic-driver-popover .driver-popover-next-btn:hover,
+.resumaic-driver-popover .driver-popover-done-btn:hover {
   opacity: 0.9;
   transform: translateY(-1px);
 }
@@ -340,4 +344,39 @@
 
 .dark .driver-popover-arrow-side-bottom.driver-popover-arrow {
   border-bottom-color: #1f2937;
+}
+
+/* Custom highlight ring for driver.js */
+.driver-highlighted-element {
+  box-shadow: 0 0 0 4px rgba(112, 228, 168, 0.3), 0 0 30px rgba(112, 228, 168, 0.1) !important;
+  border-radius: 8px !important;
+  z-index: 100001 !important;
+}
+
+/* Responsive styles for Driver.js Popover */
+@media (max-width: 640px) {
+  .resumaic-driver-popover.driver-popover {
+    width: auto !important;
+    max-width: calc(100vw - 32px) !important;
+    padding: 1.25rem !important;
+    /* On mobile, sometimes centering or fixed positioning is better, but driver.js handles positioning. */
+  }
+
+  .resumaic-driver-popover .driver-popover-title {
+    font-size: 1.1rem !important;
+  }
+
+  .resumaic-driver-popover .driver-popover-description {
+    font-size: 0.8125rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .resumaic-driver-popover .driver-popover-footer {
+    margin-top: 0.75rem !important;
+  }
+  
+  .resumaic-driver-popover .driver-popover-footer button {
+    padding: 0.4rem 0.8rem !important;
+    font-size: 0.8125rem !important;
+  }
 }

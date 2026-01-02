@@ -18,123 +18,6 @@ export function WelcomeTour() {
       const hasSeenTour = localStorage.getItem(`welcome_tour_seen_${user.id}`)
 
       if (!hasSeenTour) {
-        // Add custom styles for your theme
-        const style = document.createElement('style')
-        style.innerHTML = `
-          .custom-driver-popover {
-            font-family: 'Inter', -apple-system, sans-serif;
-            border-radius: 12px !important;
-            box-shadow: 0 10px 40px rgba(45, 54, 57, 0.15) !important;
-            border: 1px solid #e5e7eb !important;
-            overflow: hidden !important;
-          }
-          
-          .custom-driver-popover.driverjs-theme {
-            background-color: white !important;
-            color: #2d3639 !important;
-          }
-          
-          .dark .custom-driver-popover.driverjs-theme {
-            background-color: #1f2937 !important;
-            color: #f9fafb !important;
-            border-color: #374151 !important;
-          }
-          
-          .custom-driver-popover .driver-popover-title {
-            font-weight: 600 !important;
-            font-size: 1.125rem !important;
-            color: #2d3639 !important;
-            margin-bottom: 0.5rem !important;
-          }
-          
-          .dark .custom-driver-popover .driver-popover-title {
-            color: #f9fafb !important;
-          }
-          
-          .custom-driver-popover .driver-popover-description {
-            font-size: 0.875rem !important;
-            line-height: 1.5 !important;
-          }
-          
-          .custom-driver-popover .driver-popover-footer {
-            padding-top: 1rem !important;
-            margin-top: 1rem !important;
-            border-top: 1px solid #e5e7eb !important;
-            display: flex !important;
-            justify-content: space-between !important;
-            align-items: center !important;
-          }
-          
-          .dark .custom-driver-popover .driver-popover-footer {
-            border-top-color: #374151 !important;
-          }
-          
-          .custom-driver-popover .driver-popover-progress-text {
-            font-size: 0.75rem !important;
-            color: #6b7280 !important;
-            font-weight: 500 !important;
-          }
-          
-          .custom-driver-popover .driver-btn {
-            border-radius: 8px !important;
-            font-weight: 500 !important;
-            font-size: 0.875rem !important;
-            padding: 0.5rem 1rem !important;
-            transition: all 0.2s !important;
-            cursor: pointer !important;
-          }
-          
-          .custom-driver-popover .driver-btn.driver-next-btn {
-            background: linear-gradient(135deg, #70E4A8 0%, #4ACD8C 100%) !important;
-            color: white !important;
-            border: none !important;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
-          }
-          
-          .custom-driver-popover .driver-btn.driver-next-btn:hover {
-            opacity: 0.9 !important;
-            transform: translateY(-1px) !important;
-            box-shadow: 0 4px 12px rgba(74, 205, 140, 0.3) !important;
-          }
-          
-          .custom-driver-popover .driver-btn.driver-prev-btn {
-            background-color: transparent !important;
-            color: #6b7280 !important;
-            border: 1px solid #d1d5db !important;
-          }
-          
-          .dark .custom-driver-popover .driver-btn.driver-prev-btn {
-            color: #d1d5db !important;
-            border-color: #4b5563 !important;
-          }
-          
-          .custom-driver-popover .driver-btn.driver-prev-btn:hover {
-            background-color: #f9fafb !important;
-            color: #1f2937 !important;
-          }
-          
-          .dark .custom-driver-popover .driver-btn.driver-prev-btn:hover {
-            background-color: #374151 !important;
-            color: #f9fafb !important;
-          }
-          
-          .custom-driver-popover .driver-btn.driver-close-btn {
-             display: none !important; /* Hide standard close button in favor of clicking overlay or finish */
-          }
-          
-          .custom-driver-popover .driver-popover-arrow {
-            display: none !important;
-          }
-          
-          /* Custom highlight ring */
-          .driver-highlighted-element {
-            box-shadow: 0 0 0 4px rgba(112, 228, 168, 0.3), 0 0 30px rgba(112, 228, 168, 0.1) !important;
-            border-radius: 8px !important;
-            z-index: 100001 !important;
-          }
-        `
-        document.head.appendChild(style)
-
         // Initialize driver.js with your theme
         const driverObj = driver({
           showProgress: true,
@@ -143,18 +26,13 @@ export function WelcomeTour() {
           smoothScroll: true,
           overlayColor: theme === 'dark' ? 'rgba(29, 41, 57, 0.85)' : 'rgba(45, 54, 57, 0.85)',
           showButtons: ['next', 'previous', 'close'],
-          nextBtnText: 'Next →',
-          prevBtnText: '← Back',
-          doneBtnText: 'Get Started!',
+          nextBtnText: 'Next',
+          prevBtnText: 'Back',
+          doneBtnText: 'Finish',
           progressText: 'Step {{current}} of {{total}}',
-          popoverClass: 'custom-driver-popover',
+          popoverClass: 'resumaic-driver-popover',
 
           onDestroyed: () => {
-            // Remove custom styles
-            if (document.head.contains(style)) {
-              document.head.removeChild(style)
-            }
-
             // Mark tour as seen when finished or skipped
             if (user?.id) {
               localStorage.setItem(`welcome_tour_seen_${user.id}`, 'true')
