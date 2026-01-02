@@ -210,7 +210,7 @@ export default function SignUpPage() {
                   source: "google",
                 };
                 localStorage.setItem("user", JSON.stringify(user));
-                dispatch(setCredentials({ token,user }));
+                dispatch(setCredentials({ token, user: user as any }));
               }
             }
             const cleanUrl = window.location.pathname;

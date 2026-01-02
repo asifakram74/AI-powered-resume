@@ -27,6 +27,7 @@
     "clsx": "^2.1.1",
     "cmdk": "1.0.4",
     "docx": "^9.5.1",
+    "driver.js": "^1.4.0",
     "face-api.js": "^0.22.2",
     "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",

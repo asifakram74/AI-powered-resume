@@ -226,6 +226,7 @@ export function Sidebar({
               <SidebarMenuItem key={item.id} className={`animate-fade-in-up animation-delay-${(index + 1) * 100}`}>
                 {setActivePage ? (
                   <SidebarMenuButton
+                    id={`tour-${item.id}`}
                     onClick={() => setActivePage(item.id)}
                     isActive={activePage === item.id}
                     className={`
@@ -254,6 +255,7 @@ export function Sidebar({
                 ) : (
                   <Link href={item.path} className="w-full block">
                     <SidebarMenuButton
+                      id={`tour-${item.id}`}
                       isActive={activePage === item.id}
                       className={`
                         w-full justify-start gap-3 px-4 py-3.5 text-left rounded-2xl transition-all duration-300
