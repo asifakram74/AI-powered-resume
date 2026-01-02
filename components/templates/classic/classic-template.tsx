@@ -115,7 +115,7 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
       </div>
     </div>
   );
-
+  
   const ExperienceHeader = ({ exp }: { exp: CVData["experience"][number] }) => (
     <div className="flex justify-between items-start mb-2">
       <div>
