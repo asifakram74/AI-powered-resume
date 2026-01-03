@@ -1,23 +1,72 @@
 "use client"
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { renderToString } from 'react-dom/server'
 import { driver } from "driver.js"
 import "driver.js/dist/driver.css"
-import { useAppSelector } from '../../lib/redux/hooks'
+import { useAppSelector, useAppDispatch } from '../../lib/redux/hooks'
 import { useTheme } from 'next-themes'
-import { Sparkles, UserCircle, FileText, Mail, Target, Settings } from 'lucide-react'
+import { updateProfile } from "../../lib/redux/slices/authSlice"
 
 export function WelcomeTour() {
-  const { user } = useAppSelector((state) => state.auth)
+  const { user, profile } = useAppSelector((state) => state.auth)
+  const dispatch = useAppDispatch()
   const { theme } = useTheme()
+  const [hasRunTour, setHasRunTour] = useState(false)
+
+  // Check localStorage to see if tour has run before
+  useEffect(() => {
+    const tourCompleted = localStorage.getItem('welcomeTourCompleted')
+    if (tourCompleted === 'true') {
+      setHasRunTour(true)
+    }
+  }, [])
+
+  // Function to mark tour as completed
+  const markTourAsCompleted = () => {
+    localStorage.setItem('welcomeTourCompleted', 'true')
+    setHasRunTour(true)
+    
+    // Also update the backend if user is logged in
+    if (user?.id) {
+      try {
+        dispatch(updateProfile({
+          first_login: 0 
+        })).unwrap()
+        console.log('First login status updated to 1 (tour completed)')
+      } catch (error) {
+        console.error('Error updating first login status:', error)
+      }
+    }
+  }
 
   useEffect(() => {
-    // Check if user is logged in, is a regular user, and hasn't seen the tour
-    if (user && user.role === 'user') {
-      const hasSeenTour = localStorage.getItem(`welcome_tour_seen_${user.id}`)
+    // Debug logging to check values
+    console.log('WelcomeTour Debug:', {
+      userId: user?.id,
+      userRole: user?.role,
+      profileRole: profile?.role,
+      profileFirstLogin: profile?.first_login,
+      profilePlanType: profile?.plan_type,
+      hasRunTour
+    })
 
-      if (!hasSeenTour) {
+    // Check if profile exists and user is logged in and tour hasn't run yet
+    if (profile && user?.id && !hasRunTour) {
+      // For Google/LinkedIn login, check both user.role and profile.role
+      const userRole = user?.role || profile?.role;
+      const isRegularUser = userRole === 'User' || userRole === 'user';
+      const isNotProPlan = profile?.plan_type?.toLowerCase() !== 'pro';
+      
+      console.log('Tour conditions:', {
+        isRegularUser,
+        isNotProPlan,
+        shouldShowTour: isRegularUser && isNotProPlan
+      })
+
+      // Show tour for regular users (not Admin) who are not on Pro plan
+      // This will run only once because hasRunTour prevents re-running
+      if (isRegularUser && isNotProPlan) {
         // Initialize driver.js with your theme
         const driverObj = driver({
           showProgress: true,
@@ -33,10 +82,14 @@ export function WelcomeTour() {
           popoverClass: 'resumaic-driver-popover',
 
           onDestroyed: () => {
-            // Mark tour as seen when finished or skipped
-            if (user?.id) {
-              localStorage.setItem(`welcome_tour_seen_${user.id}`, 'true')
-            }
+            // Mark tour as completed when finished
+            markTourAsCompleted()
+          },
+
+          onCloseClick: () => {
+            // Also mark when user manually closes the tour
+            markTourAsCompleted()
+            driverObj.destroy()
           },
 
           steps: [
@@ -170,18 +223,16 @@ export function WelcomeTour() {
 
         // Add a small delay to ensure UI is fully rendered
         const timer = setTimeout(() => {
+          console.log('Starting tour...')
           driverObj.drive()
         }, 1500)
 
         return () => {
           clearTimeout(timer)
-          // Note: we don't destroy driver here to allow it to finish animation if component unmounts quickly,
-          // but strictly speaking we should if it's running. 
-          // However, the onDestroyed callback handles style cleanup.
         }
       }
     }
-  }, [user, theme])
+  }, [user, theme, profile, dispatch, hasRunTour])
 
   return null
 }

@@ -14,7 +14,7 @@ import { showSuccessToast, showErrorToast } from "../../components/ui/toast"
 import { Menu } from "lucide-react"
 import { Input } from "../../components/ui/input"
 import { Label } from "../../components/ui/label"
-import { WelcomeTour } from "../../components/dashboard/WelcomeTour"
+// import { WelcomeTour } from "../../components/dashboard/WelcomeTour"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isClient, setIsClient] = useState(false)
@@ -147,7 +147,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <ProtectedRoute>
       <SidebarProvider>
-        <WelcomeTour />
+        {/* <WelcomeTour /> */}
         <div className="flex min-h-screen w-full">
           <Sidebar user={profile as any} />
           <main className="flex-1 bg-gray-50 relative">
