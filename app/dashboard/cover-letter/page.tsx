@@ -4,6 +4,6 @@ import { useAppSelector } from "../../../lib/redux/hooks"
 import { CoverLetterPage } from "../../../pages/cover-letter/CoverLetterList"
 
 export default function Page() {
-  const { user } = useAppSelector((state) => state.auth)
-  return <CoverLetterPage user={user} />
+  const { user, profile } = useAppSelector((state) => state.auth)
+  return <CoverLetterPage user={profile as any} />
 }

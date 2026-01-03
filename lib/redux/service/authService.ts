@@ -39,6 +39,7 @@ export type ProfileResponse = {
   cvs_count: number
   cover_letters_count: number
   ats_resumes_count: number
+  first_login: number
 }
 
 export type RegisterResponse = {

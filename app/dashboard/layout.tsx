@@ -18,7 +18,7 @@ import { WelcomeTour } from "../../components/dashboard/WelcomeTour"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isClient, setIsClient] = useState(false)
-  const { user, requiresPasswordSetup } = useAppSelector((state: RootState) => state.auth)
+  const { user, requiresPasswordSetup, profile } = useAppSelector((state: RootState) => state.auth)
   const router = useRouter()
   const pathname = usePathname()
   const dispatch = useAppDispatch()
@@ -149,7 +149,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <SidebarProvider>
         <WelcomeTour />
         <div className="flex min-h-screen w-full">
-          <Sidebar user={user} />
+          <Sidebar user={profile as any} />
           <main className="flex-1 bg-gray-50 relative">
             {/* {requiresPasswordSetup && user?.role?.toLowerCase() !== 'admin' && 
               <Dialog open>

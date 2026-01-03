@@ -219,7 +219,7 @@ export default function SignInPage() {
                   source: "google",
                 };
                 localStorage.setItem("user", JSON.stringify(user));
-                dispatch(setCredentials({ token, user: { ...user, otp: null, otp_expiry: null, otp_count: 0, role: 'user', created_at: new Date().toISOString(), updated_at: new Date().toISOString(), is_verified: true, reset_token: null, reset_token_expiry: null, last_login: new Date().toISOString(), is_active: true, status: 'active', plan: 'free', email_verified_at: new Date().toISOString(), plan_type: 'monthly', trial_ends_at: null, subscription_ends_at: null, is_trial: false, is_premium: false } }));
+                dispatch(setCredentials({ token, user: user as any }));
               }
             }
 

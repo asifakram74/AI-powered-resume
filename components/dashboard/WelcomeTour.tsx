@@ -14,7 +14,7 @@ export function WelcomeTour() {
 
   useEffect(() => {
     // Check if user is logged in, is a regular user, and hasn't seen the tour
-    if (user && user.role === 'User') {
+    if (user && user.role === 'user') {
       const hasSeenTour = localStorage.getItem(`welcome_tour_seen_${user.id}`)
 
       if (!hasSeenTour) {

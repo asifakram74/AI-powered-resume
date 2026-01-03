@@ -192,7 +192,7 @@ export default function SetPassword({
             </Button>
             <Button type="submit" disabled={isLoading} className="resumaic-gradient-green text-white hover:opacity-90">
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Update Password
+              Add Password
             </Button>
           </DialogFooter>
         </form>
