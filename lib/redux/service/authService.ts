@@ -27,6 +27,7 @@ export type User = {
   last_login?: string
   is_active?: boolean
   has_password?: boolean
+  first_login: number
 }
 
 export type ProfileResponse = {
