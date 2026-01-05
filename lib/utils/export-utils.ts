@@ -22,23 +22,26 @@ export const exportToPNG = async (elementId: string, filename: string = 'cv.png'
 // DOCX Export using server API
 export const exportToDOCX = async (htmlContent: string, filename: string = 'cv.docx') => {
   try {
-    console.log('Making request to:', '  https://backendserver.resumaic.com/api/export-docx');
+    console.log('Making request to:', 'https://backendserver.resumaic.com/api/export-docx');
+    // console.log('Making request to:', 'https://stagingnode.resumaic.com/api/export-docx');
     console.log('Request payload size:', JSON.stringify({ html: htmlContent }).length);
     
     try {
-      const testResponse = await fetch('  https://backendserver.resumaic.com', { method: 'HEAD' });
+      const testResponse = await fetch('https://backendserver.resumaic.com', { method: 'HEAD' });
+      // const testResponse = await fetch('https://stagingnode.resumaic.com', { method: 'HEAD' });
       console.log('Server reachable:', testResponse.ok);
     } catch (testError) {
       console.error('Server not reachable:', testError);
     }
     
-    const response = await fetch('  https://backendserver.resumaic.com/api/export-docx', {
+    const response = await fetch('https://backendserver.resumaic.com/api/export-docx', {
+    // const response = await fetch('https://stagingnode.resumaic.com/api/export-docx', {
       method: 'POST',
-      headers: {
+    headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        html: htmlContent,
+      html: htmlContent,
       }),
     })
 
@@ -138,7 +141,7 @@ const BROWSERLESS_TOKEN = process.env.NEXT_PUBLIC_BROWSERLESS_TOKEN || ''
 const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_BASE_URL || 'https://backendserver.resumaic.com'
 
 export const exportToPDFViaBrowserless = async (
-  htmlContent: string,
+htmlContent: string,
   filename: string = 'cv.pdf',
   _token: string = BROWSERLESS_TOKEN
 ) => {
@@ -146,7 +149,7 @@ export const exportToPDFViaBrowserless = async (
     const endpoint = `${BACKEND_BASE_URL}/api/cv-export/pdf`
     const response = await fetch(endpoint, {
       method: 'POST',
-      headers: {
+    headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ html: htmlContent, filename }),
@@ -178,7 +181,7 @@ export const exportToPDFViaBrowserless = async (
 }
 
 export const exportToPNGViaBrowserless = async (
-  htmlContent: string,
+htmlContent: string,
   filename: string = 'cv.png',
   _token: string = BROWSERLESS_TOKEN
 ) => {
@@ -186,7 +189,7 @@ export const exportToPNGViaBrowserless = async (
     const endpoint = `${BACKEND_BASE_URL}/api/cv-export/png`
     const response = await fetch(endpoint, {
       method: 'POST',
-      headers: {
+    headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ html: htmlContent, filename }),

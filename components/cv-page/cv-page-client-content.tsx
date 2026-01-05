@@ -388,6 +388,7 @@ export function CVPageClientContent() {
           } else if (personaData) {
             const personaText = convertPersonaToText(personaData)
             const response = await fetch("https://backendserver.resumaic.com/api/optimize-cv", {
+            // const response = await fetch("https://stagingnode.resumaic.com/api/optimize-cv", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ extractedText: personaText }),
@@ -445,10 +446,12 @@ export function CVPageClientContent() {
           const personaText = convertPersonaToText(personaData)
 
           console.log("Making request to:", "https://backendserver.resumaic.com/api/optimize-cv")
+          // console.log("Making request to:", "https://stagingnode.resumaic.com/api/optimize-cv")
           console.log("Request payload size:", JSON.stringify({ extractedText: personaText }).length)
 
           try {
             const testResponse = await fetch("https://backendserver.resumaic.com/", { method: "HEAD" })
+            // const testResponse = await fetch("https://stagingnode.resumaic.com/", { method: "HEAD" })
 
             console.log("Server reachable:", testResponse.ok)
           } catch (testError) {
@@ -456,6 +459,7 @@ export function CVPageClientContent() {
           }
 
           const response = await fetch("https://backendserver.resumaic.com/api/optimize-cv", {
+          // const response = await fetch("https://stagingnode.resumaic.com/api/optimize-cv", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -683,16 +687,19 @@ export function CVPageClientContent() {
       const personaText = convertPersonaToText(persona)
 
       console.log("Making request to:", "https://backendserver.resumaic.com/api/optimize-cv")
+      // console.log("Making request to:", "https://stagingnode.resumaic.com/api/optimize-cv")
       console.log("Request payload size:", JSON.stringify({ extractedText: personaText }).length)
 
       try {
         const testResponse = await fetch("https://backendserver.resumaic.com", { method: "HEAD" })
+        // const testResponse = await fetch("https://stagingnode.resumaic.com", { method: "HEAD" })
         console.log("Server reachable:", testResponse.ok)
       } catch (testError) {
         console.error("Server not reachable:", testError)
       }
 
       const response = await fetch("https://backendserver.resumaic.com/api/optimize-cv", {
+      // const response = await fetch("https://stagingnode.resumaic.com/api/optimize-cv", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -814,6 +821,7 @@ export function CVPageClientContent() {
         } else if (format === "docx") {
           // Keep existing DOCX export flow via backend
           const response = await fetch(`https://backendserver.resumaic.com/api/cv-export/docx`, {
+          // const response = await fetch(`https://stagingnode.resumaic.com/api/cv-export/docx`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ html: cvElement.outerHTML, filename }),
