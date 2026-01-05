@@ -27,7 +27,8 @@ export type User = {
   last_login?: string
   is_active?: boolean
   has_password?: boolean
-  first_login: number
+  first_login: number | string | boolean
+  set_password?: string | boolean
 }
 
 export type ProfileResponse = {
@@ -40,7 +41,7 @@ export type ProfileResponse = {
   cvs_count: number
   cover_letters_count: number
   ats_resumes_count: number
-  first_login: number
+  first_login: number | string | boolean
 }
 
 export type RegisterResponse = {

@@ -32,7 +32,7 @@ export interface User {
   role: string
   status: string
   plan: string
-  first_login: boolean
+  first_login: boolean | string | number
   email_verified_at: string
   plan_type: string
   created_at: string
@@ -46,6 +46,7 @@ export interface User {
   trial_ends_at: string
   source: string
   is_verified?: boolean
+  set_password?: string | boolean
 }
 
 export interface CreateUserData {

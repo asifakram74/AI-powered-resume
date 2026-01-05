@@ -13,11 +13,17 @@ export function WelcomeTour() {
   const { theme } = useTheme()
 
   useEffect(() => {
-    // Check if user is logged in, is a regular user, and hasn't seen the tour
-    if (user && user.role === 'User') {
+    // Check if user is logged in
+    if (user) {
+      // Check for first_login flag (handle boolean, string '1', or number 1)
+      const isFirstLogin = user.first_login === true || user.first_login === '1' || user.first_login === 1
       const hasSeenTour = localStorage.getItem(`welcome_tour_seen_${user.id}`)
+      
+      // Only show tour if user is Active (email verified) to avoid conflict with verification popup
+      const isActive = user.status === 'Active'
 
-      if (!hasSeenTour) {
+      // Show tour if it's first login, hasn't been seen in this browser session, and user is Active
+      if (isFirstLogin && !hasSeenTour && isActive) {
         // Initialize driver.js with your theme
         const driverObj = driver({
           showProgress: true,
