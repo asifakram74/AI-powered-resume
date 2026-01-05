@@ -54,8 +54,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [router]);
 
-  const isEmailVerified = Boolean(user?.email_verified_at) || user?.status?.toLowerCase() === 'active'
-  const isSocialLogin = loginMethod !== 'email' && (user?.source?.toLowerCase() === 'google' || user?.source?.toLowerCase() === 'linkedin')
+  // const isEmailVerified = Boolean(user?.email_verified_at) || user?.status?.toLowerCase() === 'active'
+  const isEmailVerified =
+    Boolean(user?.email_verified_at && profile?.email_verified_at) ||
+    user?.status?.toLowerCase() === 'active' ||
+    profile?.status?.toLowerCase() === 'active'
+
+  const isSocialLogin = loginMethod !== 'email' && (user?.source?.toLowerCase() === 'google' && profile?.source?.toLowerCase() === 'google' || user?.source?.toLowerCase() === 'linkedin' && profile?.source?.toLowerCase() === 'linkedin') 
   // const handleSetPassword = async () => {
   //   if (password !== confirmPassword) {
   //     showErrorToast("Error", "Passwords do not match")
@@ -262,7 +267,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             {/* Main Content */}
             <div className={`p-6 ${!isEmailVerified ? 'blur-sm pointer-events-none' : ''}`}>
-               {children}
+              {children}
             </div>
           </main>
         </div>

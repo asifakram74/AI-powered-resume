@@ -36,7 +36,8 @@ export default function VerifyEmailPage() {
 
     const verify = async () => {
       try {
-        const res = await fetch(`https://backendcv.onlinetoolpot.com/public/api/verify-email-address?token=${token}`)
+        // const res = await fetch(`https://backendcv.onlinetoolpot.com/public/api/verify-email-address?token=${token}`)
+        const res = await fetch(`https://stagingbackend.resumaic.com/public/api/verify-email-address?token=${token}`)
         const data = await res.json()
         if (data && (data.status === true || data.success === true)) {
           setSuccess(true)
@@ -70,21 +71,9 @@ export default function VerifyEmailPage() {
             <ShieldCheck className="h-5 w-5 text-blue-600" />
             <span className="text-xs font-medium text-gray-600">Secure Verification</span>
           </div>
-          <CardTitle className="text-xl font-bold text-gray-900">Verify Your Email</CardTitle>
-          <CardDescription>
-            {loading && "Please wait while we verify your email."}
-            {!loading && success && "Verification complete. Welcome to Resumic!"}
-            {!loading && success === false && "We couldn't verify your email with this link."}
-          </CardDescription>
+          <CardTitle className="text-xl font-bold text-gray-900">{message}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-3 mb-4">
-            {loading && <Loader2 className="h-5 w-5 animate-spin text-blue-600" />}
-            {!loading && success && <CheckCircle2 className="h-5 w-5 text-emerald-600" />}
-            {!loading && success === false && <AlertCircle className="h-5 w-5 text-red-600" />}
-            <p className="text-sm text-gray-700">{message}</p>
-          </div>
-
           {!loading && success === false && (
             <div className="space-y-3 mb-4">
               <p className="text-sm text-gray-600">Try the following:</p>

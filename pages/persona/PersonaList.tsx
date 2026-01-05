@@ -69,7 +69,7 @@ function CreatePersonaPage({ user }: PageProps) {
   const [personas, setPersonas] = useState<CVData[]>([])
   const [viewMode, setViewMode] = useState<"grid" | "table">("table");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
+  const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingPersona, setEditingPersona] = useState<CVData | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -159,11 +159,11 @@ const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
       const data = await getPersonaById(Number.parseInt(persona.id));
       console.log('Raw persona data from API:', data);
       console.log('Profile picture from API:', data.profile_picture);
-      
+
       // The profile picture URL is now constructed in the service layer
       const profilePictureUrl = data.profile_picture || "";
       console.log('Profile picture URL:', profilePictureUrl);
-      
+
       setEditingPersona({
         ...persona,
         personalInfo: {
@@ -323,12 +323,12 @@ const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
       toast.error("Free plan users can only create up to 3 CVs. Please upgrade your plan to create more.");
       return;
     }
-    
+
     window.open(`/create-cv?personaId=${persona.id}`, '_blank')
   }
 
   const handlePersonaGenerated = async (newPersona: CVData, profilePictureFile?: File | null) => {
-    console.log("handlePersonaGenerated called with:", { 
+    console.log("handlePersonaGenerated called with:", {
       newPersona: newPersona.personalInfo.fullName,
       profilePictureFile: profilePictureFile ? {
         name: profilePictureFile.name,
@@ -406,12 +406,12 @@ const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
         console.log("Creating persona with data:", personaData);
         response = await createPersona(personaData);
         console.log("Create persona response:", response);
-        
+
         if (!response || !response.id) {
           console.error("Invalid response from createPersona:", response);
           throw new Error("Failed to create persona: Invalid response from server");
         }
-        
+
         // Step 2: Upload profile picture if provided
         if (profilePictureFile) {
           try {
@@ -479,7 +479,7 @@ const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
       setShowForm(false);
       setPrefilledData(null);
       setEditingPersona(null);
-      
+
       toast.success(editingPersona ? "Persona updated successfully" : "Persona created successfully");
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -549,11 +549,11 @@ const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
                 className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
                 onClick={async (e) => {
 
-                if ((user as any)?.plan_type?.toLowerCase() === "free" && personas.length >= 3 && (user?.role?.toLowerCase() !== 'admin')) {
-                  e.preventDefault();
-                  setIsUpgradeDialogOpen(true);
-                  return;
-                }
+                  if ((user as any)?.plan_type?.toLowerCase() === "free" && personas.length >= 3 && (user?.role?.toLowerCase() !== 'admin')) {
+                    e.preventDefault();
+                    setIsUpgradeDialogOpen(true);
+                    return;
+                  }
                   setShowForm(false);
                   setPrefilledData(null);
                   setEditingPersona(null);
@@ -725,8 +725,8 @@ const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
                             <div className="flex items-center gap-3 min-w-0">
                               <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors flex-shrink-0">
                                 {persona.personalInfo.profilePicture && (
-                                  <AvatarImage 
-                                    src={persona.personalInfo.profilePicture} 
+                                  <AvatarImage
+                                    src={persona.personalInfo.profilePicture}
                                     alt={persona.personalInfo.fullName}
                                   />
                                 )}
@@ -746,13 +746,13 @@ const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
                                 </AvatarFallback>
                               </Avatar>
                               <div className="min-w-0 flex-1">
-                                <div 
-                                  className="font-medium truncate cursor-help" 
+                                <div
+                                  className="font-medium truncate cursor-help"
                                   title={persona.personalInfo.fullName}
                                 >
                                   {persona.personalInfo.fullName}
                                 </div>
-                                <div 
+                                <div
                                   className="text-sm text-gray-600 truncate cursor-help"
                                   title={persona.personalInfo.email}
                                 >
@@ -762,8 +762,8 @@ const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
                             </div>
                           </TableCell>
                           <TableCell className="w-[15%] px-4">
-                            <div 
-                              className="truncate cursor-help" 
+                            <div
+                              className="truncate cursor-help"
                               title={persona.personalInfo.jobTitle}
                             >
                               {persona.personalInfo.jobTitle}
@@ -813,12 +813,12 @@ const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
                             </div>
                           </TableCell> */}
                           <TableCell className="w-[11%] px-4">
-                            <div 
-                              className="truncate cursor-help text-sm" 
-                              title={new Date(persona.createdAt).toLocaleDateString('en-US', { 
-                                year: 'numeric', 
-                                month: 'long', 
-                                day: 'numeric' 
+                            <div
+                              className="truncate cursor-help text-sm"
+                              title={new Date(persona.createdAt).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
                               })}
                             >
                               {new Date(persona.createdAt).toLocaleDateString()}
@@ -875,8 +875,8 @@ const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
                         {persona.personalInfo.profilePicture && (
-                          <AvatarImage 
-                            src={persona.personalInfo.profilePicture} 
+                          <AvatarImage
+                            src={persona.personalInfo.profilePicture}
                             alt={persona.personalInfo.fullName}
                           />
                         )}

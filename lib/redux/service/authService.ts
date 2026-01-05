@@ -42,6 +42,8 @@ export type ProfileResponse = {
   cover_letters_count: number
   ats_resumes_count: number
   first_login: number | string | boolean
+  email_verified_at: string | null
+  source?: string
 }
 
 export type RegisterResponse = {

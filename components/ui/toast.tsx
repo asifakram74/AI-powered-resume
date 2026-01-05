@@ -7,7 +7,7 @@ export const showSuccessToast = (message: string, description?: string) => {
   toast.success(message, {
     description,
     duration: 4000,
-    icon: <CheckCircle className="h-5 w-5 text-green-500" />,
+    icon: <CheckCircle className="h-5 w-5 white" />,
     style: {
       background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
       color: "white",

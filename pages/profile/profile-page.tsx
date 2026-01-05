@@ -382,7 +382,7 @@ export function ProfilePage() {
                     <p className="font-medium">
                       {(user?.source?.toLowerCase() === 'google' || user?.source?.toLowerCase() === 'linkedin') && 
                        !(user?.has_password || (typeof window !== 'undefined' && localStorage.getItem('password_set') === 'true'))
-                        ? 'Update Password' 
+                        ? 'Create Password' 
                         : 'Change Password'}
                     </p>
                     <p className="text-xs text-gray-500">

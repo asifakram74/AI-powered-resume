@@ -78,7 +78,6 @@ export function ResumePage({ user }: PageProps) {
 
   // Data fetching handled in combined effect below (CVs + personas)
 
-
   useEffect(() => {
     const fetchData = async () => {
       try {
