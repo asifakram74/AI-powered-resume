@@ -71,28 +71,29 @@ export default function SignUpPage() {
     }
   }, [token, router])
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const token = localStorage.getItem('token');
-      const userStr = localStorage.getItem('user');
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     const token = localStorage.getItem('token');
+  //     const userStr = localStorage.getItem('user');
 
-      if (token && userStr) {
-        try {
-          const user = JSON.parse(userStr);
-          if (user && user.id && window.location.pathname !== '/dashboard') {
-            console.log('Force redirecting to dashboard');
-            router.push('/dashboard');
-          }
-        } catch (e) {
-          console.error('Error parsing user:', e);
-        }
-      }
-    }, 1000);
+  //     if (token && userStr) {
+  //       try {
+  //         const user = JSON.parse(userStr);
+  //         if (user && user.id && window.location.pathname !== '/dashboard') {
+  //           console.log('Force redirecting to dashboard');
+  //           router.push('/dashboard');
+  //         }
+  //       } catch (e) {
+  //         console.error('Error parsing user:', e);
+  //       }
+  //     }
+  //   }, 1000);
 
-    return () => clearInterval(interval);
-  }, [router]);
+  //   return () => clearInterval(interval);
+  // }, [router]);
 
   // For LinkedIn login
+
   const handleLinkedInSignUp = () => {
     localStorage.setItem("oauth_provider", "linkedin");
     const randomState = `secureRandom${Math.floor(Math.random() * 10000)}${Date.now()}`;
@@ -269,7 +270,7 @@ export default function SignUpPage() {
     // Validate email before proceeding with registration
     try {
       const emailValidation = await validateEmailAPI(email)
-      
+
       if (!emailValidation.success) {
         setEmailError("Please enter a valid email address")
         showErrorToast("Email validation failed. Please enter your valid email address.")
@@ -298,7 +299,7 @@ export default function SignUpPage() {
       if (result.payload && typeof result.payload === 'object' && 'errors' in result.payload) {
         const payload = result.payload as { message: string; errors: Record<string, string[]> }
         setFieldErrors(payload.errors)
-        
+
         // Handle specific email error with user-friendly message
         if (payload.errors.email && payload.errors.email.includes("The email has already been taken.")) {
           setEmailError("This email is already registered. Please log in instead.")

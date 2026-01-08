@@ -83,7 +83,7 @@ export const getAllPersonas = async (): Promise<PersonaResponse[]> => {
 
 export const getPersonas = async (userId: string): Promise<PersonaResponse[]> => {
   try {
-    const response = await api.get(`/personas?user_id=${userId}`, { timeout: 10000 });
+    const response = await api.get(`/personas?user_id=${userId}`);
     const personas = response.data.data;
     return personas.map((persona: PersonaResponse) => ({
       ...persona,

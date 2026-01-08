@@ -32,9 +32,7 @@ export const getAllCoverLetters = async (): Promise<CoverLetter[]> => {
 
 export const getCoverLetters = async (userId: string): Promise<CoverLetter[]> => {
   try {
-    const response = await api.get(`/cover-letters?user_id=${userId}`, {
-      timeout: 10000
-    });
+    const response = await api.get(`/cover-letters?user_id=${userId}`);
     return response.data
   } catch (error) {
     console.error("Error fetching cover letters:", error)

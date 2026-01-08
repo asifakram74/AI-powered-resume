@@ -61,28 +61,29 @@ export default function SignInPage() {
     }
   }, [token, router])
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const token = localStorage.getItem('token');
-      const userStr = localStorage.getItem('user');
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     const token = localStorage.getItem('token');
+  //     const userStr = localStorage.getItem('user');
 
-      if (token && userStr) {
-        try {
-          const user = JSON.parse(userStr);
-          if (user && user.id && window.location.pathname !== '/dashboard') {
-            console.log('Force redirecting to dashboard');
-            router.push('/dashboard');
-          }
-        } catch (e) {
-          console.error('Error parsing user:', e);
-        }
-      }
-    }, 1000);
+  //     if (token && userStr) {
+  //       try {
+  //         const user = JSON.parse(userStr);
+  //         if (user && user.id && window.location.pathname !== '/dashboard') {
+  //           console.log('Force redirecting to dashboard');
+  //           router.push('/dashboard');
+  //         }
+  //       } catch (e) {
+  //         console.error('Error parsing user:', e);
+  //       }
+  //     }
+  //   }, 1000);
 
-    return () => clearInterval(interval);
-  }, [router]);
+  //   return () => clearInterval(interval);
+  // }, [router]);
 
   // For LinkedIn login
+  
   const handleLinkedInSignIn = () => {
     setLinkedInLoading(true)
     setOauthProvider("linkedin")

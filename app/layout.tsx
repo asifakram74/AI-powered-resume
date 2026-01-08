@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     siteName: "Resumaic",
     images: [
       {
-        url: "https://app.resumaic.com/resumic.png", // image in /public folder
+        url: "https://app.resumaic.com/resumic.png",
         width: 1200,
         height: 630,
         alt: "Resumaic App Preview",
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     description:
       "Design your perfect resume with AI assistance. Resumaic helps you stand out and land your dream job faster.",
     images: ["https://app.resumaic.com/resumic.png"],
-    creator: "@resumaic", // optional — if you have a Twitter/X handle
+    creator: "@resumaic",
   },
   robots: {
     index: false,

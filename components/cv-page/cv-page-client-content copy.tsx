@@ -81,78 +81,132 @@ interface CVTemplate {
   category: "modern" | "classic" | "creative" | "minimal"
 }
 
-interface CVFormData {
-  user_id: string;
-  layout_id: string;
-  personas_id: string;
-  title: string;
-  job_description: string;
-  persona?: PersonaResponse | null;
-}
-
 const templates: CVTemplate[] = [
-  {
-    id: "classic",
-    name: "Classic Traditional",
-    description: "Traditional format ideal for conservative industries",
-    category: "classic",
-  },
-  {
-    id: "classic-2",
-    name: "Classic Traditional 2",
-    description: "An updated classic format for conservative industries",
-    category: "classic",
-  },
-  {
-    id: "classic-3",
-    name: "Classic Traditional 3",
-    description: "Another variation of the classic format",
-    category: "classic",
-  },
-  {
-    id: "classic-4",
-    name: "Classic Traditional 4",
-    description: "Premium classic format with enhanced layout",
-    category: "classic",
-  },
+//  {
+//   id: "modern",
+//   name: "Modern Professional",
+//   description: "Clean, modern design perfect for tech and business professionals",
+//   category: "modern",
+// },
+// {
+//   id: "modern-2",
+//   name: "Modern LOREN",
+//   description: "Dark blue curved sidebar with elegant design",
+//   category: "modern",
+// },
+// {
+//   id: "modern-3",
+//   name: "Modern LILLY",
+//   description: "Light blue sidebar with rounded contact section",
+//   category: "modern",
+// },
+// {
+//   id: "modern-4",
+//   name: "Modern MIKE",
+//   description: "Blue sidebar with professional white layout",
+//   category: "modern",
+// },
 
-  {
-    id: "creative",
-    name: "Creative SOFIA",
-    description: "Clean layout with name positioned on left side",
-    category: "creative",
-  },
-  {
-    id: "creative-2",
-    name: "Creative Minimal Clean",
-    description: "Simple, clean layout focusing on content",
-    category: "creative",
-  },
-  {
-    id: "creative-3",
-    name: "Creative Designer",
-    description: "Eye-catching design for creative professionals",
-    category: "creative",
-  },
-  {
-    id: "creative-4",
-    name: "Creative JAY",
-    description: "Gray sidebar with clean white main content",
-    category: "creative",
-  },
+{
+  id: "classic",
+  name: "Classic Traditional",
+  description: "Traditional format ideal for conservative industries",
+  category: "classic",
+},
+{
+  id: "classic-2",
+  name: "Classic Traditional 2",
+  description: "An updated classic format for conservative industries",
+  category: "classic",
+},
+{
+  id: "classic-3",
+  name: "Classic Traditional 3",
+  description: "Another variation of the classic format",
+  category: "classic",
+},
+{
+  id: "classic-4",
+  name: "Classic Traditional 4",
+  description: "Premium classic format with enhanced layout",
+  category: "classic",
+},
 
-  {
-    id: "minimal-2",
-    name: "Minimal Clean 2",
-    description: "An updated minimal layout focusing on content",
-    category: "minimal",
-  },
-  {
-    id: "minimal-3",
-    name: "Minimal Clean 3",
-    description: "Another variation of the minimal layout",
-    category: "minimal",
-  },
+{
+  id: "creative",
+  name: "Creative SOFIA",
+  description: "Clean layout with name positioned on left side",
+  category: "creative",
+},
+{
+  id: "creative-2",
+  name: "Creative Minimal Clean",
+  description: "Simple, clean layout focusing on content",
+  category: "creative",
+},
+{
+  id: "creative-3",
+  name: "Creative Designer",
+  description: "Eye-catching design for creative professionals",
+  category: "creative",
+},
+{
+  id: "creative-4",
+  name: "Creative JAY",
+  description: "Gray sidebar with clean white main content",
+  category: "creative",
+},
+
+// {
+//   id: "minimal",
+//   name: "Minimal",
+//   description: "A new creative design for professionals",
+//   category: "minimal",
+// },
+{
+  id: "minimal-2",
+  name: "Minimal Clean 2",
+  description: "An updated minimal layout focusing on content",
+  category: "minimal",
+},
+{
+  id: "minimal-3",
+  name: "Minimal Clean 3",
+  description: "Another variation of the minimal layout",
+  category: "minimal",
+},
+// {
+//   id: "minimal-4",
+//   name: "Minimal Clean 4",
+//   description: "Ultra-clean minimal design focusing on content",
+//   category: "minimal",
+// },
+// {
+//   id: "minimal-5",
+//   name: "Minimal 5",
+//   description: "Another creative design option",
+//   category: "minimal",
+// },
+// {
+//   id: "minimal-6",
+//   name: "Minimal 6",
+//   description: "Another modern design option",
+//   category: "minimal",
+// },
+// {
+//   id: "minimal-7",
+//   name: "Minimal 7",
+//   description: "Advanced modern design for professionals",
+//   category: "minimal",
+// },
+// {
+//   id: "minimal-8",
+//   name: "Minimal 8",
+//   description: "Premium creative design for professionals",
+//   category: "minimal",
+// },
+
+
 ]
 
 const showSuccessToast = (message: string, description?: string) => {
@@ -235,34 +289,66 @@ export function CVPageClientContent() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [showEditPopup, setShowEditPopup] = useState(false)
   const [showTemplateSelector, setShowTemplateSelector] = useState(false)
-  const [isViewMode, setIsViewMode] = useState(false)
+  const [isViewMode, setIsViewMode] = useState(false) // Add this state
   const [jobDescription, setJobDescription] = useState("")
-  const [formData, setFormData] = useState<CVFormData | null>(null)
 
   const searchParams = useSearchParams()
   const router = useRouter()
   const personaId = searchParams?.get("personaId") ?? ""
   const cvId = searchParams?.get("cvId") ?? ""
   const templateIdFromUrl = searchParams?.get("templateId") ?? ""
-  const viewMode = searchParams?.get("view") === "true"
+  const viewMode = searchParams?.get("view") === "true" // Check for view mode parameter
 
   const dispatch = useAppDispatch()
   const { user } = useAppSelector((state) => state.auth)
   const cvPreviewRef = useRef<HTMLDivElement>(null)
 
+  const renderActivePage = () => {
+    switch (activePage) {
+      case "persona":
+        return <CreatePersonaPage user={user} />
+      case "resumes":
+        return <ResumePage user={user} />
+      case "cover-letter":
+        return <CoverLetterPage user={user} />
+      case "ats-checker":
+        return <ATSCheckerPage />
+      case "profile":
+        return <ProfilePage />
+      default:
+        return <CreatePersonaPage user={user} />
+    }
+  }
+  const handleLogout = async () => {
+    await dispatch(logoutUser())
+    router.push("/")
+  }
+
+  const handleTemplateSelect = (template: CVTemplate) => {
+    setSelectedTemplate(template)
+    setHasUnsavedChanges(true)
+    setShowTemplateSelector(false)
+    const url = new URL(window.location.href)
+    url.searchParams.set("templateId", template.id)
+    router.replace(url.toString())
+  }
+
   const defaultTemplate: CVTemplate = {
-    id: "classic",
-    name: "Classic Traditional",
-    description: "Traditional format ideal for conservative industries",
-    category: "classic",
+    id: "modern",
+    name: "Modern Professional",
+    description: "Clean, modern design perfect for tech and business professionals",
+    category: "modern",
   }
 
   // Sync selected template with URL only when the URL changes.
+  // Avoid reverting to the previous template during a local selection update.
   useEffect(() => {
     if (templateIdFromUrl) {
       const foundTemplate = templates.find((t) => t.id === templateIdFromUrl) || defaultTemplate
+      // Only update if different to prevent duplicate re-renders
       setSelectedTemplate((prev) => (prev?.id === foundTemplate.id ? prev : foundTemplate))
     } else {
+      // Initialize default template once when no URL param is present
       setSelectedTemplate((prev) => prev ?? defaultTemplate)
     }
   }, [templateIdFromUrl])
@@ -273,30 +359,12 @@ export function CVPageClientContent() {
   }, [viewMode])
 
   useEffect(() => {
-    // Load form data from sessionStorage on component mount
-    if (typeof window !== "undefined") {
-      const storedData = sessionStorage.getItem("cv_form_data");
-      if (storedData) {
-        try {
-          const parsedData = JSON.parse(storedData);
-          setFormData(parsedData);
-          console.log("Loaded form data from sessionStorage:", parsedData);
-        } catch (error) {
-          console.error("Failed to parse cv_form_data:", error);
-        }
-      }
-    }
-  }, []);
-
-  useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true)
       setError(null)
 
       try {
-        // FIRST: Check for existing CV (editing mode)
         if (cvId) {
-          console.log("Loading existing CV with ID:", cvId);
           const cvData = await getCVById(cvId)
           setExistingCV(cvData)
           setJobDescription(cvData.job_description || "")
@@ -320,12 +388,10 @@ export function CVPageClientContent() {
           } else if (personaData) {
             const personaText = convertPersonaToText(personaData)
             const response = await fetch("https://backendserver.resumaic.com/api/optimize-cv", {
+            // const response = await fetch("https://stagingnode.resumaic.com/api/optimize-cv", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ 
-                extractedText: personaText,
-                jobDescription: cvData.job_description || ""
-              }),
+              body: JSON.stringify({ extractedText: personaText }),
             })
             if (response.ok) {
               const aiData = await response.json()
@@ -340,91 +406,25 @@ export function CVPageClientContent() {
           return
         }
 
-        // SECOND: Check if we have form data from CVWizard (NEW CV creation)
-        if (formData) {
-          console.log("Creating new CV from form data:", formData);
+        // Handle new CV creation - check session storage for data from wizard
+        if (typeof window !== "undefined" && !existingCV) {
+          const wizardJobDesc = sessionStorage.getItem("cv_wizard_job_description")
+          if (wizardJobDesc) {
+            setJobDescription(wizardJobDesc)
+            // Optional: Clear it so it doesn't persist forever, but maybe keep it in case of refresh?
+            // sessionStorage.removeItem("cv_wizard_job_description") 
+          }
           
-          // Set job description from form data
-          setJobDescription(formData.job_description || "")
-
-          // Store title for later use
-          if (typeof window !== "undefined") {
-            sessionStorage.setItem("cv_wizard_title", formData.title || "");
-          }
-
-          // Set template from form data
-          const templateToUse = formData.layout_id
-            ? templates.find((t) => t.id === formData.layout_id) || defaultTemplate
-            : defaultTemplate
-          setSelectedTemplate(templateToUse)
-
-          // Use persona from form data if available, otherwise fetch it
-          let personaData: PersonaResponse | null = null;
-          if (formData.persona) {
-            personaData = formData.persona;
-            setPersona(personaData);
-          } else if (formData.personas_id) {
-            personaData = await getPersonaById(Number.parseInt(formData.personas_id));
-            setPersona(personaData);
-          } else {
-            setError("No persona data provided");
-            setIsLoading(false);
-            return;
-          }
-
-          if (!personaData) {
-            setError("Failed to load persona data");
-            setIsLoading(false);
-            return;
-          }
-
-          // Generate AI response with combined data
-          const personaText = convertPersonaToText(personaData)
-          console.log("Making AI request with persona text and job description");
-
-          try {
-            const response = await fetch("https://backendserver.resumaic.com/api/optimize-cv", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                extractedText: personaText,
-                jobDescription: formData.job_description || ""
-              }),
-            })
-
-            if (response.ok) {
-              const aiData = await response.json()
-              setAiResponse(aiData)
-              setHasUnsavedChanges(true)
-              
-              // Clear form data from sessionStorage after successful generation
-              setTimeout(() => {
-                if (typeof window !== "undefined") {
-                  sessionStorage.removeItem("cv_form_data");
-                  console.log("Cleared cv_form_data from sessionStorage");
-                }
-              }, 1000);
-            } else {
-              throw new Error(`AI API responded with status: ${response.status}`);
-            }
-          } catch (aiError) {
-            console.error("AI API error:", aiError);
-            setError("Failed to generate AI content. Please try again.");
-          }
-
-          setIsLoading(false)
-          return
+          // We can also check for title if we want to pre-set it, but title is usually set on save
         }
 
-        // THIRD: Fallback to old flow (direct navigation with personaId in URL)
-        console.log("Falling back to old flow with personaId:", personaId);
         if (!personaId) {
-          setError("No form data or persona ID provided. Please go back and create a resume from the wizard.");
+          setError("No persona ID provided")
           setIsLoading(false)
           return
         }
 
-        // Old flow (from URL params)
+        // 1. Fetch persona data
         const personaData = await getPersonaById(Number.parseInt(personaId))
         if (!personaData) {
           setError("Persona not found.")
@@ -433,38 +433,57 @@ export function CVPageClientContent() {
         }
         setPersona(personaData)
 
-        // Check for job description from sessionStorage (old way)
-        if (typeof window !== "undefined") {
-          const wizardJobDesc = sessionStorage.getItem("cv_wizard_job_description")
-          if (wizardJobDesc) {
-            setJobDescription(wizardJobDesc)
+        // 2. Set default template if none is selected
+        if (!selectedTemplate) {
+          const templateToUse = templateIdFromUrl
+            ? templates.find((t) => t.id === templateIdFromUrl) || defaultTemplate
+            : defaultTemplate
+          setSelectedTemplate(templateToUse)
+        }
+
+        // 3. Generate AI response only for new CVs
+        if (!cvId) {
+          const personaText = convertPersonaToText(personaData)
+
+          console.log("Making request to:", "https://backendserver.resumaic.com/api/optimize-cv")
+          // console.log("Making request to:", "https://stagingnode.resumaic.com/api/optimize-cv")
+          console.log("Request payload size:", JSON.stringify({ extractedText: personaText }).length)
+
+          try {
+            const testResponse = await fetch("https://backendserver.resumaic.com/", { method: "HEAD" })
+            // const testResponse = await fetch("https://stagingnode.resumaic.com/", { method: "HEAD" })
+
+            console.log("Server reachable:", testResponse.ok)
+          } catch (testError) {
+            console.error("Server not reachable:", testError)
           }
-        }
 
-        const templateToUse = templateIdFromUrl
-          ? templates.find((t) => t.id === templateIdFromUrl) || defaultTemplate
-          : defaultTemplate
-        setSelectedTemplate(templateToUse)
+          const response = await fetch("https://backendserver.resumaic.com/api/optimize-cv", {
+          // const response = await fetch("https://stagingnode.resumaic.com/api/optimize-cv", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              extractedText: personaText,
+            }),
+          })
 
-        // Generate AI response
-        const personaText = convertPersonaToText(personaData)
-        const response = await fetch("https://backendserver.resumaic.com/api/optimize-cv", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            extractedText: personaText,
-            jobDescription: jobDescription || ""
-          }),
-        })
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`)
+          }
 
-        if (response.ok) {
           const aiData = await response.json()
-          setAiResponse(aiData)
-          setHasUnsavedChanges(true)
-        }
 
+          if (aiData.error) {
+            throw new Error(aiData.error)
+          }
+
+          setAiResponse(aiData)
+          setHasUnsavedChanges(true) // Trigger auto-save for initial generation
+        }
       } catch (err: any) {
-        console.error("Error in fetchData:", err)
+        console.error("Error:", err)
         setError(err.message || "Failed to load CV data")
       } finally {
         setIsLoading(false)
@@ -472,7 +491,7 @@ export function CVPageClientContent() {
     }
 
     fetchData()
-  }, [cvId, formData, personaId]) // Remove templateIdFromUrl from dependencies to prevent re-fetching
+  }, [personaId, cvId])
 
   const convertPersonaToText = (personaData: PersonaResponse) => {
     let text = ""
@@ -634,7 +653,7 @@ export function CVPageClientContent() {
       projects: (aiResponse.optimizedCV.projects || []).map((proj, index) => ({
         id: `proj-${index}`,
         name: proj.name || "",
-        role: "",
+        role: "", // proj.role does not exist on the type, defaulting to empty string
         description: proj.description || "",
         technologies: proj.technologies || [],
         liveDemoLink: (proj as any).liveDemoLink || "",
@@ -668,16 +687,25 @@ export function CVPageClientContent() {
       const personaText = convertPersonaToText(persona)
 
       console.log("Making request to:", "https://backendserver.resumaic.com/api/optimize-cv")
+      // console.log("Making request to:", "https://stagingnode.resumaic.com/api/optimize-cv")
       console.log("Request payload size:", JSON.stringify({ extractedText: personaText }).length)
 
+      try {
+        const testResponse = await fetch("https://backendserver.resumaic.com", { method: "HEAD" })
+        // const testResponse = await fetch("https://stagingnode.resumaic.com", { method: "HEAD" })
+        console.log("Server reachable:", testResponse.ok)
+      } catch (testError) {
+        console.error("Server not reachable:", testError)
+      }
+
       const response = await fetch("https://backendserver.resumaic.com/api/optimize-cv", {
+      // const response = await fetch("https://stagingnode.resumaic.com/api/optimize-cv", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           extractedText: personaText,
-          jobDescription: jobDescription || ""
         }),
       })
 
@@ -701,6 +729,7 @@ export function CVPageClientContent() {
       )
     } catch (error: any) {
       console.error("Error regenerating CV:", error)
+      // toast.dismiss(loadingToastId)
       showErrorToast("Regeneration Failed", error.message || "Unable to regenerate CV. Please try again.")
     } finally {
       setIsRegenerating(false)
@@ -790,7 +819,9 @@ export function CVPageClientContent() {
           link.click()
           document.body.removeChild(link)
         } else if (format === "docx") {
+          // Keep existing DOCX export flow via backend
           const response = await fetch(`https://backendserver.resumaic.com/api/cv-export/docx`, {
+          // const response = await fetch(`https://stagingnode.resumaic.com/api/cv-export/docx`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ html: cvElement.outerHTML, filename }),
@@ -833,32 +864,24 @@ export function CVPageClientContent() {
   const handleDocxExport = async () => {
     await handleExport("docx")
   }
-
   const handleSaveCV = async (isAutoSave: boolean = false) => {
     if (!aiResponse || !selectedTemplate || !persona || !user?.id) {
       if (!isAutoSave) {
-        showErrorToast("Save Failed", "Missing required data. Please regenerate your CV and try again.");
+        showErrorToast("Save Failed", "Missing required data. Please regenerate your CV and try again.")
       }
-      return;
+      return
     }
 
-    // Get title from sessionStorage or state
-    let titleToUse = existingCV?.title || "";
-    if (!existingCV) {
-      if (typeof window !== "undefined") {
-        const wizardTitle = sessionStorage.getItem("cv_wizard_title");
-        titleToUse = wizardTitle || `${persona.full_name}'s AI CV - ${selectedTemplate.name}`;
+    // Check CV limit for free plan users (only for new CVs); allow admin unlimited
+    if (!existingCV && user?.plan === "free" && (user as any)?.profile?.cvs_count >= 3 && (user?.role?.toLowerCase() !== 'admin')) {
+      if (!isAutoSave) {
+        showErrorToast(
+          "CV Limit Reached",
+          "Free plan allows only 3 resumes. Upgrade to pro for unlimited.",
+        )
       }
+      return
     }
-
-    const cvDataToSave: CreateCVData = {
-      user_id: user.id.toString(),
-      layout_id: selectedTemplate.id,
-      personas_id: persona.id.toString(),
-      title: titleToUse,
-      job_description: jobDescription || "AI-generated CV based on persona",
-      generated_content: JSON.stringify(aiResponse.optimizedCV),
-    };
 
     setIsSaving(true)
     let loadingToastId: string | number | undefined
@@ -871,6 +894,24 @@ export function CVPageClientContent() {
     }
 
     try {
+      // Get title from session storage if creating new CV and no existingCV
+      let titleToUse = existingCV?.title || `${persona.full_name}'s AI CV - ${selectedTemplate.name}`;
+      if (!existingCV && typeof window !== "undefined") {
+        const wizardTitle = sessionStorage.getItem("cv_wizard_title");
+        if (wizardTitle) {
+          titleToUse = wizardTitle;
+        }
+      }
+
+      const cvDataToSave: CreateCVData = {
+        user_id: user.id.toString(),
+        layout_id: selectedTemplate.id,
+        personas_id: persona.id.toString(),
+        title: titleToUse,
+        job_description: jobDescription || "AI-generated CV based on persona",
+        generated_content: JSON.stringify(aiResponse.optimizedCV),
+      }
+
       if (existingCV) {
         // Update existing CV
         const updatedCV = await updateCV(existingCV.id, cvDataToSave)
@@ -896,11 +937,6 @@ export function CVPageClientContent() {
             "CV Created Successfully! 🚀",
             "Your professional CV is now saved and ready to impress employers",
           )
-          
-          // Redirect back to resume list after creation
-          setTimeout(() => {
-            router.push("/dashboard/resumes");
-          }, 1500);
         }
       }
     } catch (saveError: any) {
@@ -917,7 +953,9 @@ export function CVPageClientContent() {
 
   // Auto-save effect
   useEffect(() => {
+    // Only auto-save if we have all necessary data and unsaved changes
     if (hasUnsavedChanges && aiResponse && selectedTemplate && persona && !isSaving && !isRegenerating) {
+      // Small delay to debounce rapid changes, but short enough to feel automatic
       const timer = setTimeout(() => {
         handleSaveCV(true)
       }, 1000)
@@ -925,6 +963,7 @@ export function CVPageClientContent() {
       return () => clearTimeout(timer)
     }
   }, [hasUnsavedChanges, aiResponse, selectedTemplate, persona, isSaving, isRegenerating, jobDescription])
+
 
   const handleUpdateTitle = async (newTitle: string) => {
     if (!existingCV || !newTitle.trim()) return
@@ -956,15 +995,6 @@ export function CVPageClientContent() {
     showInfoToast("CV Updated! 📝", "Your changes have been applied successfully.")
   }
 
-  const handleTemplateSelect = (template: CVTemplate) => {
-    setSelectedTemplate(template)
-    setHasUnsavedChanges(true)
-    setShowTemplateSelector(false)
-    const url = new URL(window.location.href)
-    url.searchParams.set("templateId", template.id)
-    router.replace(url.toString())
-  }
-
   if (isLoading) {
     return <CVPageLoading isEditMode={!!cvId} />
   }
@@ -979,9 +1009,9 @@ export function CVPageClientContent() {
             </div>
             <h2 className="text-xl font-semibold mb-2">Error</h2>
             <p className="text-gray-600 mb-4">{error}</p>
-            <Button onClick={() => router.push("/dashboard/resumes")}>
+            <Button onClick={() => router.back()}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Go Back to Resumes
+              Go Back
             </Button>
           </CardContent>
         </Card>
@@ -1000,9 +1030,9 @@ export function CVPageClientContent() {
               </div>
               <h2 className="text-xl font-semibold mb-2">No CV Data Available</h2>
               <p className="text-gray-600 mb-4">Please ensure a persona and template are selected to generate a CV.</p>
-              <Button onClick={() => router.push("/dashboard/resumes")}>
+              <Button onClick={() => router.back()}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Go Back to Resumes
+                Go Back
               </Button>
             </CardContent>
           </Card>
@@ -1014,122 +1044,123 @@ export function CVPageClientContent() {
   return (
     <ProtectedRoute>
       <SidebarProvider>
-        <Sidebar
-          user={user}
-          activePage="cv-export"
-          setActivePage={(page) => {
-            try {
-              if (typeof window !== "undefined") {
-                window.localStorage.setItem('dashboardActivePage', page)
+          <Sidebar
+            user={user}
+            activePage="cv-export"
+            setActivePage={(page) => {
+              try {
+                if (typeof window !== "undefined") {
+                  window.localStorage.setItem('dashboardActivePage', page)
+                }
+              } catch {}
+
+              // Navigate to dashboard for all sidebar pages including ATS Checker and Users
+              if (
+                page === "persona" ||
+                page === "resumes" ||
+                page === "cover-letter" ||
+                page === "profile" ||
+                page === "ats-checker" ||
+                page === "users"
+              ) {
+                router.push("/dashboard")
               }
-            } catch { }
-
-            if (
-              page === "persona" ||
-              page === "resumes" ||
-              page === "cover-letter" ||
-              page === "profile" ||
-              page === "ats-checker" ||
-              page === "users"
-            ) {
-              router.push("/dashboard")
-            }
-          }}
-          onExportPDF={() => handleExport("pdf")}
-          onExportDOCX={handleDocxExport}
-          onExportPNG={exportAsPNG}
-          exportMode={true}
-        />
-        <SidebarInset className="p-6 bg-gray-50 overflow-y-auto flex flex-col items-center">
-          <div className="flex flex-col gap-6 max-w-full w-full">
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h1 className="text-2xl font-bold text-gray-900">{existingCV?.title || "Create Your CV"}</h1>
-                  </div>
-                </div>
-
-                <CVHeaderActions
-                  isViewMode={isViewMode}
-                  aiResponse={aiResponse}
-                  isRegenerating={isRegenerating}
-                  isSaving={isSaving}
-                  existingCV={existingCV}
-                  onEdit={() => setShowEditPopup(true)}
-                  onRegenerate={handleRegenerateCV}
-                  onSave={handleSaveCV}
-                  onChangeTemplate={() => setShowTemplateSelector(true)}
-                />
-              </div>
-              {selectedTemplate && aiResponse && (
-                <CVPreviewSection
-                  selectedTemplate={selectedTemplate}
-                  aiResponse={aiResponse}
-                  convertToCVData={convertToCVData}
-                  isRegenerating={isRegenerating}
-                />
-              )}
-              {selectedTemplate && !aiResponse && (
-                <Card className="mt-4">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900">No preview available</h3>
-                        <p className="text-gray-600">Generate the CV preview from your persona to continue.</p>
-                      </div>
-                      <Button onClick={handleRegenerateCV} disabled={isRegenerating}>
-                        {isRegenerating ? (
-                          <span className="flex items-center"><Loader2 className="h-4 w-4 mr-2 animate-spin" />Generating</span>
-                        ) : (
-                          "Generate Preview"
-                        )}
-                      </Button>
+            }}
+            onExportPDF={() => handleExport("pdf")}
+            onExportDOCX={handleDocxExport}
+            onExportPNG={exportAsPNG}
+            exportMode={true}
+          />
+          <SidebarInset className="p-6 bg-gray-50 overflow-y-auto flex flex-col items-center">
+            <div className="flex flex-col gap-6 max-w-full w-full">
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h1 className="text-2xl font-bold text-gray-900">{existingCV?.title || "Create Your CV"}</h1>
                     </div>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          </div>
-          <Dialog
-            open={showTemplateSelector}
-            onOpenChange={setShowTemplateSelector}
-          >
-            <DialogContent className="w-[80vw] !max-w-none h-[90vh] flex flex-col">
-              <DialogHeader className="px-6 flex flex-row items-center justify-between">
-                <div className="flex flex-col gap-1">
-                  <DialogTitle className="text-2xl font-bold">
-                    Choose a Template
-                  </DialogTitle>
-                  <DialogDescription>
-                    Select a template to update your resume layout.
-                  </DialogDescription>
-                </div>
-              </DialogHeader>
-              <div className="flex-1 overflow-y-auto min-h-0 -mx-3 px-6">
-                <CVTemplates
-                  onTemplateSelect={handleTemplateSelect}
-                  selectedTemplate={selectedTemplate?.id || ""}
-                />
-              </div>
-            </DialogContent>
-          </Dialog>
+                  </div>
 
-          {aiResponse && (
-            <CVEditPopup
-              isOpen={showEditPopup}
-              onClose={() => setShowEditPopup(false)}
-              cvData={aiResponse.optimizedCV}
-              onSave={handleCVDataUpdate}
-              isLoading={isSaving}
-              personaId={personaId || undefined}
-              currentImageUrl={persona?.profile_picture}
-              onProfilePictureUpdated={(newUrl) => {
-                setPersona((prev) => (prev ? { ...prev, profile_picture: newUrl } : prev))
-              }}
-            />
-          )}
-        </SidebarInset>
+                  <CVHeaderActions
+                    isViewMode={isViewMode}
+                    aiResponse={aiResponse}
+                    isRegenerating={isRegenerating}
+                    isSaving={isSaving}
+                    existingCV={existingCV}
+                    onEdit={() => setShowEditPopup(true)}
+                    onRegenerate={handleRegenerateCV}
+                    onSave={handleSaveCV}
+                    onChangeTemplate={() => setShowTemplateSelector(true)}
+                  />
+                </div>
+                {selectedTemplate && aiResponse && (
+                  <CVPreviewSection
+                    selectedTemplate={selectedTemplate}
+                    aiResponse={aiResponse}
+                    convertToCVData={convertToCVData}
+                    isRegenerating={isRegenerating}
+                  />
+                )}
+                {selectedTemplate && !aiResponse && (
+                  <Card className="mt-4">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between gap-4">
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">No preview available</h3>
+                          <p className="text-gray-600">Generate the CV preview from your persona to continue.</p>
+                        </div>
+                        <Button onClick={handleRegenerateCV} disabled={isRegenerating}>
+                          {isRegenerating ? (
+                            <span className="flex items-center"><Loader2 className="h-4 w-4 mr-2 animate-spin" />Generating</span>
+                          ) : (
+                            "Generate Preview"
+                          )}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </div>
+            <Dialog
+              open={showTemplateSelector}
+              onOpenChange={setShowTemplateSelector}
+            >
+              <DialogContent className="w-[80vw] !max-w-none h-[90vh] flex flex-col">
+                <DialogHeader className="px-6 flex flex-row items-center justify-between">
+                  <div className="flex flex-col gap-1">
+                    <DialogTitle className="text-2xl font-bold">
+                      Choose a Template
+                    </DialogTitle>
+                    <DialogDescription>
+                      Select a template to update your resume layout.
+                    </DialogDescription>
+                  </div>
+                </DialogHeader>
+                <div className="flex-1 overflow-y-auto min-h-0 -mx-3 px-6">
+                  <CVTemplates
+                    onTemplateSelect={handleTemplateSelect}
+                    selectedTemplate={selectedTemplate?.id || ""}
+                  />
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            {aiResponse && (
+              <CVEditPopup
+                isOpen={showEditPopup}
+                onClose={() => setShowEditPopup(false)}
+                cvData={aiResponse.optimizedCV}
+                onSave={handleCVDataUpdate}
+                isLoading={isSaving}
+                personaId={personaId || undefined}
+                currentImageUrl={persona?.profile_picture}
+                onProfilePictureUpdated={(newUrl) => {
+                  setPersona((prev) => (prev ? { ...prev, profile_picture: newUrl } : prev))
+                }}
+              />
+            )}
+          </SidebarInset>
       </SidebarProvider>
     </ProtectedRoute>
   )

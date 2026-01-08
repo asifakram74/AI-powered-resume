@@ -143,13 +143,25 @@ export function CVWizard({
     setIsLoading(true);
     try {
       const formData = getValues();
-      await onSave({
+      const dataToPass = {
         ...formData,
         user_id: user?.id?.toString() || "",
         layout_id: templateId,
         personas_id: selectedPersonaId || formData.personas_id,
         job_description: formData.job_description || "",
-      });
+        // Pass the entire persona object if available
+        persona: selectedPersonaId ? personas.find(p => p.id.toString() === selectedPersonaId) : null
+      };
+
+      // Save form data to sessionStorage
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("cv_form_data", JSON.stringify(dataToPass));
+      }
+
+      // Navigate to CV page
+      router.push(
+        `/create-cv?templateId=${templateId}`
+      );
     } catch (error) {
       console.error("Error saving CV:", error);
       setApiError("Failed to save CV. Please try again.");
@@ -169,6 +181,7 @@ export function CVWizard({
         ...formData,
         job_description: formData.job_description || "",
       });
+      console.log(formData)
       setShowTemplateSelector(true);
     }
   };
@@ -196,15 +209,22 @@ export function CVWizard({
             {selectedTemplate && selectedPersonaId && (
               <Button
                 onClick={() => {
-                  // Save form data to localStorage to pass to the next page
                   const currentValues = getValues();
+                  const dataToPass = {
+                    ...currentValues,
+                    user_id: user?.id?.toString() || "",
+                    layout_id: selectedTemplate.id,
+                    personas_id: selectedPersonaId || currentValues.personas_id,
+                    job_description: currentValues.job_description || "",
+                    persona: selectedPersonaId ? personas.find(p => p.id.toString() === selectedPersonaId) : null
+                  };
+
                   if (typeof window !== "undefined") {
-                    sessionStorage.setItem("cv_wizard_job_description", currentValues.job_description || "");
-                    sessionStorage.setItem("cv_wizard_title", currentValues.title || "");
+                    sessionStorage.setItem("cv_form_data", JSON.stringify(dataToPass));
                   }
 
                   router.push(
-                    `/create-cv?personaId=${selectedPersonaId}&templateId=${selectedTemplate.id}`
+                    `/create-cv?templateId=${selectedTemplate.id}`
                   );
                 }}
                 className="resumaic-gradient-green hover:opacity-90 button-press"

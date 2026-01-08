@@ -154,11 +154,11 @@ const templates: CVTemplate[] = [
 ]
 const dashboardMenuItems = [
   {
-    id: "create-persona",
+    id: "persona",
     label: "Persona",
     icon: Sparkles,
     badge: "AI",
-    href: "/dashboard?page=create-persona",
+    href: "/dashboard?page=persona",
   },
   {
     id: "resumes",

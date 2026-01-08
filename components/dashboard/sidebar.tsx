@@ -77,8 +77,8 @@ interface SidebarProps {
 
 const regularMenuItems = [
   {
-    id: "create-persona",
-    path: "/dashboard/create-persona",
+    id: "persona",
+    path: "/dashboard/persona",
     label: "Persona",
     icon: Sparkles,
   },
@@ -159,7 +159,7 @@ export function Sidebar({
   const isProUser = profile?.plan_type?.toLowerCase() === 'pro' || user?.plan_type?.toLowerCase() === 'pro'
 
   // Determine active page based on prop or pathname
-  const activePage = propActivePage || regularMenuItems.find(item => pathname?.includes(item.path))?.id || adminMenuItems.find(item => pathname?.includes(item.path))?.id || "create-persona"
+  const activePage = propActivePage || regularMenuItems.find(item => pathname?.includes(item.path))?.id || adminMenuItems.find(item => pathname?.includes(item.path))?.id || "persona"
 
   // Function to get user initials
   const getInitials = (name?: string) => {

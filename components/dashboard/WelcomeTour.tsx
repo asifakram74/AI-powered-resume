@@ -59,7 +59,7 @@ export function WelcomeTour() {
 
         steps: [
           {
-            element: '#tour-create-persona',
+            element: '#tour-persona',
             popover: {
               title: renderToString(
                 <div className="flex items-center gap-2">
