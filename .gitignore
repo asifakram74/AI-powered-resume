@@ -19,6 +19,9 @@ yarn-error.log*
 # env files
 .env*
 !.env.production
+# Environment
+.env.test.local
+.env.local
 
 # vercel
 .vercel
@@ -28,3 +31,10 @@ yarn-error.log*
 next-env.d.ts
 \n+# backend folder
 node-backend/
+
+# Testing
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+*.log
