@@ -1,8 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { FileText, Mail, CheckCircle, UserCircle, Sparkles, BarChart3, LogOut, ChevronDown, Users, Crown } from "lucide-react"
+import { FileText, Mail, CheckCircle, UserCircle, Sparkles, BarChart3, LogOut, ChevronDown, Users, Crown, Moon, Sun } from "lucide-react"
 import Link from "next/link"
+import { useTheme } from "next-themes"
 import {
   Sidebar as SidebarPrimitive,
   SidebarContent,
@@ -138,6 +139,7 @@ export function Sidebar({
   const dispatch = useAppDispatch()
   const router = useRouter()
   const pathname = usePathname()
+  const { theme, setTheme } = useTheme()
   const { profile } = useAppSelector((state) => state.auth)
   const { resumeCount, loading } = useResumeCount(user?.id)
 
@@ -174,7 +176,7 @@ export function Sidebar({
 
   return (
     <SidebarPrimitive
-      className={`w-64 border-r border-gray-200/60 bg-white/95 backdrop-blur-xl shadow-xl ${!isMounted ? "invisible" : "animate-slide-in-left"}`}
+      className={`w-64 border-r border-gray-200/60 bg-white/95 dark:bg-gray-950/95 dark:border-gray-800/60 backdrop-blur-xl shadow-xl ${!isMounted ? "invisible" : "animate-slide-in-left"}`}
       aria-hidden={!isMounted}
     >
       <SidebarHeader className="p-6 pb-4">
@@ -185,8 +187,8 @@ export function Sidebar({
         </div>
 
         {(user || profile) && (
-          <div className="mt-4 p-3 bg-gray-50 rounded-lg flex items-center gap-3">
-            <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
+          <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg flex items-center gap-3">
+            <Avatar className="h-10 w-10 border-2 border-gray-200 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-400 transition-colors">
               <AvatarFallback
                 className={`font-semibold ${
                   user?.role === "admin"
@@ -206,7 +208,7 @@ export function Sidebar({
               </AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-sm font-medium text-gray-900">{profile?.name || user?.name}</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{profile?.name || user?.name}</p>
               
               {
                 user?.role?.toLowerCase() === 'admin' && (
@@ -237,8 +239,8 @@ export function Sidebar({
                     `}
                   >
                     <div className="flex items-center gap-3 flex-1">
-                      <item.icon className="h-5 w-5 text-gray-600 group-data-[active=true]:text-green-700" />
-                      <span className="font-semibold text-gray-700 data-[active=true]:text-gray-900">
+                      <item.icon className="h-5 w-5 text-gray-600 dark:text-gray-400 group-data-[active=true]:text-green-700 dark:group-data-[active=true]:text-green-400" />
+                      <span className="font-semibold text-gray-700 dark:text-gray-200 group-data-[active=true]:text-gray-900 dark:group-data-[active=true]:text-gray-50">
                         {item.label}
                       </span>
                     </div>
@@ -246,7 +248,7 @@ export function Sidebar({
                       item.badge === 'Pro' ? (!isProUser && !isAdmin) : true
                     ) && (
                       <Badge
-                        className={`text-xs px-3 py-1 font-bold rounded-full ${item.badgeColor || "bg-gray-100 text-gray-700"}`}
+                        className={`text-xs px-3 py-1 font-bold rounded-full ${item.badgeColor || "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200"}`}
                       >
                         {item.badge}
                       </Badge>
@@ -261,20 +263,21 @@ export function Sidebar({
                         w-full justify-start gap-3 px-4 py-3.5 text-left rounded-2xl transition-all duration-300
                         data-[active=true]:resumaic-gradient-subtle data-[active=true]:text-gray-900 data-[active=true]:shadow-xl 
                         data-[active=true]:border data-[active=true]:border-green-200/50
+                        dark:data-[active=true]:text-gray-50 dark:data-[active=true]:border-gray-800/60
                         cursor-pointer transform
                       `}
                     >
                       <div className="flex items-center gap-3 flex-1">
-                        <item.icon className="h-5 w-5 text-gray-600 group-data-[active=true]:text-green-700" />
-                        <span className="font-semibold text-gray-700 data-[active=true]:text-gray-900">
+                        <item.icon className="h-5 w-5 text-gray-600 dark:text-gray-400 group-data-[active=true]:text-green-700 dark:group-data-[active=true]:text-green-400" />
+                        <span className="font-semibold text-gray-700 dark:text-gray-200 group-data-[active=true]:text-gray-900 dark:group-data-[active=true]:text-gray-50">
                           {item.label}
                         </span>
                       </div>
                       {item.badge && (
                         item.badge === 'Pro' ? (!isProUser && !isAdmin) : true
                       ) && (
-                        <Badge
-                          className={`text-xs px-3 py-1 font-bold rounded-full ${item.badgeColor || "bg-gray-100 text-gray-700"}`}
+                      <Badge
+                          className={`text-xs px-3 py-1 font-bold rounded-full ${item.badgeColor || "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200"}`}
                         >
                           {item.badge}
                         </Badge>
@@ -295,13 +298,13 @@ export function Sidebar({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="w-full justify-between rounded-2xl border-2 border-green-200/50 hover:border-green-300 hover:bg-green-50/50 transition-all duration-300 bg-transparent"
+                className="w-full justify-between rounded-2xl border-2 border-green-200/50 dark:border-gray-800/60 hover:border-green-300 dark:hover:border-green-400 hover:bg-green-50/50 dark:hover:bg-gray-900 transition-all duration-300 bg-transparent"
               >
                 <span className="font-semibold">Export</span>
                 <ChevronDown className="h-4 w-4 ml-2" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 rounded-2xl border-green-200/50 shadow-xl">
+            <DropdownMenuContent className="w-56 rounded-2xl border-green-200/50 dark:border-gray-800/60 shadow-xl">
               <DropdownMenuItem onClick={onExportPDF} className="rounded-xl">
                 <FileText className="mr-2 h-4 w-4" />
                 <span>PDF</span>
@@ -319,30 +322,30 @@ export function Sidebar({
         ) : !isAdmin ? (
           <>
             {!!user && !isProUser && (
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-green-50/80 via-white to-orange-50/30 border border-green-200/50">
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-green-50/80 via-white to-orange-50/30 dark:from-gray-900/60 dark:via-gray-950 dark:to-gray-900/40 border border-green-200/50 dark:border-gray-800/60">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="p-2.5 rounded-xl resumaic-gradient-green shadow-lg">
                     <BarChart3 className="h-4 w-4 text-white" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-bold text-gray-900">Usage Stats</p>
+                    <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Usage Stats</p>
                   </div>
                 </div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-medium text-gray-600">
+                  <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
                     Resumes created
                   </span>
                   {loading ? (
-                    <div className="h-4 w-10 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="h-4 w-10 bg-gray-200 dark:bg-gray-800 rounded animate-pulse"></div>
                   ) : (
                     <span className="text-sm font-bold">
                       {resumeCount}/{maxResumes}
                     </span>
                   )}
                 </div>
-                <div className="w-full bg-gray-200/80 rounded-full h-2 shadow-inner">
+                <div className="w-full bg-gray-200/80 dark:bg-gray-800 rounded-full h-2 shadow-inner">
                   {loading ? (
-                    <div className="h-2 rounded-full bg-gray-300 animate-pulse"></div>
+                    <div className="h-2 rounded-full bg-gray-300 dark:bg-gray-700 animate-pulse"></div>
                   ) : (
                     <div
                       className="resumaic-gradient-green h-2 rounded-full shadow-sm transition-all duration-700 ease-out"
@@ -354,16 +357,16 @@ export function Sidebar({
             )}
             
             {!!user && isProUser && (
-              <div className="p-3 rounded-2xl bg-gradient-to-br from-orange-50/50 via-white to-orange-50/20 border border-orange-100 shadow-sm">
+              <div className="p-3 rounded-2xl bg-gradient-to-br from-orange-50/50 via-white to-orange-50/20 dark:from-gray-900/60 dark:via-gray-950 dark:to-gray-900/40 border border-orange-100 dark:border-gray-800/60 shadow-sm">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-xl resumaic-gradient-green shadow-md">
                     <Crown className="h-4 w-4 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-gray-800 leading-none mb-0.5">
+                    <p className="text-sm font-bold text-gray-800 dark:text-gray-100 leading-none mb-0.5">
                       Pro Plan
                     </p>
-                    <p className="text-[10px] text-gray-500 font-medium">
+                    <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">
                       All features active
                     </p>
                   </div>
@@ -375,7 +378,16 @@ export function Sidebar({
         
         <Button
           variant="outline"
-          className="w-full bg-transparent rounded-2xl border-2 border-gray-200/80 hover:border-red-300 hover:bg-red-50/50 hover:text-red-600 transition-all duration-300 transform hover:scale-[1.02] font-semibold"
+          className="w-full justify-center items-center bg-transparent rounded-2xl border-2 border-gray-200/80 dark:border-gray-800/60 hover:border-blue-300 dark:hover:border-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-950/30 transition-all duration-300 transform hover:scale-[1.02] font-semibold"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+        >
+          {theme === "dark" ? <Moon className="h-4 w-4 mr-2" /> : <Sun className="h-4 w-4 mr-2" />}
+          {theme === "dark" ? "Dark Mode" : "Light Mode"}
+        </Button>
+
+        <Button
+          variant="outline"
+          className="w-full bg-transparent rounded-2xl border-2 border-gray-200/80 dark:border-gray-800/60 hover:border-red-300 dark:hover:border-red-400 hover:bg-red-50/50 dark:hover:bg-red-950/30 hover:text-red-600 transition-all duration-300 transform hover:scale-[1.02] font-semibold"
           onClick={handleLogout}
         >
           <LogOut className="h-4 w-4 mr-2" />

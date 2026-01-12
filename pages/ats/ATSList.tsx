@@ -106,8 +106,8 @@ export function ATSListPage() {
 
   if (isLoading && atsResumes.length === 0) {
     return (
-      <div className="fixed inset-0 flex justify-center items-center bg-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      <div className="fixed inset-0 flex justify-center items-center bg-white dark:bg-gray-950">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-gray-100"></div>
       </div>
     );
   }
@@ -121,8 +121,8 @@ export function ATSListPage() {
             <Target className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">ATS Analyses</h1>
-            <p className="text-gray-600">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">ATS Analyses</h1>
+            <p className="text-gray-600 dark:text-gray-300">
               View and manage your ATS resume analyses
             </p>
           </div>
@@ -148,14 +148,14 @@ export function ATSListPage() {
                   <h3 className="text-lg font-semibold">
                     ATS Analyses ({filteredResumes.length})
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
                     View and manage your ATS resume analyses
                   </p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
                   <div className="relative w-full sm:w-80">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
                     <Input
                       placeholder="Search analyses by job description..."
                       value={searchTerm}
@@ -208,7 +208,7 @@ export function ATSListPage() {
                         <TableRow key={resume.id}>
                           <TableCell>
                             <div className="flex items-center gap-3">
-                              <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                              <Avatar className="h-10 w-10 border-2 border-gray-200 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-400 transition-colors">
                                 <AvatarFallback
                                   className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${user?.role === "admin"
                                       ? ""
@@ -304,7 +304,7 @@ export function ATSListPage() {
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
-                          <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                          <Avatar className="h-10 w-10 border-2 border-gray-200 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-400 transition-colors">
                             <AvatarFallback
                               className={`bg-[#70E4A8]/20 hover:opacity-90 button-press text-[#70E4A8] font-semibold ${user?.role === "admin"
                                   ? ""
@@ -344,13 +344,13 @@ export function ATSListPage() {
                           <Label className="text-sm font-medium">
                             Job Description
                           </Label>
-                          <p className="text-sm text-gray-600 line-clamp-2">
+                          <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
                             {resume.job_description.substring(0, 100)}
                             {resume.job_description.length > 100 ? "..." : ""}
                           </p>
                         </div>
 
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
                           Created: {formatDate(resume.created_at)}
                         </div>
 
@@ -399,13 +399,13 @@ export function ATSListPage() {
       {filteredResumes.length === 0 && atsResumes.length > 0 && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="rounded-full bg-gray-100 p-6 mb-4">
-              <Search className="h-8 w-8 text-gray-400" />
+            <div className="rounded-full bg-gray-100 dark:bg-gray-900 p-6 mb-4">
+              <Search className="h-8 w-8 text-gray-400 dark:text-gray-500" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
               No analyses found
             </h3>
-            <p className="text-gray-500 mb-4">
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
               Try adjusting your search terms or create a new analysis
             </p>
             <Button variant="outline" onClick={() => setSearchTerm("")}>
@@ -417,13 +417,13 @@ export function ATSListPage() {
       {atsResumes.length === 0 && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="rounded-full bg-gray-100 p-6 mb-4">
-              <Target className="h-8 w-8 text-gray-400" />
+            <div className="rounded-full bg-gray-100 dark:bg-gray-900 p-6 mb-4">
+              <Target className="h-8 w-8 text-gray-400 dark:text-gray-500" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
               No ATS analyses created yet
             </h3>
-            <p className="text-gray-500 mb-4">
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
               Create your first ATS analysis by clicking the "New Analysis"
               button above
             </p>
@@ -434,7 +434,7 @@ export function ATSListPage() {
       {/* Quick Tips */}
       <Card className="animate-slide-up-delay-3 hover:shadow-lg transition-all duration-300">
         <CardHeader>
-          <CardTitle className="flex items-center gap-3 font-rubik text-[#2D3639]">
+          <CardTitle className="flex items-center gap-3 font-rubik text-[#2D3639] dark:text-gray-100">
             <div className="p-2 bg-gradient-to-br from-[#70E4A8] to-[#EA580C] rounded-lg">
               <TrendingUp className="h-5 w-5 text-white" />
             </div>
@@ -455,10 +455,10 @@ export function ATSListPage() {
                 <CheckCircle className="h-5 w-5 text-[#70E4A8]" />
               </div>
               <div>
-                <h4 className="font-semibold text-[#2D3639] font-rubik">
+                <h4 className="font-semibold text-[#2D3639] dark:text-gray-100 font-rubik">
                   Keyword Optimization
                 </h4>
-                <p className="text-sm text-gray-600 font-inter">
+                <p className="text-sm text-gray-600 dark:text-gray-300 font-inter">
                   Match your resume keywords with the job description
                 </p>
               </div>
@@ -476,10 +476,10 @@ export function ATSListPage() {
                 <AlertTriangle className="h-5 w-5 text-[#EA580C]" />
               </div>
               <div>
-                <h4 className="font-semibold text-[#2D3639] font-rubik">
+                <h4 className="font-semibold text-[#2D3639] dark:text-gray-100 font-rubik">
                   Formatting Matters
                 </h4>
-                <p className="text-sm text-gray-600 font-inter">
+                <p className="text-sm text-gray-600 dark:text-gray-300 font-inter">
                   Use clean, ATS-friendly formatting without complex layouts
                 </p>
               </div>
@@ -491,16 +491,16 @@ export function ATSListPage() {
               style={{ animationDelay: "300ms" }}
             >
               <div
-                className="rounded-full bg-blue-100 p-3 animate-float"
+                className="rounded-full bg-blue-100 dark:bg-blue-900/30 p-3 animate-float"
                 style={{ animationDelay: "1s" }}
               >
                 <Target className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <h4 className="font-semibold text-[#2D3639] font-rubik">
+                <h4 className="font-semibold text-[#2D3639] dark:text-gray-100 font-rubik">
                   Tailor Each Application
                 </h4>
-                <p className="text-sm text-gray-600 font-inter">
+                <p className="text-sm text-gray-600 dark:text-gray-300 font-inter">
                   Customize your resume for each specific job application
                 </p>
               </div>
@@ -549,7 +549,7 @@ export function ATSListPage() {
               </Button>
               <Button
                 variant="outline"
-                className="w-full border-2 border-[#70E4A8] text-[#2d3639] hover:bg-[#70E4A8]/10"
+                className="w-full border-2 border-[#70E4A8] text-[#2d3639] hover:bg-[#70E4A8]/10 dark:text-gray-100 dark:border-[#70E4A8]/70 dark:hover:bg-[#70E4A8]/15"
                 onClick={() => setIsUpgradeDialogOpen(false)}
               >
                 Not Now

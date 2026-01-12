@@ -37,7 +37,7 @@ export default function VerifyEmailPage() {
     const verify = async () => {
       try {
         const res = await fetch(`https://backendcv.onlinetoolpot.com/public/api/verify-email-address?token=${token}`)
-        // const res = await fetch(`https://stagingbackend.resumaic.com/public/api/verify-email-address?token=${token}`)
+        // const res = await fetch(`https://backendcv.onlinetoolpot.com/public/api/verify-email-address?token=${token}`)
         const data = await res.json()
         if (data && (data.status === true || data.success === true)) {
           setSuccess(true)
@@ -59,7 +59,7 @@ export default function VerifyEmailPage() {
   }, [searchParams, router])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex items-center justify-center p-6">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
@@ -69,15 +69,15 @@ export default function VerifyEmailPage() {
           </div>
           <div className="flex items-center justify-center gap-2 mb-2">
             <ShieldCheck className="h-5 w-5 text-blue-600" />
-            <span className="text-xs font-medium text-gray-600">Secure Verification</span>
+            <span className="text-xs font-medium text-gray-600 dark:text-gray-300">Secure Verification</span>
           </div>
-          <CardTitle className="text-xl font-bold text-gray-900">{message}</CardTitle>
+          <CardTitle className="text-xl font-bold text-gray-900 dark:text-gray-100">{message}</CardTitle>
         </CardHeader>
         <CardContent>
           {!loading && success === false && (
             <div className="space-y-3 mb-4">
-              <p className="text-sm text-gray-600">Try the following:</p>
-              <ul className="text-sm text-gray-700 list-disc list-inside space-y-1">
+              <p className="text-sm text-gray-600 dark:text-gray-300">Try the following:</p>
+              <ul className="text-sm text-gray-700 dark:text-gray-200 list-disc list-inside space-y-1">
                 <li>Open the latest verification email from Resumic.</li>
                 <li>If you can't find it, check your spam folder.</li>
                 <li>Sign in to request a new verification link.</li>

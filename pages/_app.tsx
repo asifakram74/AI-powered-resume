@@ -4,6 +4,8 @@ import { ReduxProvider } from "../lib/redux/provider";
 import { Toaster } from "sonner";
 import HydrateAuth from "../components/auth/HydrateAuth";
 import Head from "next/head";
+import { ThemeProvider } from "../components/theme-provider";
+import { ThemeToggle } from "../components/theme-toggle";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -23,11 +25,14 @@ export default function App({ Component, pageProps }: AppProps) {
           }}
         />
       </Head>
-      <ReduxProvider>
-        <HydrateAuth />
-        <Toaster position="top-right" richColors />
-        <Component {...pageProps} />
-      </ReduxProvider>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
+        <ReduxProvider>
+          <HydrateAuth />
+          <Toaster position="top-right" richColors />
+          <ThemeToggle />
+          <Component {...pageProps} />
+        </ReduxProvider>
+      </ThemeProvider>
     </>
   );
 }

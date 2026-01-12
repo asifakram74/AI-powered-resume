@@ -291,7 +291,7 @@ export function CVEditPopup({
                           {isUploadingImage ? "Uploading..." : "Change"}
                         </Button>
                       </label>
-                      <p className="text-xs text-gray-500 mt-1">Supported: JPG, PNG. Updates persona image used in templates.</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Supported: JPG, PNG. Updates persona image used in templates.</p>
                     </div>
                   </div>
 

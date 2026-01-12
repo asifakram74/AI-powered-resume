@@ -319,7 +319,7 @@ export function CVPageClientContent() {
             })
           } else if (personaData) {
             const personaText = convertPersonaToText(personaData)
-            const response = await fetch("https://backendserver.resumaic.com/api/optimize-cv", {
+            const response = await fetch("https://stagingnode.resumaic.com/api/optimize-cv", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ 
@@ -383,7 +383,7 @@ export function CVPageClientContent() {
           console.log("Making AI request with persona text and job description");
 
           try {
-            const response = await fetch("https://backendserver.resumaic.com/api/optimize-cv", {
+            const response = await fetch("https://stagingnode.resumaic.com/api/optimize-cv", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -448,7 +448,7 @@ export function CVPageClientContent() {
 
         // Generate AI response
         const personaText = convertPersonaToText(personaData)
-        const response = await fetch("https://backendserver.resumaic.com/api/optimize-cv", {
+        const response = await fetch("https://stagingnode.resumaic.com/api/optimize-cv", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -667,10 +667,10 @@ export function CVPageClientContent() {
     try {
       const personaText = convertPersonaToText(persona)
 
-      console.log("Making request to:", "https://backendserver.resumaic.com/api/optimize-cv")
+      console.log("Making request to:", "https://stagingnode.resumaic.com/api/optimize-cv")
       console.log("Request payload size:", JSON.stringify({ extractedText: personaText }).length)
 
-      const response = await fetch("https://backendserver.resumaic.com/api/optimize-cv", {
+      const response = await fetch("https://stagingnode.resumaic.com/api/optimize-cv", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -790,7 +790,7 @@ export function CVPageClientContent() {
           link.click()
           document.body.removeChild(link)
         } else if (format === "docx") {
-          const response = await fetch(`https://backendserver.resumaic.com/api/cv-export/docx`, {
+          const response = await fetch(`https://stagingnode.resumaic.com/api/cv-export/docx`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ html: cvElement.outerHTML, filename }),
@@ -971,14 +971,14 @@ export function CVPageClientContent() {
 
   if (error) {
     return (
-      <div className="min-h-screen max-w-full bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen max-w-full bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
         <Card className=" max-w-full">
           <CardContent className="text-center p-6">
-            <div className="text-gray-500 mb-4">
+            <div className="text-gray-500 dark:text-gray-400 mb-4">
               <TrendingUp className="h-12 w-12 mx-auto" />
             </div>
             <h2 className="text-xl font-semibold mb-2">Error</h2>
-            <p className="text-gray-600 mb-4">{error}</p>
+            <p className="text-gray-600 dark:text-gray-300 mb-4">{error}</p>
             <Button onClick={() => router.push("/dashboard/resumes")}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Go Back to Resumes
@@ -992,14 +992,14 @@ export function CVPageClientContent() {
   if ((!persona && !existingCV) || !selectedTemplate) {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
           <Card className="w-full max-w-md">
             <CardContent className="text-center p-6">
-              <div className="text-gray-500 mb-4">
+              <div className="text-gray-500 dark:text-gray-400 mb-4">
                 <Sparkles className="h-12 w-12 mx-auto" />
               </div>
               <h2 className="text-xl font-semibold mb-2">No CV Data Available</h2>
-              <p className="text-gray-600 mb-4">Please ensure a persona and template are selected to generate a CV.</p>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">Please ensure a persona and template are selected to generate a CV.</p>
               <Button onClick={() => router.push("/dashboard/resumes")}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Go Back to Resumes
@@ -1040,13 +1040,13 @@ export function CVPageClientContent() {
           onExportPNG={exportAsPNG}
           exportMode={true}
         />
-        <SidebarInset className="p-6 bg-gray-50 overflow-y-auto flex flex-col items-center">
+        <SidebarInset className="p-6 bg-gray-50 dark:bg-gray-950 overflow-y-auto flex flex-col items-center">
           <div className="flex flex-col gap-6 max-w-full w-full">
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
-                    <h1 className="text-2xl font-bold text-gray-900">{existingCV?.title || "Create Your CV"}</h1>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{existingCV?.title || "Create Your CV"}</h1>
                   </div>
                 </div>
 
@@ -1075,8 +1075,8 @@ export function CVPageClientContent() {
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between gap-4">
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900">No preview available</h3>
-                        <p className="text-gray-600">Generate the CV preview from your persona to continue.</p>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">No preview available</h3>
+                        <p className="text-gray-600 dark:text-gray-300">Generate the CV preview from your persona to continue.</p>
                       </div>
                       <Button onClick={handleRegenerateCV} disabled={isRegenerating}>
                         {isRegenerating ? (

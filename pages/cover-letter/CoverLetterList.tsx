@@ -208,7 +208,7 @@ export function CoverLetterPage({ user }: PageProps) {
       const cvContent = await getCVContentForAI(selectedCV)
 
       // Call DeepSeek AI for cover letter generation
-      console.log('Making request to:', 'https://backendserver.resumaic.com/api/cover-letter-generation');
+      console.log('Making request to:', 'https://stagingnode.resumaic.com/api/cover-letter-generation');
       // console.log('Making request to:', 'https://stagingnode.resumaic.com/api/cover-letter-generation');
       console.log('Selected tone:', tone);
       console.log('Tone type:', typeof tone);
@@ -231,14 +231,14 @@ export function CoverLetterPage({ user }: PageProps) {
       console.log('Request payload size:', JSON.stringify(requestPayload).length);
 
       try {
-        const testResponse = await fetch('https://backendserver.resumaic.com/', { method: 'HEAD' });
+        const testResponse = await fetch('https://stagingnode.resumaic.com/', { method: 'HEAD' });
         // const testResponse = await fetch('https://stagingnode.resumaic.com/', { method: 'HEAD' });
         console.log('Server reachable:', testResponse.ok);
       } catch (testError) {
         console.error('Server not reachable:', testError);
       }
 
-      const response = await fetch('https://backendserver.resumaic.com/api/cover-letter-generation', {
+      const response = await fetch('https://stagingnode.resumaic.com/api/cover-letter-generation', {
       // const response = await fetch('https://stagingnode.resumaic.comapi/cover-letter-generation', {
         method: 'POST',
         headers: {
@@ -396,7 +396,7 @@ export function CoverLetterPage({ user }: PageProps) {
     try {
       const filename = getCoverLetterFilename(letter, format)
 
-      const response = await fetch(`https://backendserver.resumaic.com/api/cover-letter-export/${format}`, {
+      const response = await fetch(`https://stagingnode.resumaic.com/api/cover-letter-export/${format}`, {
       // const response = await fetch(`https://stagingnode.resumaic.com/api/cover-letter-export/${format}`, {
         method: 'POST',
         headers: {
@@ -474,8 +474,8 @@ export function CoverLetterPage({ user }: PageProps) {
 
   if (isLoading && coverLetters.length === 0) {
     return (
-      <div className="fixed inset-0 flex justify-center items-center bg-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      <div className="fixed inset-0 flex justify-center items-center bg-white dark:bg-gray-950">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-gray-100"></div>
       </div>
     )
   }
@@ -489,8 +489,8 @@ export function CoverLetterPage({ user }: PageProps) {
             <Sparkles className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Create Cover Letters</h1>
-            <p className="text-gray-600 text-sm sm:text-base mt-1 sm:mt-0">Generate professional cover letters with AI assistance</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">Create Cover Letters</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base mt-1 sm:mt-0">Generate professional cover letters with AI assistance</p>
           </div>
         </div>
 
@@ -499,7 +499,7 @@ export function CoverLetterPage({ user }: PageProps) {
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button
-                className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
+                className="resumaic-gradient-green dark:text-gray-100 hover:opacity-90 hover-lift button-press"
                 onClick={async (e) => {
                   if ((user as any)?.plan_type?.toLowerCase() === 'free' && coverLetters.length >= 3 && (user?.role?.toLowerCase() !== 'admin')) {
                     e.preventDefault();
@@ -791,7 +791,7 @@ export function CoverLetterPage({ user }: PageProps) {
                   </Button>
                   <Button
                     variant="outline"
-                    className="w-full border-2 border-[#70E4A8] text-[#2d3639] hover:bg-[#70E4A8]/10"
+                    className="w-full border-2 border-[#70E4A8] text-[#2d3639] hover:bg-[#70E4A8]/10 dark:text-gray-100 dark:border-[#70E4A8]/70 dark:hover:bg-[#70E4A8]/15"
                     onClick={() => setIsUpgradeDialogOpen(false)}
                   >
                     Not Now
@@ -811,12 +811,12 @@ export function CoverLetterPage({ user }: PageProps) {
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                   <h3 className="text-lg font-semibold">Generated Cover Letters ({filteredLetters.length})</h3>
-                  <p className="text-sm text-gray-600">View and manage your AI-generated cover letters</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">View and manage your AI-generated cover letters</p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
                   <div className="relative w-full sm:w-80">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
                     <Input
                       placeholder="Search cover letters by job description, tone..."
                       value={searchTerm}
@@ -865,7 +865,7 @@ export function CoverLetterPage({ user }: PageProps) {
                       <TableRow key={letter.id}>
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                            <Avatar className="h-10 w-10 border-2 border-gray-200 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-400 transition-colors">
                               {(() => {
                                 const cvForLetter = cvs.find((cv) => cv.id.toString() === (letter.cv_id as any)?.toString());
                                 const imgSrc = cvForLetter ? personaMap[cvForLetter.personas_id] : "";
@@ -1005,7 +1005,7 @@ export function CoverLetterPage({ user }: PageProps) {
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                        <Avatar className="h-10 w-10 border-2 border-gray-200 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-400 transition-colors">
                           {(() => {
                             const cvForLetter = cvs.find((cv) => cv.id.toString() === (letter.cv_id as any)?.toString());
                             const imgSrc = cvForLetter ? personaMap[cvForLetter.personas_id] : "";
@@ -1044,21 +1044,21 @@ export function CoverLetterPage({ user }: PageProps) {
                     <div className="space-y-4">
                       <div>
                         <Label className="text-sm font-medium">Job Description</Label>
-                        <p className="text-sm text-gray-600 mt-1 line-clamp-3">
+                        <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 line-clamp-3">
                           {letter.job_description.substring(0, 150)}...
                         </p>
                       </div>
 
                       <div>
                         <Label className="text-sm font-medium">Resume</Label>
-                        <p className="text-sm text-gray-600 mt-1 line-clamp-3">
+                        <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 line-clamp-3">
                           {(letter as any).cv?.title}
                         </p>
                       </div>
 
                       {/* <div>
                         <Label className="text-sm font-medium">Cover Letter Preview</Label>
-                        <p className="text-sm text-gray-600 mt-1 line-clamp-3">
+                        <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 line-clamp-3">
                           {letter.generated_letter.substring(0, 150)}...
                         </p>
                       </div> */}
@@ -1072,7 +1072,7 @@ export function CoverLetterPage({ user }: PageProps) {
                         </div>
                       </div>
 
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
                         Last Modified: {new Date(letter.updated_at).toLocaleDateString()}
                       </div>
 
@@ -1155,11 +1155,11 @@ export function CoverLetterPage({ user }: PageProps) {
       {filteredLetters.length === 0 && coverLetters.length > 0 && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="rounded-full bg-gray-100 p-6 mb-4">
-              <Search className="h-8 w-8 text-gray-400" />
+            <div className="rounded-full bg-gray-100 dark:bg-gray-900 p-6 mb-4">
+              <Search className="h-8 w-8 text-gray-400 dark:text-gray-500" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No cover letters found</h3>
-            <p className="text-gray-500 mb-4">Try adjusting your search terms or create a new cover letter</p>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No cover letters found</h3>
+            <p className="text-gray-500 dark:text-gray-400 mb-4">Try adjusting your search terms or create a new cover letter</p>
             <Button variant="outline" onClick={() => setSearchTerm("")}>
               Clear Search
             </Button>
@@ -1169,11 +1169,11 @@ export function CoverLetterPage({ user }: PageProps) {
       {coverLetters.length === 0 && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="rounded-full bg-gray-100 p-6 mb-4">
-              <Sparkles className="h-8 w-8 text-gray-400" />
+            <div className="rounded-full bg-gray-100 dark:bg-gray-900 p-6 mb-4">
+              <Sparkles className="h-8 w-8 text-gray-400 dark:text-gray-500" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No cover letters created yet</h3>
-            <p className="text-gray-500 mb-4">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No cover letters created yet</h3>
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
               Create your first AI cover letter by clicking the "Create Cover Letter" button above
             </p>
           </CardContent>
@@ -1184,7 +1184,7 @@ export function CoverLetterPage({ user }: PageProps) {
       {/* Quick Tips */}
       <Card className="animate-slide-up-delay-3 hover:shadow-lg transition-all duration-300">
         <CardHeader>
-          <CardTitle className="flex items-center gap-3 font-rubik text-[#2D3639]">
+          <CardTitle className="flex items-center gap-3 font-rubik text-[#2D3639] dark:text-gray-100">
             <div className="p-2 bg-gradient-to-br from-[#70E4A8] to-[#EA580C] rounded-lg">
               <TrendingUp className="h-5 w-5 text-white" />
             </div>
@@ -1199,8 +1199,8 @@ export function CoverLetterPage({ user }: PageProps) {
                 <Target className="h-5 w-5 text-[#70E4A8]" />
               </div>
               <div>
-                <h4 className="font-semibold text-[#2D3639] font-rubik">Be Specific</h4>
-                <p className="text-sm text-gray-600 font-inter">
+                <h4 className="font-semibold text-[#2D3639] dark:text-gray-100 font-rubik">Be Specific</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300 font-inter">
                   Include detailed job requirements for better AI personalization
                 </p>
               </div>
@@ -1212,19 +1212,19 @@ export function CoverLetterPage({ user }: PageProps) {
                 <Sparkles className="h-5 w-5 text-[#EA580C]" />
               </div>
               <div>
-                <h4 className="font-semibold text-[#2D3639] font-rubik">Choose the Right Tone</h4>
-                <p className="text-sm text-gray-600 font-inter">Match your tone to the company culture and industry</p>
+                <h4 className="font-semibold text-[#2D3639] dark:text-gray-100 font-rubik">Choose the Right Tone</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300 font-inter">Match your tone to the company culture and industry</p>
               </div>
             </div>
 
             {/* Tip 3 */}
             <div className="flex items-start gap-4 animate-fade-in-stagger" style={{ animationDelay: "300ms" }}>
-              <div className="rounded-full bg-blue-100 p-3 animate-float" style={{ animationDelay: "1s" }}>
+              <div className="rounded-full bg-blue-100 dark:bg-blue-900/30 p-3 animate-float" style={{ animationDelay: "1s" }}>
                 <FileText className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <h4 className="font-semibold text-[#2D3639] font-rubik">Review and Edit</h4>
-                <p className="text-sm text-gray-600 font-inter">Always review and customize the AI-generated content</p>
+                <h4 className="font-semibold text-[#2D3639] dark:text-gray-100 font-rubik">Review and Edit</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300 font-inter">Always review and customize the AI-generated content</p>
               </div>
             </div>
           </div>

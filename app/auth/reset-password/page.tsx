@@ -113,8 +113,8 @@ export default function ResetPasswordPage() {
   }
 
   const PasswordRequirement = ({ met, text }: { met: boolean; text: string }) => (
-    <div className={`flex items-center gap-2 text-sm ${met ? 'text-green-600' : 'text-gray-600'}`}>
-      <CheckCircle className={`h-4 w-4 ${met ? 'text-green-600' : 'text-gray-300'}`} />
+    <div className={`flex items-center gap-2 text-sm ${met ? 'text-green-600' : 'text-gray-600 dark:text-gray-300'}`}>
+      <CheckCircle className={`h-4 w-4 ${met ? 'text-green-600' : 'text-gray-300 dark:text-gray-600'}`} />
       {text}
     </div>
   )
@@ -122,10 +122,10 @@ export default function ResetPasswordPage() {
   // Show loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-gray-600 dark:text-gray-300">Loading...</p>
         </div>
       </div>
     )
@@ -134,10 +134,10 @@ export default function ResetPasswordPage() {
   // Show redirect state or invalid params
   if (!hasValidParams) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <AlertCircle className="h-8 w-8 text-red-600" />
-          <p className="text-gray-600">Invalid or missing reset parameters</p>
+          <p className="text-gray-600 dark:text-gray-300">Invalid or missing reset parameters</p>
           <Button onClick={() => router.push("/auth/verify-email")}>
             Go to Verify Email
           </Button>
@@ -147,7 +147,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex items-center mx-auto mb-4">
@@ -155,7 +155,7 @@ export default function ResetPasswordPage() {
               <Image src="/Resumic.png" alt="Logo" width={200} height={90} className="cursor-pointer" />
             </Link>
           </div>
-          <CardTitle className="text-2xl font-bold text-gray-900">Reset Password</CardTitle>
+          <CardTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">Reset Password</CardTitle>
           <CardDescription>
             Create a new password for your account
           </CardDescription>
@@ -172,9 +172,9 @@ export default function ResetPasswordPage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="newPassword" className="text-gray-700">New Password</Label>
+              <Label htmlFor="newPassword" className="text-gray-700 dark:text-gray-200">New Password</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
                 <Input
                   id="newPassword"
                   type={showNewPassword ? "text" : "password"}
@@ -187,7 +187,7 @@ export default function ResetPasswordPage() {
                 <button
                   type="button"
                   onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                   {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -195,8 +195,8 @@ export default function ResetPasswordPage() {
             </div>
 
             {newPassword && (
-              <div className="space-y-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <p className="text-sm font-medium text-gray-700">Password Requirements:</p>
+              <div className="space-y-2 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-200">Password Requirements:</p>
                 <PasswordRequirement met={passwordValidation.minLength} text="At least 8 characters" />
                 <PasswordRequirement met={passwordValidation.hasUpperCase} text="One uppercase letter" />
                 <PasswordRequirement met={passwordValidation.hasLowerCase} text="One lowercase letter" />
@@ -206,9 +206,9 @@ export default function ResetPasswordPage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-gray-700">Confirm Password</Label>
+              <Label htmlFor="confirmPassword" className="text-gray-700 dark:text-gray-200">Confirm Password</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
                 <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
@@ -221,7 +221,7 @@ export default function ResetPasswordPage() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                   {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -248,7 +248,7 @@ export default function ResetPasswordPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               Remember your password?{" "}
               <Link href="/auth/signin" className="text-blue-600 hover:text-blue-500 font-medium">
                 Sign in

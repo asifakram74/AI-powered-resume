@@ -367,8 +367,8 @@ export function UserList({ user }: PageProps) {
 
   if (isLoading && getUsersArray().length === 0) {
     return (
-      <div className="fixed inset-0 flex justify-center items-center bg-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900" />
+      <div className="fixed inset-0 flex justify-center items-center bg-white dark:bg-gray-950">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-gray-100" />
       </div>
     )
   }
@@ -398,8 +398,8 @@ export function UserList({ user }: PageProps) {
             <UserIcon className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-2xl lg:text-3xl font-bold text-[#2D3639] font-sans">User Management</h1>
-            <p className="text-gray-600 font-sans text-sm lg:text-base mt-1 lg:mt-0">Manage all system users</p>
+            <h1 className="text-2xl lg:text-3xl font-bold text-[#2D3639] dark:text-gray-100 font-sans">User Management</h1>
+            <p className="text-gray-600 dark:text-gray-300 font-sans text-sm lg:text-base mt-1 lg:mt-0">Manage all system users</p>
           </div>
         </div>
         <div className="flex justify-center lg:justify-end">
@@ -418,7 +418,7 @@ export function UserList({ user }: PageProps) {
             </DialogTrigger>
             <DialogContent className="w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
               <DialogHeader>
-                <DialogTitle className="font-sans text-[#2D3639]">
+                <DialogTitle className="font-sans text-[#2D3639] dark:text-gray-100">
                   {editingUser ? "Edit User" : "Create New User"}
                 </DialogTitle>
                 <DialogDescription className="font-sans">
@@ -456,40 +456,40 @@ export function UserList({ user }: PageProps) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="hover:shadow-lg transition-shadow duration-300 border-2 border-transparent hover:border-[#70E4A8]/20">
+        <Card className="hover:shadow-lg transition-shadow duration-300 border border-gray-200/70 dark:border-gray-800/60 hover:border-[#70E4A8]/30">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium font-sans text-[#2D3639]">Total Users</CardTitle>
+            <CardTitle className="text-sm font-medium font-sans text-[#2D3639] dark:text-gray-100">Total Users</CardTitle>
             <UserIcon className="h-4 w-4 text-[#70E4A8]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold font-sans text-[#2D3639]">
-              {isLoadingStats ? <div className="animate-pulse bg-gray-200 h-8 w-16 rounded" /> : stats.total}
+            <div className="text-2xl font-bold font-sans text-[#2D3639] dark:text-gray-100">
+              {isLoadingStats ? <div className="animate-pulse bg-gray-200 dark:bg-gray-800 h-8 w-16 rounded" /> : stats.total}
             </div>
-            <p className="text-xs text-gray-500 font-sans">All registered system users</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 font-sans">All registered system users</p>
           </CardContent>
         </Card>
-        <Card className="hover:shadow-lg transition-shadow duration-300 border-2 border-transparent hover:border-[#70E4A8]/20">
+        <Card className="hover:shadow-lg transition-shadow duration-300 border border-gray-200/70 dark:border-gray-800/60 hover:border-[#70E4A8]/30">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium font-sans text-[#2D3639]">Active Users</CardTitle>
+            <CardTitle className="text-sm font-medium font-sans text-[#2D3639] dark:text-gray-100">Active Users</CardTitle>
             <Check className="h-4 w-4 text-[#70E4A8]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold font-sans text-[#2D3639]">
-              {isLoadingStats ? <div className="animate-pulse bg-gray-200 h-8 w-16 rounded" /> : stats.active}
+            <div className="text-2xl font-bold font-sans text-[#2D3639] dark:text-gray-100">
+              {isLoadingStats ? <div className="animate-pulse bg-gray-200 dark:bg-gray-800 h-8 w-16 rounded" /> : stats.active}
             </div>
-            <p className="text-xs text-gray-500 font-sans">Currently active accounts</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 font-sans">Currently active accounts</p>
           </CardContent>
         </Card>
-        <Card className="hover:shadow-lg transition-shadow duration-300 border-2 border-transparent hover:border-[#70E4A8]/20">
+        <Card className="hover:shadow-lg transition-shadow duration-300 border border-gray-200/70 dark:border-gray-800/60 hover:border-[#70E4A8]/30">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium font-sans text-[#2D3639]">Admins</CardTitle>
+            <CardTitle className="text-sm font-medium font-sans text-[#2D3639] dark:text-gray-100">Admins</CardTitle>
             <Shield className="h-4 w-4 text-[#70E4A8]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold font-sans text-[#2D3639]">
-              {isLoadingStats ? <div className="animate-pulse bg-gray-200 h-8 w-16 rounded" /> : stats.admins}
+            <div className="text-2xl font-bold font-sans text-[#2D3639] dark:text-gray-100">
+              {isLoadingStats ? <div className="animate-pulse bg-gray-200 dark:bg-gray-800 h-8 w-16 rounded" /> : stats.admins}
             </div>
-            <p className="text-xs text-gray-500 font-sans">Users with admin privileges</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 font-sans">Users with admin privileges</p>
           </CardContent>
         </Card>
       </div>
@@ -500,17 +500,17 @@ export function UserList({ user }: PageProps) {
             <CardContent className="p-4">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-lg font-semibold font-sans text-[#2D3639]">
+                  <h3 className="text-lg font-semibold font-sans text-[#2D3639] dark:text-gray-100">
                     System Users ({searchTerm.trim() === "" ? usersData?.users.total || 0 : filteredUsers.length})
                     {searchTerm.trim() !== "" && searchMode === "all" && (
-                      <span className="text-sm text-gray-500 ml-2 font-normal">(searching all {stats.total} users)</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400 ml-2 font-normal">(searching all {stats.total} users)</span>
                     )}
                   </h3>
-                  <p className="text-sm text-gray-600 font-sans">View and manage all registered users</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 font-sans">View and manage all registered users</p>
                 </div>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
                   <div className="relative w-full sm:w-80">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
                     <Input
                       placeholder="Search users by name, email, role..."
                       value={searchTerm}
@@ -518,12 +518,12 @@ export function UserList({ user }: PageProps) {
                       className="pl-10 w-full font-sans"
                     />
                     {isLoadingAllUsers && (
-                      <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 animate-spin" />
+                      <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 animate-spin" />
                     )}
                     {searchTerm.trim() !== "" && !isLoadingAllUsers && (
                       <button
                         onClick={handleClearSearch}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                       >
                         <X className="h-4 w-4" />
                       </button>
@@ -552,7 +552,7 @@ export function UserList({ user }: PageProps) {
                 </div>
               </div>
               {searchTerm.trim() !== "" && (
-                <div className="mt-3 text-sm text-gray-600 font-sans">
+                <div className="mt-3 text-sm text-gray-600 dark:text-gray-300 font-sans">
                   <div className="flex items-center gap-2">
                     <span>Searching in: </span>
                     <div className="flex gap-2">
@@ -585,13 +585,13 @@ export function UserList({ user }: PageProps) {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="font-sans">User</TableHead>
-                      <TableHead className="font-sans">Email</TableHead>
-                      <TableHead className="font-sans">Role</TableHead>
-                      <TableHead className="font-sans">Plan</TableHead>
-                      <TableHead className="font-sans">Status</TableHead>
-                      <TableHead className="font-sans">Verified</TableHead>
-                      <TableHead className="font-sans text-right pr-5">Actions</TableHead>
+                      <TableHead className="font-sans text-gray-700 dark:text-gray-300">User</TableHead>
+                      <TableHead className="font-sans text-gray-700 dark:text-gray-300">Email</TableHead>
+                      <TableHead className="font-sans text-gray-700 dark:text-gray-300">Role</TableHead>
+                      <TableHead className="font-sans text-gray-700 dark:text-gray-300">Plan</TableHead>
+                      <TableHead className="font-sans text-gray-700 dark:text-gray-300">Status</TableHead>
+                      <TableHead className="font-sans text-gray-700 dark:text-gray-300">Verified</TableHead>
+                      <TableHead className="font-sans text-gray-700 dark:text-gray-300 text-right pr-5">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -599,32 +599,32 @@ export function UserList({ user }: PageProps) {
                       <TableRow key={user.id} className="hover:bg-[#70E4A8]/5">
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-[#70E4A8] transition-colors">
-                              <AvatarFallback className="bg-[#70E4A8]/20 text-[#70E4A8] font-semibold">
+                            <Avatar className="h-10 w-10 border-2 border-gray-200 dark:border-gray-800 hover:border-[#70E4A8] transition-colors">
+                              <AvatarFallback className="bg-[#70E4A8]/20 text-[#70E4A8] dark:text-[#70E4A8] font-semibold">
                                 {(user.name || "").split(" ").map((n) => n[0]).join("")}
                               </AvatarFallback>
                             </Avatar>
                             <div>
-                              <div className="font-medium font-sans text-[#2D3639]">{user.name}</div>
-                              <div className="text-sm text-gray-600 font-sans">
+                              <div className="font-medium font-sans text-[#2D3639] dark:text-gray-100">{user.name}</div>
+                              <div className="text-sm text-gray-600 dark:text-gray-300 font-sans">
                                 Joined: {new Date(user.created_at).toLocaleDateString()}
                               </div>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2 font-sans">
+                          <div className="flex items-center gap-2 font-sans text-[#2D3639] dark:text-gray-100">
                             <Mail className="h-4 w-4 text-[#70E4A8]" />
                             {user.email}
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="secondary" className="text-sm text-gray-600 font-sans">
+                          <Badge variant="secondary" className="text-sm font-sans bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
                             {user.role}
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="secondary" className="capitalize text-sm text-gray-600 font-sans">
+                          <Badge variant="secondary" className="capitalize text-sm font-sans bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
                             {user.plan_type}
                           </Badge>
                         </TableCell>
@@ -634,10 +634,10 @@ export function UserList({ user }: PageProps) {
                               user.status === "Active" ? "default" : user.status === "Block" ? "destructive" : "secondary"
                             }
                             className={`cursor-pointer font-sans ${user.status === "Active"
-                                ? "bg-[#70E4A8]/20 text-[#2D3639] hover:bg-[#70E4A8]/30 font-sans"
+                                ? "bg-[#70E4A8]/20 text-[#2D3639] dark:text-[#70E4A8] dark:bg-[#70E4A8]/30 border border-[#70E4A8]/30 dark:border-[#70E4A8]/50 hover:bg-[#70E4A8]/30 dark:hover:bg-[#70E4A8]/40"
                                 : user.status === "Block"
-                                  ? "bg-[#F87171]/20 text-[#DC2626] hover:bg-[#F87171]/30"
-                                  : "text-xs bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20 hover:text-yellow-800 font-sans"
+                                  ? "bg-[#F87171]/20 text-[#DC2626] dark:text-[#F87171] dark:bg-[#F87171]/30 border border-[#F87171]/30 dark:border-[#F87171]/50 hover:bg-[#F87171]/30 dark:hover:bg-[#F87171]/40"
+                                  : "text-xs bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 dark:bg-yellow-500/20 border border-yellow-500/30 dark:border-yellow-500/50 hover:bg-yellow-500/20 dark:hover:bg-yellow-500/30"
                               }`}
                             onClick={() => toggleUserStatus(user)}
                           >
@@ -646,7 +646,7 @@ export function UserList({ user }: PageProps) {
                         </TableCell>
                         <TableCell>
                           {user.email_verified_at ? (
-                            <Badge variant="secondary" className="bg-[#70E4A8]/20 text-[#2D3639] font-sans">
+                            <Badge variant="secondary" className="font-sans bg-[#70E4A8]/20 text-[#2D3639] dark:text-[#70E4A8] dark:bg-[#70E4A8]/30 border border-[#70E4A8]/30 dark:border-[#70E4A8]/50">
                               <Check className="h-3 w-3 mr-1" />
                               Verified
                             </Badge>
@@ -655,7 +655,7 @@ export function UserList({ user }: PageProps) {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleVerifyEmail(user.id)}
-                              className="text-xs bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20 hover:text-yellow-800 font-sans"
+                              className="text-xs font-sans bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 dark:bg-yellow-500/20 border border-yellow-500/30 dark:border-yellow-500/50 hover:bg-yellow-500/20 dark:hover:bg-yellow-500/30"
                             >
                               <X className="h-3 w-3 mr-1" />
                               Not Verified
@@ -668,7 +668,7 @@ export function UserList({ user }: PageProps) {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleEdit(user)}
-                              className="text-[#70E4A8] hover:text-[#70E4A8] hover:bg-[#70E4A8]/10"
+                              className="text-[#70E4A8] dark:text-[#70E4A8] hover:text-[#70E4A8] dark:hover:text-[#70E4A8] hover:bg-[#70E4A8]/10 dark:hover:bg-[#70E4A8]/20"
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -682,7 +682,7 @@ export function UserList({ user }: PageProps) {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="text-[#EA580C] hover:text-[#EA580C] hover:bg-[#EA580C]/10"
+                                  className="text-[#EA580C] dark:text-[#EA580C] hover:text-[#EA580C] dark:hover:text-[#EA580C] hover:bg-[#EA580C]/10 dark:hover:bg-[#EA580C]/20"
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -706,13 +706,13 @@ export function UserList({ user }: PageProps) {
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        <Avatar className="h-12 w-12 border-2 border-gray-200 hover:border-[#70E4A8] transition-colors">
-                          <AvatarFallback className="bg-[#70E4A8]/20 text-[#70E4A8] font-semibold">
+                        <Avatar className="h-12 w-12 border-2 border-gray-200 dark:border-gray-800 hover:border-[#70E4A8] transition-colors">
+                          <AvatarFallback className="bg-[#70E4A8]/20 text-[#70E4A8] dark:text-[#70E4A8] font-semibold">
                             {(user.name || "").split(" ").map((n) => n[0]).join("")}
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <CardTitle className="text-lg font-sans text-[#2D3639]">{user.name}</CardTitle>
+                          <CardTitle className="text-lg font-sans text-[#2D3639] dark:text-gray-100">{user.name}</CardTitle>
                           <CardDescription className="font-sans">{user.email}</CardDescription>
                         </div>
                       </div>
@@ -721,28 +721,28 @@ export function UserList({ user }: PageProps) {
                   <CardContent>
                     <div className="space-y-4">
                       <div>
-                        <Label className="text-sm font-medium font-sans text-[#2D3639]">Role</Label>
-                        <Badge variant="secondary">
-                          <p className="text-sm text-gray-600 font-sans">{user.role}</p>
+                        <Label className="text-sm font-medium font-sans text-[#2D3639] dark:text-gray-100">Role</Label>
+                        <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+                          <p className="text-sm font-sans">{user.role}</p>
                         </Badge>
                       </div>
                       <div>
-                        <Label className="text-sm font-medium font-sans text-[#2D3639]">Plan</Label>
-                        <Badge variant="secondary">
-                          <p className="text-sm text-gray-600 font-sans capitalize">{user.plan_type}</p>
+                        <Label className="text-sm font-medium font-sans text-[#2D3639] dark:text-gray-100">Plan</Label>
+                        <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+                          <p className="text-sm font-sans capitalize">{user.plan_type}</p>
                         </Badge>
                       </div>
                       <div>
-                        <Label className="text-sm font-medium font-sans text-[#2D3639]">Status</Label>
+                        <Label className="text-sm font-medium font-sans text-[#2D3639] dark:text-gray-100">Status</Label>
                         <Badge
                           variant={
                             user.status === "Active" ? "default" : user.status === "Block" ? "destructive" : "secondary"
                           }
                           className={`cursor-pointer font-sans ${user.status === "Active"
-                              ? "bg-[#70E4A8]/20 text-[#2D3639] hover:bg-[#70E4A8]/30"
+                              ? "bg-[#70E4A8]/20 text-[#2D3639] dark:text-[#70E4A8] dark:bg-[#70E4A8]/30 border border-[#70E4A8]/30 dark:border-[#70E4A8]/50 hover:bg-[#70E4A8]/30 dark:hover:bg-[#70E4A8]/40"
                               : user.status === "Block"
-                                ? "bg-[#F87171]/20 text-[#DC2626] hover:bg-[#F87171]/30"
-                                : "text-xs bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20 hover:text-yellow-800 font-sans"
+                                ? "bg-[#F87171]/20 text-[#DC2626] dark:text-[#F87171] dark:bg-[#F87171]/30 border border-[#F87171]/30 dark:border-[#F87171]/50 hover:bg-[#F87171]/30 dark:hover:bg-[#F87171]/40"
+                                : "text-xs bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 dark:bg-yellow-500/20 border border-yellow-500/30 dark:border-yellow-500/50 hover:bg-yellow-500/20 dark:hover:bg-yellow-500/30"
                             }`}
                           onClick={() => toggleUserStatus(user)}
                         >
@@ -750,9 +750,9 @@ export function UserList({ user }: PageProps) {
                         </Badge>
                       </div>
                       <div>
-                        <Label className="text-sm font-medium font-sans text-[#2D3639]">Verified</Label>
+                        <Label className="text-sm font-medium font-sans text-[#2D3639] dark:text-gray-100">Verified</Label>
                         {user.email_verified_at ? (
-                          <Badge variant="secondary" className="bg-[#70E4A8]/20 text-[#2D3639] font-sans">
+                          <Badge variant="secondary" className="font-sans bg-[#70E4A8]/20 text-[#2D3639] dark:text-[#70E4A8] dark:bg-[#70E4A8]/30 border border-[#70E4A8]/30 dark:border-[#70E4A8]/50">
                             <Check className="h-3 w-3 mr-1" />
                             Verified
                           </Badge>
@@ -761,14 +761,14 @@ export function UserList({ user }: PageProps) {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleVerifyEmail(user.id)}
-                            className="text-xs bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20 hover:text-yellow-800 font-sans"
+                            className="text-xs font-sans bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 dark:bg-yellow-500/20 border border-yellow-500/30 dark:border-yellow-500/50 hover:bg-yellow-500/20 dark:hover:bg-yellow-500/30"
                           >
                             <X className="h-3 w-3 mr-1" />
                             Not Verified
                           </Button>
                         )}
                       </div>
-                      <div className="text-xs text-gray-500 font-sans">
+                      <div className="text-xs text-gray-500 dark:text-gray-400 font-sans">
                         Joined: {new Date(user.created_at).toLocaleDateString()}
                       </div>
                       <div className="flex gap-2">
@@ -776,7 +776,7 @@ export function UserList({ user }: PageProps) {
                           variant="outline"
                           size="sm"
                           onClick={() => handleEdit(user)}
-                          className="bg-transparent border-[#70E4A8]/30 text-[#70E4A8] hover:bg-[#70E4A8]/10 hover:border-[#70E4A8]/50"
+                          className="bg-transparent border-[#70E4A8]/30 text-[#70E4A8] dark:text-[#70E4A8] hover:bg-[#70E4A8]/10 dark:hover:bg-[#70E4A8]/20 hover:border-[#70E4A8]/50"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -790,7 +790,7 @@ export function UserList({ user }: PageProps) {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="text-[#EA580C] border-[#EA580C]/30 hover:bg-[#EA580C]/10 hover:border-[#EA580C]/50 bg-transparent"
+                              className="text-[#EA580C] dark:text-[#EA580C] border-[#EA580C]/30 hover:bg-[#EA580C]/10 dark:hover:bg-[#EA580C]/20 hover:border-[#EA580C]/50 bg-transparent"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -808,13 +808,13 @@ export function UserList({ user }: PageProps) {
           {!searchTerm.trim() && usersData?.users && (
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
               <div className="flex items-center gap-4">
-                <div className="text-sm text-muted-foreground font-sans">
-                  Showing <strong>{usersData.users.from}-{usersData.users.to}</strong> of <strong>{usersData.users.total}</strong> users
+                <div className="text-sm text-muted-foreground font-sans dark:text-gray-300">
+                  Showing <strong className="text-[#2D3639] dark:text-gray-100">{usersData.users.from}-{usersData.users.to}</strong> of <strong className="text-[#2D3639] dark:text-gray-100">{usersData.users.total}</strong> users
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600 font-sans">Show:</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-300 font-sans">Show:</span>
                   <Select value={String(paginationLimit)} onValueChange={handleLimitChange}>
-                    <SelectTrigger className="w-20 h-8 border-[#70E4A8]/30">
+                    <SelectTrigger className="w-20 h-8 border-[#70E4A8]/30 dark:border-[#70E4A8]/50 dark:text-gray-100">
                       <SelectValue placeholder="10" />
                     </SelectTrigger>
                     <SelectContent>
@@ -835,7 +835,7 @@ export function UserList({ user }: PageProps) {
                     size="sm"
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="border-[#70E4A8]/30 hover:border-[#70E4A8]/50 font-sans"
+                    className="border-[#70E4A8]/30 hover:border-[#70E4A8]/50 text-[#2D3639] dark:text-gray-100 font-sans"
                   >
                     <ChevronLeft className="h-4 w-4" />
                     Previous
@@ -845,7 +845,7 @@ export function UserList({ user }: PageProps) {
                     size="sm"
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === usersData.users.last_page}
-                    className="border-[#70E4A8]/30 hover:border-[#70E4A8]/50 font-sans"
+                    className="border-[#70E4A8]/30 hover:border-[#70E4A8]/50 text-[#2D3639] dark:text-gray-100 font-sans"
                   >
                     Next
                     <ChevronRight className="h-4 w-4" />
@@ -860,15 +860,15 @@ export function UserList({ user }: PageProps) {
       {filteredUsers.length === 0 && searchTerm.trim() !== "" && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="rounded-full bg-gray-100 p-6 mb-4">
-              <Search className="h-8 w-8 text-gray-400" />
+            <div className="rounded-full bg-gray-100 dark:bg-gray-900 p-6 mb-4">
+              <Search className="h-8 w-8 text-gray-400 dark:text-gray-500" />
             </div>
-            <h3 className="text-lg font-medium text-[#2D3639] mb-2 font-sans">No users found</h3>
-            <p className="text-gray-500 mb-4 font-sans">No users match your search criteria "{searchTerm}"</p>
+            <h3 className="text-lg font-medium text-[#2D3639] dark:text-gray-100 mb-2 font-sans">No users found</h3>
+            <p className="text-gray-500 dark:text-gray-400 mb-4 font-sans">No users match your search criteria "{searchTerm}"</p>
             <Button
               variant="outline"
               onClick={handleClearSearch}
-              className="border-[#70E4A8]/30 hover:border-[#70E4A8]/50 font-sans"
+              className="border-[#70E4A8]/30 hover:border-[#70E4A8]/50 text-[#2D3639] dark:text-gray-100 font-sans"
             >
               Clear Search
             </Button>
@@ -879,18 +879,18 @@ export function UserList({ user }: PageProps) {
       {getUsersArray().length === 0 && !isLoading && searchTerm.trim() === "" && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="rounded-full bg-gray-100 p-6 mb-4">
-              <UserIcon className="h-8 w-8 text-gray-400" />
+            <div className="rounded-full bg-gray-100 dark:bg-gray-900 p-6 mb-4">
+              <UserIcon className="h-8 w-8 text-gray-400 dark:text-gray-500" />
             </div>
-            <h3 className="text-lg font-medium text-[#2D3639] mb-2 font-sans">No users registered yet</h3>
-            <p className="text-gray-500 mb-4 font-sans">Create your first user by clicking the "Add User" button above</p>
+            <h3 className="text-lg font-medium text-[#2D3639] dark:text-gray-100 mb-2 font-sans">No users registered yet</h3>
+            <p className="text-gray-500 dark:text-gray-400 mb-4 font-sans">Create your first user by clicking the "Add User" button above</p>
           </CardContent>
         </Card>
       )}
 
       <Card className="hover:shadow-lg transition-all duration-300 border-2 border-transparent hover:border-[#70E4A8]/20">
         <CardHeader>
-          <CardTitle className="flex items-center gap-3 font-sans text-[#2D3639]">
+          <CardTitle className="flex items-center gap-3 font-sans text-[#2D3639] dark:text-gray-100">
             <div className="p-2 bg-gradient-to-br from-[#70E4A8] to-[#EA580C] rounded-lg">
               <TrendingUp className="h-5 w-5 text-white" />
             </div>
@@ -904,8 +904,8 @@ export function UserList({ user }: PageProps) {
                 <UserIcon className="h-5 w-5 text-[#70E4A8]" />
               </div>
               <div>
-                <h4 className="font-semibold text-[#2D3639] font-sans">Global Search</h4>
-                <p className="text-sm text-gray-600 font-sans">Search across all users in the database, not just the current page</p>
+                <h4 className="font-semibold text-[#2D3639] dark:text-gray-100 font-sans">Global Search</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300 font-sans">Search across all users in the database, not just the current page</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
@@ -913,8 +913,8 @@ export function UserList({ user }: PageProps) {
                 <Shield className="h-5 w-5 text-[#EA580C]" />
               </div>
               <div>
-                <h4 className="font-semibold text-[#2D3639] font-sans">Admin Privileges</h4>
-                <p className="text-sm text-gray-600 font-sans">Limit admin access to trusted users only</p>
+                <h4 className="font-semibold text-[#2D3639] dark:text-gray-100 font-sans">Admin Privileges</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300 font-sans">Limit admin access to trusted users only</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
@@ -922,8 +922,8 @@ export function UserList({ user }: PageProps) {
                 <Briefcase className="h-5 w-5 text-[#70E4A8]" />
               </div>
               <div>
-                <h4 className="font-semibold text-[#2D3639] font-sans">Plan Management</h4>
-                <p className="text-sm text-gray-600 font-sans">Monitor and manage user subscription plans effectively</p>
+                <h4 className="font-semibold text-[#2D3639] dark:text-gray-100 font-sans">Plan Management</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300 font-sans">Monitor and manage user subscription plans effectively</p>
               </div>
             </div>
           </div>

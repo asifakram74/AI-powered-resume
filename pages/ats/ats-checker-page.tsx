@@ -104,18 +104,18 @@ export default function ATSCheckerPage() {
 
     setIsAnalyzing(true);
     setError(null);
-    console.log('Making request to:', 'https://backendserver.resumaic.com/api/ats-analysis');
+    console.log('Making request to:', 'https://stagingnode.resumaic.com/api/ats-analysis');
     // console.log('Making request to:', 'https://stagingnode.resumaic.com/api/ats-analysis');
     console.log('Request payload size:', JSON.stringify({ extractedText, jobDescription }).length);
     try {
-      const testResponse = await fetch('https://backendserver.resumaic.com', { method: 'HEAD' });
+      const testResponse = await fetch('https://stagingnode.resumaic.com', { method: 'HEAD' });
       // const testResponse = await fetch('https://stagingnode.resumaic.com', { method: 'HEAD' });
       console.log('Server reachable:', testResponse.ok);
     } catch (testError) {
       console.error('Server not reachable:', testError);
     }
     try {
-      const response = await fetch('https://backendserver.resumaic.com/api/ats-analysis', {
+      const response = await fetch('https://stagingnode.resumaic.com/api/ats-analysis', {
       // const response = await fetch('https://stagingnode.resumaic.com/api/ats-analysis', {
         method: 'POST',
         headers: {
@@ -402,18 +402,18 @@ export default function ATSCheckerPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-8 p-6">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-green-50 to-teal-50 rounded-2xl p-8 text-center">
+      <div className="bg-gradient-to-r from-green-50 to-teal-50 dark:from-gray-900 dark:to-gray-950 rounded-2xl p-8 text-center">
         <div className="max-w-3xl mx-auto">
-          <div className="inline-flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 mb-4 shadow-sm">
+          <div className="inline-flex items-center justify-center bg-white/80 dark:bg-gray-950/60 backdrop-blur-sm rounded-full px-4 py-2 mb-4 shadow-sm">
             <CheckCircle className="h-5 w-5 text-teal-600 mr-2" />
-            <span className="font-medium text-teal-800">
+            <span className="font-medium text-teal-800 dark:text-teal-200">
               Professional ATS Optimization Tool
             </span>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
             Optimize Your Resume for <span className="text-teal-600">ATS</span>
           </h1>
-          <p className="text-xl text-gray-600 mb-8">
+          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
             Get past applicant tracking systems and land more interviews with our
             AI-powered resume analyzer
           </p>
@@ -479,7 +479,7 @@ export default function ATSCheckerPage() {
                             className="min-h-[200px] resize-none"
                             style={{ wordBreak: "break-all" }}
                           />
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
                             Include as much detail as possible for a more tailored analysis
                           </p>
 
@@ -537,7 +537,7 @@ export default function ATSCheckerPage() {
                         )}
                       </Button>
                       {(!planType || String(planType).toLowerCase() === "free") && !isAdmin && (
-                        <p className="text-sm text-gray-500 mt-2">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                           Free checks remaining: {Math.max(0, 3 - freeChecksUsed)} of 3
                         </p>
                       )}
@@ -569,7 +569,7 @@ export default function ATSCheckerPage() {
                               style={{ width: `${analysisResult.score}%` }}
                             />
                           </Progress>
-                          <p className="text-sm text-gray-600 mt-2">
+                          <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
                             {analysisResult.score >= 80
                               ? "Excellent! Your resume is well-optimized for ATS systems."
                               : analysisResult.score >= 60
@@ -590,11 +590,11 @@ export default function ATSCheckerPage() {
                               ([section, data]) => (
                                 <div
                                   key={section}
-                                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                                  className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                                 >
                                   <div>
                                     <h4 className="font-medium">{section}</h4>
-                                    <p className="text-sm text-gray-600">{data.feedback}</p>
+                                    <p className="text-sm text-gray-600 dark:text-gray-300">{data.feedback}</p>
                                   </div>
                                   <div className="text-right">
                                     <span className={`font-bold ${getScoreColor(data.score)}`}>
@@ -742,14 +742,14 @@ export default function ATSCheckerPage() {
         <Card className="hover:shadow-lg transition-shadow duration-300">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
+              <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600">
                 <FileCheck className="h-6 w-6" />
               </div>
               <CardTitle>ATS Compatibility</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-300">
               Get a detailed score showing how well your resume will perform in
               Applicant Tracking Systems.
             </p>
@@ -759,14 +759,14 @@ export default function ATSCheckerPage() {
         <Card className="hover:shadow-lg transition-shadow duration-300">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-100 text-green-600">
+              <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/20 text-green-600">
                 <Search className="h-6 w-6" />
               </div>
               <CardTitle>Keyword Analysis</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-300">
               See which keywords from the job description are missing from your
               resume.
             </p>
@@ -776,14 +776,14 @@ export default function ATSCheckerPage() {
         <Card className="hover:shadow-lg transition-shadow duration-300">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-purple-100 text-purple-600">
+              <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/20 text-purple-600">
                 <Target className="h-6 w-6" />
               </div>
               <CardTitle>Actionable Tips</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-300">
               Receive personalized suggestions to improve your resume's ATS
               performance.
             </p>
@@ -813,16 +813,16 @@ export default function ATSCheckerPage() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="p-3 rounded-lg bg-[#70E4A8]/10">
-                    <p className="text-sm font-medium text-[#2D3639]">Unlimited ATS analyses</p>
+                    <p className="text-sm font-medium text-[#2D3639] dark:text-gray-100">Unlimited ATS analyses</p>
                   </div>
                   <div className="p-3 rounded-lg bg-[#EA580C]/10">
-                    <p className="text-sm font-medium text-[#2D3639]">Priority scoring engine</p>
+                    <p className="text-sm font-medium text-[#2D3639] dark:text-gray-100">Priority scoring engine</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-blue-100">
-                    <p className="text-sm font-medium text-[#2D3639]">Advanced suggestions</p>
+                  <div className="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                    <p className="text-sm font-medium text-[#2D3639] dark:text-gray-100">Advanced suggestions</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-purple-100">
-                    <p className="text-sm font-medium text-[#2D3639]">Keyword matching</p>
+                  <div className="p-3 rounded-lg bg-purple-100 dark:bg-purple-900/20">
+                    <p className="text-sm font-medium text-[#2D3639] dark:text-gray-100">Keyword matching</p>
                   </div>
                 </div>
 
@@ -841,7 +841,7 @@ export default function ATSCheckerPage() {
                   </Button>
                   <Button
                     variant="outline"
-                    className="flex-1 border-[#70E4A8] text-[#2D3639]"
+                    className="flex-1 border-[#70E4A8] text-[#2D3639] dark:text-gray-100 dark:border-[#70E4A8]/70"
                     onClick={() => setIsUpgradeDialogOpen(false)}
                   >
                     Not Now

@@ -5,6 +5,8 @@ import "./globals.css";
 import { ReduxProvider } from "../lib/redux/provider";
 import { Toaster } from "sonner";
 import HydrateAuth from "../components/auth/HydrateAuth";
+import { ThemeProvider } from "../components/theme-provider";
+import { ThemeToggle } from "../components/theme-toggle";
 
 export const metadata: Metadata = {
  title: "Resumaic – AI-Powered Resume Builder Online",
@@ -58,13 +60,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="antialiased">
+    <html lang="en" className="antialiased" suppressHydrationWarning>
       <body className="font-sans">
-        <ReduxProvider>
-          <HydrateAuth />
-          <Toaster position="top-right" richColors />
-          {children}
-        </ReduxProvider>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
+          <ReduxProvider>
+            <HydrateAuth />
+            <Toaster position="top-right" richColors />
+            <ThemeToggle />
+            {children}
+          </ReduxProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
