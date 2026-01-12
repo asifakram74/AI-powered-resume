@@ -155,7 +155,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <WelcomeTour />
         <div className="flex min-h-screen w-full">
           <Sidebar user={profile as any} />
-          <main className="flex-1 bg-gray-50 dark:bg-gray-950 relative">
+          <main className="flex-1 bg-gray-50 dark:bg-gray-950 relative overflow-y-auto custom-scrollbar">
             {/* {requiresPasswordSetup && user?.role?.toLowerCase() !== 'admin' && 
               <Dialog open>
                 <DialogContent className="max-w-md p-0 overflow-hidden border-0 shadow-xl rounded-xl">

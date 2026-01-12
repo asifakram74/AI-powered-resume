@@ -1099,7 +1099,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                 }))
               }
               placeholder="Brief professional summary..."
-              className="min-h-[100px]"
+              className="min-h-[100px] custom-scrollbar"
             />
           </div>
         </CardContent>
@@ -1367,10 +1367,10 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             <div className="space-y-2">
               <Label>Added Experience:</Label>
               {formData.experience.map((exp) => (
-                <div key={exp.id} className="p-3 bg-gray-50 rounded-lg flex justify-between items-start">
+                <div key={exp.id} className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg flex justify-between items-start">
                   <div className="flex-1">
                     <div className="font-medium">{exp.jobTitle}</div>
-                    <div className="text-sm text-gray-600">{exp.companyName}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">{exp.companyName}</div>
                     {(formatDateForPersona(exp.startDate) || exp.current || formatDateForPersona(exp.endDate)) && (
                     <div className="text-sm text-gray-500">
                       {formatDateForPersona(exp.startDate)}
@@ -1660,7 +1660,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                 }))
               }
               placeholder="Relevant coursework, projects, etc..."
-              className="min-h-[80px]"
+              className="min-h-[80px] custom-scrollbar"
             />
           </div>
 
@@ -1702,12 +1702,12 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             <div className="space-y-2">
               <Label>Added Education:</Label>
               {formData.education.map((edu) => (
-                <div key={edu.id} className="p-3 bg-gray-50 rounded-lg flex justify-between items-start">
+                <div key={edu.id} className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg flex justify-between items-start">
                   <div className="flex-1">
                     <div className="font-medium">
                       {edu.degree} - {edu.institutionName}
                     </div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
                       {edu.location} | {edu.graduationDate}
                     </div>
                   </div>
@@ -1840,10 +1840,10 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             <div className="space-y-2">
               <Label>Added Certifications:</Label>
               {formData.certifications.map((cert) => (
-                <div key={cert.id} className="p-3 bg-gray-50 rounded-lg flex justify-between items-start">
+                <div key={cert.id} className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg flex justify-between items-start">
                   <div className="flex-1">
                     <div className="font-medium">{cert.title}</div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
                       {cert.issuingOrganization} | {cert.dateObtained}
                     </div>
                   </div>
@@ -1917,7 +1917,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                 }))
               }
               placeholder="Describe the project, your contributions, and key achievements..."
-              className="min-h-[100px]"
+              className="min-h-[100px] custom-scrollbar"
             />
           </div>
 
@@ -2063,10 +2063,10 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             <div className="space-y-2">
               <Label>Added Projects:</Label>
               {formData.projects.map((project) => (
-                <div key={project.id} className="p-3 bg-gray-50 rounded-lg flex justify-between items-start">
+                <div key={project.id} className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg flex justify-between items-start">
                   <div className="flex-1">
                     <div className="font-medium">{project.name}</div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
                       {project.role}
                     </div>
                     <div className="text-sm text-gray-500">

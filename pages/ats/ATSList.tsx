@@ -187,7 +187,7 @@ export function ATSListPage() {
 
           {viewMode === "table" ? (
             <Card>
-              <CardContent className="p-0">
+              <CardContent className="p-0 overflow-auto max-h-[600px] custom-scrollbar">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -511,49 +511,52 @@ export function ATSListPage() {
 
       {/* Upgrade Dialog for Free Users */}
       <Dialog open={isUpgradeDialogOpen} onOpenChange={setIsUpgradeDialogOpen}>
-        <DialogContent className="max-w-md p-0 overflow-hidden border-0 shadow-xl rounded-xl">
-          <div className="relative resumaic-gradient-green p-6 text-white rounded-t-xl animate-pulse-glow">
-            <div className="absolute inset-x-0 top-0 h-0.5 shimmer-effect opacity-70" />
-            <div className="flex items-center gap-3">
-              <Crown className="h-6 w-6" />
-              <DialogTitle className="text-lg font-semibold">Upgrade Required</DialogTitle>
-            </div>
-            <DialogDescription className="mt-2 text-sm opacity-90">
-              ATS checker is a Pro feature. Upgrade your plan to access ATS analysis.
-            </DialogDescription>
-            <div className="absolute -right-10 -top-10 w-32 h-32 resumaic-gradient-orange rounded-full blur-2xl opacity-30" />
-          </div>
-          <div className="p-6 space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <span className="size-1.5 rounded-full resumaic-gradient-green" />
-                <span>Unlimited ATS analyses</span>
+                  <DialogContent className="max-w-md p-0 overflow-hidden border-0 shadow-xl rounded-xl dark:border-0 dark:p-[1px] dark:bg-transparent">
+              <div className="hidden dark:block absolute inset-0 gradient-border-moving -z-10" />
+              <div className="dark:bg-[#0B0F1A] dark:rounded-xl overflow-hidden h-full w-full">
+            <div className="relative resumaic-gradient-green p-6 text-white rounded-t-xl animate-pulse-glow">
+              <div className="absolute inset-x-0 top-0 h-0.5 shimmer-effect opacity-70" />
+              <div className="flex items-center gap-3">
+                <Crown className="h-6 w-6" />
+                <DialogTitle className="text-lg font-semibold">Upgrade Required</DialogTitle>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="size-1.5 rounded-full resumaic-gradient-orange" />
-                <span>Priority scoring engine</span>
-              </div>
+              <DialogDescription className="mt-2 text-sm opacity-90 text-white">
+                ATS checker is a Pro feature. Upgrade your plan to access ATS analysis.
+              </DialogDescription>
+              <div className="absolute -right-10 -top-10 w-32 h-32 resumaic-gradient-orange rounded-full blur-2xl opacity-30" />
             </div>
-            <div className="space-y-3">
-              <Button
-                className="w-full resumaic-gradient-orange text-white hover:opacity-90 button-press"
-                onClick={async () => {
-                  try {
-                    await createCheckoutSession();
-                  } catch (err) {
-                    console.error("Checkout error:", err);
-                  }
-                }}
-              >
-                Upgrade Now
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full border-2 border-[#70E4A8] text-[#2d3639] hover:bg-[#70E4A8]/10 dark:text-gray-100 dark:border-[#70E4A8]/70 dark:hover:bg-[#70E4A8]/15"
-                onClick={() => setIsUpgradeDialogOpen(false)}
-              >
-                Not Now
-              </Button>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <span className="size-1.5 rounded-full resumaic-gradient-green" />
+                  <span>Unlimited ATS analyses</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="size-1.5 rounded-full resumaic-gradient-orange" />
+                  <span>Priority scoring engine</span>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <Button
+                  className="w-full resumaic-gradient-orange text-white hover:opacity-90 button-press"
+                  onClick={async () => {
+                    try {
+                      await createCheckoutSession();
+                    } catch (err) {
+                      console.error("Checkout error:", err);
+                    }
+                  }}
+                >
+                  Upgrade Now
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full border-2 border-[#70E4A8] text-[#2d3639] hover:bg-[#70E4A8]/10 dark:text-gray-100 dark:border-[#70E4A8]/70 dark:hover:bg-[#70E4A8]/15"
+                  onClick={() => setIsUpgradeDialogOpen(false)}
+                >
+                  Not Now
+                </Button>
+              </div>
             </div>
           </div>
         </DialogContent>

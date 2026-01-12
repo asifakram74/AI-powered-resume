@@ -219,21 +219,22 @@ export function ResumePage({ user }: PageProps) {
               </Button>
             </DialogTrigger>
             <DialogContent
-              className="
-        w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] 
-        !max-w-none max-h-[90vh] overflow-x-auto
-      "
+              className="w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto custom-scrollbar dark:border-0 dark:p-[1px] dark:overflow-hidden dark:bg-transparent"
             >
-              <DialogHeader>
-                <DialogTitle>Create New Resume</DialogTitle>
-                <DialogDescription>
-                  Create a new resume by filling in the details below.
-                </DialogDescription>
-              </DialogHeader>
-              <CVWizard
-                onSave={handleSaveCV}
-                onCancel={() => setIsDialogOpen(false)}
-              />
+              <div className="hidden dark:block absolute inset-0 gradient-border-moving -z-10" />
+              <div className="dark:bg-[#0B0F1A] dark:rounded-2xl p-6 h-full w-full overflow-y-auto custom-scrollbar">
+                <DialogHeader className="relative pb-4 mb-4 border-b dark:border-gray-800">
+                  <div className="absolute -left-6 -top-6 w-32 h-32 resumaic-gradient-green opacity-10 blur-3xl -z-10" />
+                  <DialogTitle className="text-2xl font-bold dark:text-gray-100">Create New Resume</DialogTitle>
+                  <DialogDescription className="text-gray-500 dark:text-gray-400">
+                    Create a new resume by filling in the details below.
+                  </DialogDescription>
+                </DialogHeader>
+                <CVWizard
+                  onSave={handleSaveCV}
+                  onCancel={() => setIsDialogOpen(false)}
+                />
+              </div>
             </DialogContent>
           </Dialog>
         </div>
@@ -290,21 +291,25 @@ export function ResumePage({ user }: PageProps) {
       </Dialog>
 
       <Dialog open={isEditing} onOpenChange={setIsEditing}>
-        <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Resume</DialogTitle>
-            <DialogDescription>
-              Update the resume details below.
-            </DialogDescription>
-          </DialogHeader>
-          <CVWizard
-            editingCV={selectedCV}
-            onSave={handleUpdateCV}
-            onCancel={() => {
-              setIsEditing(false);
-              setSelectedCV(null);
-            }}
-          />
+        <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto custom-scrollbar dark:border-0 dark:p-[1px] dark:overflow-hidden dark:bg-transparent">
+          <div className="hidden dark:block absolute inset-0 gradient-border-moving -z-10" />
+          <div className="dark:bg-[#0B0F1A] dark:rounded-2xl p-6 h-full w-full overflow-y-auto custom-scrollbar">
+            <DialogHeader className="relative pb-4 mb-4 border-b dark:border-gray-800">
+              <div className="absolute -left-6 -top-6 w-32 h-32 resumaic-gradient-green opacity-10 blur-3xl -z-10" />
+              <DialogTitle className="text-2xl font-bold dark:text-gray-100">Edit Resume</DialogTitle>
+              <DialogDescription className="text-gray-500 dark:text-gray-400">
+                Update the resume details below.
+              </DialogDescription>
+            </DialogHeader>
+            <CVWizard
+              editingCV={selectedCV}
+              onSave={handleUpdateCV}
+              onCancel={() => {
+                setIsEditing(false);
+                setSelectedCV(null);
+              }}
+            />
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -360,7 +365,7 @@ export function ResumePage({ user }: PageProps) {
           {/* Table view - only visible on large screens */}
           {viewMode === "table" ? (
             <Card className="hidden lg:block">
-              <CardContent className="p-0">
+              <CardContent className="p-0 overflow-x-auto custom-scrollbar">
                 <Table>
                   <TableHeader>
                     <TableRow>

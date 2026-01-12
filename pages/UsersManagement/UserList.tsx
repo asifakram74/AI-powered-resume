@@ -83,18 +83,22 @@ function ConfirmDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button variant="outline" onClick={() => setOpen(false)}>
-            {cancelText}
-          </Button>
-          <Button variant="destructive" onClick={handleConfirm}>
-            {confirmText}
-          </Button>
+      <DialogContent className="sm:max-w-md rounded-2xl dark:border-0 dark:p-[1px] dark:overflow-hidden dark:bg-transparent">
+        <div className="hidden dark:block absolute inset-0 gradient-border-moving -z-10" />
+        <div className="dark:bg-[#0B0F1A] dark:rounded-2xl p-6 h-full w-full">
+          <DialogHeader className="relative pb-2">
+            <div className="absolute -left-4 -top-4 w-24 h-24 resumaic-gradient-orange opacity-10 blur-2xl -z-10" />
+            <DialogTitle className="text-lg font-semibold dark:text-gray-100">{title}</DialogTitle>
+            <DialogDescription className="text-gray-500 dark:text-gray-400">{description}</DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              {cancelText}
+            </Button>
+            <Button variant="destructive" onClick={handleConfirm}>
+              {confirmText}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
@@ -416,15 +420,18 @@ export function UserList({ user }: PageProps) {
                 Add User
               </Button>
             </DialogTrigger>
-            <DialogContent className="w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
-              <DialogHeader>
-                <DialogTitle className="font-sans text-[#2D3639] dark:text-gray-100">
-                  {editingUser ? "Edit User" : "Create New User"}
-                </DialogTitle>
-                <DialogDescription className="font-sans">
-                  {editingUser ? "Update user details below" : "Fill in the user details below"}
-                </DialogDescription>
-              </DialogHeader>
+            <DialogContent className="w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] !max-w-none max-h-[90vh] overflow-hidden dark:border-0 dark:p-[1px] dark:bg-transparent">
+              <div className="hidden dark:block absolute inset-0 gradient-border-moving -z-10" />
+              <div className="dark:bg-[#0B0F1A] dark:rounded-2xl p-6 h-full w-full overflow-y-auto custom-scrollbar max-h-[calc(90vh-2px)]">
+                <DialogHeader className="relative pb-4 mb-4 border-b dark:border-gray-800">
+                  <div className="absolute -left-6 -top-6 w-32 h-32 resumaic-gradient-green opacity-10 blur-3xl -z-10" />
+                  <DialogTitle className="text-2xl font-bold dark:text-gray-100">
+                    {editingUser ? "Edit User" : "Create New User"}
+                  </DialogTitle>
+                  <DialogDescription className="text-gray-500 dark:text-gray-400">
+                    {editingUser ? "Update user details below" : "Fill in the user details below"}
+                  </DialogDescription>
+                </DialogHeader>
               <UserForm
                 mode={editingUser ? "edit" : "create"}
                 userId={editingUser?.id}
@@ -450,6 +457,7 @@ export function UserList({ user }: PageProps) {
                   setEditingUser(null);
                 }}
               />
+            </div>
             </DialogContent>
           </Dialog>
         </div>
@@ -581,7 +589,7 @@ export function UserList({ user }: PageProps) {
 
           {currentViewMode === "table" ? (
             <Card>
-              <CardContent className="p-0">
+              <CardContent className="p-0 overflow-x-auto custom-scrollbar">
                 <Table>
                   <TableHeader>
                     <TableRow>

@@ -512,19 +512,22 @@ export function CoverLetterPage({ user }: PageProps) {
                 Create Cover Letter
               </Button>
             </DialogTrigger>
-            <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
-              <DialogHeader>
-                <DialogTitle>
-                  {isViewMode ? "View Cover Letter" : editingLetter ? "Edit Cover Letter" : "Generate AI Cover Letter"}
-                </DialogTitle>
-                <DialogDescription>
-                  {showGenerator
-                    ? "Provide job details to generate a personalized cover letter with AI"
-                    : isViewMode
-                      ? "Review your AI-generated cover letter"
-                      : "Review and edit your AI-generated cover letter"}
-                </DialogDescription>
-              </DialogHeader>
+            <DialogContent className="w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] !max-w-none max-h-[90vh] overflow-hidden dark:border-0 dark:p-[1px] dark:bg-transparent">
+              <div className="hidden dark:block absolute inset-0 gradient-border-moving -z-10" />
+              <div className="dark:bg-[#0B0F1A] dark:rounded-2xl p-6 h-full w-full overflow-y-auto custom-scrollbar max-h-[calc(90vh-2px)]">
+                <DialogHeader className="relative pb-4 mb-4 border-b dark:border-gray-800">
+                  <div className="absolute -left-6 -top-6 w-32 h-32 resumaic-gradient-green opacity-10 blur-3xl -z-10" />
+                  <DialogTitle className="text-2xl font-bold dark:text-gray-100">
+                    {isViewMode ? "View Cover Letter" : editingLetter ? "Edit Cover Letter" : "Generate AI Cover Letter"}
+                  </DialogTitle>
+                  <DialogDescription className="text-gray-500 dark:text-gray-400">
+                    {showGenerator
+                      ? "Provide job details to generate a personalized cover letter with AI"
+                      : isViewMode
+                        ? "Review your AI-generated cover letter"
+                        : "Review and edit your AI-generated cover letter"}
+                  </DialogDescription>
+                </DialogHeader>
 
               {showGenerator ? (
                 <CoverLetterGenerator onGenerate={handleGenerate} isGenerating={isGenerating} cvs={cvs} />
@@ -601,9 +604,8 @@ export function CoverLetterPage({ user }: PageProps) {
                       <Textarea
                         value={generatedLetter}
                         rows={10}
-
                         onChange={(e) => !isViewMode && setGeneratedLetter(e.target.value)}
-                        className="min-h-[400px] mt-2"
+                        className="min-h-[400px] mt-2 custom-scrollbar"
                         placeholder="Your cover letter will appear here..."
                         readOnly={isViewMode}
                       />
@@ -744,58 +746,62 @@ export function CoverLetterPage({ user }: PageProps) {
                   </div>
                 </div>
               )}
-            </DialogContent>
+            </div>
+          </DialogContent>
           </Dialog>
 
           {/* Upgrade Plan Dialog */}
           <Dialog open={isUpgradeDialogOpen} onOpenChange={setIsUpgradeDialogOpen}>
-            <DialogContent className="max-w-md p-0 overflow-hidden border-0 shadow-xl rounded-xl">
-              <div className="relative resumaic-gradient-green p-6 text-white rounded-t-xl animate-pulse-glow">
-                <div className="absolute inset-x-0 top-0 h-0.5 shimmer-effect opacity-70" />
-                <div className="flex items-center gap-3">
-                  <Crown className="h-6 w-6" />
-                  <DialogTitle className="text-lg font-semibold">Upgrade Required</DialogTitle>
+            <DialogContent className="max-w-md p-0 overflow-hidden border-0 shadow-xl rounded-xl dark:border-0 dark:p-[1px] dark:bg-transparent">
+              <div className="hidden dark:block absolute inset-0 gradient-border-moving -z-10" />
+              <div className="dark:bg-[#0B0F1A] dark:rounded-xl overflow-hidden h-full w-full">
+                <div className="relative resumaic-gradient-green p-6 text-white rounded-t-xl animate-pulse-glow">
+                  <div className="absolute inset-x-0 top-0 h-0.5 shimmer-effect opacity-70" />
+                  <div className="flex items-center gap-3">
+                    <Crown className="h-6 w-6" />
+                    <DialogTitle className="text-lg font-semibold">Upgrade Required</DialogTitle>
+                  </div>
+                  <DialogDescription className="mt-2 text-sm opacity-90">
+                    You’ve reached the maximum number of cover letters for the Free plan. Upgrade your plan to create more!
+                  </DialogDescription>
+                  <div className="absolute -right-10 -top-10 w-32 h-32 resumaic-gradient-orange rounded-full blur-2xl opacity-30" />
                 </div>
-                <DialogDescription className="mt-2 text-sm opacity-90">
-                  You’ve reached the maximum number of cover letters for the Free plan. Upgrade your plan to create more!
-                </DialogDescription>
-                <div className="absolute -right-10 -top-10 w-32 h-32 resumaic-gradient-orange rounded-full blur-2xl opacity-30" />
-              </div>
-              <div className="p-6 space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground list-none">
-                  {[
-                    { color: "resumaic-gradient-green", text: "Create more cover letters" },
-                    { color: "resumaic-gradient-orange", text: "Unlock extra cover letters" },
-                    { color: "resumaic-gradient-blue", text: "Unlock unlimited persona slots" },
-                    { color: "resumaic-gradient-purple", text: "Boost your CV with AI-powered optimization" },
-                  ].map((item, i) => (
-                    <div key={i} className="flex items-center gap-2 list-none">
-                      <span className={`size-1.5 rounded-full ${item.color}`} />
-                      <span className="list-none">{item.text}</span>
-                    </div>
-                  ))}
-                </div>
+                <div className="p-6 space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground list-none">
+                    {[
+                      { color: "resumaic-gradient-green", text: "Create more cover letters" },
+                      { color: "resumaic-gradient-orange", text: "Unlock extra cover letters" },
+                      { color: "resumaic-gradient-blue", text: "Unlock unlimited persona slots" },
+                      { color: "resumaic-gradient-purple", text: "Boost your CV with AI-powered optimization" },
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-center gap-2 list-none">
+                        <span className={`size-1.5 rounded-full ${item.color}`} />
+                        <span className="list-none dark:text-gray-300">{item.text}</span>
+                      </div>
+                    ))}
+                  </div>
 
-                <div className="space-y-3">
-                  <Button
-                    className="w-full resumaic-gradient-orange text-white hover:opacity-90 button-press"
-                    onClick={async () => {
-                      try {
-                        await createCheckoutSession();
-                      } catch (err) {
-                        console.error('Checkout error:', err);
-                      }
-                    }}
-                  >
-                    Upgrade Now
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full border-2 border-[#70E4A8] text-[#2d3639] hover:bg-[#70E4A8]/10 dark:text-gray-100 dark:border-[#70E4A8]/70 dark:hover:bg-[#70E4A8]/15"
-                    onClick={() => setIsUpgradeDialogOpen(false)}
-                  >
-                    Not Now
-                  </Button>
+                  <div className="space-y-3">
+                    <Button
+                      className="w-full resumaic-gradient-orange text-white hover:opacity-90 button-press"
+                      onClick={async () => {
+                        try {
+                          await createCheckoutSession();
+                        } catch (err) {
+                          console.error('Checkout error:', err);
+                        }
+                      }}
+                    >
+                      Upgrade Now
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full border-2 border-[#70E4A8] text-[#2d3639] hover:bg-[#70E4A8]/10 dark:text-gray-100 dark:border-[#70E4A8]/70 dark:hover:bg-[#70E4A8]/15"
+                      onClick={() => setIsUpgradeDialogOpen(false)}
+                    >
+                      Not Now
+                    </Button>
+                  </div>
                 </div>
               </div>
             </DialogContent>
@@ -848,7 +854,7 @@ export function CoverLetterPage({ user }: PageProps) {
 
           {(viewMode === "table" && windowWidth >= 1024) ? (
             <Card>
-              <CardContent className="p-0">
+              <CardContent className="p-0 overflow-x-auto custom-scrollbar">
                 <Table>
                   <TableHeader>
                     <TableRow>
