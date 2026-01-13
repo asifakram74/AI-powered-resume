@@ -5,10 +5,12 @@ import "./globals.css";
 import { ReduxProvider } from "../lib/redux/provider";
 import { Toaster } from "sonner";
 import HydrateAuth from "../components/auth/HydrateAuth";
+import { ThemeProvider } from "../components/theme-provider";
+import { ThemeToggle } from "../components/theme-toggle";
 import Script from "next/script";
 
 export const metadata: Metadata = {
-  title: "Resumaic – AI-Powered Resume Builder Online",
+ title: "Resumaic – AI-Powered Resume Builder Online",
   description: "Build professional resumes in minutes with Resumaic, the AI-powered resume builder. Create tailored CVs that stand out and boost your career success.",
 
   icons: {
@@ -59,9 +61,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="antialiased">
+    <html lang="en" className="antialiased" suppressHydrationWarning>
       <body className="font-sans">
 
+      
         {/* Tawk.to */}
         <Script id="tawk" strategy="afterInteractive">
           {`
@@ -76,11 +79,14 @@ export default function RootLayout({
             })();
           `}
         </Script>
-        <ReduxProvider>
-          <HydrateAuth />
-          <Toaster position="top-right" richColors />
-          {children}
-        </ReduxProvider>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
+          <ReduxProvider>
+            <HydrateAuth />
+            <Toaster position="top-right" richColors />
+            <ThemeToggle />
+            {children}
+          </ReduxProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
