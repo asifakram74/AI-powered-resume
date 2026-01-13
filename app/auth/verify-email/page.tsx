@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useDispatch, useSelector } from "react-redux"
 import { Button } from "../../../components/ui/button"
+import { Logo } from "../../../components/ui/logo"
 import { Input } from "../../../components/ui/input"
 import { Label } from "../../../components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card"
@@ -14,7 +15,7 @@ import { toast } from "sonner"
 import { verifyEmailForReset } from "../../../lib/redux/slices/authSlice"
 import type { RootState, AppDispatch } from "../../../lib/redux/store"
 import { Alert, AlertDescription } from "../../../components/ui/alert"
-import Image from "next/image"
+
 
 export default function VerifyEmailPage() {
   const [email, setEmail] = useState("")
@@ -56,7 +57,7 @@ export default function VerifyEmailPage() {
         <CardHeader className="text-center">
           <div className="flex items-center mx-auto mb-4">
             <Link href="/">
-              <Image src="/Resumic.png" alt="Logo" width={200} height={90} className="cursor-pointer" />
+              <Logo className="cursor-pointer" />
             </Link>
           </div>
           <div className="flex items-center gap-2 mb-2 justify-center">

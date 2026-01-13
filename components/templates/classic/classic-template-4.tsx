@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState, useLayoutEffect } from "react";
-import type { CVData } from "../../../types/cv-data";
+import type { CVData, CVSectionId, PersonalInfoFieldId } from "../../../types/cv-data";
 
 interface ClassicTemplate4Props {
   data: CVData;
@@ -53,49 +53,187 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
     return normalized;
   };
 
-  const Header = () => (
-    <div className="text-center mb-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">
-        {data.personalInfo.fullName}
-      </h1>
-      <h2 className="text-xl text-gray-700 font-medium mb-4">
-        {data.personalInfo.jobTitle}
-      </h2>
-      <div className="flex flex-wrap justify-center gap-4 text-gray-600 text-sm">
-        <span className="flex items-center">
-          <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
-          </svg>
-          {data.personalInfo.email}
-        </span>
-        <span className="flex items-center">
-          <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
-          </svg>
-          {data.personalInfo.phone}
-        </span>
-        {(data.personalInfo.city || data.personalInfo.country) && (
-          <span className="flex items-center">
-            <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-            </svg>
-            {data.personalInfo.city && data.personalInfo.country
-              ? `${data.personalInfo.city}, ${data.personalInfo.country}`
-              : data.personalInfo.city || data.personalInfo.country}
-          </span>
-        )}
-      </div>
-    </div>
-  );
+  const PersonalInfoSection = () => {
+    const defaultOrder: PersonalInfoFieldId[] = [
+      "fullName",
+      "jobTitle",
+      "email",
+      "phone",
+      "location",
+      "address",
+      "linkedin",
+      "github",
+      "summary",
+    ];
+    const order =
+      data.personalInfoFieldOrder && data.personalInfoFieldOrder.length > 0
+        ? data.personalInfoFieldOrder
+        : defaultOrder;
+    const allFields: PersonalInfoFieldId[] = [
+      "fullName",
+      "jobTitle",
+      "email",
+      "phone",
+      "location",
+      "address",
+      "linkedin",
+      "github",
+      "summary",
+    ];
+    const finalOrder = [
+      ...order.filter((f) => allFields.includes(f)),
+      ...allFields.filter((f) => !order.includes(f)),
+    ];
 
-  const Summary = ({ summary }: { summary: string }) => (
-    <div className="mb-8">
-      <h2 className="text-lg font-bold text-gray-900 mb-3 uppercase tracking-wide border-b border-gray-300 pb-2">
-        Professional Summary
-      </h2>
-      <p className="text-gray-700 leading-relaxed text-sm">{summary}</p>
-    </div>
-  );
+    const icons: Partial<Record<PersonalInfoFieldId, React.ReactNode>> = {
+      email: (
+        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+        </svg>
+      ),
+      phone: (
+        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+        </svg>
+      ),
+      location: (
+        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+        </svg>
+      ),
+      address: (
+        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+        </svg>
+      ),
+      linkedin: (
+        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+        </svg>
+      ),
+      github: (
+         <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+        </svg>
+      )
+    };
+
+    const locationText =
+      data.personalInfo.city && data.personalInfo.country
+        ? `${data.personalInfo.city}, ${data.personalInfo.country}`
+        : data.personalInfo.city || data.personalInfo.country || "";
+    const addressText = (data.personalInfo.address || "").trim();
+    const locLower = locationText.toLowerCase();
+    const addrLower = addressText.toLowerCase();
+    const showAddress =
+      Boolean(addressText) &&
+      (!locLower || (addrLower !== locLower && !addrLower.includes(locLower)));
+
+    const contactValue = (field: PersonalInfoFieldId) => {
+      switch (field) {
+        case "email":
+          return data.personalInfo.email?.trim() ? data.personalInfo.email : "";
+        case "phone":
+          return data.personalInfo.phone?.trim() ? data.personalInfo.phone : "";
+        case "location":
+          return locationText || "";
+        case "address":
+          return data.personalInfo.address?.trim() ? data.personalInfo.address : "";
+        case "linkedin":
+           return (data.personalInfo.linkedin || "").trim();
+        case "github":
+           return (data.personalInfo.github || "").trim();
+        default:
+          return "";
+      }
+    };
+
+    const renderContactItem = (field: PersonalInfoFieldId, value: string, key: string) => {
+       return (
+        <span key={key} className="flex items-center">
+          {icons[field]}
+          {value}
+        </span>
+       );
+    };
+
+    const rows: React.ReactNode[] = [];
+    let contactBuffer: React.ReactNode[] = [];
+    let contactBlockIndex = 0;
+
+    const flushContacts = () => {
+      if (contactBuffer.length > 0) {
+        rows.push(
+          <div key={`contacts-${contactBlockIndex}`} className="flex flex-wrap justify-center gap-4 text-gray-600 text-sm mb-4">
+            {contactBuffer}
+          </div>
+        );
+        contactBuffer = [];
+        contactBlockIndex++;
+      }
+    };
+
+    finalOrder.forEach((field) => {
+      if (field === "fullName") {
+        flushContacts();
+        if (data.personalInfo.fullName) {
+          rows.push(
+            <h1 key="pi-fullName" className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">
+              {data.personalInfo.fullName}
+            </h1>
+          );
+        }
+        return;
+      }
+      if (field === "jobTitle") {
+        flushContacts();
+        if (data.personalInfo.jobTitle) {
+          rows.push(
+            <h2 key="pi-jobTitle" className="text-xl text-gray-700 font-medium mb-4">
+              {data.personalInfo.jobTitle}
+            </h2>
+          );
+        }
+        return;
+      }
+      if (field === "summary") {
+        flushContacts();
+         if (data.personalInfo.summary) {
+           rows.push(
+             <div key="pi-summary" className="mb-8 text-left w-full">
+               <h2 className="text-lg font-bold text-gray-900 mb-3 uppercase tracking-wide border-b border-gray-300 pb-2">
+                 Professional Summary
+               </h2>
+               <p className="text-gray-700 leading-relaxed text-sm">{data.personalInfo.summary}</p>
+             </div>
+           );
+         }
+        return;
+      }
+
+      const v = contactValue(field);
+      if (!v) return;
+
+      if (field === "location" && showAddress && addressText) {
+         contactBuffer.push(renderContactItem(field, `${locationText} ${addressText}`.trim(), `${field}-combined`));
+         return;
+      }
+
+      if (field === "address" && (data.personalInfo.city || data.personalInfo.country)) {
+        if (!showAddress) return;
+      }
+      
+      contactBuffer.push(renderContactItem(field, v, field));
+    });
+
+    flushContacts();
+
+    return (
+      <div className="text-center mb-8">
+        {rows}
+      </div>
+    );
+  };
 
   const Skills = ({ skills }: { skills: CVData["skills"] }) => (
     <div className="mb-8">
@@ -256,90 +394,13 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
       {title}
     </h2>
   );
-
-  const blocks = useMemo(() => {
-    const items: React.ReactNode[] = [];
-    
-    items.push(<Header key="header" />);
-    
-    if (data.personalInfo.summary) {
-      items.push(<Summary key="summary" summary={data.personalInfo.summary} />);
-    }
-
-    if (data.experience.length > 0) {
-      items.push(<SectionTitle key="exp-title" title="Professional Experience" />);
-      data.experience.forEach((exp, index) => {
-        const isLast = index === data.experience.length - 1;
-        items.push(<ExperienceItem key={`exp-${exp.id}`} exp={exp} />);
-        if (!isLast) items.push(<div key={`exp-sp-${exp.id}`} className="h-6" />);
-      });
-    }
-
-    if (data.skills.technical.length > 0 || data.skills.soft.length > 0) {
-      items.push(<Skills key="skills" skills={data.skills} />);
-    }
-
-    if (data.education.length > 0) {
-      items.push(<SectionTitle key="edu-title" title="Education" />);
-      data.education.forEach((edu, index) => {
-        const isLast = index === data.education.length - 1;
-        items.push(<EducationItem key={`edu-${edu.id}`} edu={edu} />);
-        if (!isLast) items.push(<div key={`edu-sp-${edu.id}`} className="h-4" />);
-      });
-    }
-
-    if (data.projects.length > 0) {
-      items.push(<SectionTitle key="proj-title" title="Projects" />);
-      data.projects.forEach((project, index) => {
-        const isLast = index === data.projects.length - 1;
-        items.push(<ProjectItem key={`proj-${project.id}`} project={project} />);
-        if (!isLast) items.push(<div key={`proj-sp-${project.id}`} className="h-4" />);
-      });
-    }
-
-    if (data.certifications.length > 0 || data.languages.length > 0) {
-      items.push(
-        <div key="cert-lang-grid" className="grid grid-cols-2 gap-8 mb-8">
-          {data.certifications.length > 0 && (
-            <div>
-              <SectionTitle title="Certifications" />
-              <div className="space-y-3">
-                {data.certifications.map((cert, index) => {
-                  const isLast = index === data.certifications.length - 1;
-                  return (
-                    <React.Fragment key={`cert-${cert.id}`}>
-                      <CertificationItem cert={cert} />
-                      {!isLast && <div key={`cert-sp-${cert.id}`} className="h-2" />}
-                    </React.Fragment>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-          {data.languages.length > 0 && (
-            <div>
-              <SectionTitle title="Languages" />
-              <div className="space-y-2">
-                {data.languages.map((lang, index) => {
-                  const isLast = index === data.languages.length - 1;
-                  return (
-                    <React.Fragment key={`lang-${lang.id}`}>
-                      <LanguageItem lang={lang} />
-                      {!isLast && <div key={`lang-sp-${lang.id}`} className="h-2" />}
-                    </React.Fragment>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    if (data.additional.interests.length > 0) {
-      items.push(<SectionTitle key="int-title" title="Interests" />);
-      items.push(
-        <div key="int-body" className="flex flex-wrap gap-2">
+  
+  const InterestsSection = () => {
+    if (data.additional.interests.length === 0) return null;
+    return (
+      <div className="mb-8">
+        <SectionTitle title="Interests" />
+        <div className="flex flex-wrap gap-2">
           {data.additional.interests.map((interest, index) => (
             <span
               key={index}
@@ -349,8 +410,139 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
             </span>
           ))}
         </div>
+      </div>
+    );
+  };
+
+  const blocks = useMemo(() => {
+    const items: React.ReactNode[] = [];
+    const allSections = [
+      "personalInfo",
+      "skills",
+      "experience",
+      "projects",
+      "education",
+      "certifications",
+      "languages",
+      "interests",
+    ] as const satisfies readonly CVSectionId[];
+    const requestedOrder: readonly CVSectionId[] =
+      data.sectionOrder && data.sectionOrder.length > 0 ? data.sectionOrder : allSections;
+    const hidden = data.hiddenSections || [];
+    const ordered: CVSectionId[] = [
+      ...requestedOrder.filter((s) => allSections.includes(s)),
+      ...allSections.filter((s) => !requestedOrder.includes(s)),
+    ];
+    const finalOrder = ordered.filter((s) => s === "personalInfo" || !hidden.includes(s));
+    
+    const addPersonalInfo = () => {
+       items.push(<PersonalInfoSection key="personalInfo" />);
+    };
+
+    const addExperience = () => {
+      if (data.experience.length === 0) return;
+      items.push(<SectionTitle key="exp-title" title="Professional Experience" />);
+      data.experience.forEach((exp, index) => {
+        const isLast = index === data.experience.length - 1;
+        items.push(<ExperienceItem key={`exp-${exp.id}`} exp={exp} />);
+        if (!isLast) items.push(<div key={`exp-sp-${exp.id}`} className="h-6" />);
+      });
+    };
+    
+    const addSkills = () => {
+       if (data.skills.technical.length === 0 && data.skills.soft.length === 0) return;
+       items.push(<Skills key="skills" skills={data.skills} />);
+    };
+
+    const addEducation = () => {
+      if (data.education.length === 0) return;
+      items.push(<SectionTitle key="edu-title" title="Education" />);
+      data.education.forEach((edu, index) => {
+        const isLast = index === data.education.length - 1;
+        items.push(<EducationItem key={`edu-${edu.id}`} edu={edu} />);
+        if (!isLast) items.push(<div key={`edu-sp-${edu.id}`} className="h-4" />);
+      });
+    };
+
+    const addProjects = () => {
+      if (data.projects.length === 0) return;
+      items.push(<SectionTitle key="proj-title" title="Projects" />);
+      data.projects.forEach((project, index) => {
+        const isLast = index === data.projects.length - 1;
+        items.push(<ProjectItem key={`proj-${project.id}`} project={project} />);
+        if (!isLast) items.push(<div key={`proj-sp-${project.id}`} className="h-4" />);
+      });
+    };
+    
+    const addCertifications = () => {
+      if (data.certifications.length === 0) return;
+      items.push(<SectionTitle key="cert-title" title="Certifications" />);
+      items.push(
+        <div key="cert-list" className="space-y-3 mb-8">
+            {data.certifications.map((cert, index) => {
+                const isLast = index === data.certifications.length - 1;
+                return (
+                <React.Fragment key={`cert-${cert.id}`}>
+                    <CertificationItem cert={cert} />
+                    {!isLast && <div key={`cert-sp-${cert.id}`} className="h-2" />}
+                </React.Fragment>
+                );
+            })}
+        </div>
       );
-    }
+    };
+
+    const addLanguages = () => {
+      if (data.languages.length === 0) return;
+      items.push(<SectionTitle key="lang-title" title="Languages" />);
+      items.push(
+        <div key="lang-list" className="space-y-2 mb-8">
+            {data.languages.map((lang, index) => {
+                const isLast = index === data.languages.length - 1;
+                return (
+                <React.Fragment key={`lang-${lang.id}`}>
+                    <LanguageItem lang={lang} />
+                    {!isLast && <div key={`lang-sp-${lang.id}`} className="h-2" />}
+                </React.Fragment>
+                );
+            })}
+        </div>
+      );
+    };
+    
+    const addInterests = () => {
+       if (data.additional.interests.length === 0) return;
+       items.push(<InterestsSection key="interests" />);
+    };
+
+    finalOrder.forEach((section) => {
+      switch (section) {
+        case "personalInfo":
+          addPersonalInfo();
+          break;
+        case "skills":
+          addSkills();
+          break;
+        case "experience":
+          addExperience();
+          break;
+        case "projects":
+          addProjects();
+          break;
+        case "education":
+          addEducation();
+          break;
+        case "certifications":
+          addCertifications();
+          break;
+        case "languages":
+          addLanguages();
+          break;
+        case "interests":
+          addInterests();
+          break;
+      }
+    });
 
     return items;
   }, [data]);

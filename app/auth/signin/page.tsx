@@ -5,6 +5,7 @@ import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "../../../components/ui/button"
+import { Logo } from "../../../components/ui/logo"
 import { Input } from "../../../components/ui/input"
 import { Label } from "../../../components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card"
@@ -13,7 +14,7 @@ import { useAppDispatch, useAppSelector } from "../../../lib/redux/hooks"
 import { loginUser, clearError, loginWithLinkedIn, loginWithGoogle, setCredentials } from "../../../lib/redux/slices/authSlice"
 import { Alert, AlertDescription } from "../../../components/ui/alert"
 import { showSuccessToast, showErrorToast } from "../../../components/ui/toast"
-import Image from "next/image"
+
 
 function useSafeSearchParams() {
   try {
@@ -108,8 +109,8 @@ export default function SignInPage() {
 
     const redirectUri = (window.location.origin + window.location.pathname).replace(/\/$/, "");
     console.log("redirectUri", redirectUri)
-    window.location.href = `https://backendcv.onlinetoolpot.com/public/api/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
-    // window.location.href = `https://backendcv.onlinetoolpot.com/public/api/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    window.location.href = ` https://backendcv.onlinetoolpot.com/public/api/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    // window.location.href = ` https://backendcv.onlinetoolpot.com/public/api/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
   };
 
   useEffect(() => {
@@ -295,7 +296,7 @@ export default function SignInPage() {
         <CardHeader className="text-center">
           <div className="flex items-center mx-auto mb-4">
             <Link href="/" >
-              <Image src="/Resumic.png" alt="Logo" width={200} height={90} className="cursor-pointer" />
+              <Logo className="cursor-pointer" />
             </Link>
           </div>
           <CardTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">Welcome to Resumaic</CardTitle>

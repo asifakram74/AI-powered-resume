@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState, useLayoutEffect } from "react";
-import type { CVData } from "../../../types/cv-data";
+import type { CVData, CVSectionId, PersonalInfoFieldId } from "../../../types/cv-data";
 
 interface CreativeTemplate3Props {
   data: CVData
@@ -57,42 +57,106 @@ export function CreativeTemplate3({ data, isPreview = false }: CreativeTemplate3
     return normalized
   }
 
-  const Header = () => (
-    <div className="bg-white border-b border-gray-200 px-12 py-12">
-      <div className="max-w-5xl mx-auto text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-3">{data.personalInfo.fullName}</h1>
-        <div className="h-1 w-16 bg-blue-600 mx-auto mb-4"></div>
-        <p className="text-lg text-gray-600 mb-8">{data.personalInfo.jobTitle}</p>
+  const PersonalInfoSection = () => {
+    const { personalInfo, personalInfoFieldOrder } = data;
+    const defaultOrder: PersonalInfoFieldId[] = [
+      "fullName",
+      "jobTitle",
+      "email",
+      "phone",
+      "location",
+      "address",
+      "linkedin",
+      "github",
+      "summary",
+    ];
+    const order =
+      personalInfoFieldOrder && personalInfoFieldOrder.length > 0
+        ? personalInfoFieldOrder
+        : defaultOrder;
 
-        <div className="flex justify-center gap-8 text-sm">
-          <div>
-            <p className="text-gray-500 font-medium mb-1">Email</p>
-            <p className="text-gray-700">{data.personalInfo.email}</p>
-          </div>
-          <div>
-            <p className="text-gray-500 font-medium mb-1">Phone</p>
-            <p className="text-gray-700">{data.personalInfo.phone}</p>
-          </div>
-          {(data.personalInfo.city || data.personalInfo.country) && (
-            <div>
-              <p className="text-gray-500 font-medium mb-1">Location</p>
-              <p className="text-gray-700">
-                {data.personalInfo.city && data.personalInfo.country
-                  ? `${data.personalInfo.city}, ${data.personalInfo.country}`
-                  : data.personalInfo.city || data.personalInfo.country}
-              </p>
-            </div>
-          )}
-        </div>
+    const isContactField = (f: PersonalInfoFieldId) =>
+      ["email", "phone", "location", "address", "linkedin", "github"].includes(f);
+    
+    const contactFields = order.filter(isContactField);
+    
+    // Determine placement of Summary relative to Contact Info
+    const summaryIndex = order.indexOf("summary");
+    const firstContactIndex = order.findIndex(isContactField);
+    const summaryFirst = summaryIndex !== -1 && (firstContactIndex === -1 || summaryIndex < firstContactIndex);
+
+    const ContactItem = ({ label, value }: { label: string; value: string }) => (
+      <div>
+        <p className="text-gray-500 font-medium mb-1">{label}</p>
+        <p className="text-gray-700">{value}</p>
       </div>
-    </div>
-  )
+    );
 
-  const Summary = () => (
-    <div className="mb-8 px-12 py-6">
-      <p className="text-gray-700 leading-relaxed text-base">{data.personalInfo.summary}</p>
-    </div>
-  )
+    const ContactRow = () => (
+      <div className="flex flex-wrap justify-center gap-8 text-sm">
+        {contactFields.map((field) => {
+          switch (field) {
+            case "email":
+              return personalInfo.email ? <ContactItem key="email" label="Email" value={personalInfo.email} /> : null;
+            case "phone":
+              return personalInfo.phone ? <ContactItem key="phone" label="Phone" value={personalInfo.phone} /> : null;
+            case "location":
+              if (!personalInfo.city && !personalInfo.country) return null;
+              const hasAddress = contactFields.includes("address") && personalInfo.address;
+              if (hasAddress) return null;
+              return (
+                <ContactItem
+                  key="location"
+                  label="Location"
+                  value={
+                    personalInfo.city && personalInfo.country
+                      ? `${personalInfo.city}, ${personalInfo.country}`
+                      : personalInfo.city || personalInfo.country || ""
+                  }
+                />
+              );
+            case "address":
+              return personalInfo.address ? <ContactItem key="address" label="Address" value={personalInfo.address} /> : null;
+            case "linkedin":
+              return personalInfo.linkedin ? <ContactItem key="linkedin" label="LinkedIn" value={personalInfo.linkedin} /> : null;
+            case "github":
+              return personalInfo.github ? <ContactItem key="github" label="GitHub" value={personalInfo.github} /> : null;
+            default:
+              return null;
+          }
+        })}
+      </div>
+    );
+
+    const SummaryBlock = () => (
+      <div className="mb-8 px-12 py-6">
+        <p className="text-gray-700 leading-relaxed text-base">{personalInfo.summary}</p>
+      </div>
+    );
+
+    return (
+      <>
+        <div className="bg-white border-b border-gray-200 px-12 py-12">
+          <div className="max-w-5xl mx-auto text-center">
+            <h1 className="text-4xl font-bold text-gray-900 mb-3">{personalInfo.fullName}</h1>
+            <div className="h-1 w-16 bg-blue-600 mx-auto mb-4"></div>
+            <p className="text-lg text-gray-600 mb-8">{personalInfo.jobTitle}</p>
+            {!summaryFirst && <ContactRow />}
+          </div>
+        </div>
+        
+        {summaryFirst && personalInfo.summary && <SummaryBlock />}
+        
+        {summaryFirst && (
+            <div className="px-12 pb-12 pt-6 border-b border-gray-200 text-center">
+                 <ContactRow />
+            </div>
+        )}
+
+        {!summaryFirst && personalInfo.summary && <SummaryBlock />}
+      </>
+    );
+  };
 
   const ExperienceItem = ({ exp }: { exp: CVData["experience"][number] }) => (
     <div className="mb-6 px-12">
@@ -186,68 +250,112 @@ export function CreativeTemplate3({ data, isPreview = false }: CreativeTemplate3
 
   const blocks = useMemo(() => {
     const items: React.ReactNode[] = [];
-    
-    items.push(<Header key="header" />);
-    
-    if (data.personalInfo.summary) {
-      items.push(<Summary key="summary" />);
-    }
+    const allSections = [
+      "personalInfo",
+      "skills",
+      "experience",
+      "projects",
+      "education",
+      "certifications",
+      "languages",
+      "interests",
+    ] as const satisfies readonly CVSectionId[];
+    const requestedOrder: readonly CVSectionId[] =
+      data.sectionOrder && data.sectionOrder.length > 0 ? data.sectionOrder : allSections;
+    const hidden = data.hiddenSections || [];
+    const ordered: CVSectionId[] = [
+      ...requestedOrder.filter((s) => allSections.includes(s)),
+      ...allSections.filter((s) => !requestedOrder.includes(s)),
+    ];
+    const finalOrder = ordered.filter((s) => s === "personalInfo" || !hidden.includes(s));
 
-    if (data.experience.length > 0) {
+    const addPersonalInfo = () => {
+        items.push(<PersonalInfoSection key="personalInfo" />);
+    };
+
+    const addSkills = () => {
+      if (data.skills.technical.length === 0 && data.skills.soft.length === 0) return;
+      items.push(<Skills key="skills" />);
+    };
+
+    const addExperience = () => {
+      if (data.experience.length === 0) return;
       items.push(<SectionTitle key="exp-title" title="Professional Experience" />);
-      data.experience.forEach((exp, index) => {
+      data.experience.forEach((exp) => {
         items.push(<ExperienceItem key={`exp-${exp.id}`} exp={exp} />);
       });
-    }
+    };
 
-    if (data.education.length > 0) {
+    const addEducation = () => {
+      if (data.education.length === 0) return;
       items.push(<SectionTitle key="edu-title" title="Education" />);
-      data.education.forEach((edu, index) => {
+      data.education.forEach((edu) => {
         items.push(<EducationItem key={`edu-${edu.id}`} edu={edu} />);
       });
-    }
+    };
 
-    if (data.skills.technical.length > 0 || data.skills.soft.length > 0) {
-      items.push(<Skills key="skills" />);
-    }
-
-    if (data.projects.length > 0) {
+    const addProjects = () => {
+      if (data.projects.length === 0) return;
       items.push(<SectionTitle key="proj-title" title="Notable Projects" />);
-      data.projects.forEach((project, index) => {
+      data.projects.forEach((project) => {
         items.push(<ProjectItem key={`proj-${project.id}`} project={project} />);
       });
-    }
+    };
 
-    if (data.languages.length > 0 || data.certifications.length > 0) {
+    const addLanguages = () => {
+      if (data.languages.length === 0) return;
       items.push(
-        <div key="lang-cert-grid" className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {data.languages.length > 0 && (
-            <div>
-              <h2 className="px-12 text-base font-semibold text-gray-900 uppercase tracking-wide mb-4 pb-2 border-b border-gray-200">
-                Languages
-              </h2>
-              <div className="space-y-2 px-12">
-                {data.languages.map((lang) => (
-                  <LanguageItem key={lang.id} lang={lang} />
-                ))}
-              </div>
+        <div key="lang-section" className="px-12">
+            <h2 className="text-base font-semibold text-gray-900 uppercase tracking-wide mb-4 pb-2 border-b border-gray-200">
+            Languages
+            </h2>
+            <div className="space-y-2">
+            {data.languages.map((lang) => (
+                <LanguageItem key={lang.id} lang={lang} />
+            ))}
             </div>
-          )}
-          {data.certifications.length > 0 && (
-            <div>
-              <h2 className="px-12 text-base font-semibold text-gray-900 uppercase tracking-wide mb-4 pb-2 border-b border-gray-200">
-                Certifications
-              </h2>
-              <div className="space-y-2 px-12">
-                {data.certifications.map((cert) => (
-                  <CertificationItem key={cert.id} cert={cert} />
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       );
-    }
+    };
+
+    const addCertifications = () => {
+      if (data.certifications.length === 0) return;
+      items.push(
+        <div key="cert-section">
+            <h2 className="px-12 text-base font-semibold text-gray-900 uppercase tracking-wide mb-4 pb-2 border-b border-gray-200">
+            Certifications
+            </h2>
+            <div className="space-y-2">
+            {data.certifications.map((cert) => (
+                <CertificationItem key={cert.id} cert={cert} />
+            ))}
+            </div>
+        </div>
+      );
+    };
+
+    const addInterests = () => {
+      if (data.additional.interests.length === 0) return;
+      items.push(<SectionTitle key="int-title" title="Interests" />);
+      items.push(
+        <div key="int-body" className="px-12 mb-6">
+          <p className="text-gray-700">{data.additional.interests.join(" • ")}</p>
+        </div>
+      );
+    };
+
+    finalOrder.forEach((section) => {
+      switch (section) {
+        case "personalInfo": addPersonalInfo(); break;
+        case "skills": addSkills(); break;
+        case "experience": addExperience(); break;
+        case "projects": addProjects(); break;
+        case "education": addEducation(); break;
+        case "certifications": addCertifications(); break;
+        case "languages": addLanguages(); break;
+        case "interests": addInterests(); break;
+      }
+    });
 
     return items;
   }, [data]);

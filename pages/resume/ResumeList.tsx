@@ -388,7 +388,7 @@ export function ResumePage({ user }: PageProps) {
                                   src={personaMap[cv.personas_id]}
                                   alt="Profile"
                                   onError={(e) => {
-                                    (e.currentTarget as HTMLImageElement).src = "/placeholder-user.jpg";
+                                    (e.currentTarget as HTMLImageElement).src = "/placeholder.jpg";
                                   }}
                                 />
                               )}
@@ -486,7 +486,7 @@ export function ResumePage({ user }: PageProps) {
                             src={personaMap[cv.personas_id]}
                             alt="Profile"
                             onError={(e) => {
-                              (e.currentTarget as HTMLImageElement).src = "/placeholder-user.jpg";
+                              (e.currentTarget as HTMLImageElement).src = "/placeholder.jpg";
                             }}
                           />
                         )}
