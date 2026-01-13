@@ -966,7 +966,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                 placeholder="https://linkedin.com/in/your-profile"
                 type="url"
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 Enter full URL or leave empty
               </p>
             </div>
@@ -986,7 +986,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                 placeholder="https://github.com/your-username"
                 type="url"
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 Enter full URL or leave empty
               </p>
             </div>
@@ -1001,7 +1001,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                   <img
                     src={profilePicturePreview}
                     alt="Profile preview"
-                    className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+                    className="w-20 h-20 rounded-full object-cover border-2 border-gray-200 dark:border-gray-800"
                   />
                   <Button
                     type="button"
@@ -1014,8 +1014,8 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                   </Button>
                 </div>
               ) : (
-                <div className="w-20 h-20 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center">
-                  <User className="w-8 h-8 text-gray-400" />
+                <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-900 border-2 border-dashed border-gray-300 dark:border-gray-700 flex items-center justify-center">
+                  <User className="w-8 h-8 text-gray-400 dark:text-gray-500" />
                 </div>
               )}
               <div className="flex flex-col justify-center gap-2">
@@ -1037,7 +1037,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                     <Upload className="w-4 h-4 mr-2" />
                     {profilePictureFile ? 'Change' : 'Upload Picture'}
                   </Button>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     JPG, PNG, GIF (max 5MB)
                   </p>
                 </div>
@@ -1045,8 +1045,8 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             </div>
             {faceDetected === false && (
               <div className="mt-3">
-                <div className="rounded-md border bg-white p-3">
-                  <p className="text-xs font-semibold text-gray-700 text-center">TIPS</p>
+                <div className="rounded-md border bg-white dark:bg-gray-950 p-3">
+                  <p className="text-xs font-semibold text-gray-700 dark:text-gray-200 text-center">TIPS</p>
                   <div className="mt-2 flex items-center justify-center gap-4">
                  
                     {/* Good example 1 */}
@@ -1099,7 +1099,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                 }))
               }
               placeholder="Brief professional summary..."
-              className="min-h-[100px]"
+              className="min-h-[100px] custom-scrollbar"
             />
           </div>
         </CardContent>
@@ -1367,10 +1367,10 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             <div className="space-y-2">
               <Label>Added Experience:</Label>
               {formData.experience.map((exp) => (
-                <div key={exp.id} className="p-3 bg-gray-50 rounded-lg flex justify-between items-start">
+                <div key={exp.id} className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg flex justify-between items-start">
                   <div className="flex-1">
                     <div className="font-medium">{exp.jobTitle}</div>
-                    <div className="text-sm text-gray-600">{exp.companyName}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">{exp.companyName}</div>
                     {(formatDateForPersona(exp.startDate) || exp.current || formatDateForPersona(exp.endDate)) && (
                     <div className="text-sm text-gray-500">
                       {formatDateForPersona(exp.startDate)}
@@ -1660,7 +1660,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                 }))
               }
               placeholder="Relevant coursework, projects, etc..."
-              className="min-h-[80px]"
+              className="min-h-[80px] custom-scrollbar"
             />
           </div>
 
@@ -1702,12 +1702,12 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             <div className="space-y-2">
               <Label>Added Education:</Label>
               {formData.education.map((edu) => (
-                <div key={edu.id} className="p-3 bg-gray-50 rounded-lg flex justify-between items-start">
+                <div key={edu.id} className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg flex justify-between items-start">
                   <div className="flex-1">
                     <div className="font-medium">
                       {edu.degree} - {edu.institutionName}
                     </div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
                       {edu.location} | {edu.graduationDate}
                     </div>
                   </div>
@@ -1840,10 +1840,10 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             <div className="space-y-2">
               <Label>Added Certifications:</Label>
               {formData.certifications.map((cert) => (
-                <div key={cert.id} className="p-3 bg-gray-50 rounded-lg flex justify-between items-start">
+                <div key={cert.id} className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg flex justify-between items-start">
                   <div className="flex-1">
                     <div className="font-medium">{cert.title}</div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
                       {cert.issuingOrganization} | {cert.dateObtained}
                     </div>
                   </div>
@@ -1917,7 +1917,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                 }))
               }
               placeholder="Describe the project, your contributions, and key achievements..."
-              className="min-h-[100px]"
+              className="min-h-[100px] custom-scrollbar"
             />
           </div>
 
@@ -2063,10 +2063,10 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             <div className="space-y-2">
               <Label>Added Projects:</Label>
               {formData.projects.map((project) => (
-                <div key={project.id} className="p-3 bg-gray-50 rounded-lg flex justify-between items-start">
+                <div key={project.id} className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg flex justify-between items-start">
                   <div className="flex-1">
                     <div className="font-medium">{project.name}</div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
                       {project.role}
                     </div>
                     <div className="text-sm text-gray-500">

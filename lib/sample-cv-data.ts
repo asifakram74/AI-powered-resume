@@ -10,7 +10,7 @@ export const sampleCVData: CVData = {
     address: "123 Main Street",
     city: "San Francisco",
     country: "USA",
-    profilePicture: "/placeholder-user.jpg",
+    profilePicture: "/placeholder.jpg",
     summary: "Experienced software engineer with 5+ years of expertise in full-stack development, specializing in React, Node.js, and cloud technologies. Passionate about creating scalable solutions and leading technical teams to deliver high-quality products.",
     linkedin: "linkedin.com/in/johndoe",
     github: "github.com/johndoe"

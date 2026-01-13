@@ -3,7 +3,7 @@
 
 import React, { useMemo, useRef, useState, useLayoutEffect } from "react"
 import { Mail, Phone, MapPin, ExternalLink, Github } from "lucide-react"
-import type { CVData } from "../../../types/cv-data"
+import type { CVData, CVSectionId, PersonalInfoFieldId } from "../../../types/cv-data"
 
 interface ClassicTemplate2Props {
   data: CVData
@@ -17,6 +17,48 @@ const CONTENT_HEIGHT_PX = PAGE_HEIGHT_PX - PADDING_PX * 2
 export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Props) {
   const measureRef = useRef<HTMLDivElement>(null)
   const [pages, setPages] = useState<React.ReactNode[][]>([])
+
+  const locationText =
+    data.personalInfo.city && data.personalInfo.country
+      ? `${data.personalInfo.city}, ${data.personalInfo.country}`
+      : data.personalInfo.city || data.personalInfo.country || ""
+
+  const addressText = (data.personalInfo.address || "").trim()
+  const locLower = locationText.toLowerCase()
+  const addrLower = addressText.toLowerCase()
+  const showAddress = Boolean(addressText) && (!locLower || (addrLower !== locLower && !addrLower.includes(locLower)))
+
+  const defaultPersonalInfoOrder: PersonalInfoFieldId[] = [
+    "fullName",
+    "jobTitle",
+    "email",
+    "phone",
+    "location",
+    "address",
+    "linkedin",
+    "github",
+    "summary",
+  ]
+
+  const allPersonalInfoFields: PersonalInfoFieldId[] = [
+    "fullName",
+    "jobTitle",
+    "email",
+    "phone",
+    "location",
+    "address",
+    "linkedin",
+    "github",
+    "summary",
+  ]
+
+  const requestedPersonalInfoOrder =
+    data.personalInfoFieldOrder && data.personalInfoFieldOrder.length > 0 ? data.personalInfoFieldOrder : defaultPersonalInfoOrder
+
+  const finalPersonalInfoOrder: PersonalInfoFieldId[] = [
+    ...requestedPersonalInfoOrder.filter((f) => allPersonalInfoFields.includes(f)),
+    ...allPersonalInfoFields.filter((f) => !requestedPersonalInfoOrder.includes(f)),
+  ]
 
   const formatDate = (date: string) => {
     if (!date) return ""
@@ -40,9 +82,39 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
 
   const Header = () => (
     <div className="border-b-2 border-gray-900 pb-4 mb-6">
-      <h1 className="text-3xl font-bold text-gray-900 mb-1">{data.personalInfo.fullName}</h1>
-      <h2 className="text-lg font-semibold text-gray-700 mb-3">{data.personalInfo.jobTitle}</h2>
-      <p className="text-gray-600 leading-relaxed text-sm">{data.personalInfo.summary}</p>
+      {finalPersonalInfoOrder.map((field) => {
+        switch (field) {
+          case "fullName": {
+            const v = (data.personalInfo.fullName || "").trim()
+            if (!v) return null
+            return (
+              <h1 key="pi-fullName" className="text-3xl font-bold text-gray-900 mb-1">
+                {v}
+              </h1>
+            )
+          }
+          case "jobTitle": {
+            const v = (data.personalInfo.jobTitle || "").trim()
+            if (!v) return null
+            return (
+              <h2 key="pi-jobTitle" className="text-lg font-semibold text-gray-700 mb-3">
+                {v}
+              </h2>
+            )
+          }
+          case "summary": {
+            const v = (data.personalInfo.summary || "").trim()
+            if (!v) return null
+            return (
+              <p key="pi-summary" className="text-gray-600 leading-relaxed text-sm">
+                {v}
+              </p>
+            )
+          }
+          default:
+            return null
+        }
+      })}
     </div>
   )
 
@@ -50,26 +122,69 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
     <div>
       <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-2">Contact</h3>
       <div className="space-y-1 text-sm text-gray-600">
-        <div className="flex items-center space-x-2">
-          <Mail className="w-3.5 h-3.5 text-gray-900 flex-shrink-0" />
-          <span className="break-all text-xs">{data.personalInfo.email}</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Phone className="w-3.5 h-3.5 text-gray-900 flex-shrink-0" />
-          <span className="text-xs">{data.personalInfo.phone}</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <MapPin className="w-3.5 h-3.5 text-gray-900 flex-shrink-0" />
-          <span className="text-xs">
-            {(data.personalInfo.city || data.personalInfo.country) && (
-              <span>
-                {data.personalInfo.city && data.personalInfo.country
-                  ? `${data.personalInfo.city}, ${data.personalInfo.country}`
-                  : data.personalInfo.city || data.personalInfo.country}
-              </span>
-            )}
-          </span>
-        </div>
+        {finalPersonalInfoOrder.map((field) => {
+          if (field === "email") {
+            const v = (data.personalInfo.email || "").trim()
+            if (!v) return null
+            return (
+              <div key="pi-email" className="flex items-center space-x-2">
+                <Mail className="w-3.5 h-3.5 text-gray-900 flex-shrink-0" />
+                <span className="break-all text-xs">{v}</span>
+              </div>
+            )
+          }
+          if (field === "phone") {
+            const v = (data.personalInfo.phone || "").trim()
+            if (!v) return null
+            return (
+              <div key="pi-phone" className="flex items-center space-x-2">
+                <Phone className="w-3.5 h-3.5 text-gray-900 flex-shrink-0" />
+                <span className="text-xs">{v}</span>
+              </div>
+            )
+          }
+          if (field === "location") {
+            const v = locationText.trim()
+            if (!v) return null
+            return (
+              <div key="pi-location" className="flex items-center space-x-2">
+                <MapPin className="w-3.5 h-3.5 text-gray-900 flex-shrink-0" />
+                <span className="text-xs">{v}</span>
+              </div>
+            )
+          }
+          if (field === "address") {
+            const v = addressText
+            if (!showAddress || !v) return null
+            return (
+              <div key="pi-address" className="flex items-center space-x-2">
+                <MapPin className="w-3.5 h-3.5 text-gray-900 flex-shrink-0" />
+                <span className="text-xs">{v}</span>
+              </div>
+            )
+          }
+          if (field === "linkedin") {
+            const v = (data.personalInfo.linkedin || "").trim()
+            if (!v) return null
+            return (
+              <div key="pi-linkedin" className="flex items-center space-x-2">
+                <ExternalLink className="w-3.5 h-3.5 text-gray-900 flex-shrink-0" />
+                <span className="break-all text-xs">{v}</span>
+              </div>
+            )
+          }
+          if (field === "github") {
+            const v = (data.personalInfo.github || "").trim()
+            if (!v) return null
+            return (
+              <div key="pi-github" className="flex items-center space-x-2">
+                <Github className="w-3.5 h-3.5 text-gray-900 flex-shrink-0" />
+                <span className="break-all text-xs">{v}</span>
+              </div>
+            )
+          }
+          return null
+        })}
       </div>
     </div>
   )
@@ -183,49 +298,152 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
 
   const blocks = useMemo(() => {
     const items: React.ReactNode[] = []
-    items.push(<Header key="hdr" />)
-    items.push(<div key="grid-open" className="grid grid-cols-2 gap-6" />)
-    items.push(<Contact key="contact" />)
-    items.push(<Skills key="skills" />)
-    items.push(<div key="grid-close" className="h-2" />)
-    items.push(<SectionTitle key="exp-title" title="Experience" />)
-    data.experience.forEach((exp, idx) => {
-      items.push(<ExperienceHeader key={`exp-h-${exp.id}`} exp={exp} />)
-      exp.responsibilities.forEach((r, i) => {
-        const t = r.trim()
-        if (t) items.push(<ExperienceLine key={`exp-l-${exp.id}-${i}`} text={t} />)
+
+    const allSections = [
+      "personalInfo",
+      "skills",
+      "experience",
+      "projects",
+      "education",
+      "certifications",
+      "languages",
+      "interests",
+    ] as const satisfies readonly CVSectionId[]
+
+    const requestedOrder: readonly CVSectionId[] =
+      data.sectionOrder && data.sectionOrder.length > 0 ? data.sectionOrder : allSections
+
+    const hidden = data.hiddenSections || []
+
+    const ordered: CVSectionId[] = [
+      ...requestedOrder.filter((s) => allSections.includes(s)),
+      ...allSections.filter((s) => !requestedOrder.includes(s)),
+    ]
+
+    const finalOrder = ordered.filter((s) => s === "personalInfo" || !hidden.includes(s))
+
+    const addPersonalInfo = () => {
+      items.push(<Header key="hdr" />)
+      items.push(<Contact key="contact" />)
+    }
+
+    const addSkills = () => {
+      if (data.skills.technical.length === 0 && data.skills.soft.length === 0) return
+      items.push(<Skills key="skills" />)
+    }
+
+    const addContactSkillsGrid = () => {
+      if (
+        !data.personalInfo.email &&
+        !data.personalInfo.phone &&
+        !data.personalInfo.city &&
+        !data.personalInfo.country &&
+        data.skills.technical.length === 0 &&
+        data.skills.soft.length === 0
+      ) {
+        return
+      }
+
+      items.push(
+        <div key="pi-skills-grid" className="grid grid-cols-2 gap-6">
+          <Contact />
+          <Skills />
+        </div>,
+      )
+    }
+
+    const addExperience = () => {
+      if (data.experience.length === 0) return
+      items.push(<SectionTitle key="exp-title" title="Experience" />)
+      data.experience.forEach((exp, idx) => {
+        items.push(<ExperienceHeader key={`exp-h-${exp.id}`} exp={exp} />)
+        exp.responsibilities.forEach((r, i) => {
+          const t = r.trim()
+          if (t) items.push(<ExperienceLine key={`exp-l-${exp.id}-${i}`} text={t} />)
+        })
+        if (idx < data.experience.length - 1) items.push(<div key={`exp-sp-${exp.id}`} className="h-4" />)
       })
-      if (idx < data.experience.length - 1) items.push(<div key={`exp-sp-${exp.id}`} className="h-4" />)
-    })
-    if (data.projects.length > 0) {
+    }
+
+    const addProjects = () => {
+      if (data.projects.length === 0) return
       items.push(<SectionTitle key="proj-title" title="Projects" />)
       data.projects.forEach((p, idx) => {
         items.push(<ProjectBlock key={`proj-${p.id}`} project={p} />)
         if (idx < data.projects.length - 1) items.push(<div key={`proj-sp-${p.id}`} className="h-3" />)
       })
     }
-    if (data.education.length > 0) {
+
+    const addEducation = () => {
+      if (data.education.length === 0) return
       items.push(<SectionTitle key="edu-title" title="Education" />)
       data.education.forEach((e, idx) => {
         items.push(<EducationBlock key={`edu-${e.id}`} edu={e} />)
         if (idx < data.education.length - 1) items.push(<div key={`edu-sp-${e.id}`} className="h-2" />)
       })
     }
-    if (data.certifications.length > 0) {
+
+    const addCertifications = () => {
+      if (data.certifications.length === 0) return
       items.push(<SectionTitle key="cert-title" title="Certifications" />)
       data.certifications.forEach((c, idx) => {
         items.push(<CertificationBlock key={`cert-${c.id}`} cert={c} />)
         if (idx < data.certifications.length - 1) items.push(<div key={`cert-sp-${c.id}`} className="h-2" />)
       })
     }
-    if (data.languages.length > 0) {
+
+    const addLanguages = () => {
+      if (data.languages.length === 0) return
       items.push(<SectionTitle key="lang-title" title="Languages" />)
       data.languages.forEach((l) => items.push(<LanguageLine key={`lang-${l.id}`} lang={l} />))
     }
-    if (data.additional.interests.length > 0) {
+
+    const addInterests = () => {
+      if (data.additional.interests.length === 0) return
       items.push(<SectionTitle key="int-title" title="Interests" />)
       data.additional.interests.forEach((t, i) => items.push(<InterestTag key={`int-${i}`} text={t} />))
     }
+
+    for (let i = 0; i < finalOrder.length; i += 1) {
+      const section = finalOrder[i]
+
+      if (section === "personalInfo") {
+        const next = finalOrder[i + 1]
+        if (next === "skills") {
+          items.push(<Header key="hdr" />)
+          addContactSkillsGrid()
+          i += 1
+          continue
+        }
+        addPersonalInfo()
+        continue
+      }
+
+      switch (section) {
+        case "skills":
+          addSkills()
+          break
+        case "experience":
+          addExperience()
+          break
+        case "projects":
+          addProjects()
+          break
+        case "education":
+          addEducation()
+          break
+        case "certifications":
+          addCertifications()
+          break
+        case "languages":
+          addLanguages()
+          break
+        case "interests":
+          addInterests()
+          break
+      }
+    }
+
     return items
   }, [data])
 
@@ -274,7 +492,5 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
     </div>
   )
 }
-
-
 
 

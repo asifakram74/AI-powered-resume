@@ -224,7 +224,7 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100"></div>
       </div>
     )
   }
@@ -238,10 +238,10 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
             <UserIcon className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-[#2D3639] font-rubik">
+            <h1 className="text-3xl font-bold text-[#2D3639] dark:text-gray-100 font-rubik">
               {mode === "create" ? "Create User" : "Edit User"}
             </h1>
-            <p className="text-gray-600 font-inter">
+            <p className="text-gray-600 dark:text-gray-300 font-inter">
               {mode === "create" ? "Add a new user to the system" : "Update user information"}
             </p>
           </div>
@@ -272,14 +272,14 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
           {/* Basic Information Card */}
           <Card className="hover:shadow-lg transition-shadow duration-300 border-2 border-transparent hover:border-[#70E4A8]/20">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 font-rubik text-[#2D3639]">
+              <CardTitle className="flex items-center gap-2 font-rubik text-[#2D3639] dark:text-gray-100">
                 <UserIcon className="h-5 w-5 text-[#70E4A8]" />
                 Basic Information
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name" className="font-rubik text-[#2D3639]">
+                <Label htmlFor="name" className="font-rubik text-[#2D3639] dark:text-gray-100">
                   Full Name *
                 </Label>
                 <Input
@@ -295,7 +295,7 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="font-rubik text-[#2D3639]">
+                <Label htmlFor="email" className="font-rubik text-[#2D3639] dark:text-gray-100">
                   Email Address *
                 </Label>
                 <Input
@@ -313,7 +313,7 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
 
               {mode === "create" && (
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="font-rubik text-[#2D3639]">
+                  <Label htmlFor="password" className="font-rubik text-[#2D3639] dark:text-gray-100">
                     Password *
                   </Label>
                   <Input
@@ -335,7 +335,7 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="role" className="font-rubik text-[#2D3639]">
+                <Label htmlFor="role" className="font-rubik text-[#2D3639] dark:text-gray-100">
                   Role *
                 </Label>
                 <select
@@ -356,7 +356,7 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="status" className="font-rubik text-[#2D3639]">
+                <Label htmlFor="status" className="font-rubik text-[#2D3639] dark:text-gray-100">
                   Status *
                 </Label>
                 <select
@@ -387,7 +387,7 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
         {/* Quick Tips */}
         <Card className="animate-slide-up-delay-3 hover:shadow-lg transition-all duration-300 border-2 border-transparent hover:border-[#70E4A8]/20">
           <CardHeader>
-            <CardTitle className="flex items-center gap-3 font-rubik text-[#2D3639]">
+            <CardTitle className="flex items-center gap-3 font-rubik text-[#2D3639] dark:text-gray-100">
               <div className="p-2 bg-gradient-to-br from-[#70E4A8] to-[#EA580C] rounded-lg">
                 <TrendingUp className="h-5 w-5 text-white" />
               </div>
@@ -401,8 +401,8 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
                   <Shield className="h-5 w-5 text-[#70E4A8]" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-[#2D3639] font-rubik">Role Assignment</h4>
-                  <p className="text-sm text-gray-600 font-inter">
+                  <h4 className="font-semibold text-[#2D3639] dark:text-gray-100 font-rubik">Role Assignment</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 font-inter">
                     Assign admin roles only to trusted users who need system-wide access
                   </p>
                 </div>
@@ -413,8 +413,8 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
                   <Target className="h-5 w-5 text-[#EA580C]" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-[#2D3639] font-rubik">Plan Selection</h4>
-                  <p className="text-sm text-gray-600 font-inter">
+                  <h4 className="font-semibold text-[#2D3639] dark:text-gray-100 font-rubik">Plan Selection</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 font-inter">
                     Choose appropriate plans based on user needs and feature requirements
                   </p>
                 </div>
@@ -425,8 +425,8 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
                   <CheckCircle className="h-5 w-5 text-[#70E4A8]" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-[#2D3639] font-rubik">Active Status</h4>
-                  <p className="text-sm text-gray-600 font-inter">
+                  <h4 className="font-semibold text-[#2D3639] dark:text-gray-100 font-rubik">Active Status</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 font-inter">
                     Keep users active to ensure they can access all system features
                   </p>
                 </div>
@@ -437,8 +437,8 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
                   <XCircle className="h-5 w-5 text-[#EA580C]" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-[#2D3639] font-rubik">Suspension</h4>
-                  <p className="text-sm text-gray-600 font-inter">
+                  <h4 className="font-semibold text-[#2D3639] dark:text-gray-100 font-rubik">Suspension</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 font-inter">
                     Suspend users temporarily if needed, rather than deleting accounts
                   </p>
                 </div>
@@ -452,7 +452,7 @@ export function UserForm({ userId, mode, onSave, onCancel, initialData }: UserFo
             type="button"
             variant="outline"
             onClick={handleCancel}
-            className="border-[#70E4A8]/30 hover:border-[#70E4A8]/50 text-[#2D3639] font-inter bg-transparent"
+            className="border-[#70E4A8]/30 hover:border-[#70E4A8]/50 text-[#2D3639] dark:text-gray-100 font-inter bg-transparent"
           >
             Cancel
           </Button>

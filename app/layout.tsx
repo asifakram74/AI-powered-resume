@@ -5,6 +5,8 @@ import "./globals.css";
 import { ReduxProvider } from "../lib/redux/provider";
 import { Toaster } from "sonner";
 import HydrateAuth from "../components/auth/HydrateAuth";
+import { ThemeProvider } from "../components/theme-provider";
+import { ThemeToggle } from "../components/theme-toggle";
 
 export const metadata: Metadata = {
  title: "Resumaic – AI-Powered Resume Builder Online",
@@ -24,7 +26,7 @@ export const metadata: Metadata = {
     siteName: "Resumaic",
     images: [
       {
-        url: "https://app.resumaic.com/resumic.png", // image in /public folder
+        url: "https://app.resumaic.com/resumic.png",
         width: 1200,
         height: 630,
         alt: "Resumaic App Preview",
@@ -40,7 +42,7 @@ export const metadata: Metadata = {
     description:
       "Design your perfect resume with AI assistance. Resumaic helps you stand out and land your dream job faster.",
     images: ["https://app.resumaic.com/resumic.png"],
-    creator: "@resumaic", // optional — if you have a Twitter/X handle
+    creator: "@resumaic",
   },
   robots: {
     index: false,
@@ -58,13 +60,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="antialiased">
+    <html lang="en" className="antialiased" suppressHydrationWarning>
       <body className="font-sans">
-        <ReduxProvider>
-          <HydrateAuth />
-          <Toaster position="top-right" richColors />
-          {children}
-        </ReduxProvider>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
+          <ReduxProvider>
+            <HydrateAuth />
+            <Toaster position="top-right" richColors />
+            <ThemeToggle />
+            {children}
+          </ReduxProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

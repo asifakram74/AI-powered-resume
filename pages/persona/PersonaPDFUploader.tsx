@@ -289,10 +289,12 @@ const PDFUploader = ({ onDataExtracted, onProcessingStart }: PDFUploaderProps) =
           "border border-dashed transition-all duration-200 cursor-pointer overflow-hidden",
           cardHeight,
           "flex items-center justify-center",
-          isDragOver ? "border-emerald-500 bg-emerald-50/50" : "border-gray-200 hover:border-emerald-400 hover:bg-emerald-50/30",
-          file && !isProcessing && !error ? "border-emerald-500 bg-emerald-50/50" : "",
-          error ? "border-red-300 bg-red-50/50" : "",
-          isProcessing ? "pointer-events-none border-emerald-300 bg-emerald-50/30" : ""
+          isDragOver
+            ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/10"
+            : "border-gray-200 dark:border-gray-800 hover:border-emerald-400 hover:bg-emerald-50/30 dark:hover:bg-emerald-900/10",
+          file && !isProcessing && !error ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/10" : "",
+          error ? "border-red-300 bg-red-50/50 dark:border-red-700 dark:bg-red-950/20" : "",
+          isProcessing ? "pointer-events-none border-emerald-300 bg-emerald-50/30 dark:bg-emerald-900/10" : ""
         )}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
@@ -330,10 +332,10 @@ const PDFUploader = ({ onDataExtracted, onProcessingStart }: PDFUploaderProps) =
               <Loader2 className="h-5 w-5 text-emerald-600 animate-spin flex-shrink-0" />
               <div className="flex-1 space-y-1.5 min-w-0">
                 <div className="flex justify-between text-xs">
-                  <span className="font-medium text-gray-700 truncate mr-2">{getFriendlyMessage(safeProgress)}</span>
-                  <span className="text-gray-500 tabular-nums">{Math.round(safeProgress)}%</span>
+                  <span className="font-medium text-gray-700 dark:text-gray-200 truncate mr-2">{getFriendlyMessage(safeProgress)}</span>
+                  <span className="text-gray-500 dark:text-gray-400 tabular-nums">{Math.round(safeProgress)}%</span>
                 </div>
-                <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 overflow-hidden">
                   <div 
                     className="bg-emerald-500 h-full rounded-full transition-all duration-500 ease-out"
                     style={{ width: `${safeProgress}%` }}
@@ -343,12 +345,12 @@ const PDFUploader = ({ onDataExtracted, onProcessingStart }: PDFUploaderProps) =
             </div>
           ) : (
             <div className="flex items-center justify-center space-x-3 py-1">
-              <div className="p-2 rounded-full bg-emerald-100/50 flex-shrink-0">
+              <div className="p-2 rounded-full bg-emerald-100/50 dark:bg-emerald-900/20 flex-shrink-0">
                 <Upload className="h-4 w-4 text-emerald-600" />
               </div>
               <div className="text-left">
-                <p className="text-sm font-medium text-gray-700">Upload CV (PDF)</p>
-                <p className="text-[10px] text-gray-500">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-200">Upload CV (PDF)</p>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400">
                   Drag & drop or click
                 </p>
               </div>

@@ -259,11 +259,11 @@ export function CVEditPopup({
                     <div className="w-20 h-20 rounded-full overflow-hidden border">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={profileImagePreview || currentImageUrl || "/placeholder-user.jpg"}
+                        src={profileImagePreview || currentImageUrl || "/placeholder.jpg"}
                         alt="Profile"
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          e.currentTarget.src = "/placeholder-user.jpg";
+                          e.currentTarget.src = "/placeholder.jpg";
                         }}
                       />
                     </div>
@@ -291,7 +291,7 @@ export function CVEditPopup({
                           {isUploadingImage ? "Uploading..." : "Change"}
                         </Button>
                       </label>
-                      <p className="text-xs text-gray-500 mt-1">Supported: JPG, PNG. Updates persona image used in templates.</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Supported: JPG, PNG. Updates persona image used in templates.</p>
                     </div>
                   </div>
 

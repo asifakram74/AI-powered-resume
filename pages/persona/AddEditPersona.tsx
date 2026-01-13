@@ -60,7 +60,7 @@ export function PersonaCreationOptions({
         <Card
           className={`cursor-pointer hover:shadow-lg transition-shadow border-2 ${selectedOption === "manual"
               ? "border-[#70E4A8]"
-              : "hover:border-[#70E4A8]/50 border-gray-200"
+              : "hover:border-[#70E4A8]/50 border-gray-200 dark:border-gray-800"
             }`}
           onClick={() => setSelectedOption("manual")}
         >
@@ -68,10 +68,10 @@ export function PersonaCreationOptions({
             <div className="mx-auto w-12 h-12 bg-[#70E4A8]/20 rounded-lg flex items-center justify-center mb-3">
               <FileText className="h-6 w-6 text-[#70E4A8]" />
             </div>
-            <CardTitle className="text-lg font-rubik text-[#2D3639]">
+            <CardTitle className="text-lg font-rubik text-[#2D3639] dark:text-gray-100">
               Fill Out Form
             </CardTitle>
-            <CardDescription className="font-inter text-gray-600">
+            <CardDescription className="font-inter text-gray-600 dark:text-gray-300">
               Manually enter your information using our comprehensive form
             </CardDescription>
           </CardHeader>
@@ -82,7 +82,7 @@ export function PersonaCreationOptions({
             >
               Start Manual Entry
             </Button>
-            <div className="mt-3 text-xs text-gray-500 text-center font-inter">
+            <div className="mt-3 text-xs text-gray-500 dark:text-gray-400 text-center font-inter">
               Most comprehensive control over your data
             </div>
           </CardContent>
@@ -92,7 +92,7 @@ export function PersonaCreationOptions({
         <Card
           className={`cursor-pointer hover:shadow-lg transition-shadow border-2 ${selectedOption === "pdf"
               ? "border-[#70E4A8]"
-              : "hover:border-[#70E4A8]/50 border-gray-200"
+              : "hover:border-[#70E4A8]/50 border-gray-200 dark:border-gray-800"
             }`}
           onClick={() => setSelectedOption("pdf")}
         >
@@ -100,10 +100,10 @@ export function PersonaCreationOptions({
             <div className="mx-auto w-12 h-12 bg-[#70E4A8]/20 rounded-lg flex items-center justify-center mb-3">
               <Upload className="h-6 w-6 text-[#70E4A8]" />
             </div>
-            <CardTitle className="text-lg font-rubik text-[#2D3639]">
+            <CardTitle className="text-lg font-rubik text-[#2D3639] dark:text-gray-100">
               Upload PDF Resume
             </CardTitle>
-            <CardDescription className="font-inter text-gray-600">
+            <CardDescription className="font-inter text-gray-600 dark:text-gray-300">
               Extract information automatically from your existing resume
             </CardDescription>
           </CardHeader>
@@ -128,14 +128,14 @@ export function PersonaCreationOptions({
                 Upload PDF
               </Button>
             )}
-            <div className="mt-3 text-xs text-gray-500 text-center font-inter">
+            <div className="mt-3 text-xs text-gray-500 dark:text-gray-400 text-center font-inter">
               AI will extract and organize your information
             </div>
           </CardContent>
         </Card>
 
         {/* LinkedIn Import Option - Upcoming Feature */}
-        <Card className="cursor-not-allowed relative overflow-hidden border-2 border-gray-200">
+        <Card className="cursor-not-allowed relative overflow-hidden border-2 border-gray-200 dark:border-gray-800">
           <div className="absolute top-1 right-1 sm:top-2 sm:right-2 md:top-1 md:right-1 lg:top-2 lg:right-2 z-20">
             <span className="inline-flex items-center rounded-md bg-[#EA580C]/20 px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs font-medium text-[#EA580C] font-inter">
               Coming Soon
@@ -146,15 +146,15 @@ export function PersonaCreationOptions({
             <div className="mx-auto w-12 h-12 bg-[#0067c2]/20 rounded-lg flex items-center justify-center mb-3">
               <Linkedin className="h-6 w-6 text-[#0067c2]" />
             </div>
-            <CardTitle className="text-lg font-rubik text-[#2D3639]">
+            <CardTitle className="text-lg font-rubik text-[#2D3639] dark:text-gray-100">
               Import from LinkedIn
             </CardTitle>
-            <CardDescription className="font-inter text-gray-600">
+            <CardDescription className="font-inter text-gray-600 dark:text-gray-300">
               Connect your LinkedIn profile to import professional data
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center gap-2 text-sm text-gray-500 font-inter">
+            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 font-inter">
               <AlertCircle className="h-4 w-4" />
               Currently in development
             </div>
@@ -167,7 +167,7 @@ export function PersonaCreationOptions({
               Connect LinkedIn
             </Button>
 
-            <div className="mt-3 text-xs text-gray-500 text-center font-inter">
+            <div className="mt-3 text-xs text-gray-500 dark:text-gray-400 text-center font-inter">
               Secure OAuth connection coming soon
             </div>
           </CardContent>
@@ -180,10 +180,10 @@ export function PersonaCreationOptions({
             <Sparkles className="h-4 w-4 text-[#70E4A8]" />
           </div>
           <div className="text-center sm:text-left">
-            <h4 className="font-medium text-[#2D3639] mb-1 font-rubik">
+            <h4 className="font-medium text-[#2D3639] dark:text-gray-100 mb-1 font-rubik">
               What happens next?
             </h4>
-            <p className="text-sm text-[#2D3639]/80 font-inter">
+            <p className="text-sm text-[#2D3639]/80 dark:text-gray-300 font-inter">
               Regardless of the method you choose, you'll see the complete
               persona form with any extracted data pre-filled. You can then
               review, edit, and complete any missing information before

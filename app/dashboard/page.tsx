@@ -7,7 +7,7 @@ export default function DashboardPage() {
   const router = useRouter()
 
   useEffect(() => {
-    router.replace("/dashboard/create-persona")
+    router.replace("/dashboard/persona")
   }, [router])
 
   return (

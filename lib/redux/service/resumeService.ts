@@ -24,9 +24,7 @@ export interface CreateCVData {
 
 export const getAllCVs = async (): Promise<CV[]> => {
   try {
-    const response = await api.get(`/cvs`, {
-      timeout: 10000
-    });
+    const response = await api.get(`/cvs`);
     return response.data
   } catch (error) {
     console.error("Error fetching CVs:", error)
@@ -36,9 +34,7 @@ export const getAllCVs = async (): Promise<CV[]> => {
 
 export const getCVs = async (userId: string): Promise<CV[]> => {
   try {
-    const response = await api.get(`/cvs?user_id=${userId}`, {
-      timeout: 10000
-    });
+    const response = await api.get(`/cvs?user_id=${userId}`);
     return response.data
   } catch (error) {
     console.error("Error fetching CVs:", error)

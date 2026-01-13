@@ -130,8 +130,8 @@
 //             <>
 //               <SidebarMenuItem>
 //                 <SidebarMenuButton
-//                   onClick={() => setActivePage("create-persona")}
-//                   isActive={activePage === "create-persona"}
+//                   onClick={() => setActivePage("persona")}
+//                   isActive={activePage === "persona"}
 //                   className="w-full justify-start gap-3 px-4 py-3 text-left rounded-xl transition-all duration-200 hover:bg-gray-50 hover:shadow-sm data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-50 data-[active=true]:to-purple-50 data-[active=true]:text-blue-700 data-[active=true]:shadow-sm data-[active=true]:border data-[active=true]:border-blue-100 group"
 //                 >
 //                   <div className="flex items-center gap-3 flex-1">

@@ -76,7 +76,7 @@ export function StatsCard() {
           <CardTitle>Usage Statistics</CardTitle>
         </CardHeader>
         <CardContent className="flex justify-center items-center h-32">
-          <div className="animate-pulse text-gray-500">Loading statistics...</div>
+          <div className="animate-pulse text-gray-500 dark:text-gray-400">Loading statistics...</div>
         </CardContent>
       </Card>
     )
@@ -93,10 +93,10 @@ export function StatsCard() {
       <CardContent>
         <div className="grid grid-cols-2 gap-4">
           {stats.map((stat, index) => (
-            <div key={index} className="text-center p-3 bg-gray-50 rounded-lg">
+            <div key={index} className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
               <stat.icon className={`h-6 w-6 mx-auto mb-2 ${stat.color}`} />
-              <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
-              <div className="text-xs text-gray-600">{stat.label}</div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stat.value}</div>
+              <div className="text-xs text-gray-600 dark:text-gray-300">{stat.label}</div>
             </div>
           ))}
         </div>

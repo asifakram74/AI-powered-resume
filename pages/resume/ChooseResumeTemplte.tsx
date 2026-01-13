@@ -154,11 +154,11 @@ const templates: CVTemplate[] = [
 ]
 const dashboardMenuItems = [
   {
-    id: "create-persona",
+    id: "persona",
     label: "Persona",
     icon: Sparkles,
     badge: "AI",
-    href: "/dashboard?page=create-persona",
+    href: "/dashboard?page=persona",
   },
   {
     id: "resumes",
@@ -225,7 +225,7 @@ export function CVTemplates({
   };
 
   return (
-    <div className="min-h-screen bg-white rounded-lg ">
+    <div className="min-h-screen bg-white dark:bg-gray-950 rounded-lg">
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         {/* Template Selection */}
@@ -257,8 +257,8 @@ export function CVTemplates({
                   onClick={() => onTemplateSelect(template)}
                 >
                   <div className={`relative rounded-lg transition-all duration-200 aspect-[210/297] w-full max-w-[350px] ${isSelected
-                      ? "ring-4 ring-blue-600 scale-105 shadow-xl"
-                      : "ring-2 ring-green-100 hover:ring-green-300 hover:scale-105 hover:shadow-lg"
+                      ? "ring-4 ring-blue-600 dark:ring-blue-400 scale-105 shadow-xl"
+                      : "ring-2 ring-green-100 dark:ring-gray-800 hover:ring-green-300 dark:hover:ring-green-400 hover:scale-105 hover:shadow-lg"
                     }`}>
                     <Image
                       src={`/templates/${template.id}.png`}

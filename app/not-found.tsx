@@ -45,7 +45,7 @@ const NotFound = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-white via-green-50 to-emerald-50">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-white via-green-50 to-emerald-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
       {/* Custom CSS for animations (use CSS variables to control float) */}
       <style jsx global>{`
         /* Control these to tune the float behaviour */
@@ -174,10 +174,10 @@ const NotFound = () => {
 
           {/* Main Message */}
           <div className="text-center mb-8">
-            <h2 className="text-3xl md:text-5xl font-bold text-gray-800 mb-4">
+            <h2 className="text-3xl md:text-5xl font-bold text-gray-800 dark:text-gray-100 mb-4">
               Oops! Page Not Found
             </h2>
-            <p className="text-lg md:text-xl text-gray-600 mb-6 max-w-md mx-auto">
+            <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-6 max-w-md mx-auto">
               The page you're looking for seems to have wandered off into the digital wilderness.
             </p>
           </div>
@@ -198,7 +198,7 @@ const NotFound = () => {
 
           {/* Fun Animation Element */}
           <div className="relative mt-6">
-            <p className="mt-4 text-sm text-gray-500 animate-float" style={{ animationDuration: '8s' }}>
+            <p className="mt-4 text-sm text-gray-500 dark:text-gray-400 animate-float" style={{ animationDuration: '8s' }}>
               Redirecting your digital journey...
             </p>
           </div>

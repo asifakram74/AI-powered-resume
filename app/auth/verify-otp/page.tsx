@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useDispatch, useSelector } from "react-redux"
 import { Button } from "../../../components/ui/button"
+import { Logo } from "../../../components/ui/logo"
 import { Input } from "../../../components/ui/input"
 import { Label } from "../../../components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card"
@@ -14,7 +15,7 @@ import { toast } from "sonner"
 import { verifyOTPForReset, verifyEmailForReset } from "../../../lib/redux/slices/authSlice"
 import type { RootState, AppDispatch } from "../../../lib/redux/store"
 import { Alert, AlertDescription } from "../../../components/ui/alert"
-import Image from "next/image"
+
 
 // Add this line to force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -147,10 +148,10 @@ export default function VerifyOTPPage() {
   // Show loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-gray-600 dark:text-gray-300">Loading...</p>
         </div>
       </div>
     )
@@ -159,10 +160,10 @@ export default function VerifyOTPPage() {
   // Show redirect state or invalid params
   if (!email) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <AlertCircle className="h-8 w-8 text-red-600" />
-          <p className="text-gray-600">Invalid or missing email parameter</p>
+          <p className="text-gray-600 dark:text-gray-300">Invalid or missing email parameter</p>
           <Button onClick={() => router.push("/auth/verify-email")}>
             Go to Verify Email
           </Button>
@@ -172,25 +173,25 @@ export default function VerifyOTPPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex items-center mx-auto mb-4">
-            <Link href="/">
-              <Image src="/Resumic.png" alt="Logo" width={200} height={90} className="cursor-pointer" />
+            <Link href="/" >
+              <Logo className="cursor-pointer" />
             </Link>
           </div>
           <div className="flex items-center gap-2 mb-2 justify-center">
             <Link href="/auth/verify-email">
-              <Button variant="ghost" size="sm" className="p-2 hover:bg-gray-100">
+              <Button variant="ghost" size="sm" className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800">
                 <ArrowLeft className="h-4 w-4" />
               </Button>
             </Link>
-            <CardTitle className="text-2xl font-bold text-gray-900">Verify Code</CardTitle>
+            <CardTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">Verify Code</CardTitle>
           </div>
           <CardDescription>
             Enter the 6-digit verification code sent to{" "}
-            <span className="font-medium text-gray-700">{email}</span>
+            <span className="font-medium text-gray-700 dark:text-gray-200">{email}</span>
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -205,7 +206,7 @@ export default function VerifyOTPPage() {
             )}
 
             <div className="space-y-2">
-              <Label className="text-gray-700">Verification Code</Label>
+              <Label className="text-gray-700 dark:text-gray-200">Verification Code</Label>
               <div className="flex gap-2 justify-center">
                 {otp.map((digit, index) => (
                   <Input
@@ -220,7 +221,7 @@ export default function VerifyOTPPage() {
                     value={digit}
                     onChange={(e) => handleOtpChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
-                    className="w-12 h-12 text-center text-lg font-semibold border-gray-300 focus:border-blue-500"
+                    className="w-12 h-12 text-center text-lg font-semibold border-gray-300 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-400"
                   />
                 ))}
               </div>
@@ -243,7 +244,7 @@ export default function VerifyOTPPage() {
           </form>
 
           <div className="mt-6 text-center space-y-2">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               Didn't receive the code?
             </p>
             {canResend ? (
@@ -266,14 +267,14 @@ export default function VerifyOTPPage() {
                 )}
               </Button>
             ) : (
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
                 Resend code in {countdown}s
               </p>
             )}
           </div>
 
           <div className="mt-4 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               Wrong email?{" "}
               <Link href="/auth/verify-email" className="text-blue-600 hover:text-blue-500 font-medium">
                 Change email
