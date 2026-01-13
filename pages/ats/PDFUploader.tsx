@@ -130,10 +130,14 @@ export const PDFUploader = ({ onExtractedText, onFileUploaded, className }: PDFU
           "border-2 border-dashed p-6 text-center transition-all duration-200 cursor-pointer",
           cardHeight,
           "flex items-center justify-center",
-          isDragOver ? "border-emerald-500 bg-emerald-50 scale-[1.02]" : "border-gray-300",
-          file && !isProcessing && !error ? "border-emerald-500 bg-emerald-50" : "",
-          error ? "border-red-300 bg-red-50" : "",
-          isProcessing ? "pointer-events-none border-emerald-300 bg-emerald-50" : "hover:border-emerald-400 hover:bg-emerald-50"
+          isDragOver
+            ? "border-emerald-500 bg-emerald-50 scale-[1.02] dark:bg-emerald-900/10"
+            : "border-gray-300 dark:border-gray-700",
+          file && !isProcessing && !error ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/10" : "",
+          error ? "border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-950/20" : "",
+          isProcessing
+            ? "pointer-events-none border-emerald-300 bg-emerald-50 dark:bg-emerald-900/10"
+            : "hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/10"
         )}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
@@ -163,21 +167,21 @@ export const PDFUploader = ({ onExtractedText, onFileUploaded, className }: PDFU
               <CheckCircle2 className="h-8 w-8 text-emerald-600" />
               <div className="space-y-1">
                 <p className="text-xs font-medium text-emerald-700">Ready to Analyze</p>
-                <p className="text-xs text-gray-600 truncate max-w-[200px]">{file.name}</p>
+                <p className="text-xs text-gray-600 dark:text-gray-300 truncate max-w-[200px]">{file.name}</p>
               </div>
             </>
           ) : isProcessing ? (
             <>
               <Loader2 className="h-8 w-8 text-emerald-600 animate-spin" />
               <div className="space-y-2 w-full max-w-[280px]">
-                <p className="text-xs font-medium text-gray-800">{getFriendlyMessage(safeProgress)}</p>
-                <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                <p className="text-xs font-medium text-gray-800 dark:text-gray-200">{getFriendlyMessage(safeProgress)}</p>
+                <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-2 overflow-hidden">
                   <div
                     className="bg-emerald-600 h-full rounded-full transition-all duration-500 ease-out"
                     style={{ width: `${safeProgress}%` }}
                   />
                 </div>
-                <div className="flex justify-between text-xs text-gray-500">
+                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
                   <span>Processing...</span>
                   <span>{Math.round(safeProgress)}%</span>
                 </div>
@@ -185,12 +189,12 @@ export const PDFUploader = ({ onExtractedText, onFileUploaded, className }: PDFU
             </>
           ) : (
             <>
-              <div className="p-3 rounded-full bg-emerald-100">
+              <div className="p-3 rounded-full bg-emerald-100 dark:bg-emerald-900/20">
                 <Upload className="h-6 w-6 text-emerald-600" />
               </div>
               <div className="space-y-1">
-                <p className="text-xs font-medium text-gray-800">Upload your Resume (PDF)</p>
-                <p className="text-xs text-gray-600">Drag & drop or click to browse</p>
+                <p className="text-xs font-medium text-gray-800 dark:text-gray-200">Upload your Resume (PDF)</p>
+                <p className="text-xs text-gray-600 dark:text-gray-300">Drag & drop or click to browse</p>
               </div>
             </>
           )}

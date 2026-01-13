@@ -141,9 +141,9 @@ export default function SetPassword({
                   onClick={() => setShowPasswords(prev => ({ ...prev, new: !prev.new }))}
                 >
                   {showPasswords.new ? (
-                    <EyeOff className="h-4 w-4 text-gray-500" />
+                    <EyeOff className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                   ) : (
-                    <Eye className="h-4 w-4 text-gray-500" />
+                    <Eye className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                   )}
                 </Button>
               </div>
@@ -169,9 +169,9 @@ export default function SetPassword({
                   onClick={() => setShowPasswords(prev => ({ ...prev, confirm: !prev.confirm }))}
                 >
                   {showPasswords.confirm ? (
-                    <EyeOff className="h-4 w-4 text-gray-500" />
+                    <EyeOff className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                   ) : (
-                    <Eye className="h-4 w-4 text-gray-500" />
+                    <Eye className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                   )}
                 </Button>
               </div>

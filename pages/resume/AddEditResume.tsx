@@ -32,6 +32,7 @@ import {
 } from "../../components/ui/dialog";
 import { CVTemplates } from "./ChooseResumeTemplte";
 import { useForm } from "react-hook-form";
+import { useTheme } from "next-themes";
 
 interface CVTemplate {
   id: string;
@@ -55,6 +56,8 @@ export function CVWizard({
 }: CVWizardProps) {
   const router = useRouter();
   const { user } = useAppSelector((state) => state.auth);
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [formData, setFormData] = useState<CreateCVData | null>(null);
   const [personas, setPersonas] = useState<PersonaResponse[]>([]);
@@ -300,11 +303,17 @@ export function CVWizard({
                   isSearchable
                   placeholder="Search or select persona..."
                   styles={{
-                    control: (base) => ({
+                    control: (base, state) => ({
                       ...base,
                       minHeight: 40,
                       borderRadius: 6,
-                      borderColor: "#d1d5db",
+                      borderColor: isDark ? "#374151" : "#d1d5db",
+                      backgroundColor: isDark ? "#0b1220" : "white",
+                      boxShadow: state.isFocused
+                        ? isDark
+                          ? "0 0 0 1px rgba(112, 228, 168, 0.6)"
+                          : base.boxShadow
+                        : base.boxShadow,
                       paddingLeft: 4,
                       paddingRight: 4,
                     }),
@@ -312,17 +321,36 @@ export function CVWizard({
                       ...base,
                       borderRadius: 6,
                       marginTop: 4,
-                      border: "1px solid #e5e7eb",
+                      border: isDark ? "1px solid #374151" : "1px solid #e5e7eb",
+                      backgroundColor: isDark ? "#0b1220" : "white",
                       boxShadow: "0 4px 8px rgba(0,0,0,0.05)",
                     }),
                     option: (base, state) => ({
                       ...base,
                       backgroundColor: state.isSelected
-                        ? "#eff6ff"
+                        ? isDark
+                          ? "rgba(112, 228, 168, 0.25)"
+                          : "#eff6ff"
                         : state.isFocused
-                          ? "#f3f4f6"
-                          : "white",
-                      color: "#1f2937",
+                          ? isDark
+                            ? "#111827"
+                            : "#f3f4f6"
+                          : isDark
+                            ? "#0b1220"
+                            : "white",
+                      color: isDark ? "#e5e7eb" : "#1f2937",
+                    }),
+                    singleValue: (base) => ({
+                      ...base,
+                      color: isDark ? "#e5e7eb" : "#111827",
+                    }),
+                    placeholder: (base) => ({
+                      ...base,
+                      color: isDark ? "#9ca3af" : "#6b7280",
+                    }),
+                    input: (base) => ({
+                      ...base,
+                      color: isDark ? "#e5e7eb" : "#111827",
                     }),
                   }}
                 />

@@ -186,7 +186,7 @@ export function CoverLetterGenerator({ onGenerate, isGenerating }: CoverLetterGe
               className="min-h-[200px] w-full resize-none" style={{ wordBreak: 'break-all' }}
             />
 
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Include as much detail as possible for a more tailored cover letter
             </p>
 
@@ -250,7 +250,7 @@ export function CoverLetterGenerator({ onGenerate, isGenerating }: CoverLetterGe
                 formatOptionLabel={(option) => (
                   <div className="flex flex-col">
                     <span className="font-medium">{option.label}</span>
-                    <span className="text-sm text-gray-500">{option.description}</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">{option.description}</span>
                   </div>
                 )}
                 styles={{
@@ -283,9 +283,9 @@ export function CoverLetterGenerator({ onGenerate, isGenerating }: CoverLetterGe
             </div>
 
             {selectedToneData && (
-              <div className="p-4 bg-gray-50 rounded-lg border">
-                <Label className="text-sm font-medium text-gray-700">Example opening:</Label>
-                <p className="text-sm text-gray-600 italic mt-1">"{selectedToneData.example}"</p>
+              <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border">
+                <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">Example opening:</Label>
+                <p className="text-sm text-gray-600 dark:text-gray-300 italic mt-1">"{selectedToneData.example}"</p>
               </div>
             )}
           </div>
@@ -313,14 +313,14 @@ export function CoverLetterGenerator({ onGenerate, isGenerating }: CoverLetterGe
         </Button>
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/60 rounded-lg p-4">
         <div className="flex items-start gap-3">
-          <div className="rounded-full bg-blue-100 p-1">
+          <div className="rounded-full bg-blue-100 dark:bg-blue-900/30 p-1">
             <Sparkles className="h-4 w-4 text-blue-600" />
           </div>
           <div>
-            <h4 className="font-medium text-blue-900 mb-1">AI-Powered Personalization</h4>
-            <p className="text-sm text-blue-700">
+            <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-1">AI-Powered Personalization</h4>
+            <p className="text-sm text-blue-700 dark:text-blue-200">
               Our AI analyzes the job description and creates a tailored cover letter that highlights your relevant
               skills and experience while matching the company's requirements and culture.
             </p>

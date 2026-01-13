@@ -152,8 +152,8 @@ export function ProfilePage() {
     return (
       <div className="fixed inset-0 flex justify-center items-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-          <p className="text-gray-600">Loading your profile...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-gray-100"></div>
+          <p className="text-gray-600 dark:text-gray-300">Loading your profile...</p>
         </div>
       </div>
     )
@@ -174,8 +174,8 @@ export function ProfilePage() {
     return (
       <div className="fixed inset-0 flex justify-center items-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-          <p className="text-gray-600">Loading your profile...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-gray-100"></div>
+          <p className="text-gray-600 dark:text-gray-300">Loading your profile...</p>
         </div>
       </div>
     )
@@ -359,7 +359,7 @@ export function ProfilePage() {
                   <Edit className="h-4 w-4 mr-3 text-blue-600" />
                   <div className="text-left">
                     <p className="font-medium">Edit Profile</p>
-                    <p className="text-xs text-gray-500">Update your information</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Update your information</p>
                   </div>
                 </Button>
                 
@@ -385,7 +385,7 @@ export function ProfilePage() {
                         ? 'Create Password' 
                         : 'Change Password'}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       {(user?.source?.toLowerCase() === 'google' || user?.source?.toLowerCase() === 'linkedin') && 
                        !(user?.has_password || (typeof window !== 'undefined' && localStorage.getItem('password_set') === 'true'))
                         ? 'Create a password for your account'

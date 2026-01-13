@@ -109,7 +109,7 @@ export default function SignInPage() {
     const redirectUri = (window.location.origin + window.location.pathname).replace(/\/$/, "");
     console.log("redirectUri", redirectUri)
     window.location.href = `https://backendcv.onlinetoolpot.com/public/api/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
-    // window.location.href = `https://stagingbackend.resumaic.com/public/api/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    // window.location.href = `https://backendcv.onlinetoolpot.com/public/api/auth/google/redirect?state=${randomState}&redirect_uri=${encodeURIComponent(redirectUri)}`;
   };
 
   useEffect(() => {
@@ -290,7 +290,7 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex items-center mx-auto mb-4">
@@ -298,14 +298,14 @@ export default function SignInPage() {
               <Image src="/Resumic.png" alt="Logo" width={200} height={90} className="cursor-pointer" />
             </Link>
           </div>
-          <CardTitle className="text-2xl font-bold text-gray-900">Welcome to Resumaic</CardTitle>
+          <CardTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">Welcome to Resumaic</CardTitle>
           <CardDescription>Sign in to your CV Builder AI account</CardDescription>
         </CardHeader>
         <CardContent>
           {oauthStatus !== "idle" ? (
             <div className="flex flex-col items-center justify-center py-10">
               <Loader2 className="h-9 w-9 animate-spin text-emerald-600 mb-4" />
-              <p className="text-gray-700 font-medium">
+              <p className="text-gray-700 dark:text-gray-200 font-medium">
                 {oauthStatus === "loading" ? `Completing ${oauthProvider ?? ''} authentication...` : `${oauthProvider ?? 'OAuth'} authentication failed`}
               </p>
               {oauthStatus === "error" && (
@@ -336,7 +336,7 @@ export default function SignInPage() {
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
                     <Input
                       id="email"
                       type="email"
@@ -352,7 +352,7 @@ export default function SignInPage() {
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
@@ -365,7 +365,7 @@ export default function SignInPage() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -379,9 +379,9 @@ export default function SignInPage() {
                       type="checkbox"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="rounded border-gray-300 dark:border-gray-600 dark:bg-gray-900 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400"
                     />
-                    <Label htmlFor="remember" className="text-sm text-gray-600">
+                    <Label htmlFor="remember" className="text-sm text-gray-600 dark:text-gray-300">
                       Remember me
                     </Label>
                   </div>
@@ -408,10 +408,10 @@ export default function SignInPage() {
 
               <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300" />
+                  <div className="w-full border-t border-gray-300 dark:border-gray-700" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                  <span className="px-2 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400">Or continue with</span>
                 </div>
               </div>
 
@@ -450,7 +450,7 @@ export default function SignInPage() {
               </div>
 
               <div className="mt-6 text-center">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
                   Don't have an account?{" "}
                   <Link href="/auth/signup" className="text-blue-600 hover:text-blue-500 font-medium">
                     Sign up

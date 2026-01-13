@@ -155,7 +155,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <WelcomeTour />
         <div className="flex min-h-screen w-full">
           <Sidebar user={profile as any} />
-          <main className="flex-1 bg-gray-50 relative">
+          <main className="flex-1 bg-gray-50 dark:bg-gray-950 relative overflow-y-auto custom-scrollbar">
             {/* {requiresPasswordSetup && user?.role?.toLowerCase() !== 'admin' && 
               <Dialog open>
                 <DialogContent className="max-w-md p-0 overflow-hidden border-0 shadow-xl rounded-xl">
@@ -229,7 +229,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       Your email is not verified. Please verify to use Resumaic.
                     </DialogDescription>
                   </div>
-                  <div className="p-6 bg-white">
+                  <div className="p-6 bg-white dark:bg-gray-900">
                     <div className="flex gap-3">
                       <Button
                         className="flex-1 resumaic-gradient-green text-white hover:opacity-90 button-press"
@@ -240,13 +240,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       </Button>
                       <Button
                         variant="outline"
-                        className="flex-1 border-2 border-gray-300 text-gray-800 bg-white hover:bg-gray-100 hover:text-gray-900"
+                        className="flex-1 border-2 border-gray-300 text-gray-800 bg-white hover:bg-gray-100 hover:text-gray-900 dark:border-gray-700 dark:text-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800 dark:hover:text-gray-50"
                         onClick={handleLogout}
                       >
                         Logout
                       </Button>
                     </div>
-                    <p className="text-xs text-gray-400 mt-3 text-center">
+                    <p className="text-xs text-gray-400 dark:text-gray-400 mt-3 text-center">
                       You cannot interact with other features until verification.
                     </p>
                   </div>
@@ -255,11 +255,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             )}
 
             {/* Mobile Header with Sidebar Trigger */}
-            <div className="lg:hidden flex items-center justify-between p-4 bg-white border-b border-gray-200 sticky top-0 z-40">
-              <SidebarTrigger className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <div className="lg:hidden flex items-center justify-between p-4 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40">
+              <SidebarTrigger className="p-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg transition-colors">
                 <Menu className="h-5 w-5" />
               </SidebarTrigger>
-              <h1 className="text-lg font-semibold text-gray-900">
+              <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 {getPageTitle()}
               </h1>
               <div className="w-9" /> {/* Spacer for centering */}

@@ -22,19 +22,19 @@ export const exportToPNG = async (elementId: string, filename: string = 'cv.png'
 // DOCX Export using server API
 export const exportToDOCX = async (htmlContent: string, filename: string = 'cv.docx') => {
   try {
-    console.log('Making request to:', 'https://backendserver.resumaic.com/api/export-docx');
+    console.log('Making request to:', 'https://stagingnode.resumaic.com/api/export-docx');
     // console.log('Making request to:', 'https://stagingnode.resumaic.com/api/export-docx');
     console.log('Request payload size:', JSON.stringify({ html: htmlContent }).length);
     
     try {
-      const testResponse = await fetch('https://backendserver.resumaic.com', { method: 'HEAD' });
+      const testResponse = await fetch('https://stagingnode.resumaic.com', { method: 'HEAD' });
       // const testResponse = await fetch('https://stagingnode.resumaic.com', { method: 'HEAD' });
       console.log('Server reachable:', testResponse.ok);
     } catch (testError) {
       console.error('Server not reachable:', testError);
     }
     
-    const response = await fetch('https://backendserver.resumaic.com/api/export-docx', {
+    const response = await fetch('https://stagingnode.resumaic.com/api/export-docx', {
     // const response = await fetch('https://stagingnode.resumaic.com/api/export-docx', {
       method: 'POST',
     headers: {
@@ -138,7 +138,7 @@ export const downloadFile = (content: string, filename: string, mimeType: string
 
 // ===== Browserless.io Export Utilities =====
 const BROWSERLESS_TOKEN = process.env.NEXT_PUBLIC_BROWSERLESS_TOKEN || ''
-const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_BASE_URL || 'https://backendserver.resumaic.com'
+const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_BASE_URL || 'https://stagingnode.resumaic.com'
 
 export const exportToPDFViaBrowserless = async (
 htmlContent: string,

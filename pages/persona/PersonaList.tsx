@@ -516,8 +516,8 @@ function CreatePersonaPage({ user }: PageProps) {
 
   if (isLoading && personas.length === 0) {
     return (
-      <div className="fixed inset-0 flex justify-center items-center bg-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      <div className="fixed inset-0 flex justify-center items-center bg-white dark:bg-gray-950">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-gray-100"></div>
       </div>
     );
   }
@@ -532,10 +532,10 @@ function CreatePersonaPage({ user }: PageProps) {
             <Sparkles className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            <h1 className="text-2xl sm:text-3xl dark:text-gray-100 font-bold text-gray-900 dark:text-gray-100">
               Create Personas
             </h1>
-            <p className="text-gray-600 text-sm sm:text-base mt-1 sm:mt-0">
+            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base mt-1 sm:mt-0">
               Generate professional personas from complete CV information
             </p>
           </div>
@@ -546,7 +546,7 @@ function CreatePersonaPage({ user }: PageProps) {
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button
-                className="resumaic-gradient-green hover:opacity-90 hover-lift button-press"
+                className="resumaic-gradient-green hover:opacity-90 hover-lift button-press dark:text-gray-100"
                 onClick={async (e) => {
 
                   if ((user as any)?.plan_type?.toLowerCase() === "free" && personas.length >= 3 && (user?.role?.toLowerCase() !== 'admin')) {
@@ -563,16 +563,20 @@ function CreatePersonaPage({ user }: PageProps) {
                 Create Persona
               </Button>
             </DialogTrigger>
-            <DialogContent className="w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingPersona ? 'Edit Persona' : 'Create New Persona'}
-                </DialogTitle>
-                <DialogDescription>
-                  {editingPersona
-                    ? 'Update the persona details below.'
-                    : 'Create a new persona by filling in the details below.'}
-                </DialogDescription>
+            <DialogContent className="w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] !max-w-none max-h-[90vh] overflow-hidden dark:border-0 dark:p-[1px] dark:bg-transparent">
+              <div className="hidden dark:block absolute inset-0 gradient-border-moving -z-10" />
+              <div className="dark:bg-[#0B0F1A] dark:rounded-2xl p-6 h-full w-full overflow-y-auto custom-scrollbar max-h-[calc(90vh-2px)]">
+                <DialogHeader className="relative pb-4 mb-4 border-b dark:border-gray-800">
+                  <div className="absolute -left-6 -top-6 w-32 h-32 resumaic-gradient-green opacity-10 blur-3xl -z-10" />
+                  <DialogTitle className="text-2xl font-bold dark:text-gray-100">
+                    {editingPersona ? 'Edit Persona' : 'Create New Persona'}
+                  </DialogTitle>
+                  <DialogDescription className="text-gray-500 dark:text-gray-400">
+                    {editingPersona
+                      ? 'Update the persona details below.'
+                      : 'Create a new persona by filling in the details below.'}
+                  </DialogDescription>
+                </DialogHeader>
                 {/* {!showForm && (
                   <div className="flex justify-end hidden lg:flex">
                     <span className="inline-flex items-center rounded-md bg-[#EA580C]/20 px-2.5 py-0.5 text-xs font-medium text-[#EA580C] font-inter">
@@ -580,8 +584,8 @@ function CreatePersonaPage({ user }: PageProps) {
                     </span>
                   </div>
                 )} */}
+                
 
-              </DialogHeader>
 
               {!showForm ? (
                 <PersonaCreationOptions onOptionSelect={handleOptionSelect} />
@@ -597,7 +601,8 @@ function CreatePersonaPage({ user }: PageProps) {
                     setEditingPersona(null);
                   }}
                 />
-              )}
+                )}
+              </div>
             </DialogContent>
           </Dialog>
         </div>
@@ -605,49 +610,52 @@ function CreatePersonaPage({ user }: PageProps) {
 
       {/* Upgrade Plan Dialog */}
       <Dialog open={isUpgradeDialogOpen} onOpenChange={setIsUpgradeDialogOpen}>
-        <DialogContent className="max-w-md p-0 overflow-hidden border-0 shadow-xl rounded-xl">
-          <div className="relative resumaic-gradient-green p-6 text-white rounded-t-xl animate-pulse-glow">
-            <div className="absolute inset-x-0 top-0 h-0.5 shimmer-effect opacity-70" />
-            <div className="flex items-center gap-3">
-              <Crown className="h-6 w-6" />
-              <DialogTitle className="text-lg font-semibold">Upgrade Required</DialogTitle>
-            </div>
-            <DialogDescription className="mt-2 text-sm opacity-90">
-              You’ve reached the maximum number of personas for the Free plan. Upgrade your plan to create more!
-            </DialogDescription>
-            <div className="absolute -right-10 -top-10 w-32 h-32 resumaic-gradient-orange rounded-full blur-2xl opacity-30" />
-          </div>
-          <div className="p-6 space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <span className="size-1.5 rounded-full resumaic-gradient-green" />
-                <span>Create more personas beyond 3</span>
+        <DialogContent className="max-w-md p-0 overflow-hidden border-0 shadow-xl rounded-xl dark:border-0 dark:p-[1px] dark:bg-transparent">
+          <div className="hidden dark:block absolute inset-0 gradient-border-moving -z-10" />
+          <div className="dark:bg-[#0B0F1A] dark:rounded-xl overflow-hidden h-full w-full">
+            <div className="relative resumaic-gradient-green p-6 text-white rounded-t-xl animate-pulse-glow">
+              <div className="absolute inset-x-0 top-0 h-0.5 shimmer-effect opacity-70" />
+              <div className="flex items-center gap-3">
+                <Crown className="h-6 w-6" />
+                <DialogTitle className="text-lg font-semibold">Upgrade Required</DialogTitle>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="size-1.5 rounded-full resumaic-gradient-orange" />
-                <span>Faster AI generation</span>
-              </div>
+              <DialogDescription className="mt-2 text-sm opacity-90">
+                You’ve reached the maximum number of personas for the Free plan. Upgrade your plan to create more!
+              </DialogDescription>
+              <div className="absolute -right-10 -top-10 w-32 h-32 resumaic-gradient-orange rounded-full blur-2xl opacity-30" />
             </div>
-            <div className="space-y-3">
-              <Button
-                className="w-full resumaic-gradient-orange text-white hover:opacity-90 button-press"
-                onClick={async () => {
-                  try {
-                    await createCheckoutSession();
-                  } catch (err) {
-                    console.error("Checkout error:", err);
-                  }
-                }}
-              >
-                Upgrade Now
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full border-2 border-[#70E4A8] text-[#2d3639] hover:bg-[#70E4A8]/10"
-                onClick={() => setIsUpgradeDialogOpen(false)}
-              >
-                Not Now
-              </Button>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <span className="size-1.5 rounded-full resumaic-gradient-green" />
+                  <span>Create more personas beyond 3</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="size-1.5 rounded-full resumaic-gradient-orange" />
+                  <span>Faster AI generation</span>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <Button
+                  className="w-full resumaic-gradient-orange text-white hover:opacity-90 button-press"
+                  onClick={async () => {
+                    try {
+                      await createCheckoutSession();
+                    } catch (err) {
+                      console.error("Checkout error:", err);
+                    }
+                  }}
+                >
+                  Upgrade Now
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full border-2 border-[#70E4A8] text-[#2d3639] hover:bg-[#70E4A8]/10 dark:text-gray-100 dark:border-[#70E4A8]/70 dark:hover:bg-[#70E4A8]/15"
+                  onClick={() => setIsUpgradeDialogOpen(false)}
+                >
+                  Not Now
+                </Button>
+              </div>
             </div>
           </div>
         </DialogContent>
@@ -662,7 +670,7 @@ function CreatePersonaPage({ user }: PageProps) {
                   <h3 className="text-lg font-semibold">
                     Generated Personas ({filteredPersonas.length})
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
                     View and manage your AI-generated personas
                   </p>
                 </div>
@@ -670,7 +678,7 @@ function CreatePersonaPage({ user }: PageProps) {
                 {/* Controls section - improved mobile layout */}
                 <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full">
                   <div className="relative flex-1 min-w-0">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
                     <Input
                       placeholder="Search personas by name, job title, skills..."
                       value={searchTerm}
@@ -704,7 +712,7 @@ function CreatePersonaPage({ user }: PageProps) {
           {/* Show table view only on large screens, card view on mobile/tablet */}
           {viewMode === "table" && (
             <Card className="hidden lg:block">
-              <CardContent className="p-0">
+              <CardContent className="p-0 overflow-x-auto custom-scrollbar">
                 <div className="overflow-x-auto">
                   <Table className="table-fixed w-full">
                     <TableHeader>
@@ -723,7 +731,7 @@ function CreatePersonaPage({ user }: PageProps) {
                         <TableRow key={persona.id}>
                           <TableCell className="w-[20%] px-4">
                             <div className="flex items-center gap-3 min-w-0">
-                              <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors flex-shrink-0">
+                              <Avatar className="h-10 w-10 border-2 border-gray-200 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-400 transition-colors flex-shrink-0">
                                 {persona.personalInfo.profilePicture && (
                                   <AvatarImage
                                     src={persona.personalInfo.profilePicture}
@@ -753,7 +761,7 @@ function CreatePersonaPage({ user }: PageProps) {
                                   {persona.personalInfo.fullName}
                                 </div>
                                 <div
-                                  className="text-sm text-gray-600 truncate cursor-help"
+                                  className="text-sm text-gray-600 dark:text-gray-300 truncate cursor-help"
                                   title={persona.personalInfo.email}
                                 >
                                   {persona.personalInfo.email}
@@ -873,7 +881,7 @@ function CreatePersonaPage({ user }: PageProps) {
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10 border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                      <Avatar className="h-10 w-10 border-2 border-gray-200 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-400 transition-colors">
                         {persona.personalInfo.profilePicture && (
                           <AvatarImage
                             src={persona.personalInfo.profilePicture}
@@ -913,7 +921,7 @@ function CreatePersonaPage({ user }: PageProps) {
                       <Label className="text-sm font-medium">
                         Experience
                       </Label>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
                         {persona.experience.length}
                       </p>
                     </div>
@@ -954,7 +962,7 @@ function CreatePersonaPage({ user }: PageProps) {
                       </p>
                     </div> */}
 
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
                       Last Modified:{" "}
                       {new Date(persona.createdAt).toLocaleDateString()}
                     </div>
@@ -1039,13 +1047,13 @@ function CreatePersonaPage({ user }: PageProps) {
       {filteredPersonas.length === 0 && personas.length > 0 && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="rounded-full bg-gray-100 p-6 mb-4">
-              <Search className="h-8 w-8 text-gray-400" />
+            <div className="rounded-full bg-gray-100 dark:bg-gray-900 p-6 mb-4">
+              <Search className="h-8 w-8 text-gray-400 dark:text-gray-500" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
               No personas found
             </h3>
-            <p className="text-gray-500 mb-4">
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
               Try adjusting your search terms or create a new persona
             </p>
             <Button variant="outline" onClick={() => setSearchTerm("")}>
@@ -1057,13 +1065,13 @@ function CreatePersonaPage({ user }: PageProps) {
       {personas.length === 0 && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="rounded-full bg-gray-100 p-6 mb-4">
-              <Sparkles className="h-8 w-8 text-gray-400" />
+            <div className="rounded-full bg-gray-100 dark:bg-gray-900 p-6 mb-4">
+              <Sparkles className="h-8 w-8 text-gray-400 dark:text-gray-500" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
               No personas created yet
             </h3>
-            <p className="text-gray-500 mb-4">
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
               Create your first AI persona by clicking the "Create Persona"
               button above
             </p>
@@ -1074,7 +1082,7 @@ function CreatePersonaPage({ user }: PageProps) {
       {/* Quick Tips */}
       <Card className="animate-slide-up-delay-3 hover:shadow-lg transition-all duration-300">
         <CardHeader>
-          <CardTitle className="flex items-center gap-3 font-rubik text-[#2D3639]">
+          <CardTitle className="flex items-center gap-3 font-rubik text-[#2D3639] dark:text-gray-100">
             <div className="p-2 bg-gradient-to-br from-[#70E4A8] to-[#EA580C] rounded-lg">
               <TrendingUp className="h-5 w-5 text-white" />
             </div>
@@ -1096,10 +1104,10 @@ function CreatePersonaPage({ user }: PageProps) {
                 <User className="h-5 w-5 text-[#70E4A8]" />
               </div>
               <div>
-                <h4 className="font-semibold text-[#2D3639] font-rubik">
+                <h4 className="font-semibold text-[#2D3639] dark:text-gray-100 font-rubik">
                   Complete Information
                 </h4>
-                <p className="text-sm text-gray-600 font-inter">
+                <p className="text-sm text-gray-600 dark:text-gray-300 font-inter">
                   Fill in all sections for the most comprehensive persona
                 </p>
               </div>
@@ -1117,10 +1125,10 @@ function CreatePersonaPage({ user }: PageProps) {
                 <Briefcase className="h-5 w-5 text-[#EA580C]" />
               </div>
               <div>
-                <h4 className="font-semibold text-[#2D3639] font-rubik">
+                <h4 className="font-semibold text-[#2D3639] dark:text-gray-100 font-rubik">
                   Detailed Experience
                 </h4>
-                <p className="text-sm text-gray-600 font-inter">
+                <p className="text-sm text-gray-600 dark:text-gray-300 font-inter">
                   Include specific responsibilities and achievements
                 </p>
               </div>
@@ -1132,16 +1140,16 @@ function CreatePersonaPage({ user }: PageProps) {
               style={{ animationDelay: "300ms" }}
             >
               <div
-                className="rounded-full bg-blue-100 p-3 animate-float"
+                className="rounded-full bg-blue-100 dark:bg-blue-900/30 p-3 animate-float"
                 style={{ animationDelay: "1s" }}
               >
                 <Target className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <h4 className="font-semibold text-[#2D3639] font-rubik">
+                <h4 className="font-semibold text-[#2D3639] dark:text-gray-100 font-rubik">
                   Relevant Skills
                 </h4>
-                <p className="text-sm text-gray-600 font-inter">
+                <p className="text-sm text-gray-600 dark:text-gray-300 font-inter">
                   Focus on skills that match your career goals
                 </p>
               </div>

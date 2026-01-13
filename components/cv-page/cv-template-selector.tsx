@@ -43,7 +43,7 @@ export function CVTemplateSelector({ templates, selectedTemplate, hasUnsavedChan
         </div>
         <div className="flex justify-end items-center">
           {hasUnsavedChanges && (
-            <span className="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded">Unsaved changes</span>
+            <span className="text-xs text-orange-600 dark:text-orange-200 bg-orange-100 dark:bg-orange-900/30 px-2 py-1 rounded">Unsaved changes</span>
           )}
         </div>
 
@@ -52,13 +52,13 @@ export function CVTemplateSelector({ templates, selectedTemplate, hasUnsavedChan
             <div
               key={template.id}
               className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-md ${selectedTemplate?.id === template.id
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-200 hover:border-gray-300"
+                ? "border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-950/30"
+                : "border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700"
                 }`}
               onClick={() => onSelect(template)}
             >
-              <h4 className="font-medium text-sm text-center">{template.name}</h4>
-              <p className="text-xs text-gray-600 mt-1 text-center">{template.description}</p>
+              <h4 className="font-medium text-sm text-center text-gray-900 dark:text-gray-100">{template.name}</h4>
+              <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 text-center">{template.description}</p>
             </div>
           ))}
         </div>

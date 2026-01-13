@@ -104,18 +104,18 @@ export default function ATSCheckerPage() {
 
     setIsAnalyzing(true);
     setError(null);
-    console.log('Making request to:', 'https://backendserver.resumaic.com/api/ats-analysis');
+    console.log('Making request to:', 'https://stagingnode.resumaic.com/api/ats-analysis');
     // console.log('Making request to:', 'https://stagingnode.resumaic.com/api/ats-analysis');
     console.log('Request payload size:', JSON.stringify({ extractedText, jobDescription }).length);
     try {
-      const testResponse = await fetch('https://backendserver.resumaic.com', { method: 'HEAD' });
+      const testResponse = await fetch('https://stagingnode.resumaic.com', { method: 'HEAD' });
       // const testResponse = await fetch('https://stagingnode.resumaic.com', { method: 'HEAD' });
       console.log('Server reachable:', testResponse.ok);
     } catch (testError) {
       console.error('Server not reachable:', testError);
     }
     try {
-      const response = await fetch('https://backendserver.resumaic.com/api/ats-analysis', {
+      const response = await fetch('https://stagingnode.resumaic.com/api/ats-analysis', {
       // const response = await fetch('https://stagingnode.resumaic.com/api/ats-analysis', {
         method: 'POST',
         headers: {
@@ -402,18 +402,18 @@ export default function ATSCheckerPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-8 p-6">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-green-50 to-teal-50 rounded-2xl p-8 text-center">
+      <div className="bg-gradient-to-r from-green-50 to-teal-50 dark:from-gray-900 dark:to-gray-950 rounded-2xl p-8 text-center">
         <div className="max-w-3xl mx-auto">
-          <div className="inline-flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 mb-4 shadow-sm">
+          <div className="inline-flex items-center justify-center bg-white/80 dark:bg-gray-950/60 backdrop-blur-sm rounded-full px-4 py-2 mb-4 shadow-sm">
             <CheckCircle className="h-5 w-5 text-teal-600 mr-2" />
-            <span className="font-medium text-teal-800">
+            <span className="font-medium text-teal-800 dark:text-teal-200">
               Professional ATS Optimization Tool
             </span>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
             Optimize Your Resume for <span className="text-teal-600">ATS</span>
           </h1>
-          <p className="text-xl text-gray-600 mb-8">
+          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
             Get past applicant tracking systems and land more interviews with our
             AI-powered resume analyzer
           </p>
@@ -423,25 +423,25 @@ export default function ATSCheckerPage() {
               <DialogTrigger asChild>
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 shadow-lg hover:shadow-teal-500/20 transition-all duration-300"
+                  className="bg-gradient-to-r dark:text-gray-100 from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 shadow-lg hover:shadow-teal-500/20 transition-all duration-300  custom-scrollbar"
                 >
-                  <FileCheck className="h-5 w-5 mr-2" />
+                  <FileCheck className="h-5 w-5 mr-2 dark:text-gray-100" />
                   Check Resume Now
                 </Button>
               </DialogTrigger>
 
               <DialogContent
-                className="
-        w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw]
-        !max-w-none max-h-[90vh] overflow-x-auto
-      "
+                className="w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto custom-scrollbar dark:border-0 dark:p-[1px] dark:overflow-hidden dark:bg-transparent"
               >
-                <DialogHeader>
-                  <DialogTitle>ATS Resume Analysis</DialogTitle>
-                  <DialogDescription>
-                    Upload your resume and job description for ATS optimization analysis
-                  </DialogDescription>
-                </DialogHeader>
+                <div className="hidden dark:block absolute inset-0 gradient-border-moving -z-10" />
+                <div className="dark:bg-[#0B0F1A] dark:rounded-2xl p-6 max-h-[80vh] w-full overflow-y-auto custom-scrollbar">
+                  <DialogHeader className="relative pb-4 mb-4 border-b dark:border-gray-800">
+                    <div className="absolute -left-6 -top-6 w-32 h-32 resumaic-gradient-green opacity-10 blur-3xl -z-10" />
+                    <DialogTitle className="text-2xl font-bold dark:text-gray-100">ATS Resume Analysis</DialogTitle>
+                    <DialogDescription className="text-gray-500 dark:text-gray-400">
+                      Upload your resume and job description for ATS optimization analysis
+                    </DialogDescription>
+                  </DialogHeader>
 
                 {!analysisResult ? (
                   <div className="space-y-6">
@@ -476,10 +476,10 @@ export default function ATSCheckerPage() {
                             value={jobDescription}
                             onChange={(e) => setJobDescription(e.target.value)}
                             placeholder="Paste the complete job description, including requirements, responsibilities, and company information..."
-                            className="min-h-[200px] resize-none"
+                            className="min-h-[200px] resize-none custom-scrollbar"
                             style={{ wordBreak: "break-all" }}
                           />
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
                             Include as much detail as possible for a more tailored analysis
                           </p>
 
@@ -537,7 +537,7 @@ export default function ATSCheckerPage() {
                         )}
                       </Button>
                       {(!planType || String(planType).toLowerCase() === "free") && !isAdmin && (
-                        <p className="text-sm text-gray-500 mt-2">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                           Free checks remaining: {Math.max(0, 3 - freeChecksUsed)} of 3
                         </p>
                       )}
@@ -569,7 +569,7 @@ export default function ATSCheckerPage() {
                               style={{ width: `${analysisResult.score}%` }}
                             />
                           </Progress>
-                          <p className="text-sm text-gray-600 mt-2">
+                          <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
                             {analysisResult.score >= 80
                               ? "Excellent! Your resume is well-optimized for ATS systems."
                               : analysisResult.score >= 60
@@ -590,11 +590,11 @@ export default function ATSCheckerPage() {
                               ([section, data]) => (
                                 <div
                                   key={section}
-                                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                                  className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                                 >
                                   <div>
                                     <h4 className="font-medium">{section}</h4>
-                                    <p className="text-sm text-gray-600">{data.feedback}</p>
+                                    <p className="text-sm text-gray-600 dark:text-gray-300">{data.feedback}</p>
                                   </div>
                                   <div className="text-right">
                                     <span className={`font-bold ${getScoreColor(data.score)}`}>
@@ -730,7 +730,8 @@ export default function ATSCheckerPage() {
                     </div>
                   </div>
                 )}
-              </DialogContent>
+              </div>
+            </DialogContent>
             </Dialog>
           </div>
         </div>
@@ -742,14 +743,14 @@ export default function ATSCheckerPage() {
         <Card className="hover:shadow-lg transition-shadow duration-300">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
+              <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600">
                 <FileCheck className="h-6 w-6" />
               </div>
               <CardTitle>ATS Compatibility</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-300">
               Get a detailed score showing how well your resume will perform in
               Applicant Tracking Systems.
             </p>
@@ -759,14 +760,14 @@ export default function ATSCheckerPage() {
         <Card className="hover:shadow-lg transition-shadow duration-300">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-100 text-green-600">
+              <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/20 text-green-600">
                 <Search className="h-6 w-6" />
               </div>
               <CardTitle>Keyword Analysis</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-300">
               See which keywords from the job description are missing from your
               resume.
             </p>
@@ -776,14 +777,14 @@ export default function ATSCheckerPage() {
         <Card className="hover:shadow-lg transition-shadow duration-300">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-purple-100 text-purple-600">
+              <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/20 text-purple-600">
                 <Target className="h-6 w-6" />
               </div>
               <CardTitle>Actionable Tips</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-300">
               Receive personalized suggestions to improve your resume's ATS
               performance.
             </p>
@@ -792,63 +793,66 @@ export default function ATSCheckerPage() {
       </div>
       {/* Upgrade Dialog for Free Users */}
       <Dialog open={isUpgradeDialogOpen} onOpenChange={setIsUpgradeDialogOpen}>
-        <DialogContent className="sm:max-w-[520px] border-0 shadow-2xl overflow-hidden">
-          <div className="relative">
-            <div className="absolute -top-20 -left-20 w-64 h-64 rounded-full blur-3xl opacity-30" />
-            <Card className="border-0">
-              <CardHeader className="space-y-2">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl resumaic-gradient-green flex items-center justify-center text-white shadow-md">
-                    <Crown className="h-5 w-5" />
+                  <DialogContent className="max-w-md p-0 overflow-hidden border-0 shadow-xl rounded-xl dark:border-0 dark:p-[1px] dark:bg-transparent">
+              <div className="hidden dark:block absolute inset-0 gradient-border-moving -z-10" />
+              <div className="dark:bg-[#0B0F1A] dark:rounded-xl overflow-hidden h-full w-full">
+            <div className="relative">
+              <div className="absolute -top-20 -left-20 w-64 h-64 rounded-full blur-3xl opacity-30" />
+              <Card className="border-0 bg-transparent">
+                <CardHeader className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl resumaic-gradient-green flex items-center justify-center text-white shadow-md">
+                      <Crown className="h-5 w-5" />
+                    </div>
+                    <DialogTitle className="text-2xl font-bold text-[#1F2937] dark:text-gray-100">
+                      Upgrade to Pro
+                    </DialogTitle>
                   </div>
-                  <DialogTitle className="text-2xl font-bold text-[#1F2937]">
-                    Upgrade to Pro
-                  </DialogTitle>
-                </div>
-                <DialogDescription className="text-[#4B5563]">
-                  You have reached the limit of 3 free ATS checks. Upgrade to Pro for unlimited analyses and advanced insights.
-                </DialogDescription>
-              </CardHeader>
+                  <DialogDescription className="text-[#4B5563] dark:text-gray-400">
+                    You have reached the limit of 3 free ATS checks. Upgrade to Pro for unlimited analyses and advanced insights.
+                  </DialogDescription>
+                </CardHeader>
 
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="p-3 rounded-lg bg-[#70E4A8]/10">
-                    <p className="text-sm font-medium text-[#2D3639]">Unlimited ATS analyses</p>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="p-3 rounded-lg bg-[#70E4A8]/10">
+                      <p className="text-sm font-medium text-[#2D3639] dark:text-gray-100">Unlimited ATS analyses</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-[#EA580C]/10">
+                      <p className="text-sm font-medium text-[#2D3639] dark:text-gray-100">Priority scoring engine</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                      <p className="text-sm font-medium text-[#2D3639] dark:text-gray-100">Advanced suggestions</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-purple-100 dark:bg-purple-900/20">
+                      <p className="text-sm font-medium text-[#2D3639] dark:text-gray-100">Keyword matching</p>
+                    </div>
                   </div>
-                  <div className="p-3 rounded-lg bg-[#EA580C]/10">
-                    <p className="text-sm font-medium text-[#2D3639]">Priority scoring engine</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-blue-100">
-                    <p className="text-sm font-medium text-[#2D3639]">Advanced suggestions</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-purple-100">
-                    <p className="text-sm font-medium text-[#2D3639]">Keyword matching</p>
-                  </div>
-                </div>
 
-                <div className="flex gap-3 pt-2">
-                  <Button
-                    className="flex-1 resumaic-gradient-orange hover:opacity-90 hover-lift button-press text-white"
-                    onClick={async () => {
-                      try {
-                        await createCheckoutSession();
-                      } catch (err) {
-                        toast.error("Failed to start checkout. Please try again.");
-                      }
-                    }}
-                  >
-                    Upgrade Now
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="flex-1 border-[#70E4A8] text-[#2D3639]"
-                    onClick={() => setIsUpgradeDialogOpen(false)}
-                  >
-                    Not Now
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="flex gap-3 pt-2">
+                    <Button
+                      className="flex-1 resumaic-gradient-orange hover:opacity-90 hover-lift button-press text-white"
+                      onClick={async () => {
+                        try {
+                          await createCheckoutSession();
+                        } catch (err) {
+                          toast.error("Failed to start checkout. Please try again.");
+                        }
+                      }}
+                    >
+                      Upgrade Now
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="flex-1 border-[#70E4A8] text-[#2D3639] dark:text-gray-100 dark:border-[#70E4A8]/70"
+                      onClick={() => setIsUpgradeDialogOpen(false)}
+                    >
+                      Not Now
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
