@@ -4,10 +4,10 @@ import { useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card"
-import { ArrowLeft, Sparkles, TrendingUp, Loader2, Brain, CheckCircle, AlertCircle } from "lucide-react"
+import { ArrowLeft, Sparkles, TrendingUp, Loader2, Brain, CheckCircle, AlertCircle, GripVertical, RotateCcw, ChevronDown, Trash2, Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { getPersonaById, type PersonaResponse } from "../../lib/redux/service/pasonaService"
-import type { CVData } from "../../types/cv-data"
+import type { CVData, CVSectionId, PersonalInfoFieldId } from "../../types/cv-data"
 import { useAppDispatch, useAppSelector } from "../../lib/redux/hooks"
 import { logoutUser } from "../../lib/redux/slices/authSlice"
 import { SidebarProvider, SidebarInset } from "../../components/ui/sidebar"
@@ -26,14 +26,45 @@ import { CVHeaderActions } from "./cv-header-actions"
 import { CVPreviewSection } from "./cv-preview-section"
 import jsPDF from "jspdf"
 import * as htmlToImage from "html-to-image"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "../../components/ui/dialog"
-import { CVTemplates } from "../../pages/resume/ChooseResumeTemplte"
+
+import { TemplateSelectorDialog } from "./template-selector-dialog"
+import { SettingsPanelDialog } from "./settings-panel-dialog"
+
+const DEFAULT_SECTION_ORDER: CVSectionId[] = ["personalInfo", "skills", "experience", "projects", "education", "certifications", "languages", "interests"]
+const SECTION_LABELS: Record<CVSectionId, string> = {
+  personalInfo: "Personal Info",
+  skills: "Skills",
+  experience: "Experience",
+  projects: "Projects",
+  education: "Education",
+  certifications: "Certifications",
+  languages: "Languages",
+  interests: "Interests",
+}
+
+const DEFAULT_PERSONAL_INFO_FIELD_ORDER: PersonalInfoFieldId[] = [
+  "fullName",
+  "jobTitle",
+  "email",
+  "phone",
+  "location",
+  "address",
+  "linkedin",
+  "github",
+  "summary",
+]
+
+const PERSONAL_INFO_FIELD_LABELS: Record<PersonalInfoFieldId, string> = {
+  fullName: "Full Name",
+  jobTitle: "Job Title",
+  email: "Email",
+  phone: "Phone",
+  address: "Address",
+  location: "City / Country",
+  linkedin: "LinkedIn",
+  github: "GitHub",
+  summary: "Summary",
+}
 
 interface OptimizedCV {
   personalInfo: {
@@ -235,9 +266,14 @@ export function CVPageClientContent() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [showEditPopup, setShowEditPopup] = useState(false)
   const [showTemplateSelector, setShowTemplateSelector] = useState(false)
+  const [showSettingsPanel, setShowSettingsPanel] = useState(false)
   const [isViewMode, setIsViewMode] = useState(false)
   const [jobDescription, setJobDescription] = useState("")
   const [formData, setFormData] = useState<CVFormData | null>(null)
+  const [sectionOrder, setSectionOrder] = useState<CVSectionId[]>(DEFAULT_SECTION_ORDER)
+  const [hiddenSections, setHiddenSections] = useState<CVSectionId[]>([])
+  const [personalInfoFieldOrder, setPersonalInfoFieldOrder] = useState<PersonalInfoFieldId[]>(DEFAULT_PERSONAL_INFO_FIELD_ORDER)
+  const [isPersonalInfoOpen, setIsPersonalInfoOpen] = useState(true)
 
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -312,8 +348,27 @@ export function CVPageClientContent() {
 
           if (cvData.generated_content) {
             const parsedContent = JSON.parse(cvData.generated_content)
+            const parsedSectionOrder = Array.isArray(parsedContent?.sectionOrder)
+              ? (parsedContent.sectionOrder as unknown[]).filter((id): id is CVSectionId =>
+                typeof id === "string" && Object.prototype.hasOwnProperty.call(SECTION_LABELS, id),
+              )
+              : undefined
+            const parsedPersonalInfoOrder = Array.isArray(parsedContent?.personalInfoFieldOrder)
+              ? (parsedContent.personalInfoFieldOrder as unknown[]).filter((id): id is PersonalInfoFieldId =>
+                typeof id === "string" && Object.prototype.hasOwnProperty.call(PERSONAL_INFO_FIELD_LABELS, id),
+              )
+              : undefined
+            const parsedHiddenSections = Array.isArray(parsedContent?.hiddenSections)
+              ? (parsedContent.hiddenSections as unknown[]).filter((id): id is CVSectionId =>
+                typeof id === "string" && Object.prototype.hasOwnProperty.call(SECTION_LABELS, id),
+              )
+              : undefined
+            const { sectionOrder: _ignored, personalInfoFieldOrder: _ignored2, hiddenSections: _ignored3, ...optimizedCV } = parsedContent || {}
+            if (parsedSectionOrder && parsedSectionOrder.length > 0) setSectionOrder(parsedSectionOrder)
+            if (parsedPersonalInfoOrder && parsedPersonalInfoOrder.length > 0) setPersonalInfoFieldOrder(parsedPersonalInfoOrder)
+            if (parsedHiddenSections && parsedHiddenSections.length > 0) setHiddenSections(parsedHiddenSections)
             setAiResponse({
-              optimizedCV: parsedContent,
+              optimizedCV,
               suggestions: [],
               improvementScore: 80,
             })
@@ -322,7 +377,7 @@ export function CVPageClientContent() {
             const response = await fetch("https://stagingnode.resumaic.com/api/optimize-cv", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ 
+              body: JSON.stringify({
                 extractedText: personaText,
                 jobDescription: cvData.job_description || ""
               }),
@@ -343,7 +398,7 @@ export function CVPageClientContent() {
         // SECOND: Check if we have form data from CVWizard (NEW CV creation)
         if (formData) {
           console.log("Creating new CV from form data:", formData);
-          
+
           // Set job description from form data
           setJobDescription(formData.job_description || "")
 
@@ -396,7 +451,7 @@ export function CVPageClientContent() {
               const aiData = await response.json()
               setAiResponse(aiData)
               setHasUnsavedChanges(true)
-              
+
               // Clear form data from sessionStorage after successful generation
               setTimeout(() => {
                 if (typeof window !== "undefined") {
@@ -580,6 +635,9 @@ export function CVPageClientContent() {
 
     return {
       id: existingCV?.id || "generated-cv",
+      sectionOrder,
+      personalInfoFieldOrder,
+      hiddenSections,
       personalInfo: {
         fullName: aiResponse.optimizedCV.personalInfo.name,
         jobTitle: persona?.job_title || "",
@@ -857,12 +915,12 @@ export function CVPageClientContent() {
       personas_id: persona.id.toString(),
       title: titleToUse,
       job_description: jobDescription || "AI-generated CV based on persona",
-      generated_content: JSON.stringify(aiResponse.optimizedCV),
+      generated_content: JSON.stringify({ ...aiResponse.optimizedCV, sectionOrder, personalInfoFieldOrder, hiddenSections }),
     };
 
     setIsSaving(true)
     let loadingToastId: string | number | undefined
-    
+
     if (!isAutoSave) {
       loadingToastId = showLoadingToast(
         existingCV ? "Updating your CV..." : "Saving your CV...",
@@ -880,7 +938,7 @@ export function CVPageClientContent() {
         if (!isAutoSave && loadingToastId) {
           toast.dismiss(loadingToastId)
           showSuccessToast("CV Updated Successfully! 🎉", "Your changes have been saved and are ready to use")
-          
+
           // Redirect back to resume list
           router.push("/dashboard/resumes")
         }
@@ -896,7 +954,7 @@ export function CVPageClientContent() {
             "CV Created Successfully! 🚀",
             "Your professional CV is now saved and ready to impress employers",
           )
-          
+
           // Redirect back to resume list after creation
           setTimeout(() => {
             router.push("/dashboard/resumes");
@@ -963,6 +1021,101 @@ export function CVPageClientContent() {
     const url = new URL(window.location.href)
     url.searchParams.set("templateId", template.id)
     router.replace(url.toString())
+  }
+
+  const previewCVData = aiResponse ? convertToCVData(aiResponse) : null
+  const availableSectionIds: CVSectionId[] = []
+  if (previewCVData) availableSectionIds.push("personalInfo")
+  if (previewCVData && (previewCVData.skills.technical.length > 0 || previewCVData.skills.soft.length > 0)) availableSectionIds.push("skills")
+  if (previewCVData?.experience?.length) availableSectionIds.push("experience")
+  if (previewCVData?.projects?.length) availableSectionIds.push("projects")
+  if (previewCVData?.education?.length) availableSectionIds.push("education")
+  if (previewCVData?.certifications?.length) availableSectionIds.push("certifications")
+  if (previewCVData?.languages?.length) availableSectionIds.push("languages")
+  if (previewCVData?.additional?.interests?.length) availableSectionIds.push("interests")
+
+  const visibleSectionOrder = (() => {
+    const unique: CVSectionId[] = []
+    sectionOrder.forEach((id) => {
+      if (availableSectionIds.includes(id) && !hiddenSections.includes(id) && !unique.includes(id)) unique.push(id)
+    })
+    availableSectionIds.forEach((id) => {
+      if (!hiddenSections.includes(id) && !unique.includes(id)) unique.push(id)
+    })
+    return unique
+  })()
+
+  const moveSection = (from: CVSectionId, to: CVSectionId) => {
+    if (from === to) return
+    const current = visibleSectionOrder
+    const fromIndex = current.indexOf(from)
+    const toIndex = current.indexOf(to)
+    if (fromIndex === -1 || toIndex === -1) return
+    const next = [...current]
+    next.splice(fromIndex, 1)
+    next.splice(toIndex, 0, from)
+    const remaining = sectionOrder.filter((id) => !availableSectionIds.includes(id))
+    setSectionOrder([...next, ...remaining])
+    setHasUnsavedChanges(true)
+  }
+
+  const resetSectionOrder = () => {
+    const remaining = sectionOrder.filter((id) => !availableSectionIds.includes(id))
+    const next = DEFAULT_SECTION_ORDER.filter((id) => availableSectionIds.includes(id))
+    availableSectionIds.forEach((id) => {
+      if (!next.includes(id)) next.push(id)
+    })
+    setSectionOrder([...next, ...remaining])
+    setHasUnsavedChanges(true)
+  }
+
+  const hideSection = (id: CVSectionId) => {
+    if (id === "personalInfo") return
+    setHiddenSections((prev) => (prev.includes(id) ? prev : [...prev, id]))
+    setHasUnsavedChanges(true)
+  }
+
+  const unhideSection = (id: CVSectionId) => {
+    setHiddenSections((prev) => prev.filter((s) => s !== id))
+    setSectionOrder((prev) => (prev.includes(id) ? prev : [...prev, id]))
+    setHasUnsavedChanges(true)
+  }
+
+  const resetAllSettings = () => {
+    setHiddenSections([])
+    resetPersonalInfoOrder()
+    resetSectionOrder()
+    setHasUnsavedChanges(true)
+  }
+
+  const visiblePersonalInfoFieldOrder = (() => {
+    const all = Object.keys(PERSONAL_INFO_FIELD_LABELS) as PersonalInfoFieldId[]
+    const unique: PersonalInfoFieldId[] = []
+    personalInfoFieldOrder.forEach((id) => {
+      if (all.includes(id) && !unique.includes(id)) unique.push(id)
+    })
+    all.forEach((id) => {
+      if (!unique.includes(id)) unique.push(id)
+    })
+    return unique
+  })()
+
+  const movePersonalInfoField = (from: PersonalInfoFieldId, to: PersonalInfoFieldId) => {
+    if (from === to) return
+    const current = visiblePersonalInfoFieldOrder
+    const fromIndex = current.indexOf(from)
+    const toIndex = current.indexOf(to)
+    if (fromIndex === -1 || toIndex === -1) return
+    const next = [...current]
+    next.splice(fromIndex, 1)
+    next.splice(toIndex, 0, from)
+    setPersonalInfoFieldOrder(next)
+    setHasUnsavedChanges(true)
+  }
+
+  const resetPersonalInfoOrder = () => {
+    setPersonalInfoFieldOrder(DEFAULT_PERSONAL_INFO_FIELD_ORDER)
+    setHasUnsavedChanges(true)
   }
 
   if (isLoading) {
@@ -1049,7 +1202,6 @@ export function CVPageClientContent() {
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{existingCV?.title || "Create Your CV"}</h1>
                   </div>
                 </div>
-
                 <CVHeaderActions
                   isViewMode={isViewMode}
                   aiResponse={aiResponse}
@@ -1060,6 +1212,7 @@ export function CVPageClientContent() {
                   onRegenerate={handleRegenerateCV}
                   onSave={handleSaveCV}
                   onChangeTemplate={() => setShowTemplateSelector(true)}
+                  onChangeSettings={() => setShowSettingsPanel(true)}
                 />
               </div>
               {selectedTemplate && aiResponse && (
@@ -1091,30 +1244,31 @@ export function CVPageClientContent() {
               )}
             </div>
           </div>
-          <Dialog
+          <TemplateSelectorDialog
             open={showTemplateSelector}
             onOpenChange={setShowTemplateSelector}
-          >
-            <DialogContent className="w-[80vw] !max-w-none h-[90vh] flex flex-col">
-              <DialogHeader className="px-6 flex flex-row items-center justify-between">
-                <div className="flex flex-col gap-1">
-                  <DialogTitle className="text-2xl font-bold">
-                    Choose a Template
-                  </DialogTitle>
-                  <DialogDescription>
-                    Select a template to update your resume layout.
-                  </DialogDescription>
-                </div>
-              </DialogHeader>
-              <div className="flex-1 overflow-y-auto min-h-0 -mx-3 px-6">
-                <CVTemplates
-                  onTemplateSelect={handleTemplateSelect}
-                  selectedTemplate={selectedTemplate?.id || ""}
-                />
-              </div>
-            </DialogContent>
-          </Dialog>
+            onTemplateSelect={handleTemplateSelect}
+            selectedTemplateId={selectedTemplate?.id || ""}
+          />
 
+          <SettingsPanelDialog
+            open={showSettingsPanel}
+            onOpenChange={setShowSettingsPanel}
+            hiddenSections={hiddenSections}
+            setHiddenSections={setHiddenSections}
+            setHasUnsavedChanges={setHasUnsavedChanges}
+            resetAllSettings={resetAllSettings}
+            availableSectionIds={availableSectionIds}
+            visibleSectionOrder={visibleSectionOrder}
+            moveSection={moveSection}
+            hideSection={hideSection}
+            unhideSection={unhideSection}
+            isPersonalInfoOpen={isPersonalInfoOpen}
+            setIsPersonalInfoOpen={setIsPersonalInfoOpen}
+            resetPersonalInfoOrder={resetPersonalInfoOrder}
+            visiblePersonalInfoFieldOrder={visiblePersonalInfoFieldOrder}
+            movePersonalInfoField={movePersonalInfoField}
+          />
           {aiResponse && (
             <CVEditPopup
               isOpen={showEditPopup}

@@ -1,5 +1,29 @@
+export type CVSectionId =
+  | "personalInfo"
+  | "skills"
+  | "experience"
+  | "projects"
+  | "education"
+  | "certifications"
+  | "languages"
+  | "interests"
+
+export type PersonalInfoFieldId =
+  | "fullName"
+  | "jobTitle"
+  | "email"
+  | "phone"
+  | "address"
+  | "location"
+  | "linkedin"
+  | "github"
+  | "summary"
+
 export interface CVData {
   id: string
+  sectionOrder?: CVSectionId[]
+  hiddenSections?: CVSectionId[]
+  personalInfoFieldOrder?: PersonalInfoFieldId[]
   personalInfo: {
     fullName: string
     jobTitle: string

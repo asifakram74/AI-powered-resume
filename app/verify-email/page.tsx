@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import Image from "next/image"
+import { Logo } from "../../components/ui/logo"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../../components/ui/card"
 import { Button } from "../../components/ui/button"
 import { Loader2, CheckCircle2, AlertCircle, ShieldCheck } from "lucide-react"
@@ -36,8 +36,8 @@ export default function VerifyEmailPage() {
 
     const verify = async () => {
       try {
-        const res = await fetch(`https://backendcv.onlinetoolpot.com/public/api/verify-email-address?token=${token}`)
-        // const res = await fetch(`https://backendcv.onlinetoolpot.com/public/api/verify-email-address?token=${token}`)
+        const res = await fetch(` https://backendcv.onlinetoolpot.com/public/api/verify-email-address?token=${token}`)
+        // const res = await fetch(` https://backendcv.onlinetoolpot.com/public/api/verify-email-address?token=${token}`)
         const data = await res.json()
         if (data && (data.status === true || data.success === true)) {
           setSuccess(true)
@@ -64,7 +64,7 @@ export default function VerifyEmailPage() {
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
             <Link href="/">
-              <Image src="/Resumic.png" alt="Resumic" width={200} height={90} className="cursor-pointer" />
+              <Logo className="cursor-pointer" />
             </Link>
           </div>
           <div className="flex items-center justify-center gap-2 mb-2">

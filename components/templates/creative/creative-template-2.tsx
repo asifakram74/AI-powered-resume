@@ -1,5 +1,6 @@
 import React, { useMemo, useRef, useState, useLayoutEffect } from "react";
-import type { CVData } from "../../../types/cv-data";
+import { Mail, Phone, MapPin, Github, Linkedin } from "lucide-react";
+import type { CVData, CVSectionId, PersonalInfoFieldId } from "../../../types/cv-data";
 
 interface CreativeTemplate2Props {
   data: CVData;
@@ -61,75 +62,124 @@ export function CreativeTemplate2({
     }
   };
 
-  const Header = () => (
-    <div className="p-8 text-white relative overflow-hidden" style={{ backgroundColor: colors.primary }}>
-      <div className="flex items-center gap-6">
-        {/* Profile Image */}
-        <div className="flex-shrink-0">
-          <div className="w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-white">
-            {data.personalInfo.profilePicture ? (
-              <img
-                src={data.personalInfo.profilePicture}
-                alt={data.personalInfo.fullName}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                </svg>
+  const PersonalInfoSection = () => {
+    const { personalInfo, personalInfoFieldOrder } = data;
+    const defaultOrder: PersonalInfoFieldId[] = [
+      "fullName",
+      "jobTitle",
+      "email",
+      "phone",
+      "location",
+      "address",
+      "linkedin",
+      "github",
+      "summary",
+    ];
+    const order =
+      personalInfoFieldOrder && personalInfoFieldOrder.length > 0
+        ? personalInfoFieldOrder
+        : defaultOrder;
+
+    const isContactField = (f: PersonalInfoFieldId) =>
+      ["email", "phone", "location", "address", "linkedin", "github"].includes(f);
+    const contactFields = order.filter(isContactField);
+
+    return (
+      <>
+        <div className="p-8 text-white relative overflow-hidden" style={{ backgroundColor: colors.primary }}>
+          <div className="flex items-center gap-6">
+            {/* Profile Image */}
+            <div className="flex-shrink-0">
+              <div className="w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-white">
+                {personalInfo.profilePicture ? (
+                  <img
+                    src={personalInfo.profilePicture}
+                    alt={personalInfo.fullName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                    <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                    </svg>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
+
+            {/* Header Content */}
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold mb-1">{personalInfo.fullName}</h1>
+              <h2 className="text-lg font-light opacity-90 mb-4">{personalInfo.jobTitle}</h2>
+
+              {/* Contact Info */}
+              <div className="flex flex-wrap gap-4 text-sm opacity-90">
+                {contactFields.map((field) => {
+                  switch (field) {
+                    case "email":
+                      return personalInfo.email ? (
+                        <span key="email" className="flex items-center gap-1">
+                          <Mail className="w-3 h-3" />
+                          {personalInfo.email}
+                        </span>
+                      ) : null;
+                    case "phone":
+                      return personalInfo.phone ? (
+                        <span key="phone" className="flex items-center gap-1">
+                          <Phone className="w-3 h-3" />
+                          {personalInfo.phone}
+                        </span>
+                      ) : null;
+                    case "location":
+                      if (!personalInfo.city && !personalInfo.country) return null;
+                      const hasAddress = contactFields.includes("address") && personalInfo.address;
+                      if (hasAddress) return null;
+                      return (
+                        <span key="location" className="flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {personalInfo.city}
+                          {personalInfo.city && personalInfo.country ? ", " : ""}
+                          {personalInfo.country}
+                        </span>
+                      );
+                    case "address":
+                      return personalInfo.address ? (
+                        <span key="address" className="flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {personalInfo.address}
+                        </span>
+                      ) : null;
+                    case "linkedin":
+                      return personalInfo.linkedin ? (
+                        <span key="linkedin" className="flex items-center gap-1">
+                          <Linkedin className="w-3 h-3" />
+                          {personalInfo.linkedin}
+                        </span>
+                      ) : null;
+                    case "github":
+                      return personalInfo.github ? (
+                        <span key="github" className="flex items-center gap-1">
+                          <Github className="w-3 h-3" />
+                          {personalInfo.github}
+                        </span>
+                      ) : null;
+                    default:
+                      return null;
+                  }
+                })}
+              </div>
+            </div>
           </div>
         </div>
-
-        {/* Header Content */}
-        <div className="flex-1">
-          <h1 className="text-3xl font-bold mb-1">
-            {data.personalInfo.fullName}
-          </h1>
-          <h2 className="text-lg font-light opacity-90 mb-4">
-            {data.personalInfo.jobTitle}
-          </h2>
-
-          {/* Contact Info */}
-          <div className="flex flex-wrap gap-4 text-sm opacity-90">
-            <span className="flex items-center gap-1">
-              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
-              </svg>
-              {data.personalInfo.email}
-            </span>
-            <span className="flex items-center gap-1">
-              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
-              </svg>
-              {data.personalInfo.phone}
-            </span>
-            {(data.personalInfo.city || data.personalInfo.country) && (
-              <span className="flex items-center gap-1">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                </svg>
-                {data.personalInfo.city && data.personalInfo.country
-                  ? `${data.personalInfo.city}, ${data.personalInfo.country}`
-                  : data.personalInfo.city || data.personalInfo.country}
-              </span>
-            )}
+        {personalInfo.summary && (
+          <div className="mt-6 px-8">
+            <h3 className="text-base font-semibold text-gray-900 mb-3">Professional Summary</h3>
+            <p className="text-gray-700 text-sm leading-relaxed">{personalInfo.summary}</p>
           </div>
-        </div>
-      </div>
-    </div>
-  )
-
-  const Summary = () => (
-    <div className="mt-6 px-8">
-      <h3 className="text-base font-semibold text-gray-900 mb-3">Professional Summary</h3>
-      <p className="text-gray-700 text-sm leading-relaxed">
-        {data.personalInfo.summary}
-      </p>
-    </div>
-  )
+        )}
+      </>
+    );
+  };
 
   const Skills = () => (
     <div className="mb-6 px-8">
@@ -242,60 +292,96 @@ export function CreativeTemplate2({
 
   const blocks = useMemo(() => {
     const items: React.ReactNode[] = [];
-    
-    items.push(<Header key="header" />);
-    
-    if (data.personalInfo.summary) {
-      items.push(<Summary key="summary" />);
-    }
+    const allSections = [
+      "personalInfo",
+      "skills",
+      "experience",
+      "projects",
+      "education",
+      "certifications",
+      "languages",
+      "interests",
+    ] as const satisfies readonly CVSectionId[];
+    const requestedOrder: readonly CVSectionId[] =
+      data.sectionOrder && data.sectionOrder.length > 0 ? data.sectionOrder : allSections;
+    const hidden = data.hiddenSections || [];
+    const ordered: CVSectionId[] = [
+      ...requestedOrder.filter((s) => allSections.includes(s)),
+      ...allSections.filter((s) => !requestedOrder.includes(s)),
+    ];
+    const finalOrder = ordered.filter((s) => s === "personalInfo" || !hidden.includes(s));
 
-    if (data.skills.technical.length > 0 || data.skills.soft.length > 0) {
+    const addPersonalInfo = () => {
+       items.push(<PersonalInfoSection key="personalInfo" />);
+    };
+
+    const addSkills = () => {
+      if (data.skills.technical.length === 0 && data.skills.soft.length === 0) return;
       items.push(<Skills key="skills" />);
-    }
+    };
 
-    if (data.experience.length > 0) {
+    const addExperience = () => {
+      if (data.experience.length === 0) return;
       items.push(<SectionTitle key="exp-title" title="Professional Experience" />);
       data.experience.forEach((exp) => {
         items.push(<ExperienceItem key={`exp-${exp.id}`} exp={exp} />);
       });
-    }
+    };
 
-    if (data.education.length > 0) {
+    const addEducation = () => {
+      if (data.education.length === 0) return;
       items.push(<SectionTitle key="edu-title" title="Education" />);
       data.education.forEach((edu) => {
         items.push(<EducationItem key={`edu-${edu.id}`} edu={edu} />);
       });
-    }
+    };
 
-    if (data.projects.length > 0) {
+    const addProjects = () => {
+      if (data.projects.length === 0) return;
       items.push(<SectionTitle key="proj-title" title="Projects" />);
       data.projects.forEach((project) => {
         items.push(<ProjectItem key={`proj-${project.id}`} project={project} />);
       });
-    }
+    };
 
-    if (data.languages.length > 0) {
+    const addLanguages = () => {
+      if (data.languages.length === 0) return;
       items.push(<SectionTitle key="lang-title" title="Languages" />);
       data.languages.forEach((lang) => {
         items.push(<LanguageItem key={`lang-${lang.id}`} lang={lang} />);
       });
-    }
+    };
 
-    if (data.certifications.length > 0) {
+    const addCertifications = () => {
+      if (data.certifications.length === 0) return;
       items.push(<SectionTitle key="cert-title" title="Certifications" />);
       data.certifications.forEach((cert) => {
         items.push(<CertificationItem key={`cert-${cert.id}`} cert={cert} />);
       });
-    }
+    };
 
-    if (data.additional.interests.length > 0) {
+    const addInterests = () => {
+      if (data.additional.interests.length === 0) return;
       items.push(<SectionTitle key="int-title" title="Interests" />);
       items.push(
         <div key="int-body" className="px-8">
           <p className="text-gray-700 text-sm">{data.additional.interests.join(" • ")}</p>
         </div>
       );
-    }
+    };
+
+    finalOrder.forEach((section) => {
+      switch (section) {
+        case "personalInfo": addPersonalInfo(); break;
+        case "skills": addSkills(); break;
+        case "experience": addExperience(); break;
+        case "projects": addProjects(); break;
+        case "education": addEducation(); break;
+        case "certifications": addCertifications(); break;
+        case "languages": addLanguages(); break;
+        case "interests": addInterests(); break;
+      }
+    });
 
     return items;
   }, [data]);

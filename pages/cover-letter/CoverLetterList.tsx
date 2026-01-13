@@ -880,7 +880,7 @@ export function CoverLetterPage({ user }: PageProps) {
                                     src={imgSrc}
                                     alt="Profile"
                                     onError={(e) => {
-                                      (e.currentTarget as HTMLImageElement).src = "/placeholder-user.jpg";
+                                      (e.currentTarget as HTMLImageElement).src = "/placeholder.jpg";
                                     }}
                                   />
                                 ) : null;
@@ -1020,7 +1020,7 @@ export function CoverLetterPage({ user }: PageProps) {
                                 src={imgSrc}
                                 alt="Profile"
                                 onError={(e) => {
-                                  (e.currentTarget as HTMLImageElement).src = "/placeholder-user.jpg";
+                                  (e.currentTarget as HTMLImageElement).src = "/placeholder.jpg";
                                 }}
                               />
                             ) : null;

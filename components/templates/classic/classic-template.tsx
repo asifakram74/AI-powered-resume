@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState, useLayoutEffect } from "react";
-import type { CVData } from "../../../types/cv-data";
+import type { CVData, CVSectionId, PersonalInfoFieldId } from "../../../types/cv-data";
 
 interface ClassicTemplateProps {
   data: CVData;
@@ -59,29 +59,124 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
   const showAddress = Boolean(addressText) && (!locLower || (addrLower !== locLower && !addrLower.includes(locLower)));
 
   const Header = () => (
-    <div className="text-center border-b-2 border-gray-800 pb-6 mb-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">{data.personalInfo.fullName}</h1>
-      <h2 className="text-xl text-gray-700 mb-4">{data.personalInfo.jobTitle}</h2>
-      <div className="text-gray-600 space-x-4">
-        <span>{data.personalInfo.email}</span>
-        <span>•</span>
-        <span>{data.personalInfo.phone}</span>
-        {(data.personalInfo.city || data.personalInfo.country) && (
-          <span>
-            <span>• </span>
-            <span>
-              {locationText}
-              {showAddress && <span> {addressText}</span>}
-            </span>
-          </span>
-        )}
-        {!data.personalInfo.city && !data.personalInfo.country && data.personalInfo.address && (
-          <span>
-            <span>• </span>
-            <span>{data.personalInfo.address}</span>
-          </span>
-        )}
-      </div>
+    <div className="text-center pb-6 mb-8">
+      {(() => {
+        const defaultOrder: PersonalInfoFieldId[] = [
+          "fullName",
+          "jobTitle",
+          "email",
+          "phone",
+          "location",
+          "address",
+          "linkedin",
+          "github",
+          "summary",
+        ];
+        const order = (data.personalInfoFieldOrder && data.personalInfoFieldOrder.length > 0) ? data.personalInfoFieldOrder : defaultOrder;
+        const allFields: PersonalInfoFieldId[] = ["fullName", "jobTitle", "email", "phone", "location", "address", "linkedin", "github", "summary"];
+        const finalOrder = [...order.filter((f) => allFields.includes(f)), ...allFields.filter((f) => !order.includes(f))];
+
+        const contactValue = (field: PersonalInfoFieldId) => {
+          switch (field) {
+            case "email":
+              return data.personalInfo.email?.trim() ? data.personalInfo.email : "";
+            case "phone":
+              return data.personalInfo.phone?.trim() ? data.personalInfo.phone : "";
+            case "location":
+              return locationText || "";
+            case "address":
+              return data.personalInfo.address?.trim() ? data.personalInfo.address : "";
+            case "linkedin":
+              return (data.personalInfo.linkedin || "").trim();
+            case "github":
+              return (data.personalInfo.github || "").trim();
+            default:
+              return "";
+          }
+        };
+
+        const pushContactLine = (contactParts: string[], key: string) => {
+          const parts = contactParts.map((s) => s.trim()).filter(Boolean);
+          if (parts.length === 0) return null;
+          return (
+            <div key={key} className="text-gray-600">
+              {parts.map((p, idx) => (
+                <span key={`${key}-${idx}`}>
+                  {idx > 0 && <span className="mx-2">•</span>}
+                  <span>{p}</span>
+                </span>
+              ))}
+            </div>
+          );
+        };
+
+        const rows: React.ReactNode[] = [];
+        let contactBuffer: string[] = [];
+        let contactBlockIndex = 0;
+        let isSummaryRendered = false;
+
+        const flushContacts = () => {
+          const node = pushContactLine(contactBuffer, `contact-${contactBlockIndex}`);
+          if (node) rows.push(node);
+          contactBuffer = [];
+          contactBlockIndex += 1;
+        };
+
+        finalOrder.forEach((field) => {
+          if (field === "fullName") {
+            flushContacts();
+            if (data.personalInfo.fullName) {
+              rows.push(<h1 key="pi-fullName" className="text-3xl font-bold text-gray-900 mb-2">{data.personalInfo.fullName}</h1>);
+            }
+            return;
+          }
+          if (field === "jobTitle") {
+            flushContacts();
+            if (data.personalInfo.jobTitle) {
+              rows.push(<h2 key="pi-jobTitle" className="text-xl text-gray-700 mb-4">{data.personalInfo.jobTitle}</h2>);
+            }
+            return;
+          }
+          if (field === "summary") {
+            flushContacts();
+
+            if (data.personalInfo.summary) {
+              rows.push(<div key="header-separator" className="w-full border-b-2 border-gray-800 mb-6 mt-4"></div>);
+              rows.push(<h2
+                key="pi-summary-title"
+                className="text-xl text-left font-bold text-gray-900 mb-3 border-gray-300  mt-2"
+              >
+                PROFESSIONAL SUMMARY
+              </h2>);
+              rows.push(<p key="pi-summary" className="text-gray-700 text-left leading-relaxed ">{data.personalInfo.summary}</p>);
+              isSummaryRendered = true;
+            }
+            return;
+          }
+
+          const v = contactValue(field);
+          if (!v) return;
+
+          if (field === "location" && showAddress && addressText) {
+            contactBuffer.push(`${locationText} ${addressText}`.trim());
+            return;
+          }
+
+          if (field === "address" && (data.personalInfo.city || data.personalInfo.country)) {
+            if (!showAddress) return;
+          }
+
+          contactBuffer.push(v);
+        });
+
+        flushContacts();
+
+        if (!isSummaryRendered) {
+          rows.push(<div key="header-separator-end" className="w-full border-b-2 border-gray-800 mb-6 mt-4"></div>);
+        }
+
+        return <>{rows}</>;
+      })()}
     </div>
   );
 
@@ -115,7 +210,7 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
       </div>
     </div>
   );
-  
+
   const ExperienceHeader = ({ exp }: { exp: CVData["experience"][number] }) => (
     <div className="flex justify-between items-start mb-2">
       <div>
@@ -159,10 +254,36 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
 
   const blocks = useMemo(() => {
     const items: React.ReactNode[] = [];
-    items.push(<Header key="header" />);
-    if (data.personalInfo.summary) items.push(<Summary key="summary" summary={data.personalInfo.summary} />);
-    if (data.skills.technical.length > 0 || data.skills.soft.length > 0) items.push(<Skills key="skills" skills={data.skills} />);
-    if (data.experience.length > 0) {
+    const allSections = [
+      "personalInfo",
+      "skills",
+      "experience",
+      "projects",
+      "education",
+      "certifications",
+      "languages",
+      "interests",
+    ] as const satisfies readonly CVSectionId[];
+    const requestedOrder: readonly CVSectionId[] =
+      data.sectionOrder && data.sectionOrder.length > 0 ? data.sectionOrder : allSections;
+    const hidden = data.hiddenSections || [];
+    const ordered: CVSectionId[] = [
+      ...requestedOrder.filter((s) => allSections.includes(s)),
+      ...allSections.filter((s) => !requestedOrder.includes(s)),
+    ];
+    const finalOrder = ordered.filter((s) => s === "personalInfo" || !hidden.includes(s));
+
+    const addPersonalInfo = () => {
+      items.push(<Header key="header" />);
+    };
+
+    const addSkills = () => {
+      if (data.skills.technical.length === 0 && data.skills.soft.length === 0) return;
+      items.push(<Skills key="skills" skills={data.skills} />);
+    };
+
+    const addExperience = () => {
+      if (data.experience.length === 0) return;
       items.push(<SectionTitle key="exp-title" title="PROFESSIONAL EXPERIENCE" />);
       data.experience.forEach((exp, index) => {
         const isLast = index === data.experience.length - 1;
@@ -173,18 +294,22 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
         });
         if (!isLast) items.push(<div key={`exp-sp-${exp.id}`} className="h-5" />);
       });
-    }
-    if (data.education.length > 0) {
+    };
+
+    const addEducation = () => {
+      if (data.education.length === 0) return;
       items.push(<SectionTitle key="edu-title" title="EDUCATION" />);
       data.education.forEach((edu, index) => {
         const isLast = index === data.education.length - 1;
         items.push(<EducationHeader key={`edu-h-${edu.id}`} edu={edu} />);
-        const details = (edu.additionalInfo || "").split("\n").map(s => s.trim()).filter(Boolean);
+        const details = (edu.additionalInfo || "").split("\n").map((s) => s.trim()).filter(Boolean);
         details.forEach((line, i) => items.push(<EducationDetailsLine key={`edu-l-${edu.id}-${i}`} text={line} />));
         if (!isLast) items.push(<div key={`edu-sp-${edu.id}`} className="h-4" />);
       });
-    }
-    if (data.languages.length > 0) {
+    };
+
+    const addLanguages = () => {
+      if (data.languages.length === 0) return;
       items.push(<SectionTitle key="lang-title" title="LANGUAGES" />);
       data.languages.forEach((lang) => {
         items.push(
@@ -194,8 +319,10 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
           </div>
         );
       });
-    }
-    if (data.projects.length > 0) {
+    };
+
+    const addProjects = () => {
+      if (data.projects.length === 0) return;
       items.push(<SectionTitle key="proj-title" title="PROJECTS" />);
       data.projects.forEach((project, index) => {
         items.push(
@@ -208,8 +335,10 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
         );
         if (index < data.projects.length - 1) items.push(<div key={`proj-sp-${project.id}`} className="h-4" />);
       });
-    }
-    if (data.certifications.length > 0) {
+    };
+
+    const addCertifications = () => {
+      if (data.certifications.length === 0) return;
       items.push(<SectionTitle key="cert-title" title="CERTIFICATIONS & AWARDS" />);
       data.certifications.forEach((cert, index) => {
         items.push(
@@ -223,11 +352,42 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
         );
         if (index < data.certifications.length - 1) items.push(<div key={`cert-sp-${cert.id}`} className="h-2" />);
       });
-    }
-    if (data.additional.interests.length > 0) {
+    };
+
+    const addInterests = () => {
+      if (data.additional.interests.length === 0) return;
       items.push(<SectionTitle key="int-title" title="INTERESTS & HOBBIES" />);
       items.push(<div key="int-body" className="text-gray-700">{data.additional.interests.join(", ")}</div>);
-    }
+    };
+
+    finalOrder.forEach((section) => {
+      switch (section) {
+        case "personalInfo":
+          addPersonalInfo();
+          break;
+        case "skills":
+          addSkills();
+          break;
+        case "experience":
+          addExperience();
+          break;
+        case "projects":
+          addProjects();
+          break;
+        case "education":
+          addEducation();
+          break;
+        case "certifications":
+          addCertifications();
+          break;
+        case "languages":
+          addLanguages();
+          break;
+        case "interests":
+          addInterests();
+          break;
+      }
+    });
     return items;
   }, [data]);
 

@@ -2,8 +2,8 @@
 import axios from "axios";
 
 // Laravel Backend URL for authentication and services
-const LARAVEL_API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://backendcv.onlinetoolpot.com/public/api"
-// const LARAVEL_API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://backendcv.onlinetoolpot.com/public/api"
+const LARAVEL_API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || " https://backendcv.onlinetoolpot.com/public/api"
+// const LARAVEL_API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || " https://backendcv.onlinetoolpot.com/public/api"
 
 // Node.js Backend URL for app/api routes 
 const NODEJS_API_BASE_URL = process.env.NEXT_PUBLIC_NODEJS_API_URL || "https://stagingnode.resumaic.com"
