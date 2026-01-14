@@ -68,9 +68,9 @@ interface SidebarProps {
     profilePicture?: string;
     plan_type?: string;
   } | null
-  onExportPDF?: () => Promise<void>
-  onExportDOCX?: () => Promise<void>
-  onExportPNG?: () => Promise<void>
+  onExportPDF?: () => void
+  onExportDOCX?: () => void
+  onExportPNG?: () => void
   exportMode?: boolean
 }
 
@@ -290,30 +290,7 @@ export function Sidebar({
       </SidebarContent>
 
       <SidebarFooter className="p-4 mt-auto">
-        {exportMode ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="w-full justify-between rounded-2xl border-2 border-green-200/50 dark:border-gray-800/60 hover:border-green-300 dark:hover:border-green-400 hover:bg-green-50/50 dark:hover:bg-gray-900 transition-all duration-300 bg-transparent mb-3"
-              >
-                <span className="font-semibold">Export</span>
-                <ChevronDown className="h-4 w-4 ml-2" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 rounded-2xl border-green-200/50 dark:border-gray-800/60 shadow-xl">
-              <DropdownMenuItem onClick={onExportPDF} className="rounded-xl">
-                <FileText className="mr-2 h-4 w-4" />
-                <span>PDF</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onExportDOCX} className="rounded-xl">
-                <FileText className="mr-2 h-4 w-4" />
-                <span>DOCX</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : (
-          <div className="space-y-4">
+        <div className="space-y-4">
             {/* User Stats Section */}
             {!!user && !isAdmin && (
               <div className={`p-3 rounded-2xl ${
@@ -441,7 +418,6 @@ export function Sidebar({
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-        )}
       </SidebarFooter>
     </SidebarPrimitive>
   )
