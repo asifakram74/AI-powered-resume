@@ -1,5 +1,13 @@
 import React, { useMemo, useRef, useState, useLayoutEffect } from "react";
-import type { CVData, CVSectionId, PersonalInfoFieldId } from "../../../types/cv-data";
+import type {
+  CVBulletStyle,
+  CVData,
+  CVFontFamilyId,
+  CVSectionHeaderIconStyle,
+  CVSectionId,
+  CVStyleSettings,
+  PersonalInfoFieldId,
+} from "../../../types/cv-data";
 
 interface ClassicTemplateProps {
   data: CVData;
@@ -7,12 +15,142 @@ interface ClassicTemplateProps {
 }
 
 const PAGE_HEIGHT_PX = 1123;
-const PADDING_PX = 48;
-const CONTENT_HEIGHT_PX = PAGE_HEIGHT_PX - PADDING_PX * 2;
+const MM_TO_PX = 3.7795275591;
+
+const DEFAULT_STYLE_SETTINGS: CVStyleSettings = {
+  bodyFontFamily: "inter",
+  headingFontFamily: "inter",
+  bodyFontSizePx: 12,
+  headingFontSizePx: 20,
+  lineHeight: 1.35,
+  marginLeftRightMm: 16,
+  marginTopBottomMm: 16,
+  spaceBetweenEntriesPx: 12,
+  textColor: "#374151",
+  headingColor: "#111827",
+  mutedColor: "#4b5563",
+  accentColor: "#111827",
+  borderColor: "#1f2937",
+  backgroundColor: "#ffffff",
+  backgroundImageUrl: "",
+  colorMode: "basic",
+  borderMode: "single",
+  applyAccentToName: false,
+  applyAccentToJobTitle: false,
+  applyAccentToHeadings: false,
+  applyAccentToHeadingsLine: false,
+  applyAccentToHeaderIcons: false,
+  applyAccentToDotsBarsBubbles: false,
+  applyAccentToDates: false,
+  applyAccentToLinkIcons: false,
+  datesOpacity: 0.7,
+  nameBold: true,
+  locationOpacity: 0.7,
+  align: "left",
+  capitalization: "uppercase",
+  headingsLine: true,
+  headerIcons: "none",
+  linkIcons: "none",
+  iconFrame: "none",
+  iconSize: "sm",
+  dotsBarsBubbles: "dots",
+  descriptionIndentPx: 16,
+  entryListStyle: "bullet",
+  showPageNumbers: true,
+  showEmail: false,
+  sectionHeaderIconStyle: "none",
+  bulletStyle: "disc",
+};
+
+const fontFamilyCss = (id: CVFontFamilyId) => {
+  switch (id) {
+    case "inter":
+      return "var(--font-inter)";
+    case "serif":
+      return "var(--font-rubik)";
+    case "system-sans":
+      return "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, \"Noto Sans\", sans-serif";
+    case "system-serif":
+      return "ui-serif, Georgia, Cambria, \"Times New Roman\", Times, serif";
+    case "mono":
+      return "ui-monospace, SFMono-Regular, \"SF Mono\", Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace";
+    case "roboto":
+      return "\"Roboto\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Arial, sans-serif";
+    case "open-sans":
+      return "\"Open Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Arial, sans-serif";
+    case "lato":
+      return "\"Lato\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Arial, sans-serif";
+  }
+};
+
+const sectionIconNode = (style: CVSectionHeaderIconStyle, color: string) => {
+  const common = { flexShrink: 0 as const, display: "inline-block" as const };
+  switch (style) {
+    case "none":
+      return null;
+    case "dot":
+      return <span style={{ ...common, width: 8, height: 8, borderRadius: 999, background: color }} />;
+    case "bar":
+      return <span style={{ ...common, width: 18, height: 4, borderRadius: 999, background: color }} />;
+    case "square":
+      return <span style={{ ...common, width: 8, height: 8, background: color }} />;
+    case "circle-outline":
+      return <span style={{ ...common, width: 9, height: 9, borderRadius: 999, border: `2px solid ${color}` }} />;
+  }
+};
+
+const bulletNode = (style: CVBulletStyle, color: string) => {
+  const common = { flexShrink: 0 as const, display: "inline-flex" as const, alignItems: "center", justifyContent: "center" };
+  switch (style) {
+    case "none":
+      return null;
+    case "hyphen":
+      return <span style={{ ...common, width: 10, color, fontWeight: 700, lineHeight: 1 }}>-</span>;
+    case "disc":
+      return <span style={{ ...common, width: 7, height: 7, borderRadius: 999, background: color, marginTop: 6 }} />;
+    case "circle":
+      return <span style={{ ...common, width: 8, height: 8, borderRadius: 999, border: `2px solid ${color}`, marginTop: 6 }} />;
+    case "square":
+      return <span style={{ ...common, width: 7, height: 7, background: color, marginTop: 6 }} />;
+  }
+};
 
 export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [pages, setPages] = useState<React.ReactNode[][]>([]);
+  const styleSettings = useMemo(() => ({ ...DEFAULT_STYLE_SETTINGS, ...(data.styleSettings || {}) }), [data.styleSettings]);
+  const bodyFont = useMemo(() => fontFamilyCss(styleSettings.bodyFontFamily), [styleSettings.bodyFontFamily]);
+  const headingFont = useMemo(() => fontFamilyCss(styleSettings.headingFontFamily), [styleSettings.headingFontFamily]);
+  const paddingXpx = useMemo(() => styleSettings.marginLeftRightMm * MM_TO_PX, [styleSettings.marginLeftRightMm]);
+  const paddingYpx = useMemo(() => styleSettings.marginTopBottomMm * MM_TO_PX, [styleSettings.marginTopBottomMm]);
+  const contentHeightPx = useMemo(() => PAGE_HEIGHT_PX - paddingYpx * 2, [paddingYpx]);
+  const effectiveHeadingColor = useMemo(
+    () => (styleSettings.applyAccentToHeadings ? styleSettings.accentColor : styleSettings.headingColor),
+    [styleSettings.accentColor, styleSettings.applyAccentToHeadings, styleSettings.headingColor],
+  );
+  const effectiveBulletStyle: CVBulletStyle = useMemo(
+    () => (styleSettings.entryListStyle === "hyphen" ? "hyphen" : styleSettings.bulletStyle),
+    [styleSettings.bulletStyle, styleSettings.entryListStyle],
+  );
+  const rootStyle = useMemo<React.CSSProperties>(() => ({
+    fontFamily: bodyFont,
+    fontSize: `${styleSettings.bodyFontSizePx}px`,
+    lineHeight: styleSettings.lineHeight,
+    color: styleSettings.textColor,
+  }), [bodyFont, styleSettings.bodyFontSizePx, styleSettings.lineHeight, styleSettings.textColor]);
+  const headingBaseStyle = useMemo<React.CSSProperties>(() => ({
+    fontFamily: headingFont,
+    color: effectiveHeadingColor,
+  }), [headingFont, effectiveHeadingColor]);
+  const mutedStyle = useMemo<React.CSSProperties>(() => ({ color: styleSettings.mutedColor }), [styleSettings.mutedColor]);
+  const dateStyle = useMemo<React.CSSProperties>(() => ({ ...mutedStyle, opacity: styleSettings.datesOpacity }), [mutedStyle, styleSettings.datesOpacity]);
+  const locationStyle = useMemo<React.CSSProperties>(() => ({ ...mutedStyle, opacity: styleSettings.locationOpacity }), [mutedStyle, styleSettings.locationOpacity]);
+  const dividerStyle = useMemo<React.CSSProperties>(() => ({ borderColor: styleSettings.borderColor }), [styleSettings.borderColor]);
+  const pageStyle = useMemo<React.CSSProperties>(() => ({
+    ...rootStyle,
+    backgroundColor: styleSettings.backgroundColor,
+    padding: `${paddingYpx}px ${paddingXpx}px`,
+  }), [paddingXpx, paddingYpx, rootStyle, styleSettings.backgroundColor]);
 
   const formatDate = (date: string) => {
     if (!date) return "";
@@ -59,7 +197,7 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
   const showAddress = Boolean(addressText) && (!locLower || (addrLower !== locLower && !addrLower.includes(locLower)));
 
   const Header = () => (
-    <div className="text-center pb-6 mb-8">
+    <div className="pb-6 mb-8" style={{ textAlign: styleSettings.align }}>
       {(() => {
         const defaultOrder: PersonalInfoFieldId[] = [
           "fullName",
@@ -99,7 +237,7 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
           const parts = contactParts.map((s) => s.trim()).filter(Boolean);
           if (parts.length === 0) return null;
           return (
-            <div key={key} className="text-gray-600">
+            <div key={key} style={mutedStyle}>
               {parts.map((p, idx) => (
                 <span key={`${key}-${idx}`}>
                   {idx > 0 && <span className="mx-2">•</span>}
@@ -126,14 +264,40 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
           if (field === "fullName") {
             flushContacts();
             if (data.personalInfo.fullName) {
-              rows.push(<h1 key="pi-fullName" className="text-3xl font-bold text-gray-900 mb-2">{data.personalInfo.fullName}</h1>);
+              rows.push(
+                <h1
+                  key="pi-fullName"
+                  className="mb-2"
+                  style={{
+                    ...headingBaseStyle,
+                    fontWeight: styleSettings.nameBold ? 800 : 700,
+                    fontSize: `${Math.round(styleSettings.headingFontSizePx * 1.6)}px`,
+                    color: styleSettings.applyAccentToName ? styleSettings.accentColor : headingBaseStyle.color,
+                  }}
+                >
+                  {data.personalInfo.fullName}
+                </h1>
+              );
             }
             return;
           }
           if (field === "jobTitle") {
             flushContacts();
             if (data.personalInfo.jobTitle) {
-              rows.push(<h2 key="pi-jobTitle" className="text-xl text-gray-700 mb-4">{data.personalInfo.jobTitle}</h2>);
+              rows.push(
+                <h2
+                  key="pi-jobTitle"
+                  className="mb-4"
+                  style={{
+                    ...headingBaseStyle,
+                    fontWeight: 600,
+                    fontSize: `${Math.round(styleSettings.headingFontSizePx * 1.05)}px`,
+                    color: styleSettings.applyAccentToJobTitle ? styleSettings.accentColor : styleSettings.textColor,
+                  }}
+                >
+                  {data.personalInfo.jobTitle}
+                </h2>
+              );
             }
             return;
           }
@@ -141,14 +305,21 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
             flushContacts();
 
             if (data.personalInfo.summary) {
-              rows.push(<div key="header-separator" className="w-full border-b-2 border-gray-800 mb-6 mt-4"></div>);
-              rows.push(<h2
-                key="pi-summary-title"
-                className="text-xl text-left font-bold text-gray-900 mb-3 border-gray-300  mt-2"
-              >
-                PROFESSIONAL SUMMARY
-              </h2>);
-              rows.push(<p key="pi-summary" className="text-gray-700 text-left leading-relaxed ">{data.personalInfo.summary}</p>);
+              rows.push(<div key="header-separator" className="w-full border-b-2 mb-6 mt-4" style={dividerStyle}></div>);
+              rows.push(
+                <h2
+                  key="pi-summary-title"
+                  className="text-left mb-3 mt-2"
+                  style={{ ...headingBaseStyle, fontWeight: 800, fontSize: `${styleSettings.headingFontSizePx}px`, textTransform: styleSettings.capitalization }}
+                >
+                  PROFESSIONAL SUMMARY
+                </h2>
+              );
+              rows.push(
+                <p key="pi-summary" className="text-left" style={{ color: styleSettings.textColor }}>
+                  {data.personalInfo.summary}
+                </p>
+              );
               isSummaryRendered = true;
             }
             return;
@@ -172,7 +343,7 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
         flushContacts();
 
         if (!isSummaryRendered) {
-          rows.push(<div key="header-separator-end" className="w-full border-b-2 border-gray-800 mb-6 mt-4"></div>);
+          rows.push(<div key="header-separator-end" className="w-full border-b-2 mb-6 mt-4" style={dividerStyle}></div>);
         }
 
         return <>{rows}</>;
@@ -181,7 +352,23 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
   );
 
   const SectionTitle = ({ title }: { title: string }) => (
-    <h2 className="text-xl font-bold text-gray-900 mb-4 border-gray-300 pb-1">{title}</h2>
+    <div
+      className={`flex items-center gap-2 mb-4 ${styleSettings.headingsLine ? "pb-1 border-b" : ""}`}
+      style={styleSettings.headingsLine ? dividerStyle : undefined}
+    >
+      {sectionIconNode(styleSettings.sectionHeaderIconStyle, styleSettings.accentColor)}
+      <h2
+        style={{
+          ...headingBaseStyle,
+          fontWeight: 800,
+          fontSize: `${styleSettings.headingFontSizePx}px`,
+          margin: 0,
+          textTransform: styleSettings.capitalization,
+        }}
+      >
+        {title}
+      </h2>
+    </div>
   );
 
   const Summary = ({ summary }: { summary: string }) => (
@@ -193,18 +380,18 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
 
   const Skills = ({ skills }: { skills: CVData["skills"] }) => (
     <div className="mb-8">
-      <h2 className="text-xl font-bold text-gray-900 mb-4 border-gray-300 pb-1">SKILLS</h2>
+      <SectionTitle title="SKILLS" />
       <div className="space-y-3">
         {skills.technical.length > 0 && (
           <div>
-            <span className="font-semibold text-gray-900">Technical Skills: </span>
-            <span className="text-gray-700">{skills.technical.join(", ")}</span>
+            <span style={{ ...headingBaseStyle, fontWeight: 700, color: styleSettings.headingColor }}>Technical Skills: </span>
+            <span style={{ color: styleSettings.textColor }}>{skills.technical.join(", ")}</span>
           </div>
         )}
         {skills.soft.length > 0 && (
           <div>
-            <span className="font-semibold text-gray-900">Soft Skills: </span>
-            <span className="text-gray-700">{skills.soft.join(", ")}</span>
+            <span style={{ ...headingBaseStyle, fontWeight: 700, color: styleSettings.headingColor }}>Soft Skills: </span>
+            <span style={{ color: styleSettings.textColor }}>{skills.soft.join(", ")}</span>
           </div>
         )}
       </div>
@@ -214,12 +401,12 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
   const ExperienceHeader = ({ exp }: { exp: CVData["experience"][number] }) => (
     <div className="flex justify-between items-start mb-2">
       <div>
-        <h3 className="text-lg font-semibold text-gray-900">{exp.jobTitle}</h3>
-        <p className="text-gray-700 font-medium">{exp.companyName}</p>
-        {exp.location && <p className="text-gray-600">{exp.location}</p>}
+        <h3 style={{ ...headingBaseStyle, fontWeight: 700, fontSize: `${Math.round(styleSettings.bodyFontSizePx * 1.25)}px` }}>{exp.jobTitle}</h3>
+        <p style={{ color: styleSettings.textColor, fontWeight: 600 }}>{exp.companyName}</p>
+        {exp.location && <p style={locationStyle}>{exp.location}</p>}
       </div>
       {(formatDate(exp.startDate) || exp.current || formatDate(exp.endDate)) && (
-        <span className="text-gray-600">
+        <span style={dateStyle}>
           {formatDate(exp.startDate)}
           {(formatDate(exp.startDate) && (exp.current || formatDate(exp.endDate))) ? " - " : ""}
           {exp.current ? "Present" : formatDate(exp.endDate)}
@@ -229,27 +416,28 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
   );
 
   const ExperienceDescriptionLine = ({ text }: { text: string }) => (
-    <div className="ml-4">
-      <div className="list-disc marker:text-gray-700 pl-1 text-gray-700">{text}</div>
+    <div className="flex gap-2" style={{ marginLeft: styleSettings.descriptionIndentPx }}>
+      {bulletNode(effectiveBulletStyle, styleSettings.accentColor)}
+      <div style={{ color: styleSettings.textColor, flex: 1 }}>{text}</div>
     </div>
   );
 
   const EducationHeader = ({ edu }: { edu: CVData["education"][number] }) => (
     <div className="flex justify-between items-start">
       <div>
-        <h3 className="font-semibold text-gray-900">{edu.degree}</h3>
-        <p className="text-gray-700">{edu.institutionName}</p>
-        {edu.location && <p className="text-gray-600">{edu.location}</p>}
-        {edu.gpa && <p className="text-gray-600">GPA: {edu.gpa}</p>}
-        {edu.honors && <p className="text-gray-600">{edu.honors}</p>}
-        {edu.additionalInfo && <p className="text-gray-600 text-sm mt-1">{edu.additionalInfo}</p>}
+        <h3 style={{ ...headingBaseStyle, fontWeight: 700 }}>{edu.degree}</h3>
+        <p style={{ color: styleSettings.textColor }}>{edu.institutionName}</p>
+        {edu.location && <p style={locationStyle}>{edu.location}</p>}
+        {edu.gpa && <p style={mutedStyle}>GPA: {edu.gpa}</p>}
+        {edu.honors && <p style={mutedStyle}>{edu.honors}</p>}
+        {edu.additionalInfo && <p style={{ ...mutedStyle, fontSize: `${Math.max(10, styleSettings.bodyFontSizePx - 1)}px`, marginTop: 4 }}>{edu.additionalInfo}</p>}
       </div>
-      {edu.graduationDate && <span className="text-gray-600">{formatDate(edu.graduationDate)}</span>}
+      {edu.graduationDate && <span style={dateStyle}>{formatDate(edu.graduationDate)}</span>}
     </div>
   );
 
   const EducationDetailsLine = ({ text }: { text: string }) => (
-    <div className="ml-4 text-gray-700">{text}</div>
+    <div className="ml-4" style={{ color: styleSettings.textColor }}>{text}</div>
   );
 
   const blocks = useMemo(() => {
@@ -292,7 +480,7 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
           const t = resp.trim();
           if (t) items.push(<ExperienceDescriptionLine key={`exp-l-${exp.id}-${i}`} text={t} />);
         });
-        if (!isLast) items.push(<div key={`exp-sp-${exp.id}`} className="h-5" />);
+        if (!isLast) items.push(<div key={`exp-sp-${exp.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
       });
     };
 
@@ -304,7 +492,7 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
         items.push(<EducationHeader key={`edu-h-${edu.id}`} edu={edu} />);
         const details = (edu.additionalInfo || "").split("\n").map((s) => s.trim()).filter(Boolean);
         details.forEach((line, i) => items.push(<EducationDetailsLine key={`edu-l-${edu.id}-${i}`} text={line} />));
-        if (!isLast) items.push(<div key={`edu-sp-${edu.id}`} className="h-4" />);
+        if (!isLast) items.push(<div key={`edu-sp-${edu.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
       });
     };
 
@@ -313,8 +501,8 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
       items.push(<SectionTitle key="lang-title" title="LANGUAGES" />);
       data.languages.forEach((lang) => {
         items.push(
-          <div key={`lang-${lang.id}`} className="text-gray-700">
-            <span className="font-semibold text-gray-900">{lang.name}: </span>
+          <div key={`lang-${lang.id}`} style={{ color: styleSettings.textColor }}>
+            <span style={{ ...headingBaseStyle, fontWeight: 700 }}>{lang.name}: </span>
             <span>{lang.proficiency}</span>
           </div>
         );
@@ -327,13 +515,13 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
       data.projects.forEach((project, index) => {
         items.push(
           <div key={`proj-${project.id}`}>
-            <h3 className="font-semibold text-gray-900">{project.name}</h3>
-            <p className="text-gray-600 font-medium">{project.role}</p>
-            <p className="text-gray-700 mb-2">{project.description}</p>
-            <p className="text-gray-600"><span className="font-medium">Technologies: </span>{project.technologies.join(", ")}</p>
+            <h3 style={{ ...headingBaseStyle, fontWeight: 700 }}>{project.name}</h3>
+            <p style={{ ...mutedStyle, fontWeight: 600 }}>{project.role}</p>
+            <p className="mb-2" style={{ color: styleSettings.textColor }}>{project.description}</p>
+            <p style={mutedStyle}><span style={{ fontWeight: 600 }}>Technologies: </span>{project.technologies.join(", ")}</p>
           </div>
         );
-        if (index < data.projects.length - 1) items.push(<div key={`proj-sp-${project.id}`} className="h-4" />);
+        if (index < data.projects.length - 1) items.push(<div key={`proj-sp-${project.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
       });
     };
 
@@ -344,20 +532,20 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
         items.push(
           <div key={`cert-${cert.id}`} className="flex justify-between items-center">
             <div>
-              <span className="font-semibold text-gray-900">{cert.title}</span>
-              <span className="text-gray-700"> - {cert.issuingOrganization}</span>
+              <span style={{ ...headingBaseStyle, fontWeight: 700 }}>{cert.title}</span>
+              <span style={{ color: styleSettings.textColor }}> - {cert.issuingOrganization}</span>
             </div>
-            <span className="text-gray-600">{formatDate(cert.dateObtained)}</span>
+            <span style={mutedStyle}>{formatDate(cert.dateObtained)}</span>
           </div>
         );
-        if (index < data.certifications.length - 1) items.push(<div key={`cert-sp-${cert.id}`} className="h-2" />);
+        if (index < data.certifications.length - 1) items.push(<div key={`cert-sp-${cert.id}`} style={{ height: Math.max(4, Math.round(styleSettings.spaceBetweenEntriesPx / 2)) }} />);
       });
     };
 
     const addInterests = () => {
       if (data.additional.interests.length === 0) return;
       items.push(<SectionTitle key="int-title" title="INTERESTS & HOBBIES" />);
-      items.push(<div key="int-body" className="text-gray-700">{data.additional.interests.join(", ")}</div>);
+      items.push(<div key="int-body" style={{ color: styleSettings.textColor }}>{data.additional.interests.join(", ")}</div>);
     };
 
     finalOrder.forEach((section) => {
@@ -389,7 +577,7 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
       }
     });
     return items;
-  }, [data]);
+  }, [data, headingBaseStyle, mutedStyle, styleSettings, dividerStyle]);
 
   useLayoutEffect(() => {
     if (!containerRef.current) return;
@@ -409,7 +597,7 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
       const marginTop = parseFloat(style.marginTop) || 0;
       const marginBottom = parseFloat(style.marginBottom) || 0;
       const elementHeight = el.offsetHeight + marginTop + marginBottom;
-      if (currentHeight + elementHeight > CONTENT_HEIGHT_PX) {
+      if (currentHeight + elementHeight > contentHeightPx) {
         pushPage();
       }
       currentPage.push(blocks[index]);
@@ -417,21 +605,31 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
     });
     if (currentPage.length > 0) newPages.push(currentPage);
     setPages(newPages);
-  }, [blocks]);
+  }, [blocks, contentHeightPx]);
 
   return (
     <div className="flex flex-col items-center gap-8 pb-20 print:block print:gap-0 print:pb-0">
-      <div ref={containerRef} className="cv-measure fixed top-0 left-0 w-[210mm] p-12 opacity-0 pointer-events-none z-[-999]" style={{ visibility: "hidden" }}>
+      <div
+        ref={containerRef}
+        className="cv-measure fixed top-0 left-0 w-[210mm] opacity-0 pointer-events-none z-[-999]"
+        style={{ ...pageStyle, visibility: "hidden" }}
+      >
         {blocks}
       </div>
       {pages.length === 0 ? (
-        <div className="w-[210mm] min-h-[297mm] p-12 bg-white"></div>
+        <div className="w-[210mm] min-h-[297mm]" style={pageStyle}></div>
       ) : (
         pages.map((pageContent, i) => (
-          <div key={i} className="a4-page w-[210mm] min-h-[297mm] p-12 bg-white text-slate-900 relative print:shadow-none" style={{ breakAfter: i < pages.length - 1 ? "page" : "auto" }}>
+          <div
+            key={i}
+            className="a4-page w-[210mm] min-h-[297mm] relative print:shadow-none"
+            style={{ ...pageStyle, breakAfter: i < pages.length - 1 ? "page" : "auto" }}
+          >
             {pageContent}
-            {pages.length > 1 && (
-              <div className="absolute bottom-4 right-12 text-[10px] text-slate-400 print:hidden">Page {i + 1} of {pages.length}</div>
+            {styleSettings.showPageNumbers && pages.length > 1 && (
+              <div className="absolute bottom-4 right-12 text-[10px] print:hidden" style={mutedStyle}>
+                Page {i + 1} of {pages.length}
+              </div>
             )}
           </div>
         ))

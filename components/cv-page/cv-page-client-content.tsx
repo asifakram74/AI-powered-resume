@@ -4,10 +4,10 @@ import { useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card"
-import { ArrowLeft, Sparkles, TrendingUp, Loader2, Brain, CheckCircle, AlertCircle, GripVertical, RotateCcw, ChevronDown, Trash2, Plus } from "lucide-react"
+import { ArrowLeft, Sparkles, TrendingUp, Loader2, GripVertical, RotateCcw, ChevronDown, Trash2, Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { getPersonaById, type PersonaResponse } from "../../lib/redux/service/pasonaService"
-import type { CVData, CVSectionId, PersonalInfoFieldId } from "../../types/cv-data"
+import type { CVData, CVSectionId, CVStyleSettings, PersonalInfoFieldId } from "../../types/cv-data"
 import { useAppDispatch, useAppSelector } from "../../lib/redux/hooks"
 import { logoutUser } from "../../lib/redux/slices/authSlice"
 import { SidebarProvider, SidebarInset } from "../../components/ui/sidebar"
@@ -20,15 +20,14 @@ import { ProfilePage } from "../../pages/profile/profile-page"
 import ProtectedRoute from "../../components/auth/ProtectedRoute"
 import { createCV, getCVById, updateCV, type CreateCVData, type CV } from "../../lib/redux/service/resumeService"
 import { CVEditPopup } from "./cv-edit-popup"
-
 import { CVPageLoading } from "./cv-page-loading"
 import { CVHeaderActions } from "./cv-header-actions"
 import { CVPreviewSection } from "./cv-preview-section"
-import jsPDF from "jspdf"
-import * as htmlToImage from "html-to-image"
-
+import { useCVExport } from "./use-cv-export"
+import { showSuccessToast, showErrorToast, showInfoToast, showLoadingToast } from "./cv-toasts"
 import { TemplateSelectorDialog } from "./template-selector-dialog"
 import { SettingsPanelDialog } from "./settings-panel-dialog"
+import { DesignPanelDialog } from "./design-panel-dialog"
 
 const DEFAULT_SECTION_ORDER: CVSectionId[] = ["personalInfo", "skills", "experience", "projects", "education", "certifications", "languages", "interests"]
 const SECTION_LABELS: Record<CVSectionId, string> = {
@@ -64,6 +63,51 @@ const PERSONAL_INFO_FIELD_LABELS: Record<PersonalInfoFieldId, string> = {
   linkedin: "LinkedIn",
   github: "GitHub",
   summary: "Summary",
+}
+
+const DEFAULT_STYLE_SETTINGS: CVStyleSettings = {
+  bodyFontFamily: "inter",
+  headingFontFamily: "inter",
+  bodyFontSizePx: 12,
+  headingFontSizePx: 20,
+  lineHeight: 1.35,
+  marginLeftRightMm: 16,
+  marginTopBottomMm: 16,
+  spaceBetweenEntriesPx: 12,
+  textColor: "#374151",
+  headingColor: "#111827",
+  mutedColor: "#4b5563",
+  accentColor: "#111827",
+  borderColor: "#1f2937",
+  backgroundColor: "#ffffff",
+  backgroundImageUrl: "",
+  colorMode: "basic",
+  borderMode: "single",
+  applyAccentToName: false,
+  applyAccentToJobTitle: false,
+  applyAccentToHeadings: false,
+  applyAccentToHeadingsLine: false,
+  applyAccentToHeaderIcons: false,
+  applyAccentToDotsBarsBubbles: false,
+  applyAccentToDates: false,
+  applyAccentToLinkIcons: false,
+  datesOpacity: 0.7,
+  locationOpacity: 0.7,
+  align: "left",
+  capitalization: "uppercase",
+  headingsLine: true,
+  headerIcons: "none",
+  linkIcons: "none",
+  iconFrame: "none",
+  iconSize: "sm",
+  dotsBarsBubbles: "dots",
+  descriptionIndentPx: 16,
+  entryListStyle: "bullet",
+  showPageNumbers: true,
+  showEmail: false,
+  nameBold: true,
+  sectionHeaderIconStyle: "none",
+  bulletStyle: "disc",
 }
 
 interface OptimizedCV {
@@ -186,72 +230,7 @@ const templates: CVTemplate[] = [
   },
 ]
 
-const showSuccessToast = (message: string, description?: string) => {
-  toast.success(message, {
-    description,
-    duration: 4000,
-    icon: <CheckCircle className="h-5 w-5 text-green-500" />,
-    style: {
-      background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-      color: "white",
-      border: "none",
-      borderRadius: "12px",
-      padding: "16px",
-      fontSize: "14px",
-      fontWeight: "500",
-    },
-  })
-}
 
-const showErrorToast = (message: string, description?: string) => {
-  toast.error(message, {
-    description,
-    duration: 5000,
-    icon: <AlertCircle className="h-5 w-5 text-red-500" />,
-    style: {
-      background: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
-      color: "white",
-      border: "none",
-      borderRadius: "12px",
-      padding: "16px",
-      fontSize: "14px",
-      fontWeight: "500",
-    },
-  })
-}
-
-const showInfoToast = (message: string, description?: string) => {
-  toast.info(message, {
-    description,
-    duration: 4000,
-    icon: <Brain className="h-5 w-5 text-blue-500" />,
-    style: {
-      background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
-      color: "white",
-      border: "none",
-      borderRadius: "12px",
-      padding: "16px",
-      fontSize: "14px",
-      fontWeight: "500",
-    },
-  })
-}
-
-const showLoadingToast = (message: string, description?: string) => {
-  return toast.loading(message, {
-    description,
-    icon: <Loader2 className="h-5 w-5 animate-spin text-blue-500" />,
-    style: {
-      background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
-      color: "#1e293b",
-      border: "1px solid #cbd5e1",
-      borderRadius: "12px",
-      padding: "16px",
-      fontSize: "14px",
-      fontWeight: "500",
-    },
-  })
-}
 
 export function CVPageClientContent() {
   const [aiResponse, setAiResponse] = useState<AIResponse | null>(null)
@@ -267,6 +246,7 @@ export function CVPageClientContent() {
   const [showEditPopup, setShowEditPopup] = useState(false)
   const [showTemplateSelector, setShowTemplateSelector] = useState(false)
   const [showSettingsPanel, setShowSettingsPanel] = useState(false)
+  const [showDesignPanel, setShowDesignPanel] = useState(false)
   const [isViewMode, setIsViewMode] = useState(false)
   const [jobDescription, setJobDescription] = useState("")
   const [formData, setFormData] = useState<CVFormData | null>(null)
@@ -274,6 +254,7 @@ export function CVPageClientContent() {
   const [hiddenSections, setHiddenSections] = useState<CVSectionId[]>([])
   const [personalInfoFieldOrder, setPersonalInfoFieldOrder] = useState<PersonalInfoFieldId[]>(DEFAULT_PERSONAL_INFO_FIELD_ORDER)
   const [isPersonalInfoOpen, setIsPersonalInfoOpen] = useState(true)
+  const [styleSettings, setStyleSettings] = useState<CVStyleSettings>(DEFAULT_STYLE_SETTINGS)
 
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -285,6 +266,11 @@ export function CVPageClientContent() {
   const dispatch = useAppDispatch()
   const { user } = useAppSelector((state) => state.auth)
   const cvPreviewRef = useRef<HTMLDivElement>(null)
+
+  const { handleExport, exportAsPNG, handleDocxExport } = useCVExport({
+    selectedTemplateId: selectedTemplate?.id,
+    personaFullName: persona?.full_name
+  })
 
   const defaultTemplate: CVTemplate = {
     id: "classic",
@@ -363,10 +349,14 @@ export function CVPageClientContent() {
                 typeof id === "string" && Object.prototype.hasOwnProperty.call(SECTION_LABELS, id),
               )
               : undefined
-            const { sectionOrder: _ignored, personalInfoFieldOrder: _ignored2, hiddenSections: _ignored3, ...optimizedCV } = parsedContent || {}
+            const parsedStyleSettings = parsedContent?.styleSettings
+            const { sectionOrder: _ignored, personalInfoFieldOrder: _ignored2, hiddenSections: _ignored3, styleSettings: _ignored4, ...optimizedCV } = parsedContent || {}
             if (parsedSectionOrder && parsedSectionOrder.length > 0) setSectionOrder(parsedSectionOrder)
             if (parsedPersonalInfoOrder && parsedPersonalInfoOrder.length > 0) setPersonalInfoFieldOrder(parsedPersonalInfoOrder)
             if (parsedHiddenSections && parsedHiddenSections.length > 0) setHiddenSections(parsedHiddenSections)
+            if (parsedStyleSettings && typeof parsedStyleSettings === "object") {
+              setStyleSettings({ ...DEFAULT_STYLE_SETTINGS, ...(parsedStyleSettings as Partial<CVStyleSettings>) })
+            }
             setAiResponse({
               optimizedCV,
               suggestions: [],
@@ -638,6 +628,7 @@ export function CVPageClientContent() {
       sectionOrder,
       personalInfoFieldOrder,
       hiddenSections,
+      styleSettings,
       personalInfo: {
         fullName: aiResponse.optimizedCV.personalInfo.name,
         jobTitle: persona?.job_title || "",
@@ -765,132 +756,7 @@ export function CVPageClientContent() {
     }
   }
 
-  const handleExport = async (format: "pdf" | "docx" | "png") => {
-    try {
-      const cvElement = document.getElementById("cv-preview-content")
-      if (!cvElement) {
-        showErrorToast("Export Failed", "CV preview not found. Please refresh and try again.")
-        return
-      }
 
-      const loadingToastId = showLoadingToast(
-        `Preparing ${format.toUpperCase()} export...`,
-        "Processing your CV for download",
-      )
-
-      try {
-        const filename =
-          format === "png"
-            ? `${selectedTemplate?.id || "resume"}.png`
-            : `${persona?.full_name || "resume"}-cv.${format}`
-
-        if (format === "pdf") {
-          const pageEls = Array.from(cvElement.querySelectorAll('.a4-page')) as HTMLElement[]
-          if (pageEls.length > 0) {
-            const pdf = new jsPDF({
-              orientation: 'p',
-              unit: 'mm',
-              format: 'a4',
-              compress: true
-            })
-            const pageWidth = pdf.internal.pageSize.getWidth()
-
-            for (let i = 0; i < pageEls.length; i++) {
-              const pageEl = pageEls[i]
-              const dataUrl = await htmlToImage.toJpeg(pageEl, {
-                quality: 0.8,
-                pixelRatio: 2,
-                backgroundColor: '#ffffff',
-                skipFonts: true,
-              })
-              const img = new Image()
-              await new Promise<void>((resolve) => {
-                img.onload = () => resolve()
-                img.src = dataUrl
-              })
-              const mmPerPx = pageWidth / img.width
-              const imgHeightMm = img.height * mmPerPx
-              pdf.addImage(dataUrl, 'JPEG', 0, 0, pageWidth, imgHeightMm)
-              if (i < pageEls.length - 1) pdf.addPage()
-            }
-
-            pdf.save(filename)
-          } else {
-            const dataUrl = await htmlToImage.toJpeg(cvElement, {
-              quality: 0.95,
-              pixelRatio: 2,
-              backgroundColor: '#ffffff',
-              skipFonts: true,
-            })
-            const pdf = new jsPDF('p', 'mm', 'a4')
-            const pageWidth = pdf.internal.pageSize.getWidth()
-            const img = new Image()
-            await new Promise<void>((resolve) => {
-              img.onload = () => resolve()
-              img.src = dataUrl
-            })
-            const mmPerPx = pageWidth / img.width
-            const imgHeightMm = img.height * mmPerPx
-            pdf.addImage(dataUrl, 'JPEG', 0, 0, pageWidth, imgHeightMm)
-            pdf.save(filename)
-          }
-        } else if (format === "png") {
-          const dataUrl = await htmlToImage.toPng(cvElement, {
-            quality: 1,
-            pixelRatio: 2,
-            backgroundColor: '#ffffff',
-            skipFonts: true,
-          })
-          const link = document.createElement('a')
-          link.href = dataUrl
-          link.download = filename
-          document.body.appendChild(link)
-          link.click()
-          document.body.removeChild(link)
-        } else if (format === "docx") {
-          const response = await fetch(`https://stagingnode.resumaic.com/api/cv-export/docx`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ html: cvElement.outerHTML, filename }),
-          })
-          if (!response.ok) {
-            const errorData = await response.json()
-            throw new Error(errorData.error || `Failed to export ${format.toUpperCase()}`)
-          }
-          const blob = await response.blob()
-          const url = URL.createObjectURL(blob)
-          const link = document.createElement("a")
-          link.href = url
-          link.download = filename
-          document.body.appendChild(link)
-          link.click()
-          document.body.removeChild(link)
-          URL.revokeObjectURL(url)
-        }
-
-        toast.dismiss(loadingToastId)
-        showSuccessToast(
-          `${format.toUpperCase()} Downloaded! 📄`,
-          `Your CV has been downloaded as ${format.toUpperCase()}`,
-        )
-      } catch (error) {
-        console.error(`Error exporting as ${format}:`, error)
-        toast.dismiss(loadingToastId)
-        showErrorToast("Export Failed", `${format.toUpperCase()} export failed. Please try again.`)
-      }
-    } catch (error: any) {
-      console.error("Export error:", error)
-      showErrorToast("Export Failed", `Unable to export as ${format.toUpperCase()}. Please try again.`)
-    }
-  }
-
-  const exportAsPNG = async () => {
-    await handleExport("png")
-  }
-
-  const handleDocxExport = async () => {
-    await handleExport("docx")
-  }
 
   const handleSaveCV = async (isAutoSave: boolean = false) => {
     if (!aiResponse || !selectedTemplate || !persona || !user?.id) {
@@ -915,7 +781,7 @@ export function CVPageClientContent() {
       personas_id: persona.id.toString(),
       title: titleToUse,
       job_description: jobDescription || "AI-generated CV based on persona",
-      generated_content: JSON.stringify({ ...aiResponse.optimizedCV, sectionOrder, personalInfoFieldOrder, hiddenSections }),
+      generated_content: JSON.stringify({ ...aiResponse.optimizedCV, sectionOrder, personalInfoFieldOrder, hiddenSections, styleSettings }),
     };
 
     setIsSaving(true)
@@ -1085,6 +951,12 @@ export function CVPageClientContent() {
     setHiddenSections([])
     resetPersonalInfoOrder()
     resetSectionOrder()
+    setStyleSettings(DEFAULT_STYLE_SETTINGS)
+    setHasUnsavedChanges(true)
+  }
+
+  const resetStyleSettings = () => {
+    setStyleSettings(DEFAULT_STYLE_SETTINGS)
     setHasUnsavedChanges(true)
   }
 
@@ -1213,6 +1085,7 @@ export function CVPageClientContent() {
                   onSave={handleSaveCV}
                   onChangeTemplate={() => setShowTemplateSelector(true)}
                   onChangeSettings={() => setShowSettingsPanel(true)}
+                  onChangeDesign={() => setShowDesignPanel(true)}
                 />
               </div>
               {selectedTemplate && aiResponse && (
@@ -1268,6 +1141,17 @@ export function CVPageClientContent() {
             resetPersonalInfoOrder={resetPersonalInfoOrder}
             visiblePersonalInfoFieldOrder={visiblePersonalInfoFieldOrder}
             movePersonalInfoField={movePersonalInfoField}
+          />
+
+          <DesignPanelDialog
+            open={showDesignPanel}
+            onOpenChange={setShowDesignPanel}
+            value={styleSettings}
+            onChange={(next: CVStyleSettings) => {
+              setStyleSettings(next)
+              setHasUnsavedChanges(true)
+            }}
+            onReset={resetStyleSettings}
           />
           {aiResponse && (
             <CVEditPopup

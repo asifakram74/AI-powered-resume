@@ -79,7 +79,7 @@ export function SettingsPanelDialog({
 }: SettingsPanelDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="fixed top-0 left-0 h-[100dvh] w-[90vw] sm:w-1/2 max-w-none translate-x-0 translate-y-0 p-0 gap-0 rounded-none border-none data-[state=closed]:-translate-x-full data-[state=open]:translate-x-0 transition-transform duration-300 custom-scrollbar">
+      <DialogContent className="fixed top-0 left-0 h-[100dvh] w-[90vw] sm:w-1/2 max-w-none translate-x-0 translate-y-0 p-0 gap-0 rounded-none border-none data-[state=closed]:-translate-x-full data-[state=open]:translate-x-0 transition-transform duration-300 overflow-y-auto custom-scrollbar">
         <div className="flex flex-col h-full">
           <div className="px-6 py-5 bg-white/70 dark:bg-gray-950/70">
             <div className="flex items-start justify-between gap-4 pr-10">
