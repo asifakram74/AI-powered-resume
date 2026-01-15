@@ -1,13 +1,11 @@
 import React, { useMemo, useState } from "react"
-import { Dialog, DialogContent, DialogTitle } from "../../components/ui/dialog"
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import { Label } from "../../components/ui/label"
-import { Check, Minus, Plus, RotateCcw } from "lucide-react"
+import { Check, Minus, Plus, RotateCcw, GripVertical, ChevronDown, Trash2 } from "lucide-react"
 import type {
   CVBulletStyle,
   CVFontFamilyId,
- 
   CVStyleSettings,
   CVColorMode,
   CVBorderMode,
@@ -16,10 +14,11 @@ import type {
   CVIconFill,
   CVIconFrame,
   CVIconSize,
-
   CVEntryListStyle,
   CVDotsBarsBubbles,
   CVSectionHeaderIconStyle,
+  CVSectionId,
+  PersonalInfoFieldId,
 } from "../../types/cv-data"
 import {
   Select,
@@ -29,12 +28,49 @@ import {
   SelectValue,
 } from "../../components/ui/select"
 
+const SECTION_LABELS: Record<CVSectionId, string> = {
+  personalInfo: "Personal Info",
+  skills: "Skills",
+  experience: "Experience",
+  projects: "Projects",
+  education: "Education",
+  certifications: "Certifications",
+  languages: "Languages",
+  interests: "Interests",
+}
+
+const PERSONAL_INFO_FIELD_LABELS: Record<PersonalInfoFieldId, string> = {
+  fullName: "Full Name",
+  jobTitle: "Job Title",
+  email: "Email",
+  phone: "Phone",
+  address: "Address",
+  location: "City / Country",
+  linkedin: "LinkedIn",
+  github: "GitHub",
+  summary: "Summary",
+}
+
 type Props = {
-  open: boolean
-  onOpenChange: (open: boolean) => void
   value: CVStyleSettings
   onChange: (next: CVStyleSettings) => void
   onReset: () => void
+  
+  // Arrange Section Props
+  hiddenSections: CVSectionId[]
+  setHiddenSections: (sections: CVSectionId[]) => void
+  setHasUnsavedChanges: (hasChanges: boolean) => void
+  resetAllSettings: () => void
+  availableSectionIds: CVSectionId[]
+  visibleSectionOrder: CVSectionId[]
+  moveSection: (from: CVSectionId, to: CVSectionId) => void
+  hideSection: (sectionId: CVSectionId) => void
+  unhideSection: (sectionId: CVSectionId) => void
+  isPersonalInfoOpen: boolean
+  setIsPersonalInfoOpen: React.Dispatch<React.SetStateAction<boolean>>
+  resetPersonalInfoOrder: () => void
+  visiblePersonalInfoFieldOrder: PersonalInfoFieldId[]
+  movePersonalInfoField: (from: PersonalInfoFieldId, to: PersonalInfoFieldId) => void
 }
 
 const FONT_OPTIONS: Array<{ id: CVFontFamilyId; label: string }> = [
@@ -59,9 +95,6 @@ const BORDER_MODE_OPTIONS: Array<{ id: CVBorderMode; label: string }> = [
   { id: "multi", label: "Multi" },
   { id: "image", label: "Image" },
 ]
-
-
-
 
 
 const ALIGN_OPTIONS: Array<{ id: CVAlign; label: string }> = [
@@ -155,8 +188,8 @@ function normalizeHex(input: string) {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-none border border-[rgba(45,54,57,0.12)] bg-white p-5 shadow-sm">
-      <div className="text-sm font-semibold text-foreground mb-3">{title}</div>
+    <div className="rounded-none border border-[rgba(45,54,57,0.12)] bg-white p-4 shadow-sm">
+      <div className="text-xs font-semibold text-foreground mb-2.5 uppercase tracking-wide">{title}</div>
       {children}
     </div>
   )
@@ -172,7 +205,7 @@ function Segmented<T extends string>({
   onChange: (next: T) => void
 }) {
   return (
-    <div className="inline-flex rounded-none border border-[rgba(45,54,57,0.14)] bg-[rgba(45,54,57,0.04)] p-1 gap-1">
+    <div className="inline-flex rounded-none border border-[rgba(45,54,57,0.14)] bg-[rgba(45,54,57,0.04)] p-0.5 gap-0.5">
       {options.map((opt) => {
         const active = opt.id === value
         return (
@@ -180,15 +213,15 @@ function Segmented<T extends string>({
             key={opt.id}
             type="button"
             onClick={() => onChange(opt.id)}
-            className={`px-3 py-1.5 text-xs rounded-none transition-colors ${
+            className={`px-2 py-1 text-[11px] rounded-none transition-colors ${
               active
-                ? "bg-[var(--resumaic-green)] text-[var(--resumaic-dark-gray)]"
+                ? "bg-[var(--resumaic-green)] text-white"
                 : "text-[rgba(45,54,57,0.7)] hover:bg-[rgba(112,228,168,0.18)] hover:text-[var(--resumaic-dark-gray)]"
             }`}
           >
             {active ? (
               <span className="inline-flex items-center gap-1">
-                <Check className="h-3.5 w-3.5" />
+                <Check className="h-3 w-3 text-white" />
                 {opt.label}
               </span>
             ) : (
@@ -213,17 +246,17 @@ function ModeButton({
   icon: React.ReactNode
 }) {
   return (
-    <button type="button" onClick={onClick} className="flex flex-col items-center gap-2">
+    <button type="button" onClick={onClick} className="flex flex-col items-center gap-1.5">
       <div
-        className={`grid place-items-center size-14 rounded-none border transition-colors ${
+        className={`grid place-items-center size-10 rounded-none border transition-colors ${
           active
             ? "border-[rgba(112,228,168,0.9)] bg-[rgba(112,228,168,0.18)]"
             : "border-[rgba(45,54,57,0.16)] bg-white"
         }`}
       >
-        {icon}
+        <div className="scale-75 origin-center">{icon}</div>
       </div>
-      <div className={`text-xs ${active ? "text-[var(--resumaic-dark-gray)]" : "text-[rgba(45,54,57,0.65)]"}`}>{label}</div>
+      <div className={`text-[10px] ${active ? "text-[var(--resumaic-dark-gray)]" : "text-[rgba(45,54,57,0.65)]"}`}>{label}</div>
     </button>
   )
 }
@@ -238,12 +271,12 @@ function Swatch({
   onClick: () => void
 }) {
   return (
-    <button type="button" onClick={onClick} className="relative size-9 rounded-none">
+    <button type="button" onClick={onClick} className="relative size-7 rounded-none">
       <span className="absolute inset-0 rounded-none border border-[rgba(45,54,57,0.16)]" style={{ background: color }} />
       {selected ? (
         <span className="absolute inset-0 grid place-items-center">
-          <span className="grid place-items-center size-6 rounded-none bg-white/80 backdrop-blur-sm">
-            <Check className="h-4 w-4 text-[var(--resumaic-dark-gray)]" />
+          <span className="grid place-items-center size-5 rounded-none bg-white/80 backdrop-blur-sm">
+            <Check className="h-3 w-3 text-[var(--resumaic-dark-gray)]" />
           </span>
         </span>
       ) : null}
@@ -261,15 +294,15 @@ function AccentCheck({
   onToggle: () => void
 }) {
   return (
-    <button type="button" onClick={onToggle} className="flex items-center gap-2 text-sm text-[var(--resumaic-dark-gray)]">
+    <button type="button" onClick={onToggle} className="flex items-center gap-1.5 text-xs text-[var(--resumaic-dark-gray)]">
       <span
-        className={`grid place-items-center size-5 rounded-none border transition-colors ${
+        className={`grid place-items-center size-4 rounded-none border transition-colors ${
           checked
-            ? "border-[rgba(112,228,168,0.9)] bg-[rgba(112,228,168,0.18)]"
+            ? "border-[var(--resumaic-green)] bg-[var(--resumaic-green)]"
             : "border-[rgba(45,54,57,0.16)] bg-white"
         }`}
       >
-        {checked ? <Check className="h-4 w-4 text-[var(--resumaic-dark-gray)]" /> : null}
+        {checked ? <Check className="h-3 w-3 text-white" /> : null}
       </span>
       <span>{label}</span>
     </button>
@@ -388,7 +421,25 @@ function RangeControl({
   )
 }
 
-export function DesignPanelDialog({ open, onOpenChange, value, onChange, onReset }: Props) {
+export function DesignPanel({
+  value,
+  onChange,
+  onReset,
+  hiddenSections,
+  setHiddenSections,
+  setHasUnsavedChanges,
+  resetAllSettings,
+  availableSectionIds,
+  visibleSectionOrder,
+  moveSection,
+  hideSection,
+  unhideSection,
+  isPersonalInfoOpen,
+  setIsPersonalInfoOpen,
+  resetPersonalInfoOrder,
+  visiblePersonalInfoFieldOrder,
+  movePersonalInfoField,
+}: Props) {
   const set = (patch: Partial<CVStyleSettings>) => onChange({ ...value, ...patch })
 
   const updateColor = (key: keyof Pick<
@@ -449,43 +500,231 @@ export function DesignPanelDialog({ open, onOpenChange, value, onChange, onReset
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-<DialogContent className="fixed top-0 bottom-0 left-0 h-[100dvh]
-w-screen sm:w-[62.4vw] md:w-[59.8vw] lg:w-[57.2vw] xl:w-[50.7vw] 2xl:w-[44.2vw]
-max-w-none sm:max-w-none translate-x-0 translate-y-0 p-0 gap-0 rounded-none
-border-none data-[state=closed]:-translate-x-full
-data-[state=open]:translate-x-0 transition-transform duration-300
-overflow-y-auto overflow-x-hidden custom-scrollbar bg-white text-[var(--resumaic-dark-gray)] shadow-2xl">
-
-
-        <div className="flex flex-col h-full">
-          <div className="px-6 py-5 bg-white border-b border-[rgba(45,54,57,0.12)]">
-            <div className="flex items-start justify-between gap-4 pr-10">
-              <div className="space-y-1">
-                <DialogTitle className="text-xl font-bold text-[var(--resumaic-dark-gray)]">
-                  Design
-                </DialogTitle>
-                <div className="text-sm text-[rgba(45,54,57,0.65)]">
-                  Customize fonts, sizes, colors, and icons
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={onReset}
-                  className="flex items-center gap-2 border-[rgba(45,54,57,0.18)] bg-white text-[var(--resumaic-dark-gray)] hover:bg-[rgba(112,228,168,0.18)] hover:border-[rgba(112,228,168,0.6)]"
-                >
-                  <RotateCcw className="h-4 w-4" />
-                  Default
-                </Button>
-              </div>
+    <div className="flex flex-col h-full bg-white border-r border-[rgba(45,54,57,0.12)]">
+      <div className="px-5 py-4 bg-white border-b border-[rgba(45,54,57,0.12)]">
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-0.5">
+            <h2 className="text-lg font-bold text-[var(--resumaic-dark-gray)]">
+              Design
+            </h2>
+            <div className="text-xs text-[rgba(45,54,57,0.65)]">
+              Customize fonts, sizes, colors, and icons
             </div>
           </div>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onReset}
+              className="flex items-center gap-1.5 h-8 px-3 text-xs border-[rgba(45,54,57,0.18)] bg-white text-[var(--resumaic-dark-gray)] hover:bg-[rgba(112,228,168,0.18)] hover:border-[rgba(112,228,168,0.6)]"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              Default
+            </Button>
+          </div>
+        </div>
+      </div>
 
-          <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar bg-[rgba(112,228,168,0.05)]">
-            <div className="px-6 py-6 space-y-6">
+      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar bg-[f3f1ec]">
+        <div className="px-5 py-5 space-y-5">
+          <Section title="Arrange Sections">
+              {availableSectionIds.length === 0 ? (
+                <div className="rounded-xl border bg-white/60 dark:bg-gray-950/60 p-4">
+                  <div className="text-xs font-semibold text-gray-900 dark:text-gray-100">
+                    No sections to rearrange yet
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-300 mt-1">
+                    Add experience, education, or projects to enable section
+                    ordering.
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {hiddenSections.length > 0 && (
+                    <div className="rounded-xl border bg-white/70 dark:bg-gray-950/60 p-3">
+                      <div className="flex items-center justify-between gap-3 mb-2">
+                        <div className="text-xs font-semibold text-gray-900 dark:text-gray-100">
+                          Hidden Sections
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 text-xs"
+                          onClick={() => {
+                            setHiddenSections([])
+                            setHasUnsavedChanges(true)
+                          }}
+                        >
+                          <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+                          Restore All
+                        </Button>
+                      </div>
+                      <div className="space-y-1.5">
+                        {hiddenSections.map((id) => (
+                          <div
+                            key={id}
+                            className="flex items-center justify-between rounded-lg border bg-white/80 dark:bg-gray-950/70 px-2.5 py-1.5"
+                          >
+                            <div className="text-xs font-medium text-gray-900 dark:text-gray-100">
+                              {SECTION_LABELS[id]}
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => unhideSection(id)}
+                              className="h-6 w-6 text-gray-600 dark:text-gray-300"
+                              aria-label={`Restore ${SECTION_LABELS[id]}`}
+                            >
+                              <Plus className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    {visibleSectionOrder.map((sectionId) => (
+                      <div
+                        key={sectionId}
+                        className="rounded-xl border bg-white/80 dark:bg-gray-950/70 shadow-sm overflow-hidden"
+                      >
+                        <div
+                          draggable={availableSectionIds.length > 1}
+                          onDragStart={(e) => {
+                            e.dataTransfer.effectAllowed = "move"
+                            e.dataTransfer.setData("text/plain", sectionId)
+                          }}
+                          onDragOver={(e) => {
+                            e.preventDefault()
+                            e.dataTransfer.dropEffect = "move"
+                          }}
+                          onDrop={(e) => {
+                            e.preventDefault()
+                            const from = e.dataTransfer.getData(
+                              "text/plain"
+                            ) as CVSectionId
+                            if (from) moveSection(from, sectionId)
+                          }}
+                          className="group flex items-center justify-between px-3 py-2 hover:shadow-md transition-shadow"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="shrink-0 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors">
+                              <GripVertical className="h-3.5 w-3.5" />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (sectionId === "personalInfo")
+                                  setIsPersonalInfoOpen((v) => !v)
+                              }}
+                              className="min-w-0 flex items-center gap-2 text-left"
+                            >
+                              <div className="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">
+                                {SECTION_LABELS[sectionId]}
+                              </div>
+                              {sectionId === "personalInfo" && (
+                                <ChevronDown
+                                  className={`h-3.5 w-3.5 text-gray-500 dark:text-gray-400 transition-transform ${
+                                    isPersonalInfoOpen ? "rotate-180" : ""
+                                  }`}
+                                />
+                              )}
+                            </button>
+                          </div>
+                          <div className="flex items-center gap-0.5">
+                            {sectionId !== "personalInfo" && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => hideSection(sectionId)}
+                                className="h-7 w-7 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
+                                aria-label={`Hide ${SECTION_LABELS[sectionId]}`}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            )}
+                            <div className="text-[10px] text-gray-500 dark:text-gray-400 px-1.5">
+                              Drag
+                            </div>
+                          </div>
+                        </div>
+                        {sectionId === "personalInfo" && isPersonalInfoOpen && (
+                          <div className="border-t bg-gray-50/70 dark:bg-gray-950/40">
+                            <div className="px-3 pt-2 pb-1.5 flex items-center justify-between gap-2">
+                              <div className="text-[10px] font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">
+                                Personal Info Fields
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={resetPersonalInfoOrder}
+                                className="h-6 text-[10px] text-gray-600 dark:text-gray-300 px-2"
+                              >
+                                <RotateCcw className="h-3 w-3 mr-1" />
+                                Reset
+                              </Button>
+                            </div>
+                            <div className="px-3 pb-3">
+                              <div className="space-y-1 max-h-48 overflow-y-auto custom-scrollbar pr-1">
+                                {visiblePersonalInfoFieldOrder.map(
+                                  (fieldId) => (
+                                    <div
+                                      key={fieldId}
+                                      draggable={
+                                        visiblePersonalInfoFieldOrder.length > 1
+                                      }
+                                      onDragStart={(e) => {
+                                        e.dataTransfer.effectAllowed = "move"
+                                        e.dataTransfer.setData(
+                                          "text/plain",
+                                          fieldId
+                                        )
+                                      }}
+                                      onDragOver={(e) => {
+                                        e.preventDefault()
+                                        e.dataTransfer.dropEffect = "move"
+                                      }}
+                                      onDrop={(e) => {
+                                        e.preventDefault()
+                                        const from = e.dataTransfer.getData(
+                                          "text/plain"
+                                        ) as PersonalInfoFieldId
+                                        if (from)
+                                          movePersonalInfoField(from, fieldId)
+                                      }}
+                                      className="group flex items-center justify-between rounded-lg border bg-white/80 dark:bg-gray-950/70 px-2.5 py-1"
+                                    >
+                                      <div className="flex items-center gap-2 min-w-0">
+                                        <div className="shrink-0 text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300 transition-colors">
+                                          <GripVertical className="h-3.5 w-3.5" />
+                                        </div>
+                                        <div className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
+                                          {PERSONAL_INFO_FIELD_LABELS[fieldId]}
+                                        </div>
+                                      </div>
+                                      <div className="text-[10px] text-gray-500 dark:text-gray-400">
+                                        Drag
+                                      </div>
+                                    </div>
+                                  )
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+          </Section>
+
               <Section title="Spacing">
                 <div className="space-y-6">
                   <RangeControl
@@ -537,44 +776,29 @@ overflow-y-auto overflow-x-hidden custom-scrollbar bg-white text-[var(--resumaic
               </Section>
 
               <Section title="Colors">
-                <div className="space-y-5">
-                  <div className="flex items-start justify-between">
-                    <ModeButton
-                      active={!showBorderPanel && value.colorMode === "basic"}
-                      label="Basic"
-                      onClick={() => {
-                        setShowBorderPanel(false)
-                        set({ colorMode: "basic" })
+                <div className="space-y-4">
+                  <div className="flex items-start justify-center">
+                    <Segmented
+                      value={showBorderPanel ? "border" : value.colorMode}
+                      options={[
+                        { id: "basic", label: "Basic" },
+                        { id: "advanced", label: "Advanced" },
+                        { id: "border", label: "Border" },
+                      ]}
+                      onChange={(v) => {
+                        if (v === "border") {
+                          setShowBorderPanel(true)
+                        } else {
+                          setShowBorderPanel(false)
+                          set({ colorMode: v as CVColorMode })
+                        }
                       }}
-                      icon={<span className="size-8 rounded-none border-2 border-[rgba(112,228,168,0.9)]" />}
-                    />
-                    <ModeButton
-                      active={!showBorderPanel && value.colorMode === "advanced"}
-                      label="Advanced"
-                      onClick={() => {
-                        setShowBorderPanel(false)
-                        set({ colorMode: "advanced" })
-                      }}
-                      icon={
-                        <span className="size-8 rounded-none border border-[rgba(45,54,57,0.16)] overflow-hidden">
-                          <span className="block h-1/2 bg-[rgba(45,54,57,0.10)]" />
-                          <span className="block h-1/2 bg-white" />
-                        </span>
-                      }
-                    />
-                    <ModeButton
-                      active={showBorderPanel}
-                      label="Border"
-                      onClick={() => setShowBorderPanel(true)}
-                      icon={
-                        <span className="size-8 rounded-none border-[6px] border-[rgba(45,54,57,0.22)] bg-white" />
-                      }
                     />
                   </div>
 
-                  {!showBorderPanel ? (
+                  {!showBorderPanel && value.colorMode === "basic" && (
                     <>
-                      <div className="grid grid-cols-3 gap-3">
+                      <div className="flex items-center gap-1.5 justify-between">
                         {([
                           { id: "single" as const, label: "Accent" },
                           { id: "multi" as const, label: "Multi" },
@@ -586,27 +810,23 @@ overflow-y-auto overflow-x-hidden custom-scrollbar bg-white text-[var(--resumaic
                               key={opt.id}
                               type="button"
                               onClick={() => set({ borderMode: opt.id })}
-                              className={`rounded-none border p-3 text-left transition-colors ${
+                              className={`flex-1 rounded-none border p-2 text-center transition-colors ${
                                 active
-                                  ? "border-[rgba(112,228,168,0.9)] bg-[rgba(112,228,168,0.18)]"
-                                  : "border-[rgba(45,54,57,0.16)] bg-white"
+                                  ? "border-[var(--resumaic-green)] bg-[var(--resumaic-green)] text-white"
+                                  : "border-[rgba(45,54,57,0.16)] bg-white text-foreground"
                               }`}
                             >
-                              <div className="flex items-center justify-between">
-                                <div className="text-sm font-medium text-foreground">{opt.label}</div>
-                                {active ? <Check className="h-4 w-4 text-[var(--resumaic-dark-gray)]" /> : null}
-                              </div>
-                              <div className="mt-2 h-10 rounded-none bg-[rgba(45,54,57,0.08)]" />
+                              <div className="text-xs font-medium">{opt.label}</div>
                             </button>
                           )
                         })}
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-1.5">
                         {accentPalette.map((c) => (
                           <Swatch key={c} color={c} selected={c.toLowerCase() === value.accentColor.toLowerCase()} onClick={() => set({ accentColor: c })} />
                         ))}
-                        <label className="relative size-9 rounded-none cursor-pointer">
+                        <label className="relative size-7 rounded-none cursor-pointer">
                           <span className="absolute inset-0 rounded-none border border-border bg-gradient-to-br from-red-500 via-yellow-500 to-blue-500" />
                           <input
                             type="color"
@@ -617,11 +837,11 @@ overflow-y-auto overflow-x-hidden custom-scrollbar bg-white text-[var(--resumaic
                         </label>
                       </div>
 
-                      <div className="space-y-3">
-                        <div className="text-xs font-semibold text-[rgba(45,54,57,0.6)] uppercase tracking-wide">
+                      <div className="space-y-2">
+                        <div className="text-[10px] font-semibold text-[rgba(45,54,57,0.6)] uppercase tracking-wide">
                           Apply accent color
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div className="grid grid-cols-2 gap-1.5">
                           {accentTargets.map(([key, label]) => (
                             <AccentCheck
                               key={key}
@@ -633,16 +853,18 @@ overflow-y-auto overflow-x-hidden custom-scrollbar bg-white text-[var(--resumaic
                         </div>
                       </div>
                     </>
-                  ) : (
+                  )}
+
+                  {showBorderPanel && (
                     <div className="space-y-4">
                       <div className="flex items-center justify-between gap-4">
-                        <Label className="text-sm">Border Mode</Label>
+                        <Label className="text-xs">Border Mode</Label>
                         <Segmented value={value.borderMode} options={BORDER_MODE_OPTIONS} onChange={(v) => set({ borderMode: v })} />
                       </div>
 
-                      <div className="flex items-end gap-3">
-                        <div className="grow space-y-1.5">
-                          <Label>Border color</Label>
+                      <div className="flex items-end gap-2">
+                        <div className="grow space-y-1">
+                          <Label className="text-xs">Border color</Label>
                           <Input
                             value={value.borderColor}
                             onChange={(e) => {
@@ -650,42 +872,42 @@ overflow-y-auto overflow-x-hidden custom-scrollbar bg-white text-[var(--resumaic
                               if (normalized) set({ borderColor: normalized })
                             }}
                             placeholder="#1f2937"
-                            className="bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]"
+                            className="h-8 text-xs bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]"
                           />
                         </div>
                         <input
                           type="color"
                           value={value.borderColor}
                           onChange={(e) => updateColor("borderColor" as any, e.target.value)}
-                          className="h-9 w-12 rounded-none border border-[rgba(45,54,57,0.16)] bg-white p-1"
+                          className="h-8 w-10 rounded-none border border-[rgba(45,54,57,0.16)] bg-white p-0.5"
                         />
                       </div>
 
                       {value.borderMode === "image" ? (
-                        <div className="space-y-2">
-                          <Label>Background image URL</Label>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Background image URL</Label>
                           <Input
                             value={value.backgroundImageUrl}
                             onChange={(e) => set({ backgroundImageUrl: e.target.value })}
                             placeholder="https://..."
-                            className="bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]"
+                            className="h-8 text-xs bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]"
                           />
                         </div>
                       ) : null}
                     </div>
                   )}
 
-                  {showAdvancedColors ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  {!showBorderPanel && value.colorMode === "advanced" && (
+                    <div className="grid grid-cols-1 gap-3 pt-1">
                       {([
                         ["textColor", "Text"],
                         ["headingColor", "Headings"],
                         ["mutedColor", "Muted"],
                         ["backgroundColor", "Background"],
                       ] as const).map(([key, label]) => (
-                        <div key={key} className="flex items-end gap-3">
-                          <div className="grow space-y-1.5">
-                            <Label>{label}</Label>
+                        <div key={key} className="flex items-end gap-2">
+                          <div className="grow space-y-1">
+                            <Label className="text-xs">{label}</Label>
                             <Input
                               value={(value as any)[key]}
                               onChange={(e) => {
@@ -693,21 +915,21 @@ overflow-y-auto overflow-x-hidden custom-scrollbar bg-white text-[var(--resumaic
                                 if (normalized) set({ [key]: normalized } as any)
                               }}
                               placeholder="#000000"
-                              className="bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]"
+                              className="h-8 text-xs bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]"
                             />
                           </div>
                           <input
                             type="color"
                             value={(value as any)[key]}
                             onChange={(e) => updateColor(key as any, e.target.value)}
-                            className="h-9 w-12 rounded-none border border-[rgba(45,54,57,0.16)] bg-white p-1"
+                            className="h-8 w-10 rounded-none border border-[rgba(45,54,57,0.16)] bg-white p-0.5"
                           />
                         </div>
                       ))}
                     </div>
-                  ) : null}
+                  )}
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="space-y-4 pt-2 border-t border-[rgba(45,54,57,0.08)]">
                     <RangeControl
                       label="Dates opacity"
                       valueLabel={`${Math.round(value.datesOpacity * 100)}%`}
@@ -733,84 +955,66 @@ overflow-y-auto overflow-x-hidden custom-scrollbar bg-white text-[var(--resumaic
               </Section>
 
               <Section title="Font">
-                <div className="space-y-5">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="inline-flex rounded-none border border-[rgba(45,54,57,0.14)] bg-[rgba(45,54,57,0.04)] p-1 gap-1">
-                      {(["body", "heading"] as const).map((t) => {
-                        const active = t === fontTarget
+                <div className="space-y-4">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between w-full">
+                      <div className="inline-flex rounded-none border border-[rgba(45,54,57,0.14)] bg-[rgba(45,54,57,0.04)] p-0.5 gap-0.5">
+                        {(["body", "heading"] as const).map((t) => {
+                          const active = t === fontTarget
+                          return (
+                            <button
+                              key={t}
+                              type="button"
+                              onClick={() => setFontTarget(t)}
+                              className={`px-2 py-1 text-[11px] rounded-none transition-colors ${
+                                active
+                                  ? "bg-[var(--resumaic-green)] text-white"
+                                  : "text-[rgba(45,54,57,0.7)] hover:bg-[rgba(112,228,168,0.18)] hover:text-[var(--resumaic-dark-gray)]"
+                              }`}
+                            >
+                              {t === "body" ? "Body" : "Headings"}
+                            </button>
+                          )
+                        })}
+                      </div>
+                      <Segmented
+                        value={fontCategory}
+                        options={[
+                          { id: "serif", label: "Serif" },
+                          { id: "sans", label: "Sans" },
+                          { id: "mono", label: "Mono" },
+                        ]}
+                        onChange={(v) => setFontCategory(v as any)}
+                      />
+                    </div>
+
+                    {/* Font Categories Cards - Hidden as we have Segmented Control above */}
+                    {/* We can remove this grid to save space or keep it if visual selection is preferred. 
+                        Given user feedback about size, let's keep only the segmented control for category selection 
+                        and show font options directly. */}
+                    
+                    <div className="grid grid-cols-2 gap-2">
+                      {visibleFonts.map((opt) => {
+                        const active = opt.id === activeFontFamily
                         return (
                           <button
-                            key={t}
+                            key={opt.id}
                             type="button"
-                            onClick={() => setFontTarget(t)}
-                            className={`px-3 py-1.5 text-xs rounded-none transition-colors ${
+                            onClick={() => setFontFamily(opt.id)}
+                            className={`rounded-none border px-2 py-1.5 text-xs transition-colors truncate ${
                               active
-                                ? "bg-[var(--resumaic-green)] text-[var(--resumaic-dark-gray)]"
-                                : "text-[rgba(45,54,57,0.7)] hover:bg-[rgba(112,228,168,0.18)] hover:text-[var(--resumaic-dark-gray)]"
+                                ? "border-[var(--resumaic-green)] bg-[var(--resumaic-green)] text-white"
+                                : "border-[rgba(45,54,57,0.16)] bg-white text-foreground"
                             }`}
                           >
-                            {t === "body" ? "Body" : "Headings"}
+                            {opt.label}
                           </button>
                         )
                       })}
                     </div>
-                    <Segmented
-                      value={fontCategory}
-                      options={[
-                        { id: "serif", label: "Serif" },
-                        { id: "sans", label: "Sans" },
-                        { id: "mono", label: "Mono" },
-                      ]}
-                      onChange={(v) => setFontCategory(v as any)}
-                    />
                   </div>
 
-                  <div className="grid grid-cols-3 gap-3">
-                    {([
-                      { id: "serif" as const, label: "Serif" },
-                      { id: "sans" as const, label: "Sans" },
-                      { id: "mono" as const, label: "Mono" },
-                    ] as const).map((c) => {
-                      const active = c.id === fontCategory
-                      return (
-                        <button
-                          key={c.id}
-                          type="button"
-                          onClick={() => setFontCategory(c.id)}
-                          className={`rounded-none border p-4 text-center transition-colors ${
-                            active
-                              ? "border-[rgba(112,228,168,0.9)] bg-[rgba(112,228,168,0.18)]"
-                              : "border-[rgba(45,54,57,0.16)] bg-white"
-                          }`}
-                        >
-                          <div className={`text-3xl leading-none ${active ? "text-[var(--resumaic-dark-gray)]" : "text-foreground"}`}>Aa</div>
-                          <div className="mt-1 text-xs text-[rgba(45,54,57,0.6)]">{c.label}</div>
-                        </button>
-                      )
-                    })}
-                  </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {visibleFonts.map((opt) => {
-                      const active = opt.id === activeFontFamily
-                      return (
-                        <button
-                          key={opt.id}
-                          type="button"
-                          onClick={() => setFontFamily(opt.id)}
-                          className={`rounded-none border px-3 py-2 text-sm transition-colors ${
-                            active
-                              ? "border-[rgba(112,228,168,0.9)] bg-[rgba(112,228,168,0.18)] text-[var(--resumaic-dark-gray)]"
-                              : "border-[rgba(45,54,57,0.16)] bg-white text-foreground"
-                          }`}
-                        >
-                          {opt.label}
-                        </button>
-                      )
-                    })}
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
+                  <div className="space-y-4 pt-1">
                     <RangeControl
                       label="Headings size"
                       valueLabel={`${value.headingFontSizePx}px`}
@@ -820,8 +1024,8 @@ overflow-y-auto overflow-x-hidden custom-scrollbar bg-white text-[var(--resumaic
                       step={1}
                       onChange={(next) => set({ headingFontSizePx: clampNumber(next, 14, 26) })}
                     />
-                    <div className="flex items-center justify-between gap-4">
-                      <Label className="text-sm">Capitalization</Label>
+                    <div className="flex items-center justify-between gap-2">
+                      <Label className="text-xs">Capitalization</Label>
                       <Segmented value={value.capitalization} options={CAPITALIZATION_OPTIONS} onChange={(v) => set({ capitalization: v })} />
                     </div>
                   </div>
@@ -830,8 +1034,8 @@ overflow-y-auto overflow-x-hidden custom-scrollbar bg-white text-[var(--resumaic
 
               <Section title="Section Headings">
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between gap-4">
-                    <Label className="text-sm">Headings line</Label>
+                  <div className="flex items-center justify-between gap-2">
+                    <Label className="text-xs">Headings line</Label>
                     <Segmented
                       value={value.headingsLine ? ("on" as const) : ("off" as const)}
                       options={[
@@ -842,19 +1046,19 @@ overflow-y-auto overflow-x-hidden custom-scrollbar bg-white text-[var(--resumaic
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <Label>Section header icon</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Section header icon</Label>
                       <Select
                         value={value.sectionHeaderIconStyle}
                         onValueChange={(v) => set({ sectionHeaderIconStyle: v as CVSectionHeaderIconStyle })}
                       >
-                        <SelectTrigger className="w-full bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]">
+                        <SelectTrigger className="h-8 text-xs w-full bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]">
                           <SelectValue placeholder="Select style" />
                         </SelectTrigger>
                         <SelectContent className="bg-white text-[var(--resumaic-dark-gray)] border-[rgba(45,54,57,0.16)]">
                           {SECTION_ICON_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.id} value={opt.id}>
+                            <SelectItem key={opt.id} value={opt.id} className="text-xs">
                               {opt.label}
                             </SelectItem>
                           ))}
@@ -862,15 +1066,15 @@ overflow-y-auto overflow-x-hidden custom-scrollbar bg-white text-[var(--resumaic
                       </Select>
                     </div>
 
-                    <div className="space-y-1.5">
-                      <Label>Dots / Bars / Bubbles</Label>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Dots / Bars / Bubbles</Label>
                       <Select value={value.dotsBarsBubbles} onValueChange={(v) => set({ dotsBarsBubbles: v as CVDotsBarsBubbles })}>
-                        <SelectTrigger className="w-full bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]">
+                        <SelectTrigger className="h-8 text-xs w-full bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]">
                           <SelectValue placeholder="Select style" />
                         </SelectTrigger>
                         <SelectContent className="bg-white text-[var(--resumaic-dark-gray)] border-[rgba(45,54,57,0.16)]">
                           {DOTS_BARS_BUBBLES_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.id} value={opt.id}>
+                            <SelectItem key={opt.id} value={opt.id} className="text-xs">
                               {opt.label}
                             </SelectItem>
                           ))}
@@ -883,176 +1087,174 @@ overflow-y-auto overflow-x-hidden custom-scrollbar bg-white text-[var(--resumaic
 
               <Section title="Entry Layout">
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Description indentation ({value.descriptionIndentPx}px)</Label>
-                      <input
-                        className="w-full accent-[var(--resumaic-green)]"
-                        type="range"
-                        min={0}
-                        max={32}
-                        step={1}
-                        value={value.descriptionIndentPx}
-                        onChange={(e) => set({ descriptionIndentPx: clampNumber(Number(e.target.value), 0, 32) })}
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>List style</Label>
-                      <Select value={value.entryListStyle} onValueChange={(v) => set({ entryListStyle: v as CVEntryListStyle })}>
-                        <SelectTrigger className="w-full bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]">
-                          <SelectValue placeholder="Select list style" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white text-[var(--resumaic-dark-gray)] border-[rgba(45,54,57,0.16)]">
-                          {ENTRY_LIST_STYLE_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.id} value={opt.id}>
-                              {opt.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
-              </Section>
-
-              <Section title="Personal Details">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between gap-4">
-                    <Label className="text-sm">Align</Label>
-                    <Segmented value={value.align} options={ALIGN_OPTIONS} onChange={(v) => set({ align: v })} />
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <Label>Header icons</Label>
-                      <Select value={value.headerIcons} onValueChange={(v) => set({ headerIcons: v as CVIconFill })}>
-                        <SelectTrigger className="w-full bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]">
-                          <SelectValue placeholder="Select icon style" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white text-[var(--resumaic-dark-gray)] border-[rgba(45,54,57,0.16)]">
-                          {ICON_FILL_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.id} value={opt.id}>
-                              {opt.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Link icons</Label>
-                      <Select value={value.linkIcons} onValueChange={(v) => set({ linkIcons: v as CVIconFill })}>
-                        <SelectTrigger className="w-full bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]">
-                          <SelectValue placeholder="Select icon style" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white text-[var(--resumaic-dark-gray)] border-[rgba(45,54,57,0.16)]">
-                          {ICON_FILL_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.id} value={opt.id}>
-                              {opt.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Icon frame</Label>
-                      <Select value={value.iconFrame} onValueChange={(v) => set({ iconFrame: v as CVIconFrame })}>
-                        <SelectTrigger className="w-full bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]">
-                          <SelectValue placeholder="Select frame" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white text-[var(--resumaic-dark-gray)] border-[rgba(45,54,57,0.16)]">
-                          {ICON_FRAME_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.id} value={opt.id}>
-                              {opt.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Icon size</Label>
-                      <Select value={value.iconSize} onValueChange={(v) => set({ iconSize: v as CVIconSize })}>
-                        <SelectTrigger className="w-full bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]">
-                          <SelectValue placeholder="Select size" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white text-[var(--resumaic-dark-gray)] border-[rgba(45,54,57,0.16)]">
-                          {ICON_SIZE_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.id} value={opt.id}>
-                              {opt.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
-              </Section>
-
-              <Section title="Name">
-                <div className="flex items-center justify-between gap-4">
-                  <Label className="text-sm">Name bold</Label>
-                  <Segmented
-                    value={value.nameBold ? ("on" as const) : ("off" as const)}
-                    options={[
-                      { id: "on", label: "On" },
-                      { id: "off", label: "Off" },
-                    ]}
-                    onChange={(v) => set({ nameBold: v === "on" })}
-                  />
-                </div>
-              </Section>
-
-              <Section title="Footer">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="flex items-center justify-between gap-4 rounded-none border border-[rgba(45,54,57,0.12)] bg-[rgba(45,54,57,0.03)] px-3 py-2">
-                    <Label className="text-sm">Page numbers</Label>
-                    <Segmented
-                      value={value.showPageNumbers ? ("on" as const) : ("off" as const)}
-                      options={[
-                        { id: "on", label: "On" },
-                        { id: "off", label: "Off" },
-                      ]}
-                      onChange={(v) => set({ showPageNumbers: v === "on" })}
+                  <div className="space-y-2">
+                    <Label className="text-xs">Description indentation ({value.descriptionIndentPx}px)</Label>
+                    <input
+                      className="w-full h-1.5 accent-[var(--resumaic-green)] bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                      type="range"
+                      min={0}
+                      max={32}
+                      step={1}
+                      value={value.descriptionIndentPx}
+                      onChange={(e) => set({ descriptionIndentPx: clampNumber(Number(e.target.value), 0, 32) })}
                     />
                   </div>
-                  <div className="flex items-center justify-between gap-4 rounded-none border border-[rgba(45,54,57,0.12)] bg-[rgba(45,54,57,0.03)] px-3 py-2">
-                    <Label className="text-sm">Email</Label>
-                    <Segmented
-                      value={value.showEmail ? ("on" as const) : ("off" as const)}
-                      options={[
-                        { id: "on", label: "On" },
-                        { id: "off", label: "Off" },
-                      ]}
-                      onChange={(v) => set({ showEmail: v === "on" })}
-                    />
-                  </div>
-                </div>
-              </Section>
-
-              <Section title="Icons">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <Label>Bullets</Label>
-                    <Select value={value.bulletStyle} onValueChange={(v) => set({ bulletStyle: v as CVBulletStyle })}>
-                      <SelectTrigger className="w-full bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]">
-                        <SelectValue placeholder="Select style" />
+                  <div className="space-y-1">
+                    <Label className="text-xs">List style</Label>
+                    <Select value={value.entryListStyle} onValueChange={(v) => set({ entryListStyle: v as CVEntryListStyle })}>
+                      <SelectTrigger className="h-8 text-xs w-full bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]">
+                        <SelectValue placeholder="Select list style" />
                       </SelectTrigger>
                       <SelectContent className="bg-white text-[var(--resumaic-dark-gray)] border-[rgba(45,54,57,0.16)]">
-                        {BULLET_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.id} value={opt.id}>
+                        {ENTRY_LIST_STYLE_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.id} value={opt.id} className="text-xs">
                             {opt.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-1.5">
-                    <Label>List bullets</Label>
+                </div>
+              </Section>
+
+              <Section title="Personal Details">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <Label className="text-xs">Align</Label>
+                    <Segmented value={value.align} options={ALIGN_OPTIONS} onChange={(v) => set({ align: v })} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Header icons</Label>
+                      <Select value={value.headerIcons} onValueChange={(v) => set({ headerIcons: v as CVIconFill })}>
+                        <SelectTrigger className="h-8 text-xs w-full bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]">
+                          <SelectValue placeholder="Select icon style" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white text-[var(--resumaic-dark-gray)] border-[rgba(45,54,57,0.16)]">
+                          {ICON_FILL_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.id} value={opt.id} className="text-xs">
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Link icons</Label>
+                      <Select value={value.linkIcons} onValueChange={(v) => set({ linkIcons: v as CVIconFill })}>
+                        <SelectTrigger className="h-8 text-xs w-full bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]">
+                          <SelectValue placeholder="Select icon style" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white text-[var(--resumaic-dark-gray)] border-[rgba(45,54,57,0.16)]">
+                          {ICON_FILL_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.id} value={opt.id} className="text-xs">
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Icon frame</Label>
+                      <Select value={value.iconFrame} onValueChange={(v) => set({ iconFrame: v as CVIconFrame })}>
+                        <SelectTrigger className="h-8 text-xs w-full bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]">
+                          <SelectValue placeholder="Select frame" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white text-[var(--resumaic-dark-gray)] border-[rgba(45,54,57,0.16)]">
+                          {ICON_FRAME_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.id} value={opt.id} className="text-xs">
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Icon size</Label>
+                      <Select value={value.iconSize} onValueChange={(v) => set({ iconSize: v as CVIconSize })}>
+                        <SelectTrigger className="h-8 text-xs w-full bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]">
+                          <SelectValue placeholder="Select size" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white text-[var(--resumaic-dark-gray)] border-[rgba(45,54,57,0.16)]">
+                          {ICON_SIZE_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.id} value={opt.id} className="text-xs">
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              </Section>
+
+              <Section title="Name & Footer">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <Label className="text-xs">Name bold</Label>
+                    <Segmented
+                      value={value.nameBold ? ("on" as const) : ("off" as const)}
+                      options={[
+                        { id: "on", label: "On" },
+                        { id: "off", label: "Off" },
+                      ]}
+                      onChange={(v) => set({ nameBold: v === "on" })}
+                    />
+                  </div>
+                  
+                  <div className="pt-2 border-t border-[rgba(45,54,57,0.08)] grid grid-cols-2 gap-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <Label className="text-xs">Page numbers</Label>
+                      <Segmented
+                        value={value.showPageNumbers ? ("on" as const) : ("off" as const)}
+                        options={[
+                          { id: "on", label: "On" },
+                          { id: "off", label: "Off" },
+                        ]}
+                        onChange={(v) => set({ showPageNumbers: v === "on" })}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <Label className="text-xs">Email</Label>
+                      <Segmented
+                        value={value.showEmail ? ("on" as const) : ("off" as const)}
+                        options={[
+                          { id: "on", label: "On" },
+                          { id: "off", label: "Off" },
+                        ]}
+                        onChange={(v) => set({ showEmail: v === "on" })}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </Section>
+
+              <Section title="Icons">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Bullets</Label>
+                    <Select value={value.bulletStyle} onValueChange={(v) => set({ bulletStyle: v as CVBulletStyle })}>
+                      <SelectTrigger className="h-8 text-xs w-full bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]">
+                        <SelectValue placeholder="Select style" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white text-[var(--resumaic-dark-gray)] border-[rgba(45,54,57,0.16)]">
+                        {BULLET_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.id} value={opt.id} className="text-xs">
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">List bullets</Label>
                     <Select value={value.entryListStyle} onValueChange={(v) => set({ entryListStyle: v as CVEntryListStyle })}>
-                      <SelectTrigger className="w-full bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]">
+                      <SelectTrigger className="h-8 text-xs w-full bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]">
                         <SelectValue placeholder="Select style" />
                       </SelectTrigger>
                       <SelectContent className="bg-white text-[var(--resumaic-dark-gray)] border-[rgba(45,54,57,0.16)]">
                         {ENTRY_LIST_STYLE_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.id} value={opt.id}>
+                          <SelectItem key={opt.id} value={opt.id} className="text-xs">
                             {opt.label}
                           </SelectItem>
                         ))}
@@ -1064,7 +1266,6 @@ overflow-y-auto overflow-x-hidden custom-scrollbar bg-white text-[var(--resumaic
             </div>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+   
   )
 }

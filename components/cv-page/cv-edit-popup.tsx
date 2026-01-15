@@ -24,6 +24,7 @@ interface OptimizedCV {
     location: string;
     linkedin: string;
     website: string;
+    profilePicture?: string;
   };
   summary: string;
   workExperience: Array<{
