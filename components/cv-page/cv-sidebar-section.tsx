@@ -128,11 +128,11 @@ export function CVSidebarSection({
         {items.map((item, index) => (
           <div 
             key={index}
-            className="group relative p-6 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl hover:border-pink-200 dark:hover:border-pink-900/50 hover:shadow-md transition-all cursor-pointer"
+            className="group relative p-6 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl hover:border-emerald-200 dark:hover:border-emerald-900/50 hover:shadow-md transition-all cursor-pointer"
             onClick={() => onEditItem(index)}
           >
             {/* Edit Button - Top Right */}
-            <div className="absolute top-4 right-4 p-2.5 rounded-full bg-[#ff4d6d] text-white shadow-md shadow-pink-100 dark:shadow-none group-hover:scale-110 transition-transform z-10">
+            <div className="absolute top-4 right-4 p-2.5 rounded-full resumaic-gradient-green text-white shadow-md shadow-emerald-100 dark:shadow-none group-hover:scale-110 transition-transform z-10">
               <Edit2 className="h-4 w-4" />
             </div>
 
@@ -223,7 +223,7 @@ export function CVSidebarSection({
           {items.map((item, index) => (
             <div 
               key={index}
-              className="group flex items-center gap-3 p-3 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl hover:border-pink-200 dark:hover:border-pink-900/50 hover:shadow-sm transition-all cursor-pointer relative"
+              className="group flex items-center gap-3 p-3 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl hover:border-emerald-200 dark:hover:border-emerald-900/50 hover:shadow-sm transition-all cursor-pointer relative"
               onClick={() => onEditItem(index)}
             >
               {/* Drag Handle */}
@@ -246,7 +246,7 @@ export function CVSidebarSection({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 text-gray-400 dark:text-gray-500 hover:text-pink-600 dark:hover:text-pink-400 hover:bg-pink-50 dark:hover:bg-pink-900/20"
+                  className="h-7 w-7 text-gray-400 dark:text-gray-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
                   onClick={(e) => {
                     e.stopPropagation();
                     onEditItem(index);
@@ -257,7 +257,7 @@ export function CVSidebarSection({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 text-gray-400 dark:text-gray-500 hover:text-pink-600 dark:hover:text-pink-400 hover:bg-pink-50 dark:hover:bg-pink-900/20"
+                  className="h-7 w-7 text-gray-400 dark:text-gray-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
                   onClick={(e) => handleToggleVisibility(e, index)}
                 >
                   {item.isHidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -278,7 +278,7 @@ export function CVSidebarSection({
           <div className="pt-2 flex justify-center">
             <Button 
               variant="outline" 
-              className="h-10 px-6 rounded-full border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 bg-transparent hover:border-pink-200 dark:hover:border-pink-900/50 hover:bg-pink-50 dark:hover:bg-pink-900/20 hover:text-pink-700 dark:hover:text-pink-400 gap-2 transition-all"
+              className="h-10 px-6 rounded-full border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 bg-transparent hover:border-emerald-200 dark:hover:border-emerald-900/50 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-700 dark:hover:text-emerald-400 gap-2 transition-all"
               onClick={onAddItem}
             >
               <Plus className="h-4 w-4" />
@@ -408,7 +408,7 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
           <Button variant="ghost" size="sm" className="h-8 gap-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" onClick={onCancel}>
             Cancel
           </Button>
-          <Button variant="ghost" size="sm" className="h-8 gap-1 text-gray-500 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400">
+          <Button variant="ghost" size="sm" className="h-8 gap-1 text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400">
             <Lightbulb className="h-4 w-4" />
             <span className="text-xs font-medium">Get Tips</span>
           </Button>
@@ -483,7 +483,7 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
               <Input
                 value={formData.fullName || ""}
                 onChange={(e) => handleChange("fullName", e.target.value)}
-                className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-[#ff4d6d]/20 focus-visible:border-[#ff4d6d] h-10"
+                className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500 h-10"
                 placeholder="e.g. Asif Akram"
               />
             </div>
@@ -492,7 +492,7 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
               <Input
                 value={formData.jobTitle || ""}
                 onChange={(e) => handleChange("jobTitle", e.target.value)}
-                className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-[#ff4d6d]/20 focus-visible:border-[#ff4d6d] h-10"
+                className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500 h-10"
                 placeholder="e.g. Full Stack Developer"
               />
             </div>
@@ -502,7 +502,7 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
                 <Input
                   value={formData.location || ""}
                   onChange={(e) => handleChange("location", e.target.value)}
-                  className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-[#ff4d6d]/20 focus-visible:border-[#ff4d6d] h-10"
+                  className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500 h-10"
                   placeholder="e.g. Lahore, Punjab, Pakistan"
                 />
                 <GripVertical className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
@@ -514,7 +514,7 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
                 <Input
                   value={formData.email || ""}
                   onChange={(e) => handleChange("email", e.target.value)}
-                  className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-[#ff4d6d]/20 focus-visible:border-[#ff4d6d] h-10"
+                  className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500 h-10"
                   placeholder="e.g. name@example.com"
                 />
                 <GripVertical className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
@@ -526,7 +526,7 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
                 <Input
                   value={formData.phone || ""}
                   onChange={(e) => handleChange("phone", e.target.value)}
-                  className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-[#ff4d6d]/20 focus-visible:border-[#ff4d6d] h-10"
+                  className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500 h-10"
                   placeholder="Enter Phone"
                 />
                 <GripVertical className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
@@ -539,7 +539,7 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
                   <Input
                     value={formData.linkedin || ""}
                     onChange={(e) => handleChange("linkedin", e.target.value)}
-                    className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-[#ff4d6d]/20 focus-visible:border-[#ff4d6d] h-10"
+                    className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500 h-10"
                     placeholder="Enter LinkedIn"
                   />
                 </div>
@@ -559,7 +559,7 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
                   <Input
                     value={formData.github || ""}
                     onChange={(e) => handleChange("github", e.target.value)}
-                    className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-[#ff4d6d]/20 focus-visible:border-[#ff4d6d] h-10"
+                    className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500 h-10"
                     placeholder="Enter GitHub"
                   />
                 </div>
@@ -607,7 +607,7 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
               <Textarea
                 value={formData.summary || ""}
                 onChange={(e) => handleChange("summary", e.target.value)}
-                className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-[#ff4d6d]/20 focus-visible:border-[#ff4d6d] min-h-[140px]"
+                className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500 min-h-[140px]"
                 placeholder="Write a brief professional summary..."
               />
             </div>
@@ -622,7 +622,7 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
                 <Input 
                   value={formData[titleKey as keyof SectionItem] || ''} 
                   onChange={(e) => handleChange(titleKey as string, e.target.value)}
-                  className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-pink-500/20 focus-visible:border-pink-500"
+                  className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500"
                   placeholder="e.g. Senior Product Designer"
                 />
               </div>
@@ -635,7 +635,7 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
               <Input 
                 value={formData[subtitleKey as keyof SectionItem] || ''} 
                 onChange={(e) => handleChange(subtitleKey as string, e.target.value)}
-                className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-pink-500/20 focus-visible:border-pink-500"
+                className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500"
                 placeholder="e.g. Google Inc."
               />
             </div>
@@ -691,7 +691,7 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
             <Input
               value={Array.isArray((formData as any).technologies) ? (formData as any).technologies.join(", ") : ""}
               onChange={(e) => handleChange("technologies", e.target.value.split(",").map((s: string) => s.trim()).filter(Boolean))}
-              className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-pink-500/20 focus-visible:border-pink-500"
+              className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500"
               placeholder="e.g. React, Next.js, Tailwind"
             />
           </div>
@@ -703,7 +703,7 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
             <Textarea
               value={Array.isArray((formData as any).responsibilities) ? (formData as any).responsibilities.join("\n") : ""}
               onChange={(e) => handleChange("responsibilities", e.target.value.split("\n").map((s) => s.trim()).filter(Boolean))}
-              className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-pink-500/20 focus-visible:border-pink-500 min-h-[100px]"
+              className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500 min-h-[100px]"
               placeholder={"One bullet per line"}
             />
           </div>
@@ -717,7 +717,7 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
                 <Input
                   value={(formData as any).liveDemoLink || ""}
                   onChange={(e) => handleChange("liveDemoLink", e.target.value)}
-                  className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-pink-500/20 focus-visible:border-pink-500"
+                  className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500"
                   placeholder="https://"
                 />
               </div>
@@ -728,7 +728,7 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
                 <Input
                   value={(formData as any).githubLink || ""}
                   onChange={(e) => handleChange("githubLink", e.target.value)}
-                  className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-pink-500/20 focus-visible:border-pink-500"
+                  className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500"
                   placeholder="https://"
                 />
               </div>
@@ -739,7 +739,7 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
                 <Input
                   value={(formData as any).verificationLink || ""}
                   onChange={(e) => handleChange("verificationLink", e.target.value)}
-                  className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-pink-500/20 focus-visible:border-pink-500"
+                  className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500"
                   placeholder="https://"
                 />
               </div>
@@ -751,7 +751,7 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
         {shouldShowDescription && (
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Description</label>
-            <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800 focus-within:ring-2 focus-within:ring-pink-500/20 focus-within:border-pink-500 transition-all">
+            <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800 focus-within:ring-2 focus-within:ring-emerald-500/20 focus-within:border-emerald-500 transition-all">
               <div className="flex items-center gap-1 p-2 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50">
                  <Button variant="ghost" size="icon" className="h-6 w-6 rounded text-gray-500 dark:text-gray-400"><span className="font-bold font-serif">B</span></Button>
                  <Button variant="ghost" size="icon" className="h-6 w-6 rounded text-gray-500 dark:text-gray-400"><span className="italic font-serif">I</span></Button>
@@ -781,7 +781,7 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
       {/* Footer Actions */}
       <div className="p-4 border-t border-gray-50 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-900/30">
         <Button 
-          className="w-full bg-[#ff4d6d] hover:bg-[#ff3355] text-white shadow-md shadow-pink-200 dark:shadow-none transition-all rounded-xl h-11"
+          className="w-full resumaic-gradient-green hover:opacity-90 text-white shadow-md shadow-emerald-200 dark:shadow-none transition-all rounded-xl h-11"
           onClick={() => onSave(formData)}
         >
           <Check className="h-4 w-4 mr-2" />

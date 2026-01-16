@@ -339,7 +339,7 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
     })
 
     return (
-      <div className="pb-4 mb-6" style={{ borderBottomColor: styleSettings.borderColor, borderBottomWidth: 2 }}>
+      <div data-section-id="personalInfo" className="pb-4 mb-6" style={{ borderBottomColor: styleSettings.borderColor, borderBottomWidth: 2 }}>
         {rows}
       </div>
     )
@@ -428,7 +428,7 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
 
   // Skills Section (Template 2 style)
   const Skills = () => (
-    <div className="mb-6">
+    <div className="mb-6" data-section-id="skills">
       <h3
         className="font-bold uppercase tracking-wide mb-2"
         style={{
@@ -693,6 +693,7 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
       items.push(
         <h3
           key="exp-title"
+          data-section-id="experience"
           className="font-bold uppercase tracking-wide mb-4"
           style={{
             ...headingBaseStyle,
@@ -718,6 +719,7 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
       items.push(
         <h3
           key="proj-title"
+          data-section-id="projects"
           className="font-bold uppercase tracking-wide mb-4"
           style={{
             ...headingBaseStyle,
@@ -739,6 +741,7 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
       items.push(
         <h3
           key="edu-title"
+          data-section-id="education"
           className="font-bold uppercase tracking-wide mb-4"
           style={{
             ...headingBaseStyle,
@@ -760,6 +763,7 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
       items.push(
         <h3
           key="cert-title"
+          data-section-id="certifications"
           className="font-bold uppercase tracking-wide mb-4"
           style={{
             ...headingBaseStyle,
@@ -781,6 +785,7 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
       items.push(
         <h3
           key="lang-title"
+          data-section-id="languages"
           className="font-bold uppercase tracking-wide mb-4"
           style={{
             ...headingBaseStyle,
@@ -799,6 +804,7 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
       items.push(
         <h3
           key="int-title"
+          data-section-id="interests"
           className="font-bold uppercase tracking-wide mb-4"
           style={{
             ...headingBaseStyle,

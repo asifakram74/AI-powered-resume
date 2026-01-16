@@ -6,12 +6,13 @@ type Props = {
   aiResponse: any
   convertToCVData: (aiResponse: any) => any
   isRegenerating: boolean
+  activeSection?: string | null
 }
 
-export function CVPreviewSection({ selectedTemplate, aiResponse, convertToCVData, isRegenerating }: Props) {
+export function CVPreviewSection({ selectedTemplate, aiResponse, convertToCVData, isRegenerating, activeSection }: Props) {
   return (
     <div className="relative">
-      <CVPreview key={selectedTemplate.id} data={convertToCVData(aiResponse)} template={selectedTemplate} />
+      <CVPreview key={selectedTemplate.id} data={convertToCVData(aiResponse)} template={selectedTemplate} activeSection={activeSection} />
 
       {/* Progress Overlay */}
       {isRegenerating && (

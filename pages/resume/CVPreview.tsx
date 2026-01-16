@@ -19,9 +19,9 @@ import {CreativeTemplate4}from "../../components/templates/creative/creative-tem
 import {ModernTemplate2} from "../../components/templates/modern/modern-template-2";
 import {ModernTemplate3} from "../../components/templates/modern/modern-template-3";
 import {ModernTemplate4} from "../../components/templates/modern/modern-template-4";
-import {CreativeTemplate} from "../../components/templates/creative/creative-template";
+import { CreativeTemplate} from "../../components/templates/creative/creative-template";
 import { sampleCVData } from "../../lib/sample-cv-data";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Button } from "../../components/ui/button";
 import jsPDF from "jspdf";
 import * as htmlToImage from "html-to-image";
@@ -36,6 +36,7 @@ interface CVTemplate {
 interface CVPreviewProps {
   data?: typeof sampleCVData;
   template?: CVTemplate;
+  activeSection?: string | null;
 }
 
 const defaultTemplate: CVTemplate = {
@@ -48,9 +49,25 @@ const defaultTemplate: CVTemplate = {
 export function CVPreview({
   data = sampleCVData,
   template = defaultTemplate,
+  activeSection,
 }: CVPreviewProps) {
   const previewRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
+
+  useEffect(() => {
+    if (!activeSection || !previewRef.current) return;
+    
+    // Find the element with data-section-id matching activeSection
+    // We search within .a4-page to avoid finding the hidden measurement nodes
+    const element = previewRef.current.querySelector(`.a4-page [data-section-id="${activeSection}"]`);
+    
+    if (element) {
+      // Small delay to ensure rendering is complete if data just changed
+      setTimeout(() => {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 100);
+    }
+  }, [activeSection, data]); // Add data as dep to retry scroll if content changes re-renders it
 
   const renderTemplate = () => {
     switch (template?.id) {

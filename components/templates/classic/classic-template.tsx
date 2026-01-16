@@ -197,7 +197,7 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
   const showAddress = Boolean(addressText) && (!locLower || (addrLower !== locLower && !addrLower.includes(locLower)));
 
   const Header = () => (
-    <div className="pb-6 mb-8" style={{ textAlign: styleSettings.align }}>
+    <div data-section-id="personalInfo" className="pb-6 mb-8" style={{ textAlign: styleSettings.align }}>
       {(() => {
         const defaultOrder: PersonalInfoFieldId[] = [
           "fullName",
@@ -351,8 +351,9 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
     </div>
   );
 
-  const SectionTitle = ({ title }: { title: string }) => (
+  const SectionTitle = ({ title, sectionId }: { title: string; sectionId?: string }) => (
     <div
+      data-section-id={sectionId}
       className={`flex items-center gap-2 mb-4 ${styleSettings.headingsLine ? "pb-1 border-b" : ""}`}
       style={styleSettings.headingsLine ? dividerStyle : undefined}
     >
@@ -379,7 +380,7 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
   );
 
   const Skills = ({ skills }: { skills: CVData["skills"] }) => (
-    <div className="mb-8">
+    <div className="mb-8" data-section-id="skills">
       <SectionTitle title="SKILLS" />
       <div className="space-y-3">
         {skills.technical.length > 0 && (
@@ -472,7 +473,7 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
 
     const addExperience = () => {
       if (data.experience.length === 0) return;
-      items.push(<SectionTitle key="exp-title" title="PROFESSIONAL EXPERIENCE" />);
+      items.push(<SectionTitle key="exp-title" title="PROFESSIONAL EXPERIENCE" sectionId="experience" />);
       data.experience.forEach((exp, index) => {
         const isLast = index === data.experience.length - 1;
         items.push(<ExperienceHeader key={`exp-h-${exp.id}`} exp={exp} />);
@@ -486,7 +487,7 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
 
     const addEducation = () => {
       if (data.education.length === 0) return;
-      items.push(<SectionTitle key="edu-title" title="EDUCATION" />);
+      items.push(<SectionTitle key="edu-title" title="EDUCATION" sectionId="education" />);
       data.education.forEach((edu, index) => {
         const isLast = index === data.education.length - 1;
         items.push(<EducationHeader key={`edu-h-${edu.id}`} edu={edu} />);
@@ -498,7 +499,7 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
 
     const addLanguages = () => {
       if (data.languages.length === 0) return;
-      items.push(<SectionTitle key="lang-title" title="LANGUAGES" />);
+      items.push(<SectionTitle key="lang-title" title="LANGUAGES" sectionId="languages" />);
       data.languages.forEach((lang) => {
         items.push(
           <div key={`lang-${lang.id}`} style={{ color: styleSettings.textColor }}>
@@ -511,7 +512,7 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
 
     const addProjects = () => {
       if (data.projects.length === 0) return;
-      items.push(<SectionTitle key="proj-title" title="PROJECTS" />);
+      items.push(<SectionTitle key="proj-title" title="PROJECTS" sectionId="projects" />);
       data.projects.forEach((project, index) => {
         items.push(
           <div key={`proj-${project.id}`}>
@@ -527,7 +528,7 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
 
     const addCertifications = () => {
       if (data.certifications.length === 0) return;
-      items.push(<SectionTitle key="cert-title" title="CERTIFICATIONS & AWARDS" />);
+      items.push(<SectionTitle key="cert-title" title="CERTIFICATIONS & AWARDS" sectionId="certifications" />);
       data.certifications.forEach((cert, index) => {
         items.push(
           <div key={`cert-${cert.id}`} className="flex justify-between items-center">
@@ -544,7 +545,7 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
 
     const addInterests = () => {
       if (data.additional.interests.length === 0) return;
-      items.push(<SectionTitle key="int-title" title="INTERESTS & HOBBIES" />);
+      items.push(<SectionTitle key="int-title" title="INTERESTS & HOBBIES" sectionId="interests" />);
       items.push(<div key="int-body" style={{ color: styleSettings.textColor }}>{data.additional.interests.join(", ")}</div>);
     };
 

@@ -61,7 +61,7 @@ export function CVHeaderActions({
   ]
 
   return (
-<div className="flex items-center justify-between w-full bg-white dark:bg-gray-900 px-6 py-2 rounded-b-xl shadow-sm border border-gray-200/80 dark:border-gray-800">
+    <div className="flex items-center justify-between w-full bg-white dark:bg-gray-900 px-6 py-2 rounded-b-xl shadow-sm border border-gray-200/80 dark:border-gray-800">
       <div className="flex items-center gap-2">
         {navItems.map((item) => {
           const isActive = activeTab === item.id;
@@ -74,7 +74,7 @@ export function CVHeaderActions({
                 size="sm"
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                   isActive 
-                    ? "bg-pink-50 text-pink-600 hover:bg-pink-100 hover:text-pink-700 dark:bg-pink-900/20 dark:text-pink-400" 
+                    ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400" 
                     : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
                 }`}
                 onClick={() => {
@@ -82,7 +82,7 @@ export function CVHeaderActions({
                   onChangeDesign?.();
                 }}
               >
-                <item.icon className={`h-4 w-4 ${isActive ? "text-pink-600" : "text-gray-500"}`} />
+                <item.icon className={`h-4 w-4 ${isActive ? "text-emerald-600" : "text-gray-500"}`} />
                 <span className="font-medium">{item.label}</span>
               </Button>
             )
@@ -95,12 +95,12 @@ export function CVHeaderActions({
               size="sm"
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                 isActive 
-                  ? "bg-pink-50 text-pink-600 hover:bg-pink-100 hover:text-pink-700 dark:bg-pink-900/20 dark:text-pink-400" 
+                  ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400" 
                   : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
               }`}
               onClick={() => onTabChange?.(item.id as any)}
             >
-              <item.icon className={`h-4 w-4 ${isActive ? "text-pink-600" : "text-gray-500"}`} />
+              <item.icon className={`h-4 w-4 ${isActive ? "text-emerald-600" : "text-gray-500"}`} />
               <span className="font-medium">{item.label}</span>
             </Button>
           )
@@ -126,7 +126,7 @@ export function CVHeaderActions({
         {(onExportPDF || onExportDOCX) && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button size="sm" className="flex items-center gap-2 bg-[#2d3639] hover:bg-[#1a2022] text-white rounded-lg px-4 h-9">
+              <Button size="sm" className="flex items-center gap-2 resumaic-gradient-green hover:opacity-90 text-white rounded-lg px-4 h-9">
                 <span className="font-semibold">Download</span>
                 <FileDown className="h-4 w-4" />
               </Button>

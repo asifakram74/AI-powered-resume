@@ -414,14 +414,14 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
     }
 
     return (
-      <div className="text-center mb-8" style={{ textAlign: styleSettings.align as any }}>
+      <div data-section-id="personalInfo" className="text-center mb-8" style={{ textAlign: styleSettings.align as any }}>
         {rows}
       </div>
     );
   };
 
   const Skills = ({ skills }: { skills: CVData["skills"] }) => (
-    <div className="mb-8">
+    <div className="mb-8" data-section-id="skills">
       <SectionTitle title="Skills" />
       <div className="grid grid-cols-2 gap-4">
         {skills.technical.length > 0 && (
@@ -628,8 +628,9 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
     </div>
   );
 
-  const SectionTitle = ({ title }: { title: string }) => (
+  const SectionTitle = ({ title, sectionId }: { title: string; sectionId?: string }) => (
     <div
+      data-section-id={sectionId}
       className={`flex items-center gap-2 mb-4 ${styleSettings.headingsLine ? "pb-2 border-b" : ""}`}
       style={styleSettings.headingsLine ? dividerStyle : undefined}
     >
@@ -652,7 +653,7 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
   const InterestsSection = () => {
     if (data.additional.interests.length === 0) return null;
     return (
-      <div className="mb-8">
+      <div className="mb-8" data-section-id="interests">
         <SectionTitle title="Interests" />
         <div className="flex flex-wrap gap-2">
           {data.additional.interests.map((interest, index) => (
@@ -702,7 +703,7 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
 
     const addExperience = () => {
       if (data.experience.length === 0) return;
-      items.push(<SectionTitle key="exp-title" title="Professional Experience" />);
+      items.push(<SectionTitle key="exp-title" title="Professional Experience" sectionId="experience" />);
       data.experience.forEach((exp, index) => {
         const isLast = index === data.experience.length - 1;
         items.push(<ExperienceItem key={`exp-${exp.id}`} exp={exp} />);
@@ -717,7 +718,7 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
 
     const addEducation = () => {
       if (data.education.length === 0) return;
-      items.push(<SectionTitle key="edu-title" title="Education" />);
+      items.push(<SectionTitle key="edu-title" title="Education" sectionId="education" />);
       data.education.forEach((edu, index) => {
         const isLast = index === data.education.length - 1;
         items.push(<EducationItem key={`edu-${edu.id}`} edu={edu} />);
@@ -727,7 +728,7 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
 
     const addProjects = () => {
       if (data.projects.length === 0) return;
-      items.push(<SectionTitle key="proj-title" title="Projects" />);
+      items.push(<SectionTitle key="proj-title" title="Projects" sectionId="projects" />);
       data.projects.forEach((project, index) => {
         const isLast = index === data.projects.length - 1;
         items.push(<ProjectItem key={`proj-${project.id}`} project={project} />);
@@ -737,7 +738,7 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
 
     const addCertifications = () => {
       if (data.certifications.length === 0) return;
-      items.push(<SectionTitle key="cert-title" title="Certifications" />);
+      items.push(<SectionTitle key="cert-title" title="Certifications" sectionId="certifications" />);
       data.certifications.forEach((cert, index) => {
         const isLast = index === data.certifications.length - 1;
         items.push(<CertificationItem key={`cert-${cert.id}`} cert={cert} />);
@@ -747,7 +748,7 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
 
     const addLanguages = () => {
       if (data.languages.length === 0) return;
-      items.push(<SectionTitle key="lang-title" title="Languages" />);
+      items.push(<SectionTitle key="lang-title" title="Languages" sectionId="languages" />);
       data.languages.forEach((lang, index) => {
         const isLast = index === data.languages.length - 1;
         items.push(<LanguageItem key={`lang-${lang.id}`} lang={lang} />);

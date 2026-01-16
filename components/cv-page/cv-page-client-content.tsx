@@ -274,6 +274,7 @@ export function CVPageClientContent() {
   const [activeTab, setActiveTab] = useState("content")
   const [expandedSectionId, setExpandedSectionId] = useState<CVSectionId | null>("personalInfo")
   const [editingItem, setEditingItem] = useState<{ sectionId: CVSectionId; index: number } | null>(null)
+  const [activeSection, setActiveSection] = useState<CVSectionId | null>(null)
 
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -958,6 +959,7 @@ export function CVPageClientContent() {
     const remaining = sectionOrder.filter((id) => !availableSectionIds.includes(id))
     setSectionOrder([...next, ...remaining])
     setHasUnsavedChanges(true)
+    setActiveSection(from)
   }
 
   const resetSectionOrder = () => {
@@ -980,6 +982,7 @@ export function CVPageClientContent() {
     setHiddenSections((prev) => prev.filter((s) => s !== id))
     setSectionOrder((prev) => (prev.includes(id) ? prev : [...prev, id]))
     setHasUnsavedChanges(true)
+    setActiveSection(id)
   }
 
   const resetAllSettings = () => {
@@ -1223,6 +1226,7 @@ export function CVPageClientContent() {
                         next[editingItem.index] = updatedItem
                         updateSectionItems(editingItem.sectionId, next)
                         setEditingItem(null)
+                        setActiveSection(editingItem.sectionId)
                       }}
                       onCancel={() => setEditingItem(null)}
                       onDelete={() => {
@@ -1233,6 +1237,7 @@ export function CVPageClientContent() {
                         const next = items.filter((_, i) => i !== editingItem.index)
                         updateSectionItems(editingItem.sectionId, next)
                         setEditingItem(null)
+                        setActiveSection(editingItem.sectionId)
                       }}
                     />
                   )
@@ -1254,21 +1259,30 @@ export function CVPageClientContent() {
                           icon={Icon}
                           items={items}
                           isExpanded={isExpanded}
-                          onToggleExpand={() => setExpandedSectionId(isExpanded ? null : sectionId)}
-                          onUpdateItems={(nextItems: SectionItem[]) => updateSectionItems(sectionId, nextItems)}
+                          onToggleExpand={() => {
+                            setExpandedSectionId(isExpanded ? null : sectionId)
+                            if (!isExpanded) setActiveSection(sectionId)
+                          }}
+                          onUpdateItems={(nextItems: SectionItem[]) => {
+                            updateSectionItems(sectionId, nextItems)
+                            setActiveSection(sectionId)
+                          }}
                           onEditItem={(index: number) => {
                             setExpandedSectionId(sectionId)
                             setEditingItem({ sectionId, index })
+                            setActiveSection(sectionId)
                           }}
                           onAddItem={() => {
                             setExpandedSectionId(sectionId)
                             if (sectionId === "personalInfo") {
                               setEditingItem({ sectionId, index: 0 })
+                              setActiveSection(sectionId)
                               return
                             }
                             const nextItems = [...items, createNewItem(sectionId)]
                             updateSectionItems(sectionId, nextItems)
                             setEditingItem({ sectionId, index: nextItems.length - 1 })
+                            setActiveSection(sectionId)
                           }}
                         />
                       )
@@ -1318,6 +1332,7 @@ export function CVPageClientContent() {
                   aiResponse={aiResponse}
                   convertToCVData={convertToCVData}
                   isRegenerating={isRegenerating}
+                  activeSection={activeSection}
                 />
               )}
               {selectedTemplate && !aiResponse && (
