@@ -186,10 +186,13 @@ function normalizeHex(input: string) {
   return ""
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) {
   return (
-    <div className="rounded-none border border-[rgba(45,54,57,0.12)] bg-white p-4 shadow-sm">
-      <div className="text-xs font-semibold text-foreground mb-2.5 uppercase tracking-wide">{title}</div>
+    <div className="rounded-md border border-[rgba(45,54,57,0.12)] dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
+      <div className="flex items-center justify-between mb-5">
+        <div className="text-base font-bold text-[var(--resumaic-dark-gray)] dark:text-gray-100">{title}</div>
+        {action}
+      </div>
       {children}
     </div>
   )
@@ -205,7 +208,7 @@ function Segmented<T extends string>({
   onChange: (next: T) => void
 }) {
   return (
-    <div className="inline-flex rounded-none border border-[rgba(45,54,57,0.14)] bg-[rgba(45,54,57,0.04)] p-0.5 gap-0.5">
+    <div className="inline-flex rounded-none border border-[rgba(45,54,57,0.14)] dark:border-gray-800 bg-[rgba(45,54,57,0.04)] dark:bg-gray-800/50 p-0.5 gap-0.5">
       {options.map((opt) => {
         const active = opt.id === value
         return (
@@ -216,7 +219,7 @@ function Segmented<T extends string>({
             className={`px-2 py-1 text-[11px] rounded-none transition-colors ${
               active
                 ? "bg-[var(--resumaic-green)] text-white"
-                : "text-[rgba(45,54,57,0.7)] hover:bg-[rgba(112,228,168,0.18)] hover:text-[var(--resumaic-dark-gray)]"
+                : "text-[rgba(45,54,57,0.7)] dark:text-gray-400 hover:bg-[rgba(112,228,168,0.18)] dark:hover:bg-gray-800 hover:text-[var(--resumaic-dark-gray)] dark:hover:text-gray-200"
             }`}
           >
             {active ? (
@@ -250,13 +253,13 @@ function ModeButton({
       <div
         className={`grid place-items-center size-10 rounded-none border transition-colors ${
           active
-            ? "border-[rgba(112,228,168,0.9)] bg-[rgba(112,228,168,0.18)]"
-            : "border-[rgba(45,54,57,0.16)] bg-white"
+            ? "border-[rgba(112,228,168,0.9)] bg-[rgba(112,228,168,0.18)] dark:bg-[rgba(112,228,168,0.1)]"
+            : "border-[rgba(45,54,57,0.16)] dark:border-gray-800 bg-white dark:bg-gray-900"
         }`}
       >
-        <div className="scale-75 origin-center">{icon}</div>
+        <div className="scale-75 origin-center dark:text-gray-300">{icon}</div>
       </div>
-      <div className={`text-[10px] ${active ? "text-[var(--resumaic-dark-gray)]" : "text-[rgba(45,54,57,0.65)]"}`}>{label}</div>
+      <div className={`text-[10px] ${active ? "text-[var(--resumaic-dark-gray)] dark:text-gray-100" : "text-[rgba(45,54,57,0.65)] dark:text-gray-500"}`}>{label}</div>
     </button>
   )
 }
@@ -272,11 +275,11 @@ function Swatch({
 }) {
   return (
     <button type="button" onClick={onClick} className="relative size-7 rounded-none">
-      <span className="absolute inset-0 rounded-none border border-[rgba(45,54,57,0.16)]" style={{ background: color }} />
+      <span className="absolute inset-0 rounded-none border border-[rgba(45,54,57,0.16)] dark:border-gray-700" style={{ background: color }} />
       {selected ? (
         <span className="absolute inset-0 grid place-items-center">
-          <span className="grid place-items-center size-5 rounded-none bg-white/80 backdrop-blur-sm">
-            <Check className="h-3 w-3 text-[var(--resumaic-dark-gray)]" />
+          <span className="grid place-items-center size-5 rounded-none bg-white/80 dark:bg-black/40 backdrop-blur-sm">
+            <Check className="h-3 w-3 text-[var(--resumaic-dark-gray)] dark:text-white" />
           </span>
         </span>
       ) : null}
@@ -294,12 +297,12 @@ function AccentCheck({
   onToggle: () => void
 }) {
   return (
-    <button type="button" onClick={onToggle} className="flex items-center gap-1.5 text-xs text-[var(--resumaic-dark-gray)]">
+    <button type="button" onClick={onToggle} className="flex items-center gap-1.5 text-xs text-[var(--resumaic-dark-gray)] dark:text-gray-300">
       <span
         className={`grid place-items-center size-4 rounded-none border transition-colors ${
           checked
             ? "border-[var(--resumaic-green)] bg-[var(--resumaic-green)]"
-            : "border-[rgba(45,54,57,0.16)] bg-white"
+            : "border-[rgba(45,54,57,0.16)] dark:border-gray-700 bg-white dark:bg-gray-900"
         }`}
       >
         {checked ? <Check className="h-3 w-3 text-white" /> : null}
@@ -329,10 +332,9 @@ function RangeControl({
   segments?: number
 }) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null)
-  
-  // Calculate which segment the current value belongs to (0 to segments-1)
+
   const segmentIndex = Math.round(((value - min) / (max - min)) * (segments - 1))
-  
+
   const onMinus = () => onChange(Math.max(min, Number((value - step).toFixed(4))))
   const onPlus = () => onChange(Math.min(max, Number((value + step).toFixed(4))))
 
@@ -348,74 +350,78 @@ function RangeControl({
     const x = e.clientX - rect.left
     const index = Math.floor((x / rect.width) * segments)
     const newValue = min + (index / (segments - 1)) * (max - min)
-    // Round to step
     const steppedValue = Math.round(newValue / step) * step
     onChange(Number(steppedValue.toFixed(4)))
   }
 
   return (
-    <div className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-3 items-center">
-      <div className="text-sm font-medium text-[var(--resumaic-dark-gray)]">{label}</div>
-      <div className="text-sm text-[rgba(45,54,57,0.65)] tabular-nums">{valueLabel}</div>
-
-      <div 
-        className="relative col-span-1 h-11 border border-[rgba(45,54,57,0.10)] bg-[rgba(45,54,57,0.04)] overflow-hidden cursor-pointer group rounded-none"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={() => setHoverIndex(null)}
-        onClick={handleClick}
-      >
-        {/* Vertical Dividers */}
-        <div className="absolute inset-0 flex">
-          {Array.from({ length: segments - 1 }).map((_, i) => (
-            <div 
-              key={i} 
-              className="h-full border-r border-[rgba(45,54,57,0.1)]" 
-              style={{ width: `${100 / segments}%` }} 
-            />
-          ))}
-        </div>
-
-        {/* Hover Indicator */}
-        {hoverIndex !== null && hoverIndex !== segmentIndex && (
-          <div
-            className="absolute top-0 bottom-0 bg-[rgba(112,228,168,0.15)] transition-all duration-150"
-            style={{ 
-              left: `${(hoverIndex * 100) / segments}%`,
-              width: `${100 / segments}%`
-            }}
-          />
-        )}
-
-        {/* Active Indicator */}
-        <div
-          className="absolute top-1.5 bottom-1.5 transition-all duration-200 shadow-sm rounded-none"
-          style={{ 
-            left: `calc(${(segmentIndex * 100) / segments}% + 6px)`,
-            width: `calc(${100 / segments}% - 12px)`,
-            background: 'linear-gradient(135deg, #70e4a8 0%, #4ade80 100%)'
-          }}
-        />
+    <div className="space-y-2">
+      <div className="flex items-center justify-between gap-3">
+        <div className="text-sm font-medium text-[var(--resumaic-dark-gray)] dark:text-gray-200">{label}</div>
+        <div className="text-sm text-[rgba(45,54,57,0.65)] dark:text-gray-400 tabular-nums">{valueLabel}</div>
       </div>
 
-      <div className="col-span-1 flex items-center justify-end gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          onClick={onMinus}
-          className="size-11 rounded-none border-[rgba(45,54,57,0.18)] bg-white text-[var(--resumaic-dark-gray)] hover:bg-[rgba(112,228,168,0.18)] hover:border-[rgba(112,228,168,0.6)]"
+      <div className="flex items-center gap-2">
+        <div
+          className="relative h-9 flex-1 border border-[rgba(45,54,57,0.12)] dark:border-gray-700 bg-[rgba(45,54,57,0.03)] dark:bg-gray-800/50 overflow-hidden cursor-pointer group rounded-lg"
+          onMouseMove={handleMouseMove}
+          onMouseLeave={() => setHoverIndex(null)}
+          onClick={handleClick}
         >
-          <Minus className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          onClick={onPlus}
-          className="size-11 rounded-none border-[rgba(45,54,57,0.18)] bg-white text-[var(--resumaic-dark-gray)] hover:bg-[rgba(112,228,168,0.18)] hover:border-[rgba(112,228,168,0.6)]"
-        >
-          <Plus className="h-4 w-4" />
-        </Button>
+          {/* Vertical Dividers */}
+          <div className="absolute inset-0 flex">
+            {Array.from({ length: segments - 1 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-full border-r border-[rgba(45,54,57,0.08)] dark:border-gray-700/50"
+                style={{ width: `${100 / segments}%` }}
+              />
+            ))}
+          </div>
+
+          {/* Hover Indicator */}
+          {hoverIndex !== null && hoverIndex !== segmentIndex && (
+            <div
+              className="absolute inset-y-0 bg-[rgba(112,228,168,0.2)] transition-all duration-150"
+              style={{
+                left: `${(hoverIndex * 100) / segments}%`,
+                width: `${100 / segments}%`,
+              }}
+            />
+          )}
+
+          {/* Active Indicator */}
+          <div
+            className="absolute inset-y-0 transition-all duration-200 shadow-sm"
+            style={{
+              left: `${(segmentIndex * 100) / segments}%`,
+              width: `${100 / segments}%`,
+              background: "var(--resumaic-green)",
+            }}
+          />
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={onMinus}
+            className="size-9 rounded-lg border-[rgba(45,54,57,0.12)] dark:border-gray-700 bg-white dark:bg-gray-800 text-[var(--resumaic-dark-gray)] dark:text-gray-200 hover:bg-[rgba(112,228,168,0.18)] dark:hover:bg-gray-700 hover:border-[rgba(112,228,168,0.6)]"
+          >
+            <Minus className="h-4 w-4" />
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={onPlus}
+            className="size-9 rounded-lg border-[rgba(45,54,57,0.12)] dark:border-gray-700 bg-white dark:bg-gray-800 text-[var(--resumaic-dark-gray)] dark:text-gray-200 hover:bg-[rgba(112,228,168,0.18)] dark:hover:bg-gray-700 hover:border-[rgba(112,228,168,0.6)]"
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   )
@@ -500,41 +506,31 @@ export function DesignPanel({
   }
 
   return (
-    <div className="flex flex-col h-full bg-white border-r border-[rgba(45,54,57,0.12)]">
-      <div className="px-5 py-4 bg-white border-b border-[rgba(45,54,57,0.12)]">
-        <div className="flex items-start justify-between gap-3">
-          <div className="space-y-0.5">
-            <h2 className="text-lg font-bold text-[var(--resumaic-dark-gray)]">
-              Design
-            </h2>
-            <div className="text-xs text-[rgba(45,54,57,0.65)]">
-              Customize fonts, sizes, colors, and icons
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={onReset}
-              className="flex items-center gap-1.5 h-8 px-3 text-xs border-[rgba(45,54,57,0.18)] bg-white text-[var(--resumaic-dark-gray)] hover:bg-[rgba(112,228,168,0.18)] hover:border-[rgba(112,228,168,0.6)]"
-            >
-              <RotateCcw className="h-3.5 w-3.5" />
-              Default
-            </Button>
-          </div>
-        </div>
-      </div>
+  <div className="flex flex-col h-full bg-[#f4f4f2] dark:bg-gray-950"> 
+  <div className="flex-1 min-h-0 overflow-y-auto bg-[#f4f4f2] dark:bg-gray-950 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+    <div className=" space-y-5 mb-10">
 
-      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar bg-[f3f1ec]">
-        <div className="px-5 py-5 space-y-5">
-          <Section title="Arrange Sections">
+          <Section 
+            title="Arrange Sections"
+            action={
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={resetAllSettings}
+                className="flex items-center gap-1.5 h-7 px-2 text-xs border-[rgba(45,54,57,0.18)] dark:border-gray-700 bg-white dark:bg-gray-800 text-[var(--resumaic-dark-gray)] dark:text-gray-200 hover:bg-[rgba(112,228,168,0.18)] dark:hover:bg-gray-700 hover:border-[rgba(112,228,168,0.6)]"
+              >
+                <RotateCcw className="h-3 w-3" />
+                Default
+              </Button>
+            }
+          >
               {availableSectionIds.length === 0 ? (
-                <div className="rounded-xl border bg-white/60 dark:bg-gray-950/60 p-4">
+                <div className="rounded-xl border bg-white/60 dark:bg-gray-900/40 border-gray-200 dark:border-gray-800 p-4">
                   <div className="text-xs font-semibold text-gray-900 dark:text-gray-100">
                     No sections to rearrange yet
                   </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-300 mt-1">
+                  <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                     Add experience, education, or projects to enable section
                     ordering.
                   </div>
@@ -542,7 +538,7 @@ export function DesignPanel({
               ) : (
                 <div className="space-y-3">
                   {hiddenSections.length > 0 && (
-                    <div className="rounded-xl border bg-white/70 dark:bg-gray-950/60 p-3">
+                    <div className="rounded-xl border bg-white/70 dark:bg-gray-900/40 border-gray-200 dark:border-gray-800 p-3">
                       <div className="flex items-center justify-between gap-3 mb-2">
                         <div className="text-xs font-semibold text-gray-900 dark:text-gray-100">
                           Hidden Sections
@@ -551,7 +547,7 @@ export function DesignPanel({
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="h-7 text-xs"
+                          className="h-7 text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
                           onClick={() => {
                             setHiddenSections([])
                             setHasUnsavedChanges(true)
@@ -565,7 +561,7 @@ export function DesignPanel({
                         {hiddenSections.map((id) => (
                           <div
                             key={id}
-                            className="flex items-center justify-between rounded-lg border bg-white/80 dark:bg-gray-950/70 px-2.5 py-1.5"
+                            className="flex items-center justify-between rounded-lg border bg-white/80 dark:bg-gray-900/60 border-gray-200 dark:border-gray-800 px-2.5 py-1.5"
                           >
                             <div className="text-xs font-medium text-gray-900 dark:text-gray-100">
                               {SECTION_LABELS[id]}
@@ -575,7 +571,7 @@ export function DesignPanel({
                               variant="ghost"
                               size="icon"
                               onClick={() => unhideSection(id)}
-                              className="h-6 w-6 text-gray-600 dark:text-gray-300"
+                              className="h-6 w-6 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
                               aria-label={`Restore ${SECTION_LABELS[id]}`}
                             >
                               <Plus className="h-3.5 w-3.5" />
@@ -590,7 +586,7 @@ export function DesignPanel({
                     {visibleSectionOrder.map((sectionId) => (
                       <div
                         key={sectionId}
-                        className="rounded-xl border bg-white/80 dark:bg-gray-950/70 shadow-sm overflow-hidden"
+                        className="rounded-xl border bg-white/80 dark:bg-gray-900/60 border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden"
                       >
                         <div
                           draggable={availableSectionIds.length > 1}
@@ -609,10 +605,12 @@ export function DesignPanel({
                             ) as CVSectionId
                             if (from) moveSection(from, sectionId)
                           }}
-                          className="group flex items-center justify-between px-3 py-2 hover:shadow-md transition-shadow"
+                          className={`group flex items-center justify-between px-3 py-2 hover:shadow-md transition-shadow bg-white dark:bg-gray-900 ${
+                            availableSectionIds.length > 1 ? "cursor-grab active:cursor-grabbing" : ""
+                          }`}
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
-                            <div className="shrink-0 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors">
+                            <div className="shrink-0 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors cursor-grab active:cursor-grabbing select-none">
                               <GripVertical className="h-3.5 w-3.5" />
                             </div>
                             <button
@@ -642,21 +640,21 @@ export function DesignPanel({
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => hideSection(sectionId)}
-                                className="h-7 w-7 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
+                                className="h-7 w-7 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-800"
                                 aria-label={`Hide ${SECTION_LABELS[sectionId]}`}
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </Button>
                             )}
-                            <div className="text-[10px] text-gray-500 dark:text-gray-400 px-1.5">
+                            <div className="text-[10px] text-gray-400 dark:text-gray-500 px-1.5">
                               Drag
                             </div>
                           </div>
                         </div>
                         {sectionId === "personalInfo" && isPersonalInfoOpen && (
-                          <div className="border-t bg-gray-50/70 dark:bg-gray-950/40">
+                          <div className="border-t border-gray-100 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-900/40">
                             <div className="px-3 pt-2 pb-1.5 flex items-center justify-between gap-2">
-                              <div className="text-[10px] font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">
+                              <div className="text-[10px] font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
                                 Personal Info Fields
                               </div>
                               <Button
@@ -664,14 +662,14 @@ export function DesignPanel({
                                 variant="ghost"
                                 size="sm"
                                 onClick={resetPersonalInfoOrder}
-                                className="h-6 text-[10px] text-gray-600 dark:text-gray-300 px-2"
+                                className="h-6 text-[10px] text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 px-2"
                               >
                                 <RotateCcw className="h-3 w-3 mr-1" />
                                 Reset
                               </Button>
                             </div>
                             <div className="px-3 pb-3">
-                              <div className="space-y-1 max-h-48 overflow-y-auto custom-scrollbar pr-1">
+                              <div className="space-y-1 max-h-48 overflow-y-auto pr-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
                                 {visiblePersonalInfoFieldOrder.map(
                                   (fieldId) => (
                                     <div
@@ -698,17 +696,19 @@ export function DesignPanel({
                                         if (from)
                                           movePersonalInfoField(from, fieldId)
                                       }}
-                                      className="group flex items-center justify-between rounded-lg border bg-white/80 dark:bg-gray-950/70 px-2.5 py-1"
+                                      className={`group flex items-center justify-between rounded-lg border bg-white/80 dark:bg-gray-900/60 border-gray-200 dark:border-gray-800 px-2.5 py-1 ${
+                                        visiblePersonalInfoFieldOrder.length > 1 ? "cursor-grab active:cursor-grabbing" : ""
+                                      }`}
                                     >
                                       <div className="flex items-center gap-2 min-w-0">
-                                        <div className="shrink-0 text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300 transition-colors">
+                                        <div className="shrink-0 text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300 transition-colors cursor-grab active:cursor-grabbing select-none">
                                           <GripVertical className="h-3.5 w-3.5" />
                                         </div>
                                         <div className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
                                           {PERSONAL_INFO_FIELD_LABELS[fieldId]}
                                         </div>
                                       </div>
-                                      <div className="text-[10px] text-gray-500 dark:text-gray-400">
+                                      <div className="text-[10px] text-gray-400 dark:text-gray-500 select-none">
                                         Drag
                                       </div>
                                     </div>
@@ -772,6 +772,21 @@ export function DesignPanel({
                     step={1}
                     onChange={(next) => set({ spaceBetweenEntriesPx: clampNumber(next, 4, 28) })}
                   />
+                  <div className="space-y-4 pt-1 border-t border-[rgba(45,54,57,0.08)]">
+                    <RangeControl
+                      label="Headings size"
+                      valueLabel={`${value.headingFontSizePx}px`}
+                      value={value.headingFontSizePx}
+                      min={14}
+                      max={26}
+                      step={1}
+                      onChange={(next) => set({ headingFontSizePx: clampNumber(next, 14, 26) })}
+                    />
+                    <div className="flex items-center justify-between gap-2">
+                      <Label className="text-xs">Capitalization</Label>
+                      <Segmented value={value.capitalization} options={CAPITALIZATION_OPTIONS} onChange={(v) => set({ capitalization: v })} />
+                    </div>
+                  </div>
                 </div>
               </Section>
 
@@ -813,7 +828,7 @@ export function DesignPanel({
                               className={`flex-1 rounded-none border p-2 text-center transition-colors ${
                                 active
                                   ? "border-[var(--resumaic-green)] bg-[var(--resumaic-green)] text-white"
-                                  : "border-[rgba(45,54,57,0.16)] bg-white text-foreground"
+                                  : "border-[rgba(45,54,57,0.16)] dark:border-gray-700 bg-white dark:bg-gray-800 text-foreground dark:text-gray-200"
                               }`}
                             >
                               <div className="text-xs font-medium">{opt.label}</div>
@@ -827,7 +842,7 @@ export function DesignPanel({
                           <Swatch key={c} color={c} selected={c.toLowerCase() === value.accentColor.toLowerCase()} onClick={() => set({ accentColor: c })} />
                         ))}
                         <label className="relative size-7 rounded-none cursor-pointer">
-                          <span className="absolute inset-0 rounded-none border border-border bg-gradient-to-br from-red-500 via-yellow-500 to-blue-500" />
+                          <span className="absolute inset-0 rounded-none border border-border dark:border-gray-700 bg-gradient-to-br from-red-500 via-yellow-500 to-blue-500" />
                           <input
                             type="color"
                             value={value.accentColor}
@@ -838,7 +853,7 @@ export function DesignPanel({
                       </div>
 
                       <div className="space-y-2">
-                        <div className="text-[10px] font-semibold text-[rgba(45,54,57,0.6)] uppercase tracking-wide">
+                        <div className="text-[10px] font-semibold text-[rgba(45,54,57,0.6)] dark:text-gray-400 uppercase tracking-wide">
                           Apply accent color
                         </div>
                         <div className="grid grid-cols-2 gap-1.5">
@@ -858,13 +873,13 @@ export function DesignPanel({
                   {showBorderPanel && (
                     <div className="space-y-4">
                       <div className="flex items-center justify-between gap-4">
-                        <Label className="text-xs">Border Mode</Label>
+                        <Label className="text-xs dark:text-gray-300">Border Mode</Label>
                         <Segmented value={value.borderMode} options={BORDER_MODE_OPTIONS} onChange={(v) => set({ borderMode: v })} />
                       </div>
 
                       <div className="flex items-end gap-2">
                         <div className="grow space-y-1">
-                          <Label className="text-xs">Border color</Label>
+                          <Label className="text-xs dark:text-gray-300">Border color</Label>
                           <Input
                             value={value.borderColor}
                             onChange={(e) => {
@@ -872,25 +887,25 @@ export function DesignPanel({
                               if (normalized) set({ borderColor: normalized })
                             }}
                             placeholder="#1f2937"
-                            className="h-8 text-xs bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]"
+                            className="h-8 text-xs bg-white dark:bg-gray-800 border-[rgba(45,54,57,0.16)] dark:border-gray-700 text-[var(--resumaic-dark-gray)] dark:text-gray-200"
                           />
                         </div>
                         <input
                           type="color"
                           value={value.borderColor}
                           onChange={(e) => updateColor("borderColor" as any, e.target.value)}
-                          className="h-8 w-10 rounded-none border border-[rgba(45,54,57,0.16)] bg-white p-0.5"
+                          className="h-8 w-10 rounded-none border border-[rgba(45,54,57,0.16)] dark:border-gray-700 bg-white dark:bg-gray-800 p-0.5"
                         />
                       </div>
 
                       {value.borderMode === "image" ? (
                         <div className="space-y-1">
-                          <Label className="text-xs">Background image URL</Label>
+                          <Label className="text-xs dark:text-gray-300">Background image URL</Label>
                           <Input
                             value={value.backgroundImageUrl}
                             onChange={(e) => set({ backgroundImageUrl: e.target.value })}
                             placeholder="https://..."
-                            className="h-8 text-xs bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]"
+                            className="h-8 text-xs bg-white dark:bg-gray-800 border-[rgba(45,54,57,0.16)] dark:border-gray-700 text-[var(--resumaic-dark-gray)] dark:text-gray-200"
                           />
                         </div>
                       ) : null}
@@ -907,7 +922,7 @@ export function DesignPanel({
                       ] as const).map(([key, label]) => (
                         <div key={key} className="flex items-end gap-2">
                           <div className="grow space-y-1">
-                            <Label className="text-xs">{label}</Label>
+                            <Label className="text-xs dark:text-gray-300">{label}</Label>
                             <Input
                               value={(value as any)[key]}
                               onChange={(e) => {
@@ -915,14 +930,14 @@ export function DesignPanel({
                                 if (normalized) set({ [key]: normalized } as any)
                               }}
                               placeholder="#000000"
-                              className="h-8 text-xs bg-white border-[rgba(45,54,57,0.16)] text-[var(--resumaic-dark-gray)]"
+                              className="h-8 text-xs bg-white dark:bg-gray-800 border-[rgba(45,54,57,0.16)] dark:border-gray-700 text-[var(--resumaic-dark-gray)] dark:text-gray-200"
                             />
                           </div>
                           <input
                             type="color"
                             value={(value as any)[key]}
                             onChange={(e) => updateColor(key as any, e.target.value)}
-                            className="h-8 w-10 rounded-none border border-[rgba(45,54,57,0.16)] bg-white p-0.5"
+                            className="h-8 w-10 rounded-none border border-[rgba(45,54,57,0.16)] dark:border-gray-700 bg-white dark:bg-gray-800 p-0.5"
                           />
                         </div>
                       ))}
@@ -1014,21 +1029,7 @@ export function DesignPanel({
                     </div>
                   </div>
 
-                  <div className="space-y-4 pt-1">
-                    <RangeControl
-                      label="Headings size"
-                      valueLabel={`${value.headingFontSizePx}px`}
-                      value={value.headingFontSizePx}
-                      min={14}
-                      max={26}
-                      step={1}
-                      onChange={(next) => set({ headingFontSizePx: clampNumber(next, 14, 26) })}
-                    />
-                    <div className="flex items-center justify-between gap-2">
-                      <Label className="text-xs">Capitalization</Label>
-                      <Segmented value={value.capitalization} options={CAPITALIZATION_OPTIONS} onChange={(v) => set({ capitalization: v })} />
-                    </div>
-                  </div>
+
                 </div>
               </Section>
 

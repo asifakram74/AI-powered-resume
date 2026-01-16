@@ -128,41 +128,41 @@ export function CVSidebarSection({
         {items.map((item, index) => (
           <div 
             key={index}
-            className="group relative p-6 bg-white border border-gray-100 rounded-2xl hover:border-pink-200 hover:shadow-md transition-all cursor-pointer"
+            className="group relative p-6 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl hover:border-pink-200 dark:hover:border-pink-900/50 hover:shadow-md transition-all cursor-pointer"
             onClick={() => onEditItem(index)}
           >
             {/* Edit Button - Top Right */}
-            <div className="absolute top-4 right-4 p-2.5 rounded-full bg-[#ff4d6d] text-white shadow-md shadow-pink-100 group-hover:scale-110 transition-transform z-10">
+            <div className="absolute top-4 right-4 p-2.5 rounded-full bg-[#ff4d6d] text-white shadow-md shadow-pink-100 dark:shadow-none group-hover:scale-110 transition-transform z-10">
               <Edit2 className="h-4 w-4" />
             </div>
 
             <div className="flex justify-between items-start">
               <div className="flex-1 min-w-0 pr-4">
                 <div className="mb-4">
-                  <h4 className="text-xl font-bold text-gray-900 mb-0.5">
+                  <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-0.5">
                     {item.fullName || "(No Name)"}
                   </h4>
-                  <p className="text-base text-gray-500 font-medium">
+                  <p className="text-base text-gray-500 dark:text-gray-400 font-medium">
                     {item.jobTitle || "(No Title)"}
                   </p>
                 </div>
 
                 <div className="space-y-3">
                   {item.email && (
-                    <div className="flex items-center gap-3 text-sm text-gray-600">
-                      <Mail className="h-4 w-4 text-gray-400" />
+                    <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
+                      <Mail className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                       <span className="truncate">{item.email}</span>
                     </div>
                   )}
                   {item.phone && (
-                    <div className="flex items-center gap-3 text-sm text-gray-600">
-                      <Phone className="h-4 w-4 text-gray-400" />
+                    <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
+                      <Phone className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                       <span>{item.phone || "Phone"}</span>
                     </div>
                   )}
                   {(item.location || item.address || item.city || item.country) && (
-                    <div className="flex items-center gap-3 text-sm text-gray-600">
-                      <MapPin className="h-4 w-4 text-gray-400" />
+                    <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
+                      <MapPin className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                       <span className="truncate">
                         {[item.address, item.city, item.location, item.country].filter(Boolean).join(", ") || "Location"}
                       </span>
@@ -173,7 +173,7 @@ export function CVSidebarSection({
 
               {/* Profile Image */}
               <div className="flex-shrink-0 mt-6">
-                <Avatar className="h-24 w-24 border-2 border-gray-50 shadow-sm">
+                <Avatar className="h-24 w-24 border-2 border-gray-50 dark:border-gray-800 shadow-sm">
                   {item.profilePicture && (
                     <AvatarImage 
                       src={item.profilePicture} 
@@ -181,7 +181,7 @@ export function CVSidebarSection({
                       className="object-cover"
                     />
                   )}
-                  <AvatarFallback className="bg-gray-50 text-gray-400">
+                  <AvatarFallback className="bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
                     <User className="h-10 w-10" />
                   </AvatarFallback>
                 </Avatar>
@@ -194,26 +194,26 @@ export function CVSidebarSection({
   }
 
   return (
-    <div className="bg-white  dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-200">
+    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-all duration-200">
       {/* Header */}
       <div 
-        className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50/50 transition-colors"
+        className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors"
         onClick={onToggleExpand}
       >
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-gray-50 text-gray-600">
+          <div className="p-2 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
             <Icon className="h-5 w-5" />
           </div>
           <div className="flex items-center">
-            <span className="font-bold text-gray-700 tracking-wide uppercase text-sm">
+            <span className="font-bold text-gray-700 dark:text-gray-200 tracking-wide uppercase text-sm">
               {title}
             </span>
           </div>
         </div>
         {isExpanded ? (
-          <ChevronUp className="h-4 w-4 text-gray-400" />
+          <ChevronUp className="h-4 w-4 text-gray-400 dark:text-gray-500" />
         ) : (
-          <ChevronDown className="h-4 w-4 text-gray-400" />
+          <ChevronDown className="h-4 w-4 text-gray-400 dark:text-gray-500" />
         )}
       </div>
 
@@ -223,20 +223,20 @@ export function CVSidebarSection({
           {items.map((item, index) => (
             <div 
               key={index}
-              className="group flex items-center gap-3 p-3 bg-white border border-gray-100 rounded-xl hover:border-pink-200 hover:shadow-sm transition-all cursor-pointer relative"
+              className="group flex items-center gap-3 p-3 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl hover:border-pink-200 dark:hover:border-pink-900/50 hover:shadow-sm transition-all cursor-pointer relative"
               onClick={() => onEditItem(index)}
             >
               {/* Drag Handle */}
-              <div className="text-gray-300 cursor-grab active:cursor-grabbing hover:text-gray-500">
+              <div className="text-gray-300 dark:text-gray-600 cursor-grab active:cursor-grabbing hover:text-gray-500 dark:hover:text-gray-400">
                 <GripVertical className="h-4 w-4" />
               </div>
 
               {/* Content */}
               <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-semibold text-gray-800 truncate">
+                <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">
                   {getItemTitle(item)}
                 </h4>
-                <p className="text-xs text-gray-500 truncate">
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                   {getItemSubtitle(item)}
                 </p>
               </div>
@@ -246,7 +246,7 @@ export function CVSidebarSection({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 text-gray-400 hover:text-pink-600 hover:bg-pink-50"
+                  className="h-7 w-7 text-gray-400 dark:text-gray-500 hover:text-pink-600 dark:hover:text-pink-400 hover:bg-pink-50 dark:hover:bg-pink-900/20"
                   onClick={(e) => {
                     e.stopPropagation();
                     onEditItem(index);
@@ -257,7 +257,7 @@ export function CVSidebarSection({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 text-gray-400 hover:text-pink-600 hover:bg-pink-50"
+                  className="h-7 w-7 text-gray-400 dark:text-gray-500 hover:text-pink-600 dark:hover:text-pink-400 hover:bg-pink-50 dark:hover:bg-pink-900/20"
                   onClick={(e) => handleToggleVisibility(e, index)}
                 >
                   {item.isHidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -265,7 +265,7 @@ export function CVSidebarSection({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                  className="h-7 w-7 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                   onClick={(e) => handleDeleteItem(e, index)}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -278,7 +278,7 @@ export function CVSidebarSection({
           <div className="pt-2 flex justify-center">
             <Button 
               variant="outline" 
-              className="h-10 px-6 rounded-full border-gray-200 text-gray-700 font-medium hover:border-pink-200 hover:bg-pink-50 hover:text-pink-700 gap-2 transition-all"
+              className="h-10 px-6 rounded-full border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 bg-transparent hover:border-pink-200 dark:hover:border-pink-900/50 hover:bg-pink-50 dark:hover:bg-pink-900/20 hover:text-pink-700 dark:hover:text-pink-400 gap-2 transition-all"
               onClick={onAddItem}
             >
               <Plus className="h-4 w-4" />
@@ -398,22 +398,22 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
   const shouldShowLinks = "liveDemoLink" in item || "githubLink" in item || "verificationLink" in item;
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-200">
+    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-200">
       {/* Header */}
-      <div className="p-4 flex items-center justify-between border-b border-gray-50">
-        <h3 className="text-lg font-bold text-gray-800">
+      <div className="p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-800">
+        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">
           {isPersonalInfo ? "Edit Personal Details" : "Edit Entry"}
         </h3>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" className="h-8 gap-1 text-gray-500 hover:text-gray-700" onClick={onCancel}>
+          <Button variant="ghost" size="sm" className="h-8 gap-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" onClick={onCancel}>
             Cancel
           </Button>
-          <Button variant="ghost" size="sm" className="h-8 gap-1 text-gray-500 hover:text-pink-600">
+          <Button variant="ghost" size="sm" className="h-8 gap-1 text-gray-500 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400">
             <Lightbulb className="h-4 w-4" />
             <span className="text-xs font-medium">Get Tips</span>
           </Button>
           {!isPersonalInfo && (
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50" onClick={onDelete}>
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={onDelete}>
               <Trash2 className="h-4 w-4" />
             </Button>
           )}
@@ -425,9 +425,9 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
         {isPersonalInfo ? (
           <>
             {/* Profile Picture Upload */}
-            <div className="flex flex-col items-center gap-4 py-4 border-b border-gray-50 mb-4">
+            <div className="flex flex-col items-center gap-4 py-4 border-b border-gray-50 dark:border-gray-800 mb-4">
               <div className="relative group">
-                <Avatar className="h-28 w-28 border-4 border-white shadow-xl">
+                <Avatar className="h-28 w-28 border-4 border-white dark:border-gray-800 shadow-xl">
                   {formData.profilePicture && (
                     <AvatarImage 
                       src={formData.profilePicture} 
@@ -435,7 +435,7 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
                       className="object-cover"
                     />
                   )}
-                  <AvatarFallback className="bg-gray-50 text-gray-400">
+                  <AvatarFallback className="bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
                     <User className="h-12 w-12" />
                   </AvatarFallback>
                 </Avatar>
@@ -467,145 +467,147 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="h-8 text-xs font-semibold rounded-lg border-gray-200"
+                  className="h-8 text-xs font-semibold rounded-lg border-gray-200 dark:border-gray-700 bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   Change Photo
                 </Button>
-                <p className="text-[10px] text-gray-400 mt-1.5 uppercase tracking-wider font-medium">
+                <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1.5 uppercase tracking-wider font-medium">
                   JPG, PNG or WebP. Max 2MB.
                 </p>
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">Full name</label>
+              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Full name</label>
               <Input
                 value={formData.fullName || ""}
                 onChange={(e) => handleChange("fullName", e.target.value)}
-                className="bg-gray-50 border-gray-200 focus-visible:ring-[#ff4d6d]/20 focus-visible:border-[#ff4d6d] h-10"
+                className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-[#ff4d6d]/20 focus-visible:border-[#ff4d6d] h-10"
                 placeholder="e.g. Asif Akram"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">Professional title</label>
+              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Professional title</label>
               <Input
                 value={formData.jobTitle || ""}
                 onChange={(e) => handleChange("jobTitle", e.target.value)}
-                className="bg-gray-50 border-gray-200 focus-visible:ring-[#ff4d6d]/20 focus-visible:border-[#ff4d6d] h-10"
+                className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-[#ff4d6d]/20 focus-visible:border-[#ff4d6d] h-10"
                 placeholder="e.g. Full Stack Developer"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">Location</label>
+              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Location</label>
               <div className="relative">
                 <Input
                   value={formData.location || ""}
                   onChange={(e) => handleChange("location", e.target.value)}
-                  className="bg-gray-50 border-gray-200 focus-visible:ring-[#ff4d6d]/20 focus-visible:border-[#ff4d6d] h-10"
+                  className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-[#ff4d6d]/20 focus-visible:border-[#ff4d6d] h-10"
                   placeholder="e.g. Lahore, Punjab, Pakistan"
                 />
-                <GripVertical className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <GripVertical className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
               </div>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">Email</label>
+              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Email</label>
               <div className="relative">
                 <Input
                   value={formData.email || ""}
                   onChange={(e) => handleChange("email", e.target.value)}
-                  className="bg-gray-50 border-gray-200 focus-visible:ring-[#ff4d6d]/20 focus-visible:border-[#ff4d6d] h-10"
+                  className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-[#ff4d6d]/20 focus-visible:border-[#ff4d6d] h-10"
                   placeholder="e.g. name@example.com"
                 />
-                <GripVertical className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <GripVertical className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
               </div>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">Phone</label>
+              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Phone</label>
               <div className="relative">
                 <Input
                   value={formData.phone || ""}
                   onChange={(e) => handleChange("phone", e.target.value)}
-                  className="bg-gray-50 border-gray-200 focus-visible:ring-[#ff4d6d]/20 focus-visible:border-[#ff4d6d] h-10"
+                  className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-[#ff4d6d]/20 focus-visible:border-[#ff4d6d] h-10"
                   placeholder="Enter Phone"
                 />
-                <GripVertical className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <GripVertical className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
               </div>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">LinkedIn</label>
+              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">LinkedIn</label>
               <div className="relative flex gap-2">
                 <div className="relative flex-1">
                   <Input
                     value={formData.linkedin || ""}
                     onChange={(e) => handleChange("linkedin", e.target.value)}
-                    className="bg-gray-50 border-gray-200 focus-visible:ring-[#ff4d6d]/20 focus-visible:border-[#ff4d6d] h-10"
+                    className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-[#ff4d6d]/20 focus-visible:border-[#ff4d6d] h-10"
                     placeholder="Enter LinkedIn"
                   />
                 </div>
-                <Button variant="outline" size="sm" className="h-10 px-3 text-xs gap-1 border-gray-200 text-gray-500">
+                <Button variant="outline" size="sm" className="h-10 px-3 text-xs gap-1 border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800">
                   <Globe className="h-3 w-3" />
                   Link
                 </Button>
                 <div className="flex items-center">
-                   <GripVertical className="h-4 w-4 text-gray-400" />
+                   <GripVertical className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                 </div>
               </div>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">GitHub</label>
+              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">GitHub</label>
               <div className="relative flex gap-2">
                 <div className="relative flex-1">
                   <Input
                     value={formData.github || ""}
                     onChange={(e) => handleChange("github", e.target.value)}
-                    className="bg-gray-50 border-gray-200 focus-visible:ring-[#ff4d6d]/20 focus-visible:border-[#ff4d6d] h-10"
+                    className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-[#ff4d6d]/20 focus-visible:border-[#ff4d6d] h-10"
                     placeholder="Enter GitHub"
                   />
                 </div>
-                <Button variant="outline" size="sm" className="h-10 px-3 text-xs gap-1 border-gray-200 text-gray-500">
+                <Button variant="outline" size="sm" className="h-10 px-3 text-xs gap-1 border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800">
                   <Globe className="h-3 w-3" />
                   Link
                 </Button>
                 <div className="flex items-center">
-                   <GripVertical className="h-4 w-4 text-gray-400" />
+                   <GripVertical className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                 </div>
               </div>
             </div>
 
             <div className="pt-2 space-y-3">
-              <label className="text-xs font-bold text-gray-800">Add Details</label>
+              <label className="text-xs font-bold text-gray-800 dark:text-gray-200">Add Details</label>
               <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" className="h-8 text-[11px] gap-1 border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">
+                <Button variant="outline" size="sm" className="h-8 text-[11px] gap-1 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                   <Plus className="h-3 w-3" /> Website
                 </Button>
-                <Button variant="outline" size="sm" className="h-8 text-[11px] gap-1 border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">
+                <Button variant="outline" size="sm" className="h-8 text-[11px] gap-1 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                   <Plus className="h-3 w-3" /> Nationality
                 </Button>
-                <Button variant="outline" size="sm" className="h-8 text-[11px] gap-1 border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">
+                <Button variant="outline" size="sm" className="h-8 text-[11px] gap-1 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                   <Plus className="h-3 w-3" /> Date of Birth
                 </Button>
-                <Button variant="outline" size="sm" className="h-8 text-[11px] gap-1 border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">
+                <Button variant="outline" size="sm" className="h-8 text-[11px] gap-1 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                   <Plus className="h-3 w-3" /> Visa
                 </Button>
-                <Button variant="outline" size="sm" className="h-8 text-[11px] gap-1 border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">
+                <Button variant="outline" size="sm" className="h-8 text-[11px] gap-1 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                   <Plus className="h-3 w-3" /> Passport or Id
                 </Button>
-                <Button variant="outline" size="sm" className="h-8 text-[11px] gap-1 border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">
+                <Button variant="outline" size="sm" className="h-8 text-[11px] gap-1 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                   <Plus className="h-3 w-3" /> Gender/Pronoun
                 </Button>
-                <Button variant="outline" size="sm" className="h-8 text-[11px] font-semibold border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 px-4">
+                <Button variant="outline" size="sm" className="h-8 text-[11px] font-semibold border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 px-4">
                   Show More
                 </Button>
               </div>
             </div>
+
+
             
             <div className="space-y-1.5 pt-2">
-              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">Summary</label>
+              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Summary</label>
               <Textarea
                 value={formData.summary || ""}
                 onChange={(e) => handleChange("summary", e.target.value)}
-                className="bg-gray-50 border-gray-200 focus-visible:ring-[#ff4d6d]/20 focus-visible:border-[#ff4d6d] min-h-[140px]"
+                className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-[#ff4d6d]/20 focus-visible:border-[#ff4d6d] min-h-[140px]"
                 placeholder="Write a brief professional summary..."
               />
             </div>
@@ -613,27 +615,27 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
         ) : (
           <>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                 {getTitleLabel()}
               </label>
               <div className="relative">
                 <Input 
                   value={formData[titleKey as keyof SectionItem] || ''} 
                   onChange={(e) => handleChange(titleKey as string, e.target.value)}
-                  className="bg-gray-50 border-gray-200 focus-visible:ring-pink-500/20 focus-visible:border-pink-500"
+                  className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-pink-500/20 focus-visible:border-pink-500"
                   placeholder="e.g. Senior Product Designer"
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                 {getSubtitleLabel()}
               </label>
               <Input 
                 value={formData[subtitleKey as keyof SectionItem] || ''} 
                 onChange={(e) => handleChange(subtitleKey as string, e.target.value)}
-                className="bg-gray-50 border-gray-200 focus-visible:ring-pink-500/20 focus-visible:border-pink-500"
+                className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-pink-500/20 focus-visible:border-pink-500"
                 placeholder="e.g. Google Inc."
               />
             </div>
@@ -643,20 +645,20 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
         {shouldShowStartEndDates && (
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">Start Date</label>
+              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Start Date</label>
               <Input 
                 value={formData.startDate || ''} 
                 onChange={(e) => handleChange('startDate', e.target.value)}
-                className="bg-gray-50 border-gray-200"
+                className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                 placeholder="MM/YYYY" 
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">End Date</label>
+              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">End Date</label>
               <Input 
                 value={formData.endDate || ''} 
                 onChange={(e) => handleChange('endDate', e.target.value)}
-                className="bg-gray-50 border-gray-200"
+                className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                 placeholder="MM/YYYY" 
               />
             </div>
@@ -665,7 +667,7 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
 
         {shouldShowSingleDate && (
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
               {singleDateKey === "graduationDate"
                 ? "Graduation Date"
                 : singleDateKey === "dateObtained"
@@ -677,7 +679,7 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
             <Input
               value={(formData as any)[singleDateKey] || ""}
               onChange={(e) => handleChange(singleDateKey, e.target.value)}
-              className="bg-gray-50 border-gray-200"
+              className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
               placeholder={singleDateKey === "duration" ? "e.g. 2022 - Present" : "MM/YYYY"}
             />
           </div>
@@ -685,11 +687,11 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
 
         {shouldShowTechnologies && (
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">Technologies</label>
+            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Technologies</label>
             <Input
               value={Array.isArray((formData as any).technologies) ? (formData as any).technologies.join(", ") : ""}
               onChange={(e) => handleChange("technologies", e.target.value.split(",").map((s: string) => s.trim()).filter(Boolean))}
-              className="bg-gray-50 border-gray-200 focus-visible:ring-pink-500/20 focus-visible:border-pink-500"
+              className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-pink-500/20 focus-visible:border-pink-500"
               placeholder="e.g. React, Next.js, Tailwind"
             />
           </div>
@@ -697,11 +699,11 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
 
         {shouldShowResponsibilities && (
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">Responsibilities</label>
+            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Responsibilities</label>
             <Textarea
               value={Array.isArray((formData as any).responsibilities) ? (formData as any).responsibilities.join("\n") : ""}
               onChange={(e) => handleChange("responsibilities", e.target.value.split("\n").map((s) => s.trim()).filter(Boolean))}
-              className="bg-gray-50 border-gray-200 focus-visible:ring-pink-500/20 focus-visible:border-pink-500 min-h-[100px]"
+              className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-pink-500/20 focus-visible:border-pink-500 min-h-[100px]"
               placeholder={"One bullet per line"}
             />
           </div>
@@ -711,33 +713,33 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
           <div className="grid grid-cols-2 gap-4">
             {"liveDemoLink" in item && (
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">Live Demo</label>
+                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Live Demo</label>
                 <Input
                   value={(formData as any).liveDemoLink || ""}
                   onChange={(e) => handleChange("liveDemoLink", e.target.value)}
-                  className="bg-gray-50 border-gray-200 focus-visible:ring-pink-500/20 focus-visible:border-pink-500"
+                  className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-pink-500/20 focus-visible:border-pink-500"
                   placeholder="https://"
                 />
               </div>
             )}
             {"githubLink" in item && (
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">GitHub</label>
+                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">GitHub</label>
                 <Input
                   value={(formData as any).githubLink || ""}
                   onChange={(e) => handleChange("githubLink", e.target.value)}
-                  className="bg-gray-50 border-gray-200 focus-visible:ring-pink-500/20 focus-visible:border-pink-500"
+                  className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-pink-500/20 focus-visible:border-pink-500"
                   placeholder="https://"
                 />
               </div>
             )}
             {"verificationLink" in item && (
               <div className="col-span-2 space-y-1.5">
-                <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">Verification Link</label>
+                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Verification Link</label>
                 <Input
                   value={(formData as any).verificationLink || ""}
                   onChange={(e) => handleChange("verificationLink", e.target.value)}
-                  className="bg-gray-50 border-gray-200 focus-visible:ring-pink-500/20 focus-visible:border-pink-500"
+                  className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-pink-500/20 focus-visible:border-pink-500"
                   placeholder="https://"
                 />
               </div>
@@ -748,27 +750,27 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
         {/* Description */}
         {shouldShowDescription && (
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">Description</label>
-            <div className="border border-gray-200 rounded-lg overflow-hidden bg-white focus-within:ring-2 focus-within:ring-pink-500/20 focus-within:border-pink-500 transition-all">
-              <div className="flex items-center gap-1 p-2 border-b border-gray-100 bg-gray-50/50">
-                 <Button variant="ghost" size="icon" className="h-6 w-6 rounded text-gray-500"><span className="font-bold font-serif">B</span></Button>
-                 <Button variant="ghost" size="icon" className="h-6 w-6 rounded text-gray-500"><span className="italic font-serif">I</span></Button>
-                 <Button variant="ghost" size="icon" className="h-6 w-6 rounded text-gray-500"><span className="underline font-serif">U</span></Button>
-                 <div className="w-px h-4 bg-gray-200 mx-1" />
-                 <Button variant="ghost" size="icon" className="h-6 w-6 rounded text-gray-500"><MoreVertical className="h-3 w-3" /></Button>
+            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Description</label>
+            <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800 focus-within:ring-2 focus-within:ring-pink-500/20 focus-within:border-pink-500 transition-all">
+              <div className="flex items-center gap-1 p-2 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50">
+                 <Button variant="ghost" size="icon" className="h-6 w-6 rounded text-gray-500 dark:text-gray-400"><span className="font-bold font-serif">B</span></Button>
+                 <Button variant="ghost" size="icon" className="h-6 w-6 rounded text-gray-500 dark:text-gray-400"><span className="italic font-serif">I</span></Button>
+                 <Button variant="ghost" size="icon" className="h-6 w-6 rounded text-gray-500 dark:text-gray-400"><span className="underline font-serif">U</span></Button>
+                 <div className="w-px h-4 bg-gray-200 dark:bg-gray-700 mx-1" />
+                 <Button variant="ghost" size="icon" className="h-6 w-6 rounded text-gray-500 dark:text-gray-400"><MoreVertical className="h-3 w-3" /></Button>
               </div>
               <Textarea 
                 value={formData.description || ''} 
                 onChange={(e) => handleChange('description', e.target.value)}
-                className="border-0 focus-visible:ring-0 resize-none min-h-[120px] p-3 text-sm leading-relaxed"
+                className="border-0 focus-visible:ring-0 resize-none min-h-[120px] p-3 text-sm leading-relaxed bg-transparent text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"
                 placeholder="Describe your responsibilities and achievements..."
               />
             </div>
             <div className="flex flex-wrap gap-2 pt-1">
-               <Button variant="secondary" size="sm" className="h-6 text-[10px] bg-purple-50 text-purple-600 hover:bg-purple-100 border border-purple-100">
+               <Button variant="secondary" size="sm" className="h-6 text-[10px] bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40 border border-purple-100 dark:border-purple-800/50">
                  Improve Writing
                </Button>
-               <Button variant="secondary" size="sm" className="h-6 text-[10px] bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-100">
+               <Button variant="secondary" size="sm" className="h-6 text-[10px] bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 border border-blue-100 dark:border-blue-800/50">
                  Suggest Content
                </Button>
             </div>
@@ -777,9 +779,9 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
       </div>
 
       {/* Footer Actions */}
-      <div className="p-4 border-t border-gray-50 bg-gray-50/30">
+      <div className="p-4 border-t border-gray-50 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-900/30">
         <Button 
-          className="w-full bg-[#ff4d6d] hover:bg-[#ff3355] text-white shadow-md shadow-pink-200 transition-all rounded-xl h-11"
+          className="w-full bg-[#ff4d6d] hover:bg-[#ff3355] text-white shadow-md shadow-pink-200 dark:shadow-none transition-all rounded-xl h-11"
           onClick={() => onSave(formData)}
         >
           <Check className="h-4 w-4 mr-2" />

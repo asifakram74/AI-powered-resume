@@ -269,7 +269,7 @@ export function CVPageClientContent() {
   const [sectionOrder, setSectionOrder] = useState<CVSectionId[]>(DEFAULT_SECTION_ORDER)
   const [hiddenSections, setHiddenSections] = useState<CVSectionId[]>([])
   const [personalInfoFieldOrder, setPersonalInfoFieldOrder] = useState<PersonalInfoFieldId[]>(DEFAULT_PERSONAL_INFO_FIELD_ORDER)
-  const [isPersonalInfoOpen, setIsPersonalInfoOpen] = useState(true)
+  const [isPersonalInfoOpen, setIsPersonalInfoOpen] = useState(false)
   const [styleSettings, setStyleSettings] = useState<CVStyleSettings>(DEFAULT_STYLE_SETTINGS)
   const [activeTab, setActiveTab] = useState("content")
   const [expandedSectionId, setExpandedSectionId] = useState<CVSectionId | null>("personalInfo")
@@ -1240,7 +1240,7 @@ export function CVPageClientContent() {
               ) : (
                 <>
                   <div className="space-y-6 mb-20">
-                    {visibleSectionOrder.map((sectionId) => {
+                    {availableSectionIds.map((sectionId) => {
                       const Icon = SECTION_ICONS[sectionId] || LayoutGrid
                       const label = SECTION_LABELS[sectionId]
                       const items = getSectionItems(sectionId)
@@ -1310,7 +1310,7 @@ export function CVPageClientContent() {
           )}
 
           {/* Main Content - Preview */}
-          <div className="flex-1 min-w-0 bg-transparent overflow-y-auto flex justify-center no-scrollbar scroll-smooth">
+          <div className=" min-w-0 bg-transparent overflow-y-auto flex justify-center no-scrollbar scroll-smooth outline-none">
             <div className="w-full max-w-[210mm] shadow-2xl bg-white rounded-sm overflow-hidden h-fit">
               {selectedTemplate && aiResponse && (
                 <CVPreviewSection

@@ -7,6 +7,13 @@ import { Toaster } from "sonner";
 import HydrateAuth from "../components/auth/HydrateAuth";
 import { ThemeProvider } from "../components/theme-provider";
 import { ThemeToggle } from "../components/theme-toggle";
+import { Inter, Rubik, Roboto, Open_Sans, Lato } from 'next/font/google';
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const rubik = Rubik({ subsets: ['latin'], variable: '--font-rubik' });
+const roboto = Roboto({ weight: ['100', '300', '400', '500', '700', '900'], subsets: ['latin'], variable: '--font-roboto' });
+const openSans = Open_Sans({ subsets: ['latin'], variable: '--font-open-sans' });
+const lato = Lato({ weight: ['100', '300', '400', '700', '900'], subsets: ['latin'], variable: '--font-lato' });
 
 export const metadata: Metadata = {
  title: "Resumaic – AI-Powered Resume Builder Online",
@@ -61,7 +68,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="antialiased" suppressHydrationWarning>
-      <body className="font-sans">
+      <body className={`font-sans ${inter.variable} ${rubik.variable} ${roboto.variable} ${openSans.variable} ${lato.variable}`}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
           <ReduxProvider>
             <HydrateAuth />

@@ -1,5 +1,13 @@
 import React, { useMemo, useRef, useState, useLayoutEffect } from "react";
-import type { CVData, CVSectionId, PersonalInfoFieldId } from "../../../types/cv-data";
+import type {
+  CVBulletStyle,
+  CVData,
+  CVFontFamilyId,
+  CVSectionHeaderIconStyle,
+  CVSectionId,
+  CVStyleSettings,
+  PersonalInfoFieldId,
+} from "../../../types/cv-data";
 
 interface ClassicTemplate4Props {
   data: CVData;
@@ -7,49 +15,220 @@ interface ClassicTemplate4Props {
 }
 
 const PAGE_HEIGHT_PX = 1123;
-const PADDING_PX = 48;
-const CONTENT_HEIGHT_PX = PAGE_HEIGHT_PX - PADDING_PX * 2;
+const MM_TO_PX = 3.7795275591;
+
+const DEFAULT_STYLE_SETTINGS: CVStyleSettings = {
+  bodyFontFamily: "inter",
+  headingFontFamily: "inter",
+  bodyFontSizePx: 12,
+  headingFontSizePx: 20,
+  lineHeight: 1.35,
+  marginLeftRightMm: 16,
+  marginTopBottomMm: 16,
+  spaceBetweenEntriesPx: 12,
+  textColor: "#374151",
+  headingColor: "#111827",
+  mutedColor: "#4b5563",
+  accentColor: "#111827",
+  borderColor: "#1f2937",
+  backgroundColor: "#ffffff",
+  backgroundImageUrl: "",
+  colorMode: "basic",
+  borderMode: "single",
+  applyAccentToName: false,
+  applyAccentToJobTitle: false,
+  applyAccentToHeadings: false,
+  applyAccentToHeadingsLine: false,
+  applyAccentToHeaderIcons: false,
+  applyAccentToDotsBarsBubbles: false,
+  applyAccentToDates: false,
+  applyAccentToLinkIcons: false,
+  datesOpacity: 0.7,
+  nameBold: true,
+  locationOpacity: 0.7,
+  align: "left",
+  capitalization: "uppercase",
+  headingsLine: true,
+  headerIcons: "none",
+  linkIcons: "none",
+  iconFrame: "none",
+  iconSize: "sm",
+  dotsBarsBubbles: "dots",
+  descriptionIndentPx: 16,
+  entryListStyle: "bullet",
+  showPageNumbers: true,
+  showEmail: false,
+  sectionHeaderIconStyle: "none",
+  bulletStyle: "disc",
+};
+
+const fontFamilyCss = (id: CVFontFamilyId) => {
+  switch (id) {
+    case "inter":
+      return "var(--font-inter)";
+    case "serif":
+      return "var(--font-rubik)";
+    case "system-sans":
+      return 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif';
+    case "system-serif":
+      return 'ui-serif, Georgia, Cambria, "Times New Roman", Times, serif';
+    case "mono":
+      return 'ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace';
+    case "roboto":
+      return '"Roboto", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif';
+    case "open-sans":
+      return '"Open Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif';
+    case "lato":
+      return '"Lato", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif';
+  }
+};
+
+const sectionIconNode = (style: CVSectionHeaderIconStyle, color: string) => {
+  const common = { flexShrink: 0 as const, display: "inline-block" as const };
+  switch (style) {
+    case "none":
+      return null;
+    case "dot":
+      return <span style={{ ...common, width: 8, height: 8, borderRadius: 999, background: color }} />;
+    case "bar":
+      return <span style={{ ...common, width: 18, height: 4, borderRadius: 999, background: color }} />;
+    case "square":
+      return <span style={{ ...common, width: 8, height: 8, background: color }} />;
+    case "circle-outline":
+      return <span style={{ ...common, width: 9, height: 9, borderRadius: 999, border: `2px solid ${color}` }} />;
+  }
+};
+
+const bulletNode = (style: CVBulletStyle, color: string) => {
+  const common = {
+    flexShrink: 0 as const,
+    display: "inline-flex" as const,
+    alignItems: "center",
+    justifyContent: "center",
+  };
+  switch (style) {
+    case "none":
+      return null;
+    case "hyphen":
+      return <span style={{ ...common, width: 10, color, fontWeight: 700, lineHeight: 1 }}>-</span>;
+    case "disc":
+      return <span style={{ ...common, width: 7, height: 7, borderRadius: 999, background: color, marginTop: 6 }} />;
+    case "circle":
+      return <span style={{ ...common, width: 8, height: 8, borderRadius: 999, border: `2px solid ${color}`, marginTop: 6 }} />;
+    case "square":
+      return <span style={{ ...common, width: 7, height: 7, background: color, marginTop: 6 }} />;
+  }
+};
+
+const getIconSize = (size: string) => {
+  switch (size) {
+    case "xs":
+      return "w-2.5 h-2.5";
+    case "sm":
+      return "w-3.5 h-3.5";
+    case "md":
+      return "w-4.5 h-4.5";
+    case "lg":
+      return "w-5.5 h-5.5";
+    default:
+      return "w-3.5 h-3.5";
+  }
+};
+
+const getIconFrameClasses = (frame: string) => {
+  switch (frame) {
+    case "circle":
+      return "rounded-full p-1";
+    case "square":
+      return "rounded p-1";
+    case "rounded":
+      return "rounded-md p-1";
+    default:
+      return "";
+  }
+};
 
 export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [pages, setPages] = useState<React.ReactNode[][]>([]);
+  const styleSettings = useMemo(
+    () => ({ ...DEFAULT_STYLE_SETTINGS, ...(data.styleSettings || {}) }),
+    [data.styleSettings],
+  );
+  const bodyFont = useMemo(() => fontFamilyCss(styleSettings.bodyFontFamily), [styleSettings.bodyFontFamily]);
+  const headingFont = useMemo(() => fontFamilyCss(styleSettings.headingFontFamily), [styleSettings.headingFontFamily]);
+  const paddingXpx = useMemo(() => styleSettings.marginLeftRightMm * MM_TO_PX, [styleSettings.marginLeftRightMm]);
+  const paddingYpx = useMemo(() => styleSettings.marginTopBottomMm * MM_TO_PX, [styleSettings.marginTopBottomMm]);
+  const contentHeightPx = useMemo(() => PAGE_HEIGHT_PX - paddingYpx * 2, [paddingYpx]);
+  const effectiveHeadingColor = useMemo(
+    () => (styleSettings.applyAccentToHeadings ? styleSettings.accentColor : styleSettings.headingColor),
+    [styleSettings.accentColor, styleSettings.applyAccentToHeadings, styleSettings.headingColor],
+  );
+  const effectiveBulletStyle: CVBulletStyle = useMemo(
+    () => (styleSettings.entryListStyle === "hyphen" ? "hyphen" : styleSettings.bulletStyle),
+    [styleSettings.bulletStyle, styleSettings.entryListStyle],
+  );
+  const rootStyle = useMemo<React.CSSProperties>(
+    () => ({
+      fontFamily: bodyFont,
+      fontSize: `${styleSettings.bodyFontSizePx}px`,
+      lineHeight: styleSettings.lineHeight,
+      color: styleSettings.textColor,
+    }),
+    [bodyFont, styleSettings.bodyFontSizePx, styleSettings.lineHeight, styleSettings.textColor],
+  );
+  const headingBaseStyle = useMemo<React.CSSProperties>(
+    () => ({
+      fontFamily: headingFont,
+      color: effectiveHeadingColor,
+    }),
+    [headingFont, effectiveHeadingColor],
+  );
+  const mutedStyle = useMemo<React.CSSProperties>(() => ({ color: styleSettings.mutedColor }), [styleSettings.mutedColor]);
+  const dateStyle = useMemo<React.CSSProperties>(
+    () => ({ ...mutedStyle, opacity: styleSettings.datesOpacity }),
+    [mutedStyle, styleSettings.datesOpacity],
+  );
+  const locationStyle = useMemo<React.CSSProperties>(
+    () => ({ ...mutedStyle, opacity: styleSettings.locationOpacity }),
+    [mutedStyle, styleSettings.locationOpacity],
+  );
+  const dividerStyle = useMemo<React.CSSProperties>(
+    () => ({ borderColor: styleSettings.borderColor }),
+    [styleSettings.borderColor],
+  );
+  const pageStyle = useMemo<React.CSSProperties>(
+    () => ({
+      ...rootStyle,
+      backgroundColor: styleSettings.backgroundColor,
+      padding: `${paddingYpx}px ${paddingXpx}px`,
+    }),
+    [paddingXpx, paddingYpx, rootStyle, styleSettings.backgroundColor],
+  );
 
   const formatDate = (date: string) => {
     if (!date) return "";
     const s = date.trim();
     if (!s) return "";
-
-    // Normalize dash types
     const normalized = s.replace(/[\u2012-\u2015\u2212]/g, "-");
-
-    // Year-only: 2021
     if (/^\d{4}$/.test(normalized)) return normalized;
-
     const monthNames = [
       "January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December",
     ];
-
-    // ISO: YYYY-MM or YYYY-MM-DD
     const isoMatch = normalized.match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?$/);
     if (isoMatch) {
       const year = isoMatch[1];
       const month = Math.max(1, Math.min(12, Number.parseInt(isoMatch[2], 10)));
       return `${monthNames[month - 1]} ${year}`;
     }
-
-    // MM/YYYY
     const slashMatch = normalized.match(/^(\d{1,2})\/(\d{4})$/);
     if (slashMatch) {
       const month = Math.max(1, Math.min(12, Number.parseInt(slashMatch[1], 10)));
       const year = slashMatch[2];
       return `${monthNames[month - 1]} ${year}`;
     }
-
-    // Already readable like "Jan 2020" or "March 2022"
     if (/^([A-Za-z]{3,9})\s+\d{4}$/.test(normalized)) return normalized;
-
-    // Fallback: return raw string to avoid "undefined"
     return normalized;
   };
 
@@ -85,39 +264,6 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
       ...allFields.filter((f) => !order.includes(f)),
     ];
 
-    const icons: Partial<Record<PersonalInfoFieldId, React.ReactNode>> = {
-      email: (
-        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
-        </svg>
-      ),
-      phone: (
-        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
-        </svg>
-      ),
-      location: (
-        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-        </svg>
-      ),
-      address: (
-        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-        </svg>
-      ),
-      linkedin: (
-        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
-        </svg>
-      ),
-      github: (
-         <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-        </svg>
-      )
-    };
-
     const locationText =
       data.personalInfo.city && data.personalInfo.country
         ? `${data.personalInfo.city}, ${data.personalInfo.country}`
@@ -140,37 +286,39 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
         case "address":
           return data.personalInfo.address?.trim() ? data.personalInfo.address : "";
         case "linkedin":
-           return (data.personalInfo.linkedin || "").trim();
+          return (data.personalInfo.linkedin || "").trim();
         case "github":
-           return (data.personalInfo.github || "").trim();
+          return (data.personalInfo.github || "").trim();
         default:
           return "";
       }
     };
 
-    const renderContactItem = (field: PersonalInfoFieldId, value: string, key: string) => {
-       return (
-        <span key={key} className="flex items-center">
-          {icons[field]}
-          {value}
-        </span>
-       );
+    const pushContactLine = (contactParts: string[], key: string) => {
+      const parts = contactParts.map((s) => s.trim()).filter(Boolean);
+      if (parts.length === 0) return null;
+      return (
+        <div key={key} className="mb-4" style={{ ...mutedStyle, fontSize: `${styleSettings.bodyFontSizePx}px` }}>
+          {parts.map((p, idx) => (
+            <span key={`${key}-${idx}`}>
+              {idx > 0 && <span className="mx-2" style={{ color: styleSettings.mutedColor }}>•</span>}
+              <span>{p}</span>
+            </span>
+          ))}
+        </div>
+      );
     };
 
     const rows: React.ReactNode[] = [];
-    let contactBuffer: React.ReactNode[] = [];
+    let contactBuffer: string[] = [];
     let contactBlockIndex = 0;
+    let isSummaryRendered = false;
 
     const flushContacts = () => {
-      if (contactBuffer.length > 0) {
-        rows.push(
-          <div key={`contacts-${contactBlockIndex}`} className="flex flex-wrap justify-center gap-4 text-gray-600 text-sm mb-4">
-            {contactBuffer}
-          </div>
-        );
-        contactBuffer = [];
-        contactBlockIndex++;
-      }
+      const node = pushContactLine(contactBuffer, `contact-${contactBlockIndex}`);
+      if (node) rows.push(node);
+      contactBuffer = [];
+      contactBlockIndex += 1;
     };
 
     finalOrder.forEach((field) => {
@@ -178,7 +326,16 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
         flushContacts();
         if (data.personalInfo.fullName) {
           rows.push(
-            <h1 key="pi-fullName" className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">
+            <h1
+              key="pi-fullName"
+              className="mb-2 tracking-tight"
+              style={{
+                ...headingBaseStyle,
+                fontWeight: styleSettings.nameBold ? 800 : 700,
+                fontSize: `${Math.round(styleSettings.headingFontSizePx * 1.6)}px`,
+                color: styleSettings.applyAccentToName ? styleSettings.accentColor : styleSettings.headingColor,
+              }}
+            >
               {data.personalInfo.fullName}
             </h1>
           );
@@ -189,7 +346,16 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
         flushContacts();
         if (data.personalInfo.jobTitle) {
           rows.push(
-            <h2 key="pi-jobTitle" className="text-xl text-gray-700 font-medium mb-4">
+            <h2
+              key="pi-jobTitle"
+              className="mb-4"
+              style={{
+                fontSize: `${Math.round(styleSettings.headingFontSizePx * 1.05)}px`,
+                color: styleSettings.applyAccentToJobTitle ? styleSettings.accentColor : styleSettings.textColor,
+                fontFamily: headingFont,
+                fontWeight: 600,
+              }}
+            >
               {data.personalInfo.jobTitle}
             </h2>
           );
@@ -198,16 +364,29 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
       }
       if (field === "summary") {
         flushContacts();
-         if (data.personalInfo.summary) {
-           rows.push(
-             <div key="pi-summary" className="mb-8 text-left w-full">
-               <h2 className="text-lg font-bold text-gray-900 mb-3 uppercase tracking-wide border-b border-gray-300 pb-2">
-                 Professional Summary
-               </h2>
-               <p className="text-gray-700 leading-relaxed text-sm">{data.personalInfo.summary}</p>
-             </div>
-           );
-         }
+        if (data.personalInfo.summary) {
+          rows.push(
+            <div key="pi-summary" className="mb-8 text-left w-full">
+              <h2
+                className="mb-3 uppercase tracking-wide pb-2"
+                style={{
+                  ...headingBaseStyle,
+                  fontSize: `${styleSettings.headingFontSizePx}px`,
+                  fontWeight: 800,
+                  textTransform: styleSettings.capitalization,
+                  borderBottomWidth: 1,
+                  borderBottomColor: styleSettings.borderColor,
+                }}
+              >
+                Professional Summary
+              </h2>
+              <p className="leading-relaxed" style={{ color: styleSettings.textColor, fontSize: `${styleSettings.bodyFontSizePx}px` }}>
+                {data.personalInfo.summary}
+              </p>
+            </div>
+          );
+          isSummaryRendered = true;
+        }
         return;
       }
 
@@ -215,21 +394,27 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
       if (!v) return;
 
       if (field === "location" && showAddress && addressText) {
-         contactBuffer.push(renderContactItem(field, `${locationText} ${addressText}`.trim(), `${field}-combined`));
-         return;
+        contactBuffer.push(`${locationText} ${addressText}`.trim());
+        return;
       }
 
       if (field === "address" && (data.personalInfo.city || data.personalInfo.country)) {
         if (!showAddress) return;
       }
-      
-      contactBuffer.push(renderContactItem(field, v, field));
+
+      contactBuffer.push(v);
     });
 
     flushContacts();
 
+    if (!isSummaryRendered) {
+      rows.push(
+        <div key="header-separator-end" className="w-full border-b mb-6" style={dividerStyle}></div>
+      );
+    }
+
     return (
-      <div className="text-center mb-8">
+      <div className="text-center mb-8" style={{ textAlign: styleSettings.align as any }}>
         {rows}
       </div>
     );
@@ -237,18 +422,23 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
 
   const Skills = ({ skills }: { skills: CVData["skills"] }) => (
     <div className="mb-8">
-      <h2 className="text-lg font-bold text-gray-900 mb-4 uppercase tracking-wide border-b border-gray-300 pb-2">
-        Skills
-      </h2>
+      <SectionTitle title="Skills" />
       <div className="grid grid-cols-2 gap-4">
         {skills.technical.length > 0 && (
           <div>
-            <h4 className="font-semibold text-gray-900 text-sm mb-2">Technical Skills</h4>
+            <h4 className="font-semibold mb-2" style={{ color: styleSettings.headingColor, fontSize: `${styleSettings.bodyFontSizePx}px` }}>Technical Skills</h4>
             <div className="flex flex-wrap gap-2">
               {skills.technical.map((skill, index) => (
                 <span
                   key={index}
-                  className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm"
+                  className="px-3 py-1 rounded-full"
+                  style={{
+                    fontSize: `${styleSettings.bodyFontSizePx}px`,
+                    color: styleSettings.textColor,
+                    backgroundColor: styleSettings.applyAccentToDotsBarsBubbles
+                      ? `${styleSettings.accentColor}15`
+                      : "#f3f4f6",
+                  }}
                 >
                   {skill}
                 </span>
@@ -258,12 +448,19 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
         )}
         {skills.soft.length > 0 && (
           <div>
-            <h4 className="font-semibold text-gray-900 text-sm mb-2">Soft Skills</h4>
+            <h4 className="font-semibold mb-2" style={{ color: styleSettings.headingColor, fontSize: `${styleSettings.bodyFontSizePx}px` }}>Soft Skills</h4>
             <div className="flex flex-wrap gap-2">
               {skills.soft.map((skill, index) => (
                 <span
                   key={index}
-                  className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm"
+                  className="px-3 py-1 rounded-full"
+                  style={{
+                    fontSize: `${styleSettings.bodyFontSizePx}px`,
+                    color: styleSettings.textColor,
+                    backgroundColor: styleSettings.applyAccentToDotsBarsBubbles
+                      ? `${styleSettings.accentColor}15`
+                      : "#f3f4f6",
+                  }}
                 >
                   {skill}
                 </span>
@@ -276,102 +473,135 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
   );
 
   const ExperienceItem = ({ exp }: { exp: CVData["experience"][number] }) => (
-    <div className="pl-4 border-l-4 border-gray-200">
+    <div className="pl-4" style={{ borderLeftWidth: 4, borderLeftColor: styleSettings.applyAccentToDotsBarsBubbles ? styleSettings.accentColor : "#e5e7eb" }}>
       <div className="flex justify-between items-start mb-1">
-        <h3 className="font-semibold text-gray-900 text-base">{exp.jobTitle}</h3>
-        <span className="text-gray-600 text-sm bg-gray-100 px-2 py-1 rounded">
+        <h3 style={{ ...headingBaseStyle, fontSize: `${Math.round(styleSettings.bodyFontSizePx * 1.25)}px`, fontWeight: 700 }}>
+          {exp.jobTitle}
+        </h3>
+        <span
+          className="px-2 py-1 rounded"
+          style={{
+            ...dateStyle,
+            fontSize: `${styleSettings.bodyFontSizePx}px`,
+            backgroundColor: styleSettings.applyAccentToDates ? `${styleSettings.accentColor}15` : "#f3f4f6",
+          }}
+        >
           {formatDate(exp.startDate)}
           {formatDate(exp.startDate) && (exp.current || formatDate(exp.endDate)) ? " - " : ""}
           {exp.current ? "Present" : formatDate(exp.endDate)}
         </span>
       </div>
       <div className="flex justify-between items-start mb-3">
-        <p className="text-gray-700 font-medium text-sm">
+        <p className="font-medium" style={{ color: styleSettings.textColor, fontSize: `${styleSettings.bodyFontSizePx}px` }}>
           {exp.companyName}
           {exp.location && ` • ${exp.location}`}
         </p>
       </div>
-      <ul className="text-gray-700 text-sm leading-relaxed space-y-2">
-        {exp.responsibilities.map((resp, index) => (
-          <li key={index} className="flex items-start">
-            <span className="text-gray-500 mr-2 mt-1">•</span>
-            <span>{resp}</span>
-          </li>
-        ))}
+      <ul className="leading-relaxed space-y-2" style={{ color: styleSettings.textColor, fontSize: `${styleSettings.bodyFontSizePx}px` }}>
+        {exp.responsibilities.map((resp, index) => {
+          const t = resp.trim();
+          if (!t) return null;
+          return (
+            <li key={index} className="flex items-start" style={{ marginLeft: styleSettings.descriptionIndentPx }}>
+              {bulletNode(effectiveBulletStyle, styleSettings.accentColor)}
+              <span className="ml-2">{t}</span>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
 
   const EducationItem = ({ edu }: { edu: CVData["education"][number] }) => (
-    <div className="pl-4 border-l-4 border-gray-200">
+    <div className="pl-4" style={{ borderLeftWidth: 4, borderLeftColor: styleSettings.applyAccentToDotsBarsBubbles ? styleSettings.accentColor : "#e5e7eb" }}>
       <div className="flex justify-between items-start mb-1">
-        <h3 className="font-semibold text-gray-900 text-base">{edu.degree}</h3>
+        <h3 style={{ ...headingBaseStyle, fontSize: `${styleSettings.bodyFontSizePx}px`, fontWeight: 700 }}>{edu.degree}</h3>
         {edu.graduationDate && (
-          <span className="text-gray-600 text-sm bg-gray-100 px-2 py-1 rounded">
+          <span
+            className="px-2 py-1 rounded"
+            style={{
+              ...dateStyle,
+              fontSize: `${styleSettings.bodyFontSizePx}px`,
+              backgroundColor: styleSettings.applyAccentToDates ? `${styleSettings.accentColor}15` : "#f3f4f6",
+            }}
+          >
             {formatDate(edu.graduationDate)}
           </span>
         )}
       </div>
-      <p className="text-gray-700 font-medium text-sm mb-1">{edu.institutionName}</p>
-      {edu.location && <p className="text-gray-600 text-sm mb-1">{edu.location}</p>}
-      <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+      <p className="font-medium mb-1" style={{ color: styleSettings.textColor, fontSize: `${styleSettings.bodyFontSizePx}px` }}>{edu.institutionName}</p>
+      {edu.location && <p className="mb-1" style={{ ...locationStyle, fontSize: `${styleSettings.bodyFontSizePx}px` }}>{edu.location}</p>}
+      <div className="flex flex-wrap gap-4" style={{ ...mutedStyle, fontSize: `${styleSettings.bodyFontSizePx}px` }}>
         {edu.gpa && <span>GPA: {edu.gpa}</span>}
         {edu.honors && <span>{edu.honors}</span>}
       </div>
       {edu.additionalInfo && (
-        <p className="text-gray-600 text-sm mt-2">{edu.additionalInfo}</p>
+        <p className="mt-2" style={{ color: styleSettings.textColor, fontSize: `${styleSettings.bodyFontSizePx}px` }}>{edu.additionalInfo}</p>
       )}
     </div>
   );
 
-  const ProjectItem = ({ project }: { project: CVData["projects"][number] }) => (
-    <div className="pl-4 border-l-4 border-gray-200">
-      <h3 className="font-semibold text-gray-900 text-base mb-1">{project.name}</h3>
-      <p className="text-gray-600 text-sm mb-2">{project.role}</p>
-      <p className="text-gray-700 text-sm mb-3">{project.description}</p>
-      <div className="text-gray-600 text-sm mb-2">
-        <span className="font-medium">Technologies: </span>
-        {project.technologies.join(", ")}
-      </div>
-      {(project.liveDemoLink || project.githubLink) && (
-        <div className="flex gap-4 text-sm">
-          {project.liveDemoLink && (
-            <a
-              href={project.liveDemoLink}
-              className="text-blue-600 hover:underline flex items-center"
-            >
-              <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
-              </svg>
-              Live Demo
-            </a>
-          )}
-          {project.githubLink && (
-            <a
-              href={project.githubLink}
-              className="text-blue-600 hover:underline flex items-center"
-            >
-              <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-              </svg>
-              Source Code
-            </a>
-          )}
+  const ProjectItem = ({ project }: { project: CVData["projects"][number] }) => {
+    const iconSize = getIconSize(styleSettings.iconSize);
+    const frameClasses = getIconFrameClasses(styleSettings.iconFrame);
+    const iconColor = styleSettings.applyAccentToLinkIcons ? styleSettings.accentColor : styleSettings.headingColor;
+
+    return (
+      <div className="pl-4" style={{ borderLeftWidth: 4, borderLeftColor: styleSettings.applyAccentToDotsBarsBubbles ? styleSettings.accentColor : "#e5e7eb" }}>
+        <h3 style={{ ...headingBaseStyle, fontSize: `${styleSettings.bodyFontSizePx}px`, fontWeight: 700 }}>{project.name}</h3>
+        <p className="mb-2" style={{ color: styleSettings.textColor, fontSize: `${styleSettings.bodyFontSizePx}px` }}>{project.role}</p>
+        <p className="mb-3" style={{ color: styleSettings.textColor, fontSize: `${styleSettings.bodyFontSizePx}px` }}>{project.description}</p>
+        <div className="mb-2" style={{ color: styleSettings.mutedColor, fontSize: `${styleSettings.bodyFontSizePx}px` }}>
+          <span style={{ fontWeight: 600 }}>Technologies: </span>
+          {project.technologies.join(", ")}
         </div>
-      )}
-    </div>
-  );
+        {(project.liveDemoLink || project.githubLink) && (
+          <div className="flex gap-4" style={{ fontSize: `${styleSettings.bodyFontSizePx}px` }}>
+            {project.liveDemoLink && (
+              <a
+                href={project.liveDemoLink}
+                className="flex items-center hover:underline"
+                style={{ color: iconColor }}
+              >
+                <div className={frameClasses}>
+                  <svg className={`${iconSize} mr-1`} fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
+                  </svg>
+                </div>
+                Live Demo
+              </a>
+            )}
+            {project.githubLink && (
+              <a
+                href={project.githubLink}
+                className="flex items-center hover:underline"
+                style={{ color: iconColor }}
+              >
+                <div className={frameClasses}>
+                  <svg className={`${iconSize} mr-1`} fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                  </svg>
+                </div>
+                Source Code
+              </a>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const CertificationItem = ({ cert }: { cert: CVData["certifications"][number] }) => (
     <div>
-      <div className="font-semibold text-gray-900 text-sm">{cert.title}</div>
-      <div className="text-gray-700 text-sm">{cert.issuingOrganization}</div>
-      <div className="text-gray-600 text-sm">
+      <div style={{ ...headingBaseStyle, fontSize: `${styleSettings.bodyFontSizePx}px`, fontWeight: 700 }}>{cert.title}</div>
+      <div style={{ color: styleSettings.textColor, fontSize: `${styleSettings.bodyFontSizePx}px` }}>{cert.issuingOrganization}</div>
+      <div style={{ ...dateStyle, fontSize: `${styleSettings.bodyFontSizePx}px` }}>
         {formatDate(cert.dateObtained)}
         {cert.verificationLink && (
           <a
             href={cert.verificationLink}
-            className="text-blue-600 hover:underline ml-2"
+            className="ml-2 hover:underline"
+            style={{ color: styleSettings.applyAccentToLinkIcons ? styleSettings.accentColor : "#3b82f6" }}
           >
             (Verify)
           </a>
@@ -382,19 +612,43 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
 
   const LanguageItem = ({ lang }: { lang: CVData["languages"][number] }) => (
     <div className="flex justify-between items-center">
-      <span className="text-gray-700 text-sm font-medium">{lang.name}</span>
-      <span className="text-gray-600 text-sm bg-gray-100 px-2 py-1 rounded">
+      <span className="font-medium" style={{ color: styleSettings.textColor, fontSize: `${styleSettings.bodyFontSizePx}px` }}>{lang.name}</span>
+      <span
+        className="px-2 py-1 rounded"
+        style={{
+          fontSize: `${styleSettings.bodyFontSizePx}px`,
+          color: styleSettings.textColor,
+          backgroundColor: styleSettings.applyAccentToDotsBarsBubbles
+            ? `${styleSettings.accentColor}15`
+            : "#f3f4f6",
+        }}
+      >
         {lang.proficiency}
       </span>
     </div>
   );
 
   const SectionTitle = ({ title }: { title: string }) => (
-    <h2 className="text-lg font-bold text-gray-900 mb-4 uppercase tracking-wide border-b border-gray-300 pb-2">
-      {title}
-    </h2>
+    <div
+      className={`flex items-center gap-2 mb-4 ${styleSettings.headingsLine ? "pb-2 border-b" : ""}`}
+      style={styleSettings.headingsLine ? dividerStyle : undefined}
+    >
+      {sectionIconNode(styleSettings.sectionHeaderIconStyle, styleSettings.accentColor)}
+      <h2
+        className="uppercase tracking-wide"
+        style={{
+          ...headingBaseStyle,
+          fontSize: `${styleSettings.headingFontSizePx}px`,
+          textTransform: styleSettings.capitalization,
+          fontWeight: 800,
+          margin: 0,
+        }}
+      >
+        {title}
+      </h2>
+    </div>
   );
-  
+
   const InterestsSection = () => {
     if (data.additional.interests.length === 0) return null;
     return (
@@ -404,7 +658,14 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
           {data.additional.interests.map((interest, index) => (
             <span
               key={index}
-              className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm"
+              className="px-3 py-1 rounded-full"
+              style={{
+                fontSize: `${styleSettings.bodyFontSizePx}px`,
+                color: styleSettings.textColor,
+                backgroundColor: styleSettings.applyAccentToDotsBarsBubbles
+                  ? `${styleSettings.accentColor}15`
+                  : "#f3f4f6",
+              }}
             >
               {interest}
             </span>
@@ -434,9 +695,9 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
       ...allSections.filter((s) => !requestedOrder.includes(s)),
     ];
     const finalOrder = ordered.filter((s) => s === "personalInfo" || !hidden.includes(s));
-    
+
     const addPersonalInfo = () => {
-       items.push(<PersonalInfoSection key="personalInfo" />);
+      items.push(<PersonalInfoSection key="personalInfo" />);
     };
 
     const addExperience = () => {
@@ -445,13 +706,13 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
       data.experience.forEach((exp, index) => {
         const isLast = index === data.experience.length - 1;
         items.push(<ExperienceItem key={`exp-${exp.id}`} exp={exp} />);
-        if (!isLast) items.push(<div key={`exp-sp-${exp.id}`} className="h-6" />);
+        if (!isLast) items.push(<div key={`exp-sp-${exp.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
       });
     };
-    
+
     const addSkills = () => {
-       if (data.skills.technical.length === 0 && data.skills.soft.length === 0) return;
-       items.push(<Skills key="skills" skills={data.skills} />);
+      if (data.skills.technical.length === 0 && data.skills.soft.length === 0) return;
+      items.push(<Skills key="skills" skills={data.skills} />);
     };
 
     const addEducation = () => {
@@ -460,7 +721,7 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
       data.education.forEach((edu, index) => {
         const isLast = index === data.education.length - 1;
         items.push(<EducationItem key={`edu-${edu.id}`} edu={edu} />);
-        if (!isLast) items.push(<div key={`edu-sp-${edu.id}`} className="h-4" />);
+        if (!isLast) items.push(<div key={`edu-sp-${edu.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
       });
     };
 
@@ -470,49 +731,33 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
       data.projects.forEach((project, index) => {
         const isLast = index === data.projects.length - 1;
         items.push(<ProjectItem key={`proj-${project.id}`} project={project} />);
-        if (!isLast) items.push(<div key={`proj-sp-${project.id}`} className="h-4" />);
+        if (!isLast) items.push(<div key={`proj-sp-${project.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
       });
     };
-    
+
     const addCertifications = () => {
       if (data.certifications.length === 0) return;
       items.push(<SectionTitle key="cert-title" title="Certifications" />);
-      items.push(
-        <div key="cert-list" className="space-y-3 mb-8">
-            {data.certifications.map((cert, index) => {
-                const isLast = index === data.certifications.length - 1;
-                return (
-                <React.Fragment key={`cert-${cert.id}`}>
-                    <CertificationItem cert={cert} />
-                    {!isLast && <div key={`cert-sp-${cert.id}`} className="h-2" />}
-                </React.Fragment>
-                );
-            })}
-        </div>
-      );
+      data.certifications.forEach((cert, index) => {
+        const isLast = index === data.certifications.length - 1;
+        items.push(<CertificationItem key={`cert-${cert.id}`} cert={cert} />);
+        if (!isLast) items.push(<div key={`cert-sp-${cert.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
+      });
     };
 
     const addLanguages = () => {
       if (data.languages.length === 0) return;
       items.push(<SectionTitle key="lang-title" title="Languages" />);
-      items.push(
-        <div key="lang-list" className="space-y-2 mb-8">
-            {data.languages.map((lang, index) => {
-                const isLast = index === data.languages.length - 1;
-                return (
-                <React.Fragment key={`lang-${lang.id}`}>
-                    <LanguageItem lang={lang} />
-                    {!isLast && <div key={`lang-sp-${lang.id}`} className="h-2" />}
-                </React.Fragment>
-                );
-            })}
-        </div>
-      );
+      data.languages.forEach((lang, index) => {
+        const isLast = index === data.languages.length - 1;
+        items.push(<LanguageItem key={`lang-${lang.id}`} lang={lang} />);
+        if (!isLast) items.push(<div key={`lang-sp-${lang.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
+      });
     };
-    
+
     const addInterests = () => {
-       if (data.additional.interests.length === 0) return;
-       items.push(<InterestsSection key="interests" />);
+      if (data.additional.interests.length === 0) return;
+      items.push(<InterestsSection key="interests" />);
     };
 
     finalOrder.forEach((section) => {
@@ -545,7 +790,7 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
     });
 
     return items;
-  }, [data]);
+  }, [data, headingBaseStyle, mutedStyle, styleSettings, dividerStyle]);
 
   useLayoutEffect(() => {
     if (!containerRef.current) return;
@@ -565,7 +810,7 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
       const marginTop = parseFloat(style.marginTop) || 0;
       const marginBottom = parseFloat(style.marginBottom) || 0;
       const elementHeight = el.offsetHeight + marginTop + marginBottom;
-      if (currentHeight + elementHeight > CONTENT_HEIGHT_PX) {
+      if (currentHeight + elementHeight > contentHeightPx) {
         pushPage();
       }
       currentPage.push(blocks[index]);
@@ -573,21 +818,31 @@ export function ClassicTemplate4({ data, isPreview = false }: ClassicTemplate4Pr
     });
     if (currentPage.length > 0) newPages.push(currentPage);
     setPages(newPages);
-  }, [blocks]);
+  }, [blocks, contentHeightPx]);
 
   return (
     <div className="flex flex-col items-center gap-8 pb-20 print:block print:gap-0 print:pb-0">
-      <div ref={containerRef} className="cv-measure fixed top-0 left-0 w-[210mm] p-12 opacity-0 pointer-events-none z-[-999]" style={{ visibility: "hidden" }}>
+      <div
+        ref={containerRef}
+        className="cv-measure fixed top-0 left-0 w-[210mm] opacity-0 pointer-events-none z-[-999]"
+        style={{ ...pageStyle, visibility: "hidden" }}
+      >
         {blocks}
       </div>
       {pages.length === 0 ? (
-        <div className="w-[210mm] min-h-[297mm] p-12 bg-white"></div>
+        <div className="w-[210mm] min-h-[297mm]" style={pageStyle}></div>
       ) : (
         pages.map((pageContent, i) => (
-          <div key={i} className="a4-page w-[210mm] min-h-[297mm] p-12 bg-white text-slate-900 relative print:shadow-none" style={{ breakAfter: i < pages.length - 1 ? "page" : "auto" }}>
+          <div
+            key={i}
+            className="a4-page w-[210mm] min-h-[297mm] relative print:shadow-none"
+            style={{ ...pageStyle, breakAfter: i < pages.length - 1 ? "page" : "auto" }}
+          >
             {pageContent}
-            {pages.length > 1 && (
-              <div className="absolute bottom-4 right-12 text-[10px] text-slate-400 print:hidden">Page {i + 1} of {pages.length}</div>
+            {styleSettings.showPageNumbers && pages.length > 1 && (
+              <div className="absolute bottom-4 right-12 text-[10px] print:hidden" style={mutedStyle}>
+                Page {i + 1} of {pages.length}
+              </div>
             )}
           </div>
         ))

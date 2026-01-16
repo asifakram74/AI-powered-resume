@@ -166,7 +166,7 @@ export function CVPreview({
 
   return (
     <div className=" w-full">
-      <div className="w-full  border  bg-gray-50 dark:bg-gray-950 print:p-0 print:border-0">
+      <div className="w-full  bg-[#f4f4f2] dark:bg-gray-950 ">
         <div
           ref={previewRef}
           id="cv-preview-content"

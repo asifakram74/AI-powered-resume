@@ -68,38 +68,23 @@ export function CVHeaderActions({
           
           if (item.id === 'customize') {
             return (
-              <DropdownMenu key={item.id}>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                      isActive 
-                        ? "bg-pink-50 text-pink-600 hover:bg-pink-100 hover:text-pink-700 dark:bg-pink-900/20 dark:text-pink-400" 
-                        : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
-                    }`}
-                  >
-                    <item.icon className={`h-4 w-4 ${isActive ? "text-pink-600" : "text-gray-500"}`} />
-                    <span className="font-medium">{item.label}</span>
-                    <ChevronDown className="h-3 w-3 ml-1 opacity-50" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-48">
-                  <DropdownMenuItem onClick={() => {
-                    onTabChange?.('customize');
-                    onChangeTemplate?.();
-                  }}>
-                    Change Template
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => {
-                    onTabChange?.('customize');
-                    onChangeDesign?.();
-                  }}>
-                    Design Settings
-                  </DropdownMenuItem>
-                 
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Button
+                key={item.id}
+                variant="ghost"
+                size="sm"
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                  isActive 
+                    ? "bg-pink-50 text-pink-600 hover:bg-pink-100 hover:text-pink-700 dark:bg-pink-900/20 dark:text-pink-400" 
+                    : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                }`}
+                onClick={() => {
+                  onTabChange?.('customize');
+                  onChangeDesign?.();
+                }}
+              >
+                <item.icon className={`h-4 w-4 ${isActive ? "text-pink-600" : "text-gray-500"}`} />
+                <span className="font-medium">{item.label}</span>
+              </Button>
             )
           }
 
@@ -172,8 +157,8 @@ export function CVHeaderActions({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem onClick={onChangeTemplate}>Change Template</DropdownMenuItem>
-            <DropdownMenuItem onClick={onChangeDesign}>Design Settings</DropdownMenuItem>
-            <DropdownMenuItem onClick={onChangeSettings}>Arrange Sections</DropdownMenuItem>
+            {/* <DropdownMenuItem onClick={onChangeDesign}>Design Settings</DropdownMenuItem>
+            <DropdownMenuItem onClick={onChangeSettings}>Arrange Sections</DropdownMenuItem> */}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

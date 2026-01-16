@@ -6,6 +6,13 @@ import HydrateAuth from "../components/auth/HydrateAuth";
 import Head from "next/head";
 import { ThemeProvider } from "../components/theme-provider";
 import { ThemeToggle } from "../components/theme-toggle";
+import { Inter, Rubik, Roboto, Open_Sans, Lato } from 'next/font/google';
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const rubik = Rubik({ subsets: ['latin'], variable: '--font-rubik' });
+const roboto = Roboto({ weight: ['100', '300', '400', '500', '700', '900'], subsets: ['latin'], variable: '--font-roboto' });
+const openSans = Open_Sans({ subsets: ['latin'], variable: '--font-open-sans' });
+const lato = Lato({ weight: ['100', '300', '400', '700', '900'], subsets: ['latin'], variable: '--font-lato' });
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -30,7 +37,9 @@ export default function App({ Component, pageProps }: AppProps) {
           <HydrateAuth />
           <Toaster position="top-right" richColors />
           <ThemeToggle />
-          <Component {...pageProps} />
+          <main className={`${inter.variable} ${rubik.variable} ${roboto.variable} ${openSans.variable} ${lato.variable} font-sans`}>
+            <Component {...pageProps} />
+          </main>
         </ReduxProvider>
       </ThemeProvider>
     </>
