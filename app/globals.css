@@ -163,7 +163,7 @@
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
     background: oklch(0.556 0 0 / 0.3);
-    border-radius: 10px;
+    border-radius: 0px;
     transition: background 0.2s ease;
   }
 
@@ -177,6 +177,14 @@
 
   .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: oklch(0.708 0 0 / 0.4);
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
   }
 }
 

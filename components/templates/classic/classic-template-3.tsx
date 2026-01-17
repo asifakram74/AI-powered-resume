@@ -1,5 +1,13 @@
 import React, { useMemo, useRef, useState, useLayoutEffect } from "react";
-import type { CVData, CVSectionId, PersonalInfoFieldId } from "../../../types/cv-data";
+import type {
+  CVBulletStyle,
+  CVData,
+  CVFontFamilyId,
+  CVSectionHeaderIconStyle,
+  CVSectionId,
+  CVStyleSettings,
+  PersonalInfoFieldId,
+} from "../../../types/cv-data";
 
 interface ClassicTemplate3Props {
   data: CVData;
@@ -7,22 +15,175 @@ interface ClassicTemplate3Props {
 }
 
 const PAGE_HEIGHT_PX = 1123;
-const PADDING_PX = 48;
-const CONTENT_HEIGHT_PX = PAGE_HEIGHT_PX - PADDING_PX * 2;
+const MM_TO_PX = 3.7795275591;
+
+const DEFAULT_STYLE_SETTINGS: CVStyleSettings = {
+  bodyFontFamily: "inter",
+  headingFontFamily: "inter",
+  bodyFontSizePx: 12,
+  headingFontSizePx: 20,
+  lineHeight: 1.35,
+  marginLeftRightMm: 16,
+  marginTopBottomMm: 16,
+  spaceBetweenEntriesPx: 12,
+  textColor: "#374151",
+  headingColor: "#111827",
+  mutedColor: "#4b5563",
+  accentColor: "#111827",
+  borderColor: "#1f2937",
+  backgroundColor: "#ffffff",
+  backgroundImageUrl: "",
+  colorMode: "basic",
+  borderMode: "single",
+  applyAccentToName: false,
+  applyAccentToJobTitle: false,
+  applyAccentToHeadings: false,
+  applyAccentToHeadingsLine: false,
+  applyAccentToHeaderIcons: false,
+  applyAccentToDotsBarsBubbles: false,
+  applyAccentToDates: false,
+  applyAccentToLinkIcons: false,
+  datesOpacity: 0.7,
+  nameBold: true,
+  locationOpacity: 0.7,
+  align: "left",
+  capitalization: "uppercase",
+  headingsLine: true,
+  headerIcons: "none",
+  linkIcons: "none",
+  iconFrame: "none",
+  iconSize: "sm",
+  dotsBarsBubbles: "dots",
+  descriptionIndentPx: 16,
+  entryListStyle: "bullet",
+  showPageNumbers: true,
+  showEmail: false,
+  sectionHeaderIconStyle: "none",
+  bulletStyle: "disc",
+};
+
+const fontFamilyCss = (id: CVFontFamilyId) => {
+  switch (id) {
+    case "inter":
+      return "var(--font-inter)";
+    case "serif":
+      return "var(--font-rubik)";
+    case "system-sans":
+      return 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif';
+    case "system-serif":
+      return 'ui-serif, Georgia, Cambria, "Times New Roman", Times, serif';
+    case "mono":
+      return 'ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace';
+    case "roboto":
+      return '"Roboto", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif';
+    case "open-sans":
+      return '"Open Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif';
+    case "lato":
+      return '"Lato", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif';
+  }
+};
+
+const sectionIconNode = (style: CVSectionHeaderIconStyle, color: string) => {
+  const common = { flexShrink: 0 as const, display: "inline-block" as const };
+  switch (style) {
+    case "none":
+      return null;
+    case "dot":
+      return <span style={{ ...common, width: 8, height: 8, borderRadius: 999, background: color }} />;
+    case "bar":
+      return <span style={{ ...common, width: 18, height: 4, borderRadius: 999, background: color }} />;
+    case "square":
+      return <span style={{ ...common, width: 8, height: 8, background: color }} />;
+    case "circle-outline":
+      return <span style={{ ...common, width: 9, height: 9, borderRadius: 999, border: `2px solid ${color}` }} />;
+  }
+};
+
+const bulletNode = (style: CVBulletStyle, color: string) => {
+  const common = {
+    flexShrink: 0 as const,
+    display: "inline-flex" as const,
+    alignItems: "center",
+    justifyContent: "center",
+  };
+  switch (style) {
+    case "none":
+      return null;
+    case "hyphen":
+      return <span style={{ ...common, width: 10, color, fontWeight: 700, lineHeight: 1 }}>-</span>;
+    case "disc":
+      return <span style={{ ...common, width: 7, height: 7, borderRadius: 999, background: color, marginTop: 6 }} />;
+    case "circle":
+      return <span style={{ ...common, width: 8, height: 8, borderRadius: 999, border: `2px solid ${color}`, marginTop: 6 }} />;
+    case "square":
+      return <span style={{ ...common, width: 7, height: 7, background: color, marginTop: 6 }} />;
+  }
+};
 
 export function ClassicTemplate3({ data, isPreview = false }: ClassicTemplate3Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [pages, setPages] = useState<React.ReactNode[][]>([]);
+  const styleSettings = useMemo(
+    () => ({ ...DEFAULT_STYLE_SETTINGS, ...(data.styleSettings || {}) }),
+    [data.styleSettings],
+  );
+  const bodyFont = useMemo(() => fontFamilyCss(styleSettings.bodyFontFamily), [styleSettings.bodyFontFamily]);
+  const headingFont = useMemo(() => fontFamilyCss(styleSettings.headingFontFamily), [styleSettings.headingFontFamily]);
+  const paddingXpx = useMemo(() => styleSettings.marginLeftRightMm * MM_TO_PX, [styleSettings.marginLeftRightMm]);
+  const paddingYpx = useMemo(() => styleSettings.marginTopBottomMm * MM_TO_PX, [styleSettings.marginTopBottomMm]);
+  const contentHeightPx = useMemo(() => PAGE_HEIGHT_PX - paddingYpx * 2, [paddingYpx]);
+  const effectiveHeadingColor = useMemo(
+    () => (styleSettings.applyAccentToHeadings ? styleSettings.accentColor : styleSettings.headingColor),
+    [styleSettings.accentColor, styleSettings.applyAccentToHeadings, styleSettings.headingColor],
+  );
+  const effectiveBulletStyle: CVBulletStyle = useMemo(
+    () => (styleSettings.entryListStyle === "hyphen" ? "hyphen" : styleSettings.bulletStyle),
+    [styleSettings.bulletStyle, styleSettings.entryListStyle],
+  );
+  const rootStyle = useMemo<React.CSSProperties>(
+    () => ({
+      fontFamily: bodyFont,
+      fontSize: `${styleSettings.bodyFontSizePx}px`,
+      lineHeight: styleSettings.lineHeight,
+      color: styleSettings.textColor,
+    }),
+    [bodyFont, styleSettings.bodyFontSizePx, styleSettings.lineHeight, styleSettings.textColor],
+  );
+  const headingBaseStyle = useMemo<React.CSSProperties>(
+    () => ({
+      fontFamily: headingFont,
+      color: effectiveHeadingColor,
+    }),
+    [headingFont, effectiveHeadingColor],
+  );
+  const mutedStyle = useMemo<React.CSSProperties>(() => ({ color: styleSettings.mutedColor }), [styleSettings.mutedColor]);
+  const dateStyle = useMemo<React.CSSProperties>(
+    () => ({ ...mutedStyle, opacity: styleSettings.datesOpacity }),
+    [mutedStyle, styleSettings.datesOpacity],
+  );
+  const locationStyle = useMemo<React.CSSProperties>(
+    () => ({ ...mutedStyle, opacity: styleSettings.locationOpacity }),
+    [mutedStyle, styleSettings.locationOpacity],
+  );
+  const dividerStyle = useMemo<React.CSSProperties>(
+    () => ({ borderColor: styleSettings.borderColor }),
+    [styleSettings.borderColor],
+  );
+  const pageStyle = useMemo<React.CSSProperties>(
+    () => ({
+      ...rootStyle,
+      backgroundColor: styleSettings.backgroundColor,
+      padding: `${paddingYpx}px ${paddingXpx}px`,
+    }),
+    [paddingXpx, paddingYpx, rootStyle, styleSettings.backgroundColor],
+  );
 
   const formatDate = (date: string) => {
     if (!date) return "";
     const s = date.trim();
     if (!s) return "";
-
     const normalized = s.replace(/[\u2012-\u2015\u2212]/g, "-");
-
     if (/^\d{4}$/.test(normalized)) return normalized;
-
     const monthNames = [
       "January",
       "February",
@@ -37,23 +198,19 @@ export function ClassicTemplate3({ data, isPreview = false }: ClassicTemplate3Pr
       "November",
       "December",
     ];
-
     const isoMatch = normalized.match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?$/);
     if (isoMatch) {
       const year = isoMatch[1];
       const month = Math.max(1, Math.min(12, Number.parseInt(isoMatch[2], 10)));
       return `${monthNames[month - 1]} ${year}`;
     }
-
     const slashMatch = normalized.match(/^(\d{1,2})\/(\d{4})$/);
     if (slashMatch) {
       const month = Math.max(1, Math.min(12, Number.parseInt(slashMatch[1], 10)));
       const year = slashMatch[2];
       return `${monthNames[month - 1]} ${year}`;
     }
-
     if (/^([A-Za-z]{3,9})\s+\d{4}$/.test(normalized)) return normalized;
-
     return normalized;
   };
 
@@ -123,10 +280,10 @@ export function ClassicTemplate3({ data, isPreview = false }: ClassicTemplate3Pr
       const parts = contactParts.map((s) => s.trim()).filter(Boolean);
       if (parts.length === 0) return null;
       return (
-        <div key={key} className="text-sm text-gray-600 mb-6">
+        <div key={key} className="text-sm mb-6" style={mutedStyle}>
           {parts.map((p, idx) => (
             <span key={`${key}-${idx}`}>
-              {idx > 0 && <span className="mx-2 text-gray-400">•</span>}
+              {idx > 0 && <span className="mx-2" style={{ color: styleSettings.mutedColor }}>•</span>}
               <span>{p}</span>
             </span>
           ))}
@@ -137,6 +294,7 @@ export function ClassicTemplate3({ data, isPreview = false }: ClassicTemplate3Pr
     const rows: React.ReactNode[] = [];
     let contactBuffer: string[] = [];
     let contactBlockIndex = 0;
+    let isSummaryRendered = false;
 
     const flushContacts = () => {
       const node = pushContactLine(contactBuffer, `contact-${contactBlockIndex}`);
@@ -152,7 +310,13 @@ export function ClassicTemplate3({ data, isPreview = false }: ClassicTemplate3Pr
           rows.push(
             <h1
               key="pi-fullName"
-              className="text-4xl font-bold text-gray-900 mb-1 tracking-wide"
+              className="mb-1 tracking-wide"
+              style={{
+                ...headingBaseStyle,
+                fontWeight: styleSettings.nameBold ? 800 : 700,
+                fontSize: `${Math.round(styleSettings.headingFontSizePx * 1.6)}px`,
+                color: styleSettings.applyAccentToName ? styleSettings.accentColor : styleSettings.headingColor,
+              }}
             >
               {data.personalInfo.fullName}
             </h1>
@@ -164,7 +328,14 @@ export function ClassicTemplate3({ data, isPreview = false }: ClassicTemplate3Pr
         flushContacts();
         if (data.personalInfo.jobTitle) {
           rows.push(
-            <p key="pi-jobTitle" className="text-lg text-gray-600 font-light mb-6">
+            <p
+              key="pi-jobTitle"
+              className="mb-6 font-light"
+              style={{
+                fontSize: `${Math.round(styleSettings.headingFontSizePx * 1.05)}px`,
+                color: styleSettings.applyAccentToJobTitle ? styleSettings.accentColor : styleSettings.textColor,
+              }}
+            >
               {data.personalInfo.jobTitle}
             </p>
           );
@@ -176,11 +347,12 @@ export function ClassicTemplate3({ data, isPreview = false }: ClassicTemplate3Pr
         if (data.personalInfo.summary) {
           rows.push(
             <div key="pi-summary" className="mb-6">
-              <p className="text-gray-700 leading-relaxed text-justify italic">
+              <p className="leading-relaxed text-justify italic" style={{ color: styleSettings.textColor }}>
                 "{data.personalInfo.summary}"
               </p>
             </div>
           );
+          isSummaryRendered = true;
         }
         return;
       }
@@ -202,8 +374,15 @@ export function ClassicTemplate3({ data, isPreview = false }: ClassicTemplate3Pr
 
     flushContacts();
 
+    // Add separator if summary wasn't rendered
+    if (!isSummaryRendered) {
+      rows.push(
+        <div key="header-separator-end" className="w-full border-b-2 mb-6" style={dividerStyle}></div>
+      );
+    }
+
     return (
-      <div className="text-center mb-8 border-b-2 border-gray-300 pb-8">
+      <div data-section-id="personalInfo" className="text-center mb-8 pb-8" style={{ textAlign: styleSettings.align as any, borderBottomWidth: 2, borderBottomColor: styleSettings.borderColor }}>
         {rows}
       </div>
     );
@@ -212,21 +391,30 @@ export function ClassicTemplate3({ data, isPreview = false }: ClassicTemplate3Pr
   const ExperienceItem = ({ exp }: { exp: CVData["experience"][number] }) => (
     <div className="space-y-2">
       <div className="flex justify-between items-baseline">
-        <h3 className="text-lg font-semibold text-gray-900">{exp.jobTitle}</h3>
-        <span className="text-sm text-gray-500 font-light">
+        <h3 style={{ ...headingBaseStyle, fontSize: `${Math.round(styleSettings.bodyFontSizePx * 1.25)}px`, fontWeight: 700 }}>
+          {exp.jobTitle}
+        </h3>
+        <span className="text-sm font-light" style={dateStyle}>
           {formatDate(exp.startDate)}
           {formatDate(exp.startDate) && (exp.current || formatDate(exp.endDate)) ? " – " : ""}
           {exp.current ? "Present" : formatDate(exp.endDate)}
         </span>
       </div>
-      <p className="text-gray-700 font-medium">{exp.companyName}</p>
-      {exp.location && <p className="text-gray-600 text-sm">{exp.location}</p>}
-      <ul className="text-gray-700 space-y-2 mt-3 ml-4">
-        {exp.responsibilities.map((resp, index) => (
-          <li key={index} className="list-disc text-sm">
-            {resp}
-          </li>
-        ))}
+      <p style={{ color: styleSettings.textColor, fontWeight: 600 }}>{exp.companyName}</p>
+      {exp.location && <p className="text-sm" style={locationStyle}>{exp.location}</p>}
+      <ul className="space-y-2 mt-3 ml-4">
+        {exp.responsibilities.map((resp, index) => {
+          const t = resp.trim();
+          if (!t) return null;
+          return (
+            <li key={index} className="flex gap-2">
+              {bulletNode(effectiveBulletStyle, styleSettings.accentColor)}
+              <span style={{ color: styleSettings.textColor, fontSize: `${styleSettings.bodyFontSizePx}px` }}>
+                {t}
+              </span>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
@@ -234,31 +422,42 @@ export function ClassicTemplate3({ data, isPreview = false }: ClassicTemplate3Pr
   const EducationItem = ({ edu }: { edu: CVData["education"][number] }) => (
     <div className="flex justify-between items-start">
       <div>
-        <h3 className="font-semibold text-gray-900">{edu.degree}</h3>
-        <p className="text-gray-700">{edu.institutionName}</p>
-        {edu.location && <p className="text-gray-600 text-sm">{edu.location}</p>}
-        {edu.gpa && <p className="text-gray-600 text-sm">GPA: {edu.gpa}</p>}
+        <h3 style={{ ...headingBaseStyle, fontWeight: 700 }}>{edu.degree}</h3>
+        <p style={{ color: styleSettings.textColor }}>{edu.institutionName}</p>
+        {edu.location && <p className="text-sm" style={locationStyle}>{edu.location}</p>}
+        {edu.gpa && <p className="text-sm" style={mutedStyle}>GPA: {edu.gpa}</p>}
+        {edu.honors && <p className="text-sm" style={mutedStyle}>{edu.honors}</p>}
       </div>
       {edu.graduationDate && (
-        <span className="text-sm text-gray-500 font-light">{formatDate(edu.graduationDate)}</span>
+        <span className="text-sm font-light" style={dateStyle}>{formatDate(edu.graduationDate)}</span>
       )}
     </div>
   );
 
   const Skills = ({ skills }: { skills: CVData["skills"] }) => (
-    <div className="mb-10">
-      <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wider mb-6">Skills</h2>
+    <div className="mb-10" data-section-id="skills">
+      <h2
+        className="uppercase tracking-wider mb-6"
+        style={{
+          ...headingBaseStyle,
+          fontSize: `${styleSettings.headingFontSizePx}px`,
+          textTransform: styleSettings.capitalization,
+          fontWeight: 800,
+        }}
+      >
+        Skills
+      </h2>
       <div className="space-y-4">
         {skills.technical.length > 0 && (
           <div>
-            <p className="font-semibold text-gray-900 mb-2">Technical</p>
-            <p className="text-gray-700 text-sm">{skills.technical.join(" • ")}</p>
+            <p className="font-semibold mb-2" style={{ color: styleSettings.headingColor }}>Technical</p>
+            <p className="text-sm" style={{ color: styleSettings.textColor }}>{skills.technical.join(" • ")}</p>
           </div>
         )}
         {skills.soft.length > 0 && (
           <div>
-            <p className="font-semibold text-gray-900 mb-2">Professional</p>
-            <p className="text-gray-700 text-sm">{skills.soft.join(" • ")}</p>
+            <p className="font-semibold mb-2" style={{ color: styleSettings.headingColor }}>Professional</p>
+            <p className="text-sm" style={{ color: styleSettings.textColor }}>{skills.soft.join(" • ")}</p>
           </div>
         )}
       </div>
@@ -267,40 +466,63 @@ export function ClassicTemplate3({ data, isPreview = false }: ClassicTemplate3Pr
 
   const ProjectItem = ({ project }: { project: CVData["projects"][number] }) => (
     <div>
-      <h3 className="font-semibold text-gray-900">{project.name}</h3>
-      <p className="text-gray-600 text-sm font-light mb-1">{project.role}</p>
-      <p className="text-gray-700 text-sm mb-2">{project.description}</p>
-      <p className="text-gray-600 text-sm">{project.technologies.join(" • ")}</p>
+      <h3 style={{ ...headingBaseStyle, fontWeight: 700 }}>{project.name}</h3>
+      <p className="text-sm font-light mb-1" style={{ color: styleSettings.textColor }}>{project.role}</p>
+      <p className="text-sm mb-2" style={{ color: styleSettings.textColor }}>{project.description}</p>
+      <p className="text-sm" style={{ color: styleSettings.mutedColor }}>
+        <span style={{ fontWeight: 600 }}>Technologies: </span>
+        {project.technologies.join(" • ")}
+      </p>
     </div>
   );
 
   const LanguageItem = ({ lang }: { lang: CVData["languages"][number] }) => (
     <div className="flex justify-between">
-      <span className="text-gray-900">{lang.name}</span>
-      <span className="text-gray-600 text-sm">{lang.proficiency}</span>
+      <span style={{ ...headingBaseStyle, fontWeight: 700 }}>{lang.name}</span>
+      <span className="text-sm" style={{ color: styleSettings.textColor }}>{lang.proficiency}</span>
     </div>
   );
 
   const CertificationItem = ({ cert }: { cert: CVData["certifications"][number] }) => (
     <div>
-      <p className="font-semibold text-gray-900">{cert.title}</p>
-      <p className="text-gray-600 text-sm">{cert.issuingOrganization}</p>
-      <p className="text-gray-500 text-sm font-light">{formatDate(cert.dateObtained)}</p>
+      <p style={{ ...headingBaseStyle, fontWeight: 700 }}>{cert.title}</p>
+      <p className="text-sm" style={{ color: styleSettings.textColor }}>{cert.issuingOrganization}</p>
+      <p className="text-sm font-light" style={dateStyle}>{formatDate(cert.dateObtained)}</p>
     </div>
   );
 
-  const SectionTitle = ({ title }: { title: string }) => (
-    <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wider mb-6">{title}</h2>
+  const SectionTitle = ({ title, sectionId }: { title: string; sectionId?: string }) => (
+    <div
+      data-section-id={sectionId}
+      className={`flex items-center gap-2 mb-6 ${styleSettings.headingsLine ? "pb-1 border-b" : ""}`}
+      style={styleSettings.headingsLine ? dividerStyle : undefined}
+    >
+      {sectionIconNode(styleSettings.sectionHeaderIconStyle, styleSettings.accentColor)}
+      <h2
+        className="uppercase tracking-wider"
+        style={{
+          ...headingBaseStyle,
+          fontSize: `${styleSettings.headingFontSizePx}px`,
+          textTransform: styleSettings.capitalization,
+          fontWeight: 800,
+          margin: 0,
+        }}
+      >
+        {title}
+      </h2>
+    </div>
   );
-  
+
   const InterestsSection = () => {
-     if (data.additional.interests.length === 0) return null;
-     return (
-       <div className="mb-10">
-         <SectionTitle title="Interests" />
-         <p className="text-gray-700 text-sm">{data.additional.interests.join(", ")}</p>
-       </div>
-     );
+    if (data.additional.interests.length === 0) return null;
+    return (
+      <div className="mb-10" data-section-id="interests">
+        <SectionTitle title="Interests" />
+        <p className="text-sm" style={{ color: styleSettings.textColor }}>
+          {data.additional.interests.join(", ")}
+        </p>
+      </div>
+    );
   };
 
   const blocks = useMemo(() => {
@@ -330,21 +552,21 @@ export function ClassicTemplate3({ data, isPreview = false }: ClassicTemplate3Pr
 
     const addExperience = () => {
       if (data.experience.length === 0) return;
-      items.push(<SectionTitle key="exp-title" title="Experience" />);
+      items.push(<SectionTitle key="exp-title" title="Experience" sectionId="experience" />);
       data.experience.forEach((exp, index) => {
         const isLast = index === data.experience.length - 1;
         items.push(<ExperienceItem key={`exp-${exp.id}`} exp={exp} />);
-        if (!isLast) items.push(<div key={`exp-sp-${exp.id}`} className="h-8" />);
+        if (!isLast) items.push(<div key={`exp-sp-${exp.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
       });
     };
 
     const addEducation = () => {
       if (data.education.length === 0) return;
-      items.push(<SectionTitle key="edu-title" title="Education" />);
+      items.push(<SectionTitle key="edu-title" title="Education" sectionId="education" />);
       data.education.forEach((edu, index) => {
         const isLast = index === data.education.length - 1;
         items.push(<EducationItem key={`edu-${edu.id}`} edu={edu} />);
-        if (!isLast) items.push(<div key={`edu-sp-${edu.id}`} className="h-6" />);
+        if (!isLast) items.push(<div key={`edu-sp-${edu.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
       });
     };
 
@@ -355,38 +577,38 @@ export function ClassicTemplate3({ data, isPreview = false }: ClassicTemplate3Pr
 
     const addProjects = () => {
       if (data.projects.length === 0) return;
-      items.push(<SectionTitle key="proj-title" title="Projects" />);
+      items.push(<SectionTitle key="proj-title" title="Projects" sectionId="projects" />);
       data.projects.forEach((project, index) => {
         const isLast = index === data.projects.length - 1;
         items.push(<ProjectItem key={`proj-${project.id}`} project={project} />);
-        if (!isLast) items.push(<div key={`proj-sp-${project.id}`} className="h-6" />);
+        if (!isLast) items.push(<div key={`proj-sp-${project.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
       });
     };
 
     const addLanguages = () => {
       if (data.languages.length === 0) return;
-      items.push(<SectionTitle key="lang-title" title="Languages" />);
+      items.push(<SectionTitle key="lang-title" title="Languages" sectionId="languages" />);
       data.languages.forEach((lang, index) => {
         const isLast = index === data.languages.length - 1;
         items.push(<LanguageItem key={`lang-${lang.id}`} lang={lang} />);
-        if (!isLast) items.push(<div key={`lang-sp-${lang.id}`} className="h-2" />);
+        if (!isLast) items.push(<div key={`lang-sp-${lang.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
       });
     };
 
     const addCertifications = () => {
       if (data.certifications.length === 0) return;
-      items.push(<SectionTitle key="cert-title" title="Certifications" />);
+      items.push(<SectionTitle key="cert-title" title="Certifications" sectionId="certifications" />);
       data.certifications.forEach((cert, index) => {
         const isLast = index === data.certifications.length - 1;
         items.push(<CertificationItem key={`cert-${cert.id}`} cert={cert} />);
-        if (!isLast) items.push(<div key={`cert-sp-${cert.id}`} className="h-3" />);
+        if (!isLast) items.push(<div key={`cert-sp-${cert.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
       });
     };
-    
+
     const addInterests = () => {
       if (data.additional.interests.length === 0) return;
       items.push(<InterestsSection key="interests" />);
-    }
+    };
 
     finalOrder.forEach((section) => {
       switch (section) {
@@ -418,7 +640,7 @@ export function ClassicTemplate3({ data, isPreview = false }: ClassicTemplate3Pr
     });
 
     return items;
-  }, [data]);
+  }, [data, headingBaseStyle, mutedStyle, styleSettings, dividerStyle]);
 
   useLayoutEffect(() => {
     if (!containerRef.current) return;
@@ -438,7 +660,7 @@ export function ClassicTemplate3({ data, isPreview = false }: ClassicTemplate3Pr
       const marginTop = parseFloat(style.marginTop) || 0;
       const marginBottom = parseFloat(style.marginBottom) || 0;
       const elementHeight = el.offsetHeight + marginTop + marginBottom;
-      if (currentHeight + elementHeight > CONTENT_HEIGHT_PX) {
+      if (currentHeight + elementHeight > contentHeightPx) {
         pushPage();
       }
       currentPage.push(blocks[index]);
@@ -446,21 +668,31 @@ export function ClassicTemplate3({ data, isPreview = false }: ClassicTemplate3Pr
     });
     if (currentPage.length > 0) newPages.push(currentPage);
     setPages(newPages);
-  }, [blocks]);
+  }, [blocks, contentHeightPx]);
 
   return (
     <div className="flex flex-col items-center gap-8 pb-20 print:block print:gap-0 print:pb-0">
-      <div ref={containerRef} className="cv-measure fixed top-0 left-0 w-[210mm] p-12 opacity-0 pointer-events-none z-[-999]" style={{ visibility: "hidden" }}>
+      <div
+        ref={containerRef}
+        className="cv-measure fixed top-0 left-0 w-[210mm] opacity-0 pointer-events-none z-[-999]"
+        style={{ ...pageStyle, visibility: "hidden" }}
+      >
         {blocks}
       </div>
       {pages.length === 0 ? (
-        <div className="w-[210mm] min-h-[297mm] p-12 bg-white font-serif"></div>
+        <div className="w-[210mm] min-h-[297mm]" style={pageStyle}></div>
       ) : (
         pages.map((pageContent, i) => (
-          <div key={i} className="a4-page w-[210mm] min-h-[297mm] p-12 bg-white text-slate-900 font-serif relative print:shadow-none" style={{ breakAfter: i < pages.length - 1 ? "page" : "auto" }}>
+          <div
+            key={i}
+            className="a4-page w-[210mm] min-h-[297mm] relative print:shadow-none"
+            style={{ ...pageStyle, breakAfter: i < pages.length - 1 ? "page" : "auto" }}
+          >
             {pageContent}
-            {pages.length > 1 && (
-              <div className="absolute bottom-4 right-12 text-[10px] text-slate-400 print:hidden">Page {i + 1} of {pages.length}</div>
+            {styleSettings.showPageNumbers && pages.length > 1 && (
+              <div className="absolute bottom-4 right-12 text-[10px] print:hidden" style={mutedStyle}>
+                Page {i + 1} of {pages.length}
+              </div>
             )}
           </div>
         ))

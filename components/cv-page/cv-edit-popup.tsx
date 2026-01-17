@@ -17,12 +17,14 @@ import { uploadPersonaProfilePicture } from "../../lib/redux/service/pasonaServi
 
 interface OptimizedCV {
   personalInfo: {
-    name: string;
+    fullName: string;
+    jobTitle: string;
     email: string;
     phone: string;
     location: string;
     linkedin: string;
     website: string;
+    profilePicture?: string;
   };
   summary: string;
   workExperience: Array<{
@@ -298,11 +300,20 @@ export function CVEditPopup({
                   <div className="grid grid-cols-2 gap-4">
                     <Input
                       placeholder="Full Name"
-                      value={editingData.personalInfo.name}
+                      value={editingData.personalInfo.fullName}
                       onChange={(e) =>
-                        handlePersonalInfoChange("name", e.target.value)
+                        handlePersonalInfoChange("fullName", e.target.value)
                       }
                     />
+                    <Input
+                      placeholder="Job Title"
+                      value={editingData.personalInfo.jobTitle}
+                      onChange={(e) =>
+                        handlePersonalInfoChange("jobTitle", e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
                     <Input
                       placeholder="Email"
                       type="email"
@@ -311,8 +322,6 @@ export function CVEditPopup({
                         handlePersonalInfoChange("email", e.target.value)
                       }
                     />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
                     <Input
                       placeholder="Phone"
                       value={editingData.personalInfo.phone}
@@ -320,6 +329,8 @@ export function CVEditPopup({
                         handlePersonalInfoChange("phone", e.target.value)
                       }
                     />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
                     <Input
                       placeholder="Location"
                       value={editingData.personalInfo.location}
@@ -327,8 +338,6 @@ export function CVEditPopup({
                         handlePersonalInfoChange("location", e.target.value)
                       }
                     />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
                     <Input
                       placeholder="LinkedIn"
                       value={editingData.personalInfo.linkedin}
@@ -336,6 +345,8 @@ export function CVEditPopup({
                         handlePersonalInfoChange("linkedin", e.target.value)
                       }
                     />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
                     <Input
                       placeholder="Website"
                       value={editingData.personalInfo.website}

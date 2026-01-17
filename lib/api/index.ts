@@ -18,7 +18,7 @@ export const api = axios.create({
     // Prevent ngrok warning page when using free ngrok domains
     ...(LARAVEL_API_BASE_URL.includes("ngrok") ? { "ngrok-skip-browser-warning": "true" } : {}),
   },
-  timeout: 10000,
+  timeout: 30000,
 })
 
 // Node.js API client for app/api routes
