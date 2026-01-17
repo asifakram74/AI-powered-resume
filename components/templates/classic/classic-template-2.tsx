@@ -645,7 +645,12 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
 
   // Main content blocks
   const blocks = useMemo(() => {
-    const items: React.ReactNode[] = []
+    interface SectionBlock {
+      type: "section";
+      id: string;
+      children: React.ReactNode[];
+    }
+    const items: (React.ReactNode | SectionBlock)[] = [];
 
     const allSections = [
       "personalInfo",
@@ -690,10 +695,10 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
 
     const addExperience = () => {
       if (data.experience.length === 0) return
-      items.push(
+      const children: React.ReactNode[] = [];
+      children.push(
         <h3
           key="exp-title"
-          data-section-id="experience"
           className="font-bold uppercase tracking-wide mb-4"
           style={{
             ...headingBaseStyle,
@@ -705,21 +710,22 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
         </h3>,
       )
       data.experience.forEach((exp, idx) => {
-        items.push(<ExperienceHeader key={`exp-h-${exp.id}`} exp={exp} />)
+        children.push(<ExperienceHeader key={`exp-h-${exp.id}`} exp={exp} />)
         exp.responsibilities.forEach((r, i) => {
           const t = r.trim()
-          if (t) items.push(<ExperienceLine key={`exp-l-${exp.id}-${i}`} text={t} />)
+          if (t) children.push(<ExperienceLine key={`exp-l-${exp.id}-${i}`} text={t} />)
         })
-        if (idx < data.experience.length - 1) items.push(<div key={`exp-sp-${exp.id}`} className="h-4" />)
+        if (idx < data.experience.length - 1) children.push(<div key={`exp-sp-${exp.id}`} className="h-4" />)
       })
+      items.push({ type: "section", id: "experience", children });
     }
 
     const addProjects = () => {
       if (data.projects.length === 0) return
-      items.push(
+      const children: React.ReactNode[] = [];
+      children.push(
         <h3
           key="proj-title"
-          data-section-id="projects"
           className="font-bold uppercase tracking-wide mb-4"
           style={{
             ...headingBaseStyle,
@@ -731,17 +737,18 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
         </h3>,
       )
       data.projects.forEach((p, idx) => {
-        items.push(<ProjectBlock key={`proj-${p.id}`} project={p} />)
-        if (idx < data.projects.length - 1) items.push(<div key={`proj-sp-${p.id}`} className="h-3" />)
+        children.push(<ProjectBlock key={`proj-${p.id}`} project={p} />)
+        if (idx < data.projects.length - 1) children.push(<div key={`proj-sp-${p.id}`} className="h-3" />)
       })
+      items.push({ type: "section", id: "projects", children });
     }
 
     const addEducation = () => {
       if (data.education.length === 0) return
-      items.push(
+      const children: React.ReactNode[] = [];
+      children.push(
         <h3
           key="edu-title"
-          data-section-id="education"
           className="font-bold uppercase tracking-wide mb-4"
           style={{
             ...headingBaseStyle,
@@ -753,17 +760,18 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
         </h3>,
       )
       data.education.forEach((e, idx) => {
-        items.push(<EducationBlock key={`edu-${e.id}`} edu={e} />)
-        if (idx < data.education.length - 1) items.push(<div key={`edu-sp-${e.id}`} className="h-2" />)
+        children.push(<EducationBlock key={`edu-${e.id}`} edu={e} />)
+        if (idx < data.education.length - 1) children.push(<div key={`edu-sp-${e.id}`} className="h-2" />)
       })
+      items.push({ type: "section", id: "education", children });
     }
 
     const addCertifications = () => {
       if (data.certifications.length === 0) return
-      items.push(
+      const children: React.ReactNode[] = [];
+      children.push(
         <h3
           key="cert-title"
-          data-section-id="certifications"
           className="font-bold uppercase tracking-wide mb-4"
           style={{
             ...headingBaseStyle,
@@ -775,17 +783,18 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
         </h3>,
       )
       data.certifications.forEach((c, idx) => {
-        items.push(<CertificationBlock key={`cert-${c.id}`} cert={c} />)
-        if (idx < data.certifications.length - 1) items.push(<div key={`cert-sp-${c.id}`} className="h-2" />)
+        children.push(<CertificationBlock key={`cert-${c.id}`} cert={c} />)
+        if (idx < data.certifications.length - 1) children.push(<div key={`cert-sp-${c.id}`} className="h-2" />)
       })
+      items.push({ type: "section", id: "certifications", children });
     }
 
     const addLanguages = () => {
       if (data.languages.length === 0) return
-      items.push(
+      const children: React.ReactNode[] = [];
+      children.push(
         <h3
           key="lang-title"
-          data-section-id="languages"
           className="font-bold uppercase tracking-wide mb-4"
           style={{
             ...headingBaseStyle,
@@ -796,15 +805,16 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
           Languages
         </h3>,
       )
-      data.languages.forEach((l) => items.push(<LanguageLine key={`lang-${l.id}`} lang={l} />))
+      data.languages.forEach((l) => children.push(<LanguageLine key={`lang-${l.id}`} lang={l} />))
+      items.push({ type: "section", id: "languages", children });
     }
 
     const addInterests = () => {
       if (data.additional.interests.length === 0) return
-      items.push(
+      const children: React.ReactNode[] = [];
+      children.push(
         <h3
           key="int-title"
-          data-section-id="interests"
           className="font-bold uppercase tracking-wide mb-4"
           style={{
             ...headingBaseStyle,
@@ -815,13 +825,14 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
           Interests
         </h3>,
       )
-      items.push(
+      children.push(
         <div key="int-body" className="flex flex-wrap">
           {data.additional.interests.map((t, i) => (
             <InterestTag key={`int-${i}`} text={t} />
           ))}
         </div>,
       )
+      items.push({ type: "section", id: "interests", children });
     }
 
     // Process sections in order
@@ -879,6 +890,7 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
     const newPages: React.ReactNode[][] = []
     let currentPage: React.ReactNode[] = []
     let currentHeight = 0
+
     const pushPage = () => {
       if (currentPage.length > 0) {
         newPages.push(currentPage)
@@ -886,17 +898,67 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
         currentHeight = 0
       }
     }
-    const elements = Array.from(containerRef.current.children) as HTMLElement[]
-    elements.forEach((el, index) => {
-      const style = window.getComputedStyle(el)
-      const marginTop = parseFloat(style.marginTop) || 0
-      const marginBottom = parseFloat(style.marginBottom) || 0
-      const elementHeight = el.offsetHeight + marginTop + marginBottom
+
+    const processItem = (elementHeight: number, node: React.ReactNode) => {
       if (currentHeight + elementHeight > contentHeightPx) {
-        pushPage()
+        pushPage();
       }
-      currentPage.push(blocks[index])
-      currentHeight += elementHeight
+      currentPage.push(node);
+      currentHeight += elementHeight;
+    };
+
+    const elements = Array.from(containerRef.current.children) as HTMLElement[]
+
+    // Type guard for SectionBlock
+    const isSectionBlock = (block: any): block is { type: "section"; id: string; children: React.ReactNode[] } => {
+      return block && typeof block === 'object' && block.type === 'section' && 'id' in block && Array.isArray(block.children);
+    };
+
+    elements.forEach((el, index) => {
+      const block = blocks[index]
+
+      if (isSectionBlock(block)) {
+        const sectionId = block.id;
+        const children = Array.from(el.children) as HTMLElement[];
+        let sectionNodesBuffer: React.ReactNode[] = [];
+        
+        children.forEach((childEl, childIndex) => {
+          const style = window.getComputedStyle(childEl);
+          const marginTop = parseFloat(style.marginTop) || 0;
+          const marginBottom = parseFloat(style.marginBottom) || 0;
+          const childHeight = childEl.offsetHeight + marginTop + marginBottom;
+          
+          if (currentHeight + childHeight > contentHeightPx) {
+            // Flush buffer to current page
+            if (sectionNodesBuffer.length > 0) {
+              currentPage.push(
+                <div key={`${sectionId}-part-${newPages.length}`} data-section-id={sectionId}>
+                  {sectionNodesBuffer}
+                </div>
+              );
+              sectionNodesBuffer = [];
+            }
+            pushPage();
+          }
+          sectionNodesBuffer.push(block.children[childIndex]);
+          currentHeight += childHeight;
+        });
+        
+        // Flush remaining buffer
+        if (sectionNodesBuffer.length > 0) {
+          currentPage.push(
+            <div key={`${sectionId}-part-${newPages.length}`} data-section-id={sectionId}>
+              {sectionNodesBuffer}
+            </div>
+          );
+        }
+      } else {
+        const style = window.getComputedStyle(el)
+        const marginTop = parseFloat(style.marginTop) || 0
+        const marginBottom = parseFloat(style.marginBottom) || 0
+        const elementHeight = el.offsetHeight + marginTop + marginBottom
+        processItem(elementHeight, block as React.ReactNode)
+      }
     })
     if (currentPage.length > 0) newPages.push(currentPage)
     setPages(newPages)
@@ -909,7 +971,17 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
         className="cv-measure fixed top-0 left-0 w-[210mm] opacity-0 pointer-events-none z-[-999]"
         style={{ ...pageStyle, visibility: "hidden" }}
       >
-        {blocks}
+        {blocks.map((block, i) => {
+           // Simple type check for rendering
+           if (block && typeof block === 'object' && 'type' in block && block.type === 'section' && 'children' in block) {
+             return (
+               <div key={i}>
+                 {(block as { children: React.ReactNode[] }).children}
+               </div>
+             );
+           }
+           return <div key={i}>{block as React.ReactNode}</div>;
+        })}
       </div>
       {pages.length === 0 ? (
         <div className="w-[210mm] min-h-[297mm]" style={pageStyle}></div>

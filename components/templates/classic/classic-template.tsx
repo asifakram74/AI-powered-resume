@@ -442,7 +442,12 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
   );
 
   const blocks = useMemo(() => {
-    const items: React.ReactNode[] = [];
+    interface SectionBlock {
+      type: "section";
+      id: string;
+      children: React.ReactNode[];
+    }
+    const items: (React.ReactNode | SectionBlock)[] = [];
     const allSections = [
       "personalInfo",
       "skills",
@@ -468,53 +473,79 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
 
     const addSkills = () => {
       if (data.skills.technical.length === 0 && data.skills.soft.length === 0) return;
-      items.push(<Skills key="skills" skills={data.skills} />);
+      // Skills is small enough to be treated as a single block usually, but let's wrap it for consistency
+      const children: React.ReactNode[] = [];
+      children.push(<SectionTitle key="skills-title" title="SKILLS" />);
+      children.push(
+        <div key="skills-content" className="space-y-3">
+          {data.skills.technical.length > 0 && (
+            <div>
+              <span style={{ ...headingBaseStyle, fontWeight: 700, color: styleSettings.headingColor }}>Technical Skills: </span>
+              <span style={{ color: styleSettings.textColor }}>{data.skills.technical.join(", ")}</span>
+            </div>
+          )}
+          {data.skills.soft.length > 0 && (
+            <div>
+              <span style={{ ...headingBaseStyle, fontWeight: 700, color: styleSettings.headingColor }}>Soft Skills: </span>
+              <span style={{ color: styleSettings.textColor }}>{data.skills.soft.join(", ")}</span>
+            </div>
+          )}
+        </div>
+      );
+      items.push({ type: "section", id: "skills", children });
     };
 
     const addExperience = () => {
       if (data.experience.length === 0) return;
-      items.push(<SectionTitle key="exp-title" title="PROFESSIONAL EXPERIENCE" sectionId="experience" />);
+      const children: React.ReactNode[] = [];
+      children.push(<SectionTitle key="exp-title" title="PROFESSIONAL EXPERIENCE" />);
       data.experience.forEach((exp, index) => {
         const isLast = index === data.experience.length - 1;
-        items.push(<ExperienceHeader key={`exp-h-${exp.id}`} exp={exp} />);
+        children.push(<ExperienceHeader key={`exp-h-${exp.id}`} exp={exp} />);
         exp.responsibilities.forEach((resp, i) => {
           const t = resp.trim();
-          if (t) items.push(<ExperienceDescriptionLine key={`exp-l-${exp.id}-${i}`} text={t} />);
+          if (t) children.push(<ExperienceDescriptionLine key={`exp-l-${exp.id}-${i}`} text={t} />);
         });
-        if (!isLast) items.push(<div key={`exp-sp-${exp.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
+        if (!isLast) children.push(<div key={`exp-sp-${exp.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
       });
+      items.push({ type: "section", id: "experience", children });
     };
 
     const addEducation = () => {
       if (data.education.length === 0) return;
-      items.push(<SectionTitle key="edu-title" title="EDUCATION" sectionId="education" />);
+      const children: React.ReactNode[] = [];
+      children.push(<SectionTitle key="edu-title" title="EDUCATION" />);
       data.education.forEach((edu, index) => {
         const isLast = index === data.education.length - 1;
-        items.push(<EducationHeader key={`edu-h-${edu.id}`} edu={edu} />);
+        children.push(<EducationHeader key={`edu-h-${edu.id}`} edu={edu} />);
         const details = (edu.additionalInfo || "").split("\n").map((s) => s.trim()).filter(Boolean);
-        details.forEach((line, i) => items.push(<EducationDetailsLine key={`edu-l-${edu.id}-${i}`} text={line} />));
-        if (!isLast) items.push(<div key={`edu-sp-${edu.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
+        details.forEach((line, i) => children.push(<EducationDetailsLine key={`edu-l-${edu.id}-${i}`} text={line} />));
+        if (!isLast) children.push(<div key={`edu-sp-${edu.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
       });
+      items.push({ type: "section", id: "education", children });
     };
 
     const addLanguages = () => {
       if (data.languages.length === 0) return;
-      items.push(<SectionTitle key="lang-title" title="LANGUAGES" sectionId="languages" />);
+      const children: React.ReactNode[] = [];
+      children.push(<SectionTitle key="lang-title" title="LANGUAGES" />);
       data.languages.forEach((lang) => {
-        items.push(
+        children.push(
           <div key={`lang-${lang.id}`} style={{ color: styleSettings.textColor }}>
             <span style={{ ...headingBaseStyle, fontWeight: 700 }}>{lang.name}: </span>
             <span>{lang.proficiency}</span>
           </div>
         );
       });
+      items.push({ type: "section", id: "languages", children });
     };
 
     const addProjects = () => {
       if (data.projects.length === 0) return;
-      items.push(<SectionTitle key="proj-title" title="PROJECTS" sectionId="projects" />);
+      const children: React.ReactNode[] = [];
+      children.push(<SectionTitle key="proj-title" title="PROJECTS" />);
       data.projects.forEach((project, index) => {
-        items.push(
+        children.push(
           <div key={`proj-${project.id}`}>
             <h3 style={{ ...headingBaseStyle, fontWeight: 700 }}>{project.name}</h3>
             <p style={{ ...mutedStyle, fontWeight: 600 }}>{project.role}</p>
@@ -522,15 +553,17 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
             <p style={mutedStyle}><span style={{ fontWeight: 600 }}>Technologies: </span>{project.technologies.join(", ")}</p>
           </div>
         );
-        if (index < data.projects.length - 1) items.push(<div key={`proj-sp-${project.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
+        if (index < data.projects.length - 1) children.push(<div key={`proj-sp-${project.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
       });
+      items.push({ type: "section", id: "projects", children });
     };
 
     const addCertifications = () => {
       if (data.certifications.length === 0) return;
-      items.push(<SectionTitle key="cert-title" title="CERTIFICATIONS & AWARDS" sectionId="certifications" />);
+      const children: React.ReactNode[] = [];
+      children.push(<SectionTitle key="cert-title" title="CERTIFICATIONS & AWARDS" />);
       data.certifications.forEach((cert, index) => {
-        items.push(
+        children.push(
           <div key={`cert-${cert.id}`} className="flex justify-between items-center">
             <div>
               <span style={{ ...headingBaseStyle, fontWeight: 700 }}>{cert.title}</span>
@@ -539,14 +572,17 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
             <span style={mutedStyle}>{formatDate(cert.dateObtained)}</span>
           </div>
         );
-        if (index < data.certifications.length - 1) items.push(<div key={`cert-sp-${cert.id}`} style={{ height: Math.max(4, Math.round(styleSettings.spaceBetweenEntriesPx / 2)) }} />);
+        if (index < data.certifications.length - 1) children.push(<div key={`cert-sp-${cert.id}`} style={{ height: Math.max(4, Math.round(styleSettings.spaceBetweenEntriesPx / 2)) }} />);
       });
+      items.push({ type: "section", id: "certifications", children });
     };
 
     const addInterests = () => {
       if (data.additional.interests.length === 0) return;
-      items.push(<SectionTitle key="int-title" title="INTERESTS & HOBBIES" sectionId="interests" />);
-      items.push(<div key="int-body" style={{ color: styleSettings.textColor }}>{data.additional.interests.join(", ")}</div>);
+      const children: React.ReactNode[] = [];
+      children.push(<SectionTitle key="int-title" title="INTERESTS & HOBBIES" />);
+      children.push(<div key="int-body" style={{ color: styleSettings.textColor }}>{data.additional.interests.join(", ")}</div>);
+      items.push({ type: "section", id: "interests", children });
     };
 
     finalOrder.forEach((section) => {
@@ -585,6 +621,7 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
     const newPages: React.ReactNode[][] = [];
     let currentPage: React.ReactNode[] = [];
     let currentHeight = 0;
+
     const pushPage = () => {
       if (currentPage.length > 0) {
         newPages.push(currentPage);
@@ -592,18 +629,69 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
         currentHeight = 0;
       }
     };
-    const elements = Array.from(containerRef.current.children) as HTMLElement[];
-    elements.forEach((el, index) => {
-      const style = window.getComputedStyle(el);
-      const marginTop = parseFloat(style.marginTop) || 0;
-      const marginBottom = parseFloat(style.marginBottom) || 0;
-      const elementHeight = el.offsetHeight + marginTop + marginBottom;
+
+    const processItem = (elementHeight: number, node: React.ReactNode) => {
       if (currentHeight + elementHeight > contentHeightPx) {
         pushPage();
       }
-      currentPage.push(blocks[index]);
+      currentPage.push(node);
       currentHeight += elementHeight;
+    };
+
+    const elements = Array.from(containerRef.current.children) as HTMLElement[];
+    
+    // Type guard for SectionBlock
+    const isSectionBlock = (block: any): block is { type: "section"; id: string; children: React.ReactNode[] } => {
+      return block && typeof block === 'object' && block.type === 'section' && 'id' in block && Array.isArray(block.children);
+    };
+
+    elements.forEach((el, index) => {
+      const block = blocks[index];
+      
+      if (isSectionBlock(block)) {
+        const sectionId = block.id;
+        const children = Array.from(el.children) as HTMLElement[];
+        let sectionNodesBuffer: React.ReactNode[] = [];
+        
+        children.forEach((childEl, childIndex) => {
+          const style = window.getComputedStyle(childEl);
+          const marginTop = parseFloat(style.marginTop) || 0;
+          const marginBottom = parseFloat(style.marginBottom) || 0;
+          const childHeight = childEl.offsetHeight + marginTop + marginBottom;
+          
+          if (currentHeight + childHeight > contentHeightPx) {
+            // Flush buffer to current page
+            if (sectionNodesBuffer.length > 0) {
+              currentPage.push(
+                <div key={`${sectionId}-part-${newPages.length}`} data-section-id={sectionId}>
+                  {sectionNodesBuffer}
+                </div>
+              );
+              sectionNodesBuffer = [];
+            }
+            pushPage();
+          }
+          sectionNodesBuffer.push(block.children[childIndex]);
+          currentHeight += childHeight;
+        });
+        
+        // Flush remaining buffer
+        if (sectionNodesBuffer.length > 0) {
+          currentPage.push(
+            <div key={`${sectionId}-part-${newPages.length}`} data-section-id={sectionId}>
+              {sectionNodesBuffer}
+            </div>
+          );
+        }
+      } else {
+        const style = window.getComputedStyle(el);
+        const marginTop = parseFloat(style.marginTop) || 0;
+        const marginBottom = parseFloat(style.marginBottom) || 0;
+        const elementHeight = el.offsetHeight + marginTop + marginBottom;
+        processItem(elementHeight, block as React.ReactNode);
+      }
     });
+
     if (currentPage.length > 0) newPages.push(currentPage);
     setPages(newPages);
   }, [blocks, contentHeightPx]);
@@ -615,7 +703,17 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
         className="cv-measure fixed top-0 left-0 w-[210mm] opacity-0 pointer-events-none z-[-999]"
         style={{ ...pageStyle, visibility: "hidden" }}
       >
-        {blocks}
+        {blocks.map((block, i) => {
+           // Simple type check for rendering
+           if (block && typeof block === 'object' && 'type' in block && block.type === 'section' && 'children' in block) {
+             return (
+               <div key={i}>
+                 {(block as { children: React.ReactNode[] }).children}
+               </div>
+             );
+           }
+           return <div key={i}>{block as React.ReactNode}</div>;
+        })}
       </div>
       {pages.length === 0 ? (
         <div className="w-[210mm] min-h-[297mm]" style={pageStyle}></div>

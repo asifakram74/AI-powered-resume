@@ -526,7 +526,13 @@ export function ClassicTemplate3({ data, isPreview = false }: ClassicTemplate3Pr
   };
 
   const blocks = useMemo(() => {
-    const items: React.ReactNode[] = [];
+    interface SectionBlock {
+      type: "section";
+      id: string;
+      children: React.ReactNode[];
+    }
+    const items: (React.ReactNode | SectionBlock)[] = [];
+
     const allSections = [
       "personalInfo",
       "skills",
@@ -552,22 +558,26 @@ export function ClassicTemplate3({ data, isPreview = false }: ClassicTemplate3Pr
 
     const addExperience = () => {
       if (data.experience.length === 0) return;
-      items.push(<SectionTitle key="exp-title" title="Experience" sectionId="experience" />);
+      const children: React.ReactNode[] = [];
+      children.push(<SectionTitle key="exp-title" title="Experience" />);
       data.experience.forEach((exp, index) => {
         const isLast = index === data.experience.length - 1;
-        items.push(<ExperienceItem key={`exp-${exp.id}`} exp={exp} />);
-        if (!isLast) items.push(<div key={`exp-sp-${exp.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
+        children.push(<ExperienceItem key={`exp-${exp.id}`} exp={exp} />);
+        if (!isLast) children.push(<div key={`exp-sp-${exp.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
       });
+      items.push({ type: "section", id: "experience", children });
     };
 
     const addEducation = () => {
       if (data.education.length === 0) return;
-      items.push(<SectionTitle key="edu-title" title="Education" sectionId="education" />);
+      const children: React.ReactNode[] = [];
+      children.push(<SectionTitle key="edu-title" title="Education" />);
       data.education.forEach((edu, index) => {
         const isLast = index === data.education.length - 1;
-        items.push(<EducationItem key={`edu-${edu.id}`} edu={edu} />);
-        if (!isLast) items.push(<div key={`edu-sp-${edu.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
+        children.push(<EducationItem key={`edu-${edu.id}`} edu={edu} />);
+        if (!isLast) children.push(<div key={`edu-sp-${edu.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
       });
+      items.push({ type: "section", id: "education", children });
     };
 
     const addSkills = () => {
@@ -577,32 +587,38 @@ export function ClassicTemplate3({ data, isPreview = false }: ClassicTemplate3Pr
 
     const addProjects = () => {
       if (data.projects.length === 0) return;
-      items.push(<SectionTitle key="proj-title" title="Projects" sectionId="projects" />);
+      const children: React.ReactNode[] = [];
+      children.push(<SectionTitle key="proj-title" title="Projects" />);
       data.projects.forEach((project, index) => {
         const isLast = index === data.projects.length - 1;
-        items.push(<ProjectItem key={`proj-${project.id}`} project={project} />);
-        if (!isLast) items.push(<div key={`proj-sp-${project.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
+        children.push(<ProjectItem key={`proj-${project.id}`} project={project} />);
+        if (!isLast) children.push(<div key={`proj-sp-${project.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
       });
+      items.push({ type: "section", id: "projects", children });
     };
 
     const addLanguages = () => {
       if (data.languages.length === 0) return;
-      items.push(<SectionTitle key="lang-title" title="Languages" sectionId="languages" />);
+      const children: React.ReactNode[] = [];
+      children.push(<SectionTitle key="lang-title" title="Languages" />);
       data.languages.forEach((lang, index) => {
         const isLast = index === data.languages.length - 1;
-        items.push(<LanguageItem key={`lang-${lang.id}`} lang={lang} />);
-        if (!isLast) items.push(<div key={`lang-sp-${lang.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
+        children.push(<LanguageItem key={`lang-${lang.id}`} lang={lang} />);
+        if (!isLast) children.push(<div key={`lang-sp-${lang.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
       });
+      items.push({ type: "section", id: "languages", children });
     };
 
     const addCertifications = () => {
       if (data.certifications.length === 0) return;
-      items.push(<SectionTitle key="cert-title" title="Certifications" sectionId="certifications" />);
+      const children: React.ReactNode[] = [];
+      children.push(<SectionTitle key="cert-title" title="Certifications" />);
       data.certifications.forEach((cert, index) => {
         const isLast = index === data.certifications.length - 1;
-        items.push(<CertificationItem key={`cert-${cert.id}`} cert={cert} />);
-        if (!isLast) items.push(<div key={`cert-sp-${cert.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
+        children.push(<CertificationItem key={`cert-${cert.id}`} cert={cert} />);
+        if (!isLast) children.push(<div key={`cert-sp-${cert.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
       });
+      items.push({ type: "section", id: "certifications", children });
     };
 
     const addInterests = () => {
@@ -647,6 +663,7 @@ export function ClassicTemplate3({ data, isPreview = false }: ClassicTemplate3Pr
     const newPages: React.ReactNode[][] = [];
     let currentPage: React.ReactNode[] = [];
     let currentHeight = 0;
+
     const pushPage = () => {
       if (currentPage.length > 0) {
         newPages.push(currentPage);
@@ -654,18 +671,69 @@ export function ClassicTemplate3({ data, isPreview = false }: ClassicTemplate3Pr
         currentHeight = 0;
       }
     };
-    const elements = Array.from(containerRef.current.children) as HTMLElement[];
-    elements.forEach((el, index) => {
-      const style = window.getComputedStyle(el);
-      const marginTop = parseFloat(style.marginTop) || 0;
-      const marginBottom = parseFloat(style.marginBottom) || 0;
-      const elementHeight = el.offsetHeight + marginTop + marginBottom;
+
+    const processItem = (elementHeight: number, node: React.ReactNode) => {
       if (currentHeight + elementHeight > contentHeightPx) {
         pushPage();
       }
-      currentPage.push(blocks[index]);
+      currentPage.push(node);
       currentHeight += elementHeight;
+    };
+
+    const elements = Array.from(containerRef.current.children) as HTMLElement[];
+
+    // Type guard for SectionBlock
+    const isSectionBlock = (block: any): block is { type: "section"; id: string; children: React.ReactNode[] } => {
+      return block && typeof block === 'object' && block.type === 'section' && 'id' in block && Array.isArray(block.children);
+    };
+
+    elements.forEach((el, index) => {
+      const block = blocks[index];
+
+      if (isSectionBlock(block)) {
+        const sectionId = block.id;
+        const children = Array.from(el.children) as HTMLElement[];
+        let sectionNodesBuffer: React.ReactNode[] = [];
+        
+        children.forEach((childEl, childIndex) => {
+          const style = window.getComputedStyle(childEl);
+          const marginTop = parseFloat(style.marginTop) || 0;
+          const marginBottom = parseFloat(style.marginBottom) || 0;
+          const childHeight = childEl.offsetHeight + marginTop + marginBottom;
+          
+          if (currentHeight + childHeight > contentHeightPx) {
+            // Flush buffer to current page
+            if (sectionNodesBuffer.length > 0) {
+              currentPage.push(
+                <div key={`${sectionId}-part-${newPages.length}`} data-section-id={sectionId}>
+                  {sectionNodesBuffer}
+                </div>
+              );
+              sectionNodesBuffer = [];
+            }
+            pushPage();
+          }
+          sectionNodesBuffer.push(block.children[childIndex]);
+          currentHeight += childHeight;
+        });
+        
+        // Flush remaining buffer
+        if (sectionNodesBuffer.length > 0) {
+          currentPage.push(
+            <div key={`${sectionId}-part-${newPages.length}`} data-section-id={sectionId}>
+              {sectionNodesBuffer}
+            </div>
+          );
+        }
+      } else {
+        const style = window.getComputedStyle(el);
+        const marginTop = parseFloat(style.marginTop) || 0;
+        const marginBottom = parseFloat(style.marginBottom) || 0;
+        const elementHeight = el.offsetHeight + marginTop + marginBottom;
+        processItem(elementHeight, block as React.ReactNode);
+      }
     });
+
     if (currentPage.length > 0) newPages.push(currentPage);
     setPages(newPages);
   }, [blocks, contentHeightPx]);
@@ -677,7 +745,16 @@ export function ClassicTemplate3({ data, isPreview = false }: ClassicTemplate3Pr
         className="cv-measure fixed top-0 left-0 w-[210mm] opacity-0 pointer-events-none z-[-999]"
         style={{ ...pageStyle, visibility: "hidden" }}
       >
-        {blocks}
+        {blocks.map((block, i) => {
+           if (block && typeof block === 'object' && 'type' in block && block.type === 'section' && 'children' in block) {
+             return (
+               <div key={i}>
+                 {(block as { children: React.ReactNode[] }).children}
+               </div>
+             );
+           }
+           return <div key={i}>{block as React.ReactNode}</div>;
+        })}
       </div>
       {pages.length === 0 ? (
         <div className="w-[210mm] min-h-[297mm]" style={pageStyle}></div>

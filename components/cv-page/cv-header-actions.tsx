@@ -75,14 +75,14 @@ export function CVHeaderActions({
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                   isActive 
                     ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400" 
-                    : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100"
                 }`}
                 onClick={() => {
                   onTabChange?.('customize');
                   onChangeDesign?.();
                 }}
               >
-                <item.icon className={`h-4 w-4 ${isActive ? "text-emerald-600" : "text-gray-500"}`} />
+                <item.icon className={`h-4 w-4 ${isActive ? "text-emerald-600" : "text-gray-500 dark:text-gray-400"}`} />
                 <span className="font-medium">{item.label}</span>
               </Button>
             )
@@ -96,11 +96,11 @@ export function CVHeaderActions({
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                 isActive 
                   ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400" 
-                  : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                  : "text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100"
               }`}
               onClick={() => onTabChange?.(item.id as any)}
             >
-              <item.icon className={`h-4 w-4 ${isActive ? "text-emerald-600" : "text-gray-500"}`} />
+              <item.icon className={`h-4 w-4 ${isActive ? "text-emerald-600" : "text-gray-500 dark:text-gray-400"}`} />
               <span className="font-medium">{item.label}</span>
             </Button>
           )
@@ -151,8 +151,8 @@ export function CVHeaderActions({
         {/* More Options */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon" className="h-9 w-9 rounded-lg border-gray-200">
-              <MoreVertical className="h-4 w-4 text-gray-600" />
+            <Button variant="outline" size="icon" className="h-9 w-9 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700">
+              <MoreVertical className="h-4 w-4 text-gray-700 dark:text-gray-200" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
