@@ -1324,7 +1324,7 @@ export function CVPageClientContent() {
           )}
 
           {/* Main Content - Preview */}
-<div className="mx-auto min-w-0 bg-transparent overflow-y-auto flex justify-center no-scrollbar cursor-default scroll-smooth focus:outline-none outline-none border-none ring-0 !border-0 !outline-0 !shadow-none">
+<div className="mx-auto min-w-0 bg-transparent overflow-y-auto flex justify-center no-scrollbar cursor-pointer scroll-smooth focus:outline-none outline-none border-none ring-0 !border-0 !outline-0 !shadow-none">
             <div className="w-full max-w-[210mm] shadow-2xl bg-white rounded-sm overflow-hidden h-fit">
               {selectedTemplate && aiResponse && (
                 <CVPreviewSection
