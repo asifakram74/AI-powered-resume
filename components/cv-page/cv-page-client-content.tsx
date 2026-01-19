@@ -44,7 +44,6 @@ import { TemplateSelectorDialog } from "./template-selector-dialog"
 import { SettingsPanelDialog } from "./settings-panel-dialog"
 import { DesignPanel } from "./design-panel-dialog"
 import { CVSidebarEditForm, CVSidebarSection, type SectionItem } from "./cv-sidebar-section"
-
 const DEFAULT_SECTION_ORDER: CVSectionId[] = ["personalInfo", "skills", "experience", "projects", "education", "certifications", "languages", "interests"]
 const SECTION_LABELS: Record<CVSectionId, string> = {
   personalInfo: "Personal Info",
@@ -56,7 +55,6 @@ const SECTION_LABELS: Record<CVSectionId, string> = {
   languages: "Languages",
   interests: "Interests",
 }
-
 const DEFAULT_PERSONAL_INFO_FIELD_ORDER: PersonalInfoFieldId[] = [
   "fullName",
   "jobTitle",
@@ -68,7 +66,6 @@ const DEFAULT_PERSONAL_INFO_FIELD_ORDER: PersonalInfoFieldId[] = [
   "github",
   "summary",
 ]
-
 const PERSONAL_INFO_FIELD_LABELS: Record<PersonalInfoFieldId, string> = {
   fullName: "Full Name",
   jobTitle: "Job Title",
@@ -80,7 +77,6 @@ const PERSONAL_INFO_FIELD_LABELS: Record<PersonalInfoFieldId, string> = {
   github: "GitHub",
   summary: "Summary",
 }
-
 const DEFAULT_STYLE_SETTINGS: CVStyleSettings = {
   bodyFontFamily: "inter",
   headingFontFamily: "inter",
@@ -125,13 +121,13 @@ const DEFAULT_STYLE_SETTINGS: CVStyleSettings = {
   sectionHeaderIconStyle: "none",
   bulletStyle: "disc",
 }
-
 interface OptimizedCV {
-  personalInfo: {
-    fullName: string
-    jobTitle: string
-    email: string
-    phone: string
+    personalInfo: {
+      fullName: string
+      name?: string // Added name as optional field since API returns it
+      jobTitle: string
+      email: string
+      phone: string
     location: string
     linkedin: string
     website: string
@@ -160,20 +156,17 @@ interface OptimizedCV {
   languages: string[]
   interests: string[]
 }
-
 interface AIResponse {
   optimizedCV: OptimizedCV
   suggestions: string[]
   improvementScore: number
 }
-
 interface CVTemplate {
   id: string
   name: string
   description: string
   category: "modern" | "classic" | "creative" | "minimal"
 }
-
 interface CVFormData {
   user_id: string;
   layout_id: string;
@@ -182,7 +175,6 @@ interface CVFormData {
   job_description: string;
   persona?: PersonaResponse | null;
 }
-
 const templates: CVTemplate[] = [
   {
     id: "classic",
@@ -247,9 +239,6 @@ const templates: CVTemplate[] = [
     category: "minimal",
   },
 ]
-
-
-
 export function CVPageClientContent() {
   const [aiResponse, setAiResponse] = useState<AIResponse | null>(null)
   const [persona, setPersona] = useState<PersonaResponse | null>(null)
@@ -371,7 +360,7 @@ export function CVPageClientContent() {
               : undefined
             const parsedStyleSettings = parsedContent?.styleSettings
             const { sectionOrder: _ignored, personalInfoFieldOrder: _ignored2, hiddenSections: _ignored3, styleSettings: _ignored4, ...optimizedCV } = parsedContent || {}
-            
+
             // Map name to fullName for consistency if needed
             if (optimizedCV.personalInfo && optimizedCV.personalInfo.name && !optimizedCV.personalInfo.fullName) {
               optimizedCV.personalInfo.fullName = optimizedCV.personalInfo.name;
@@ -664,7 +653,7 @@ export function CVPageClientContent() {
       hiddenSections,
       styleSettings,
       personalInfo: {
-        fullName: aiResponse.optimizedCV.personalInfo.fullName,
+        fullName: aiResponse.optimizedCV.personalInfo.fullName || aiResponse.optimizedCV.personalInfo.name || "",
         jobTitle: aiResponse.optimizedCV.personalInfo.jobTitle || persona?.job_title || "",
         email: aiResponse.optimizedCV.personalInfo.email,
         phone: aiResponse.optimizedCV.personalInfo.phone,
@@ -1186,7 +1175,7 @@ export function CVPageClientContent() {
 
   return (
     <ProtectedRoute>
-      <div className="h-screen bg-[#f4f4f2] dark:bg-gray-950 overflow-hidden flex flex-col px-6">
+      <div className="h-screen bg-[#f4f4f2] dark:bg-gray-950 overflow-hidden flex flex-col px-2 lg:px-6">
         <CVHeaderActions
           isViewMode={isViewMode}
           aiResponse={aiResponse}
@@ -1208,11 +1197,11 @@ export function CVPageClientContent() {
           activeTab={(activeTab === "design" ? "customize" : activeTab) as any}
           onTabChange={setActiveTab as any}
         />
-        
-        <div className="flex-1 flex min-h-0 overflow-hidden mt-6 gap-6">
+
+        <div className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-y-auto lg:overflow-hidden mt-6 gap-6">
           {/* Left Sidebar - Content Editor */}
           {activeTab === 'content' && (
-            <div className="w-[480px] flex-shrink-0 flex flex-col overflow-y-auto gap-6 no-scrollbar scroll-smooth">
+            <div className="w-full lg:w-[480px] flex-shrink-0 flex flex-col overflow-y-auto gap-6 no-scrollbar scroll-smooth">
               {editingItem ? (
                 (() => {
                   const items = getSectionItems(editingItem.sectionId)
@@ -1295,7 +1284,7 @@ export function CVPageClientContent() {
 
           {/* Left Sidebar - Design Panel */}
           {activeTab === 'design' && (
-            <div className="w-[480px] flex-shrink-0 flex flex-col overflow-hidden bg-white border-r border-gray-200 dark:border-gray-800">
+            <div className="w-full lg:w-[480px] flex-shrink-0 flex flex-col overflow-hidden bg-white border-r border-gray-200 dark:border-gray-800">
               <DesignPanel
                 value={styleSettings}
                 onChange={(next) => {
@@ -1303,7 +1292,7 @@ export function CVPageClientContent() {
                   setHasUnsavedChanges(true)
                 }}
                 onReset={resetStyleSettings}
-                
+
                 // Arrange Section Props
                 hiddenSections={hiddenSections}
                 setHiddenSections={setHiddenSections}
@@ -1324,7 +1313,10 @@ export function CVPageClientContent() {
           )}
 
           {/* Main Content - Preview */}
-<div className="mx-auto min-w-0 bg-transparent overflow-y-auto flex justify-center no-scrollbar cursor-pointer scroll-smooth focus:outline-none outline-none border-none ring-0 !border-0 !outline-0 !shadow-none">
+          <div className={`
+            mx-auto w-full lg:w-auto mx-auto min-w-0 bg-transparent overflow-y-auto flex justify-center no-scrollbar cursor-pointer scroll-smooth focus:outline-none outline-none border-none ring-0 !border-0 !outline-0 !shadow-none
+            ${activeTab === 'overview' ? 'block' : 'hidden lg:flex'}
+          `}>
             <div className="w-full max-w-[210mm] shadow-2xl bg-white rounded-sm overflow-hidden h-fit">
               {selectedTemplate && aiResponse && (
                 <CVPreviewSection

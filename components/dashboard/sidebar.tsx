@@ -13,6 +13,7 @@ import {
   SidebarMenuItem,
   SidebarFooter,
   SidebarGroup,
+  useSidebar,
 } from "../../components/ui/sidebar"
 import { Logo } from "../../components/ui/logo"
 import { Badge } from "../../components/ui/badge"
@@ -23,6 +24,7 @@ import { useAppDispatch, useAppSelector } from "../../lib/redux/hooks"
 import { logoutUser, fetchProfile } from "../../lib/redux/slices/authSlice"
 import { useRouter } from "next/navigation"
 import { getCVs } from "../../lib/redux/service/resumeService"
+import { X } from "lucide-react"
 
 function useResumeCount(userId: string | number | undefined) {
   const [resumeCount, setResumeCount] = useState(0)
@@ -140,6 +142,7 @@ export function Sidebar({
   const { theme, setTheme } = useTheme()
   const { profile } = useAppSelector((state) => state.auth)
   const { resumeCount, loading } = useResumeCount(user?.id)
+  const { setOpenMobile, isMobile } = useSidebar()
 
   useEffect(() => {
     setIsMounted(true)
@@ -178,10 +181,20 @@ export function Sidebar({
       aria-hidden={!isMounted}
     >
       <SidebarHeader className="p-6 pb-4">
-        <div className="flex items-center cursor-pointer">
-          <Link href="/" >
+        <div className="flex items-center justify-between">
+          <Link href="/" className="cursor-pointer">
             <Logo height={120} className="cursor-pointer" />
           </Link>
+          {isMobile && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+              onClick={() => setOpenMobile(false)}
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          )}
         </div>
 
         {(user || profile) && (
@@ -227,7 +240,10 @@ export function Sidebar({
                 {setActivePage ? (
                   <SidebarMenuButton
                     id={`tour-${item.id}`}
-                    onClick={() => setActivePage(item.id)}
+                    onClick={() => {
+                      setActivePage(item.id)
+                      if (isMobile) setOpenMobile(false)
+                    }}
                     isActive={activePage === item.id}
                     className={`
                       w-full justify-start gap-3 px-4 py-3.5 text-left rounded-2xl transition-all duration-300
@@ -253,7 +269,13 @@ export function Sidebar({
                     )}
                   </SidebarMenuButton>
                 ) : (
-                  <Link href={item.path} className="w-full block">
+                  <Link 
+                    href={item.path} 
+                    className="w-full block"
+                    onClick={() => {
+                      if (isMobile) setOpenMobile(false)
+                    }}
+                  >
                     <SidebarMenuButton
                       id={`tour-${item.id}`}
                       isActive={activePage === item.id}
@@ -348,6 +370,20 @@ export function Sidebar({
                 )}
               </div>
             )}
+
+            {/* Theme Toggle Button */}
+            <Button
+              variant="outline"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="w-full justify-start gap-3 rounded-2xl border-2 border-gray-200/80 dark:border-gray-800/60 hover:border-blue-300 dark:hover:border-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-950/30 transition-all duration-300 transform hover:scale-[1.02] font-semibold text-gray-700 dark:text-gray-200"
+            >
+              {theme === "dark" ? (
+                <Sun className="h-5 w-5 text-orange-500" />
+              ) : (
+                <Moon className="h-5 w-5 text-blue-500" />
+              )}
+              <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+            </Button>
 
             {/* User Menu Dropdown */}
             <DropdownMenu>

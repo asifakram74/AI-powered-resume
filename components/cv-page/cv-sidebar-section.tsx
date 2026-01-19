@@ -84,7 +84,7 @@ export function CVSidebarSection({
   };
 
   const getItemTitle = (item: SectionItem): string => {
-    if (sectionId === "personalInfo") return item.fullName || item.jobTitle || "(No Name)"
+    if (sectionId === "personalInfo") return item.fullName || item.name || item.jobTitle || "(No Name)"
     if (sectionId === "experience") return item.jobTitle || item.title || "(No Title)"
     if (sectionId === "education") return item.degree || item.title || "(No Degree)"
     if (sectionId === "projects") return item.name || item.title || "(No Project)"
@@ -140,10 +140,10 @@ export function CVSidebarSection({
               <div className="flex-1 min-w-0 pr-4">
                 <div className="mb-4">
                   <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-0.5">
-                    {item.fullName || "(No Name)"}
+                    {item.fullName || item.name || "(No Name)"}
                   </h4>
                   <p className="text-base text-gray-500 dark:text-gray-400 font-medium">
-                    {item.jobTitle || "(No Title)"}
+                    {item.jobTitle || item.title || "(No Title)"}
                   </p>
                 </div>
 
@@ -177,7 +177,7 @@ export function CVSidebarSection({
                   {item.profilePicture && (
                     <AvatarImage 
                       src={item.profilePicture} 
-                      alt={item.fullName || "Profile"} 
+                      alt={item.fullName || item.name || "Profile"} 
                       className="object-cover"
                     />
                   )}
@@ -375,6 +375,8 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
     if (sectionId === "education") return "Degree";
     if (sectionId === "certifications") return "Certification Title";
     if (sectionId === "languages") return "Language";
+    if (sectionId === "skills") return "Skill";
+    if (sectionId === "interests") return "Interest";
     return "Title";
   };
 
@@ -392,6 +394,8 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
 
   const shouldShowDescription =
     "description" in item || sectionId === "projects" || sectionId === "experience" || sectionId === "education";
+
+  const shouldShowSubtitle = sectionId !== "skills" && sectionId !== "interests";
 
   const shouldShowResponsibilities = Array.isArray((item as any).responsibilities);
   const shouldShowTechnologies = Array.isArray((item as any).technologies);
@@ -573,7 +577,7 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
               </div>
             </div>
 
-            <div className="pt-2 space-y-3">
+            {/* <div className="pt-2 space-y-3">
               <label className="text-xs font-bold text-gray-800 dark:text-gray-200">Add Details</label>
               <div className="flex flex-wrap gap-2">
                 <Button variant="outline" size="sm" className="h-8 text-[11px] gap-1 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
@@ -598,7 +602,7 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
                   Show More
                 </Button>
               </div>
-            </div>
+            </div> */}
 
 
             
@@ -628,17 +632,19 @@ export function CVSidebarEditForm({ sectionId, item, onSave, onCancel, onDelete 
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                {getSubtitleLabel()}
-              </label>
-              <Input 
-                value={formData[subtitleKey as keyof SectionItem] || ''} 
-                onChange={(e) => handleChange(subtitleKey as string, e.target.value)}
-                className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500"
-                placeholder="e.g. Google Inc."
-              />
-            </div>
+            {shouldShowSubtitle && (
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                  {getSubtitleLabel()}
+                </label>
+                <Input 
+                  value={formData[subtitleKey as keyof SectionItem] || ''} 
+                  onChange={(e) => handleChange(subtitleKey as string, e.target.value)}
+                  className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500"
+                  placeholder="e.g. Google Inc."
+                />
+              </div>
+            )}
           </>
         )}
 

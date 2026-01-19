@@ -225,13 +225,13 @@ export function CVTemplates({
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 rounded-lg">
+    <div className="h-full bg-white dark:bg-gray-950 rounded-lg">
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div className="w-full mx-auto px-2 sm:px-6 lg:px-8 py-2">
         {/* Template Selection */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           {/* Filter Buttons */}
-          <div className="flex flex-wrap justify-center gap-2">
+          <div className="flex flex-wrap justify-center gap-1.5">
             {["all", "modern", "classic", "creative", "minimal"].map(
               (category) => (
                 <Button
@@ -239,7 +239,7 @@ export function CVTemplates({
                   variant={filter === category ? "default" : "outline"}
                   size="sm"
                   onClick={() => setFilter(category as any)}
-                  className="capitalize"
+                  className="capitalize h-7 px-2.5 text-xs"
                 >
                   {category}
                 </Button>
@@ -247,7 +247,7 @@ export function CVTemplates({
             )}
           </div>
           {/* Templates Grid */}
-          <div className="grid grid-cols-2 gap-6 w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 w-full">
             {filteredTemplates.map((template) => {
               const isSelected = selectedTemplate === template.id;
               return (

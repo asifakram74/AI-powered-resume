@@ -318,17 +318,7 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
         if (!v) return null
         rows.push(
           <div key="summary-container" className="mt-3">
-            <div className="w-full border-b-2 mb-3" style={dividerStyle}></div>
-            <h3
-              className="font-bold uppercase tracking-wide mb-2"
-              style={{
-                ...headingBaseStyle,
-                fontSize: `${styleSettings.headingFontSizePx}px`,
-                textTransform: styleSettings.capitalization,
-              }}
-            >
-              PROFESSIONAL SUMMARY
-            </h3>
+           
             <p className="leading-relaxed" style={{ color: styleSettings.textColor }}>
               {v}
             </p>
@@ -339,7 +329,7 @@ export function ClassicTemplate2({ data, isPreview = false }: ClassicTemplate2Pr
     })
 
     return (
-      <div data-section-id="personalInfo" className="pb-4 mb-6" style={{ borderBottomColor: styleSettings.borderColor, borderBottomWidth: 2 }}>
+      <div data-section-id="personalInfo" className="" style={{ borderBottomColor: styleSettings.borderColor, borderBottomWidth: 2 }}>
         {rows}
       </div>
     )

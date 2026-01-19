@@ -52,7 +52,42 @@ export function CVPreview({
   activeSection,
 }: CVPreviewProps) {
   const previewRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
+  const [scale, setScale] = useState(1);
+  const [contentHeight, setContentHeight] = useState(0);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (!containerRef.current) return;
+      const containerWidth = containerRef.current.clientWidth;
+      const targetWidth = 794; // A4 width in px (approx 210mm @ 96 DPI)
+      
+      if (containerWidth < targetWidth) {
+        setScale(containerWidth / targetWidth);
+      } else {
+        setScale(1);
+      }
+    };
+
+    const resizeObserver = new ResizeObserver(handleResize);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+    
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!previewRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setContentHeight(entry.contentRect.height);
+      }
+    });
+    observer.observe(previewRef.current);
+    return () => observer.disconnect();
+  }, [data, template]);
 
   useEffect(() => {
     if (!activeSection || !previewRef.current) return;
@@ -182,14 +217,25 @@ export function CVPreview({
   };
 
   return (
-    <div className=" w-full">
-      <div className="w-full  bg-[#f4f4f2] dark:bg-gray-950 ">
+    <div className="w-full" ref={containerRef}>
+      <div 
+        className="w-full bg-[#f4f4f2] dark:bg-gray-950 overflow-hidden"
+        style={{ height: contentHeight ? contentHeight * scale : 'auto' }}
+      >
         <div
-          ref={previewRef}
-          id="cv-preview-content"
-          className="mx-auto print:shadow-none"
+          className="origin-top-left"
+          style={{
+            transform: `scale(${scale})`,
+            width: '210mm',
+          }}
         >
-          {renderTemplate()}
+          <div
+            ref={previewRef}
+            id="cv-preview-content"
+            className="mx-auto print:shadow-none"
+          >
+            {renderTemplate()}
+          </div>
         </div>
       </div>
     </div>

@@ -542,7 +542,7 @@ function CreatePersonaPage({ user }: PageProps) {
         </div>
 
         {/* Button Section */}
-        <div className="flex justify-center sm:justify-end">
+        <div className="flex justify-center sm:justify-end mb-5">
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button
@@ -563,45 +563,42 @@ function CreatePersonaPage({ user }: PageProps) {
                 Create Persona
               </Button>
             </DialogTrigger>
-            <DialogContent className="w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] !max-w-none max-h-[90vh] overflow-hidden dark:border-0 dark:p-[1px] dark:bg-transparent">
+            <DialogContent className="w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] !max-w-none h-[90vh] overflow-hidden dark:border-0 dark:p-[1px] dark:bg-transparent p-0">
               <div className="hidden dark:block absolute inset-0 gradient-border-moving -z-10" />
-              <div className="dark:bg-[#0B0F1A] dark:rounded-2xl p-6 h-full w-full overflow-y-auto custom-scrollbar max-h-[calc(90vh-2px)]">
-                <DialogHeader className="relative pb-4 mb-4 border-b dark:border-gray-800">
-                  <div className="absolute -left-6 -top-6 w-32 h-32 resumaic-gradient-green opacity-10 blur-3xl -z-10" />
-                  <DialogTitle className="text-2xl font-bold dark:text-gray-100">
-                    {editingPersona ? 'Edit Persona' : 'Create New Persona'}
-                  </DialogTitle>
-                  <DialogDescription className="text-gray-500 dark:text-gray-400">
-                    {editingPersona
-                      ? 'Update the persona details below.'
-                      : 'Create a new persona by filling in the details below.'}
-                  </DialogDescription>
-                </DialogHeader>
-                {/* {!showForm && (
-                  <div className="flex justify-end hidden lg:flex">
-                    <span className="inline-flex items-center rounded-md bg-[#EA580C]/20 px-2.5 py-0.5 text-xs font-medium text-[#EA580C] font-inter">
-                      Coming Soon
-                    </span>
-                  </div>
-                )} */}
+              <div className="dark:bg-[#0B0F1A] dark:rounded-2xl h-full w-full flex flex-col overflow-hidden bg-white rounded-lg">
+                <div className="p-6 pb-0 flex-shrink-0">
+                  <DialogHeader className="relative pb-4 mb-4 border-b dark:border-gray-800">
+                    <div className="absolute -left-6 -top-6 w-32 h-32 resumaic-gradient-green opacity-10 blur-3xl -z-10" />
+                    <DialogTitle className="text-2xl font-bold dark:text-gray-100">
+                      {editingPersona ? 'Edit Persona' : 'Create New Persona'}
+                    </DialogTitle>
+                    <DialogDescription className="text-gray-500 dark:text-gray-400">
+                      {editingPersona
+                        ? 'Update the persona details below.'
+                        : 'Create a new persona by filling in the details below.'}
+                    </DialogDescription>
+                  </DialogHeader>
+                </div>
                 
-
-
-              {!showForm ? (
-                <PersonaCreationOptions onOptionSelect={handleOptionSelect} />
-              ) : (
-                <PersonaForm
-                  prefilledData={prefilledData}
-                  editingPersona={editingPersona}
-                  onPersonaGenerated={handlePersonaGenerated}
-                  onCancel={() => {
-                    setIsDialogOpen(false);
-                    setShowForm(false);
-                    setPrefilledData(null);
-                    setEditingPersona(null);
-                  }}
-                />
-                )}
+                <div className="flex-1 min-h-0 w-full px-6 pb-6 overflow-hidden">
+                  {!showForm ? (
+                    <div className="h-full overflow-y-auto custom-scrollbar">
+                      <PersonaCreationOptions onOptionSelect={handleOptionSelect} />
+                    </div>
+                  ) : (
+                    <PersonaForm
+                      prefilledData={prefilledData}
+                      editingPersona={editingPersona}
+                      onPersonaGenerated={handlePersonaGenerated}
+                      onCancel={() => {
+                        setIsDialogOpen(false);
+                        setShowForm(false);
+                        setPrefilledData(null);
+                        setEditingPersona(null);
+                      }}
+                    />
+                  )}
+                </div>
               </div>
             </DialogContent>
           </Dialog>
