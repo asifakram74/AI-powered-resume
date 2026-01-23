@@ -138,6 +138,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [dispatch, user?.id, user?.email_verified_at])
 
   const getPageTitle = () => {
+    if (pathname?.includes("applications")) return "Applications"
+    if (pathname?.includes("job-search")) return "Search Jobs"
     if (pathname?.includes("persona")) return "Persona"
     if (pathname?.includes("resumes")) return "Resumes"
     if (pathname?.includes("cover-letter")) return "Cover Letters"

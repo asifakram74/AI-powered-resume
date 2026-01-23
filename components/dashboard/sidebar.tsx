@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { FileText, Mail, CheckCircle, UserCircle, Sparkles, BarChart3, LogOut, ChevronDown, Users, Crown, Moon, Sun, Settings, User, HelpCircle } from "lucide-react"
+import { useEffect, useState, type ElementType } from "react"
+import { FileText, Mail, CheckCircle, UserCircle, Sparkles, BarChart3, LogOut, ChevronDown, Users, Crown, Moon, Sun, Settings, User, HelpCircle, Search, Kanban, IdCard } from "lucide-react"
 import Link from "next/link"
 import { useTheme } from "next-themes"
 import {
@@ -11,6 +11,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarFooter,
   SidebarGroup,
   useSidebar,
@@ -76,7 +79,41 @@ interface SidebarProps {
   exportMode?: boolean
 }
 
-const regularMenuItems = [
+type SidebarLinkItem = {
+  id: string
+  path: string
+  label: string
+  icon: ElementType
+  badge?: string
+  badgeColor?: string
+}
+
+type SidebarGroupItem = {
+  id: string
+  label: string
+  icon: ElementType
+  children: SidebarLinkItem[]
+}
+
+type SidebarItem = SidebarLinkItem | SidebarGroupItem
+
+const jobApplicationSystemItems: SidebarLinkItem[] = [
+  {
+    id: "job-search",
+    path: "/dashboard/job-search",
+    label: "Search Jobs",
+    icon: Search,
+  },
+  {
+    id: "applications",
+    path: "/dashboard/applications",
+    label: "Applications",
+    icon: Kanban,
+  },
+]
+
+const regularMenuItems: SidebarItem[] = [
+  
   {
     id: "persona",
     path: "/dashboard/persona",
@@ -106,6 +143,18 @@ const regularMenuItems = [
     badgeColor: "resumaic-gradient-orange text-white shadow-lg",
   },
   {
+    id: "profile-card",
+    path: "/dashboard/profile-card",
+    label: "Profile Card",
+    icon: IdCard,
+  },
+  {
+    id: "job-application-system",
+    label: "Job Applications",
+    icon: Kanban,
+    children: jobApplicationSystemItems,
+  },
+  {
     id: "profile",
     path: "/dashboard/profile",
     label: "Profile",
@@ -115,7 +164,7 @@ const regularMenuItems = [
   },
 ]
 
-const adminMenuItems = [
+const adminMenuItems: SidebarLinkItem[] = [
   {
     id: "users",
     path: "/dashboard/users",
@@ -161,8 +210,24 @@ export function Sidebar({
   const progressPercentage = Math.min((resumeCount / maxResumes) * 100, 100)
   const isProUser = profile?.plan_type?.toLowerCase() === 'pro' || user?.plan_type?.toLowerCase() === 'pro'
 
-  // Determine active page based on prop or pathname
-  const activePage = propActivePage || regularMenuItems.find(item => pathname?.includes(item.path))?.id || adminMenuItems.find(item => pathname?.includes(item.path))?.id || "persona"
+  const flattenedRegularItems = regularMenuItems.flatMap((item): SidebarLinkItem[] => ("children" in item ? item.children : [item]))
+
+  const activePage =
+    propActivePage ||
+    flattenedRegularItems.find((item) => pathname?.includes(item.path))?.id ||
+    adminMenuItems.find((item) => pathname?.includes(item.path))?.id ||
+    "persona"
+
+  const jobApplicationSystemIsActive = jobApplicationSystemItems.some((item) =>
+    propActivePage ? item.id === propActivePage : pathname?.includes(item.path)
+  )
+  const [isJobApplicationSystemOpen, setIsJobApplicationSystemOpen] = useState(jobApplicationSystemIsActive)
+
+  useEffect(() => {
+    if (jobApplicationSystemItems.some((item) => pathname?.includes(item.path))) {
+      setIsJobApplicationSystemOpen(true)
+    }
+  }, [pathname])
 
   // Function to get user initials
   const getInitials = (name?: string) => {
@@ -237,7 +302,72 @@ export function Sidebar({
           <SidebarMenu className="space-y-1">
             {[...regularMenuItems, ...(isAdmin ? adminMenuItems : [])].map((item, index) => (
               <SidebarMenuItem key={item.id} className={`animate-fade-in-up animation-delay-${(index + 1) * 100}`}>
-                {setActivePage ? (
+                {"children" in item ? (
+                  <>
+                    <SidebarMenuButton
+                      id={`tour-${item.id}`}
+                      type="button"
+                      onClick={() => setIsJobApplicationSystemOpen((open) => !open)}
+                      isActive={activePage === item.id || jobApplicationSystemItems.some((child) => child.id === activePage)}
+                      className={`
+                        w-full justify-start gap-3 px-4 py-3.5 text-left rounded-2xl transition-all duration-300
+                        data-[active=true]:resumaic-gradient-subtle data-[active=true]:text-gray-900 data-[active=true]:shadow-xl 
+                        data-[active=true]:border data-[active=true]:border-green-200/50
+                        dark:data-[active=true]:text-gray-50 dark:data-[active=true]:border-gray-800/60
+                        cursor-pointer transform
+                      `}
+                    >
+                      <div className="flex items-center gap-3 flex-1">
+                        <item.icon className="h-5 w-5 text-gray-600 dark:text-gray-400 group-data-[active=true]:text-green-700 dark:group-data-[active=true]:text-green-400" />
+                        <span className="font-semibold text-gray-700 dark:text-gray-200 group-data-[active=true]:text-gray-900 dark:group-data-[active=true]:text-gray-50">
+                          {item.label}
+                        </span>
+                      </div>
+                      <ChevronDown
+                        className={`h-4 w-4 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${
+                          isJobApplicationSystemOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    </SidebarMenuButton>
+
+                    {isJobApplicationSystemOpen && (
+                      <SidebarMenuSub className="mt-1">
+                        {item.children.map((child) => (
+                          <SidebarMenuSubItem key={child.id}>
+                            {setActivePage ? (
+                              <SidebarMenuSubButton
+                                href="#"
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  setActivePage(child.id)
+                                  if (isMobile) setOpenMobile(false)
+                                }}
+                                isActive={activePage === child.id}
+                                className="cursor-pointer"
+                              >
+                                <child.icon className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                                <span className="font-medium">{child.label}</span>
+                              </SidebarMenuSubButton>
+                            ) : (
+                              <SidebarMenuSubButton asChild isActive={activePage === child.id}>
+                                <Link
+                                  href={child.path}
+                                  onClick={() => {
+                                    if (isMobile) setOpenMobile(false)
+                                  }}
+                                  id={`tour-${child.id}`}
+                                >
+                                  <child.icon className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                                  <span className="font-medium">{child.label}</span>
+                                </Link>
+                              </SidebarMenuSubButton>
+                            )}
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    )}
+                  </>
+                ) : setActivePage ? (
                   <SidebarMenuButton
                     id={`tour-${item.id}`}
                     onClick={() => {
@@ -258,19 +388,15 @@ export function Sidebar({
                         {item.label}
                       </span>
                     </div>
-                    {item.badge && (
-                      item.badge === 'Pro' ? (!isProUser && !isAdmin) : true
-                    ) && (
-                      <Badge
-                        className={`text-xs px-3 py-1 font-bold rounded-full ${item.badgeColor || "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200"}`}
-                      >
+                    {item.badge && (item.badge === "Pro" ? (!isProUser && !isAdmin) : true) && (
+                      <Badge className={`text-xs px-3 py-1 font-bold rounded-full ${item.badgeColor || "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200"}`}>
                         {item.badge}
                       </Badge>
                     )}
                   </SidebarMenuButton>
                 ) : (
-                  <Link 
-                    href={item.path} 
+                  <Link
+                    href={item.path}
                     className="w-full block"
                     onClick={() => {
                       if (isMobile) setOpenMobile(false)
@@ -293,12 +419,8 @@ export function Sidebar({
                           {item.label}
                         </span>
                       </div>
-                      {item.badge && (
-                        item.badge === 'Pro' ? (!isProUser && !isAdmin) : true
-                      ) && (
-                      <Badge
-                          className={`text-xs px-3 py-1 font-bold rounded-full ${item.badgeColor || "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200"}`}
-                        >
+                      {item.badge && (item.badge === "Pro" ? (!isProUser && !isAdmin) : true) && (
+                        <Badge className={`text-xs px-3 py-1 font-bold rounded-full ${item.badgeColor || "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200"}`}>
                           {item.badge}
                         </Badge>
                       )}

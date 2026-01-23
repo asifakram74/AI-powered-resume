@@ -1,0 +1,281 @@
+{
+  "name": "Resumaic Job Tracker",
+  "item": [
+    {
+      "name": "Jobs",
+      "item": [
+        {
+          "name": "Search Jobs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/jobs/search?q=developer",
+              "host": ["{{base_url}}"],
+              "path": ["jobs", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "developer"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Google Search Jobs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/jobs/google-search?q=developer",
+              "host": ["{{base_url}}"],
+              "path": ["jobs", "google-search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "developer"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Pipeline Management",
+      "item": [
+        {
+          "name": "Create Pipeline",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('pipeline_id', response.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"review\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/pipelines",
+              "host": ["{{base_url}}"],
+              "path": ["pipelines"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Pipelines",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/pipelines",
+              "host": ["{{base_url}}"],
+              "path": ["pipelines"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Pipeline",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/pipelines/{{pipeline_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["pipelines", "{{pipeline_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Pipeline",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"updated_pipeline\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/pipelines/{{pipeline_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["pipelines", "{{pipeline_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Pipeline",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/pipelines/{{pipeline_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["pipelines", "{{pipeline_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Job Applications",
+      "item": [
+        {
+          "name": "Create Job Application (Wishlist)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('job_application_id', response.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"company_name\": \"Microsoft\",\n  \"job_title\": \"Backend Engineer\",\n  \"application_date\": \"2024-01-10\",\n  \"pipeline_id\": \"{{pipeline_id}}\",\n  \"cv_id\": \"{{cv_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/job-applications",
+              "host": ["{{base_url}}"],
+              "path": ["job-applications"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Job Applications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/job-applications",
+              "host": ["{{base_url}}"],
+              "path": ["job-applications"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Job Applications by Pipeline",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/job-applications?pipeline_id={{pipeline_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["job-applications"],
+              "query": [
+                {
+                  "key": "pipeline_id",
+                  "value": "{{pipeline_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Job Application",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/job-applications/{{job_application_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["job-applications", "{{job_application_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Job Application",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pipeline_id\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/job-applications/{{job_application_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["job-applications", "{{job_application_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Job Application",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/job-applications/{{job_application_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["job-applications", "{{job_application_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

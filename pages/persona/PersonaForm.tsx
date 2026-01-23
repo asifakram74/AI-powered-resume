@@ -392,14 +392,7 @@ export function PersonaForm({
         }));
         toast.success("Experience added successfully");
       }
-      setCurrentExperience({
-        jobTitle: "",
-        companyName: "",
-        location: "",
-        employmentType: "",
-        industry: "",
      
-  };
 
   const handleEditExperience = (exp: any) => {
     setCurrentExperience({
@@ -2246,5 +2239,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
       </div>
     </div>
   );
+}
+}
 }
 export default PersonaForm;
