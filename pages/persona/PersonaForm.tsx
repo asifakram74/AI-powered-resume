@@ -392,7 +392,19 @@ export function PersonaForm({
         }));
         toast.success("Experience added successfully");
       }
-     
+      setCurrentExperience({
+        jobTitle: "",
+        companyName: "",
+        location: "",
+        employmentType: "",
+        industry: "",
+        startDate: "",
+        endDate: "",
+        current: false,
+        responsibilities: [""],
+      });
+    }
+  };
 
   const handleEditExperience = (exp: any) => {
     setCurrentExperience({
@@ -2240,6 +2252,3 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
     </div>
   );
 }
-}
-}
-export default PersonaForm;

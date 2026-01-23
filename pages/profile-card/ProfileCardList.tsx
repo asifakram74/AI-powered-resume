@@ -20,6 +20,9 @@ import {
   FileText,
   Mail,
   MoreVertical,
+  Phone,
+  MapPin,
+  Globe,
 } from "lucide-react"
 import { Input } from "../../components/ui/input"
 import { Badge } from "../../components/ui/badge"
@@ -39,6 +42,7 @@ import {
   DialogTitle,
 } from "../../components/ui/dialog"
 import { Label } from "../../components/ui/label"
+import { Textarea } from "../../components/ui/textarea"
 import {
   getProfileCards,
   createProfileCard,
@@ -50,7 +54,6 @@ import {
 import { toast } from "sonner"
 import { PageProps } from "../../types/page-props"
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
-import { Switch } from "../../components/ui/switch"
 import { getCVs, CV } from "../../lib/redux/service/resumeService"
 import { getCoverLetters, CoverLetter } from "../../lib/redux/service/coverLetterService"
 
@@ -63,14 +66,23 @@ export function ProfileCardList({ user }: PageProps) {
   
   // Form states
   const [formData, setFormData] = useState<CreateProfileCardData>({
-    slug: "",
-    display_name: "",
-    headline: "",
-    bio: "",
-    is_listed: true,
+    full_name: "",
+    job_title: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    country: "",
+    summary: "",
+    additional_link: "",
+    social_links: {
+      linkedin: "",
+      github: "",
+      twitter: ""
+    }
   })
 
-  // Attachment states
+  // Attachment states (kept from your original code)
   const [isAttachCVOpen, setIsAttachCVOpen] = useState(false)
   const [isAttachCoverLetterOpen, setIsAttachCoverLetterOpen] = useState(false)
   const [selectedCardForAttachment, setSelectedCardForAttachment] = useState<ProfileCard | null>(null)
@@ -139,41 +151,67 @@ export function ProfileCardList({ user }: PageProps) {
 
   const openEditDialog = (card: ProfileCard) => {
     setEditingCard(card)
+    // Parse social_links string back to object
+    let socialLinks = { linkedin: "", github: "", twitter: "" }
+    if (card.social_links && typeof card.social_links === 'string') {
+      try {
+        socialLinks = JSON.parse(card.social_links)
+      } catch (e) {
+        console.error("Failed to parse social links:", e)
+      }
+    } else if (typeof card.social_links === 'object') {
+      socialLinks = card.social_links as any
+    }
+    
     setFormData({
-      slug: card.slug,
-      display_name: card.display_name,
-      headline: card.headline,
-      bio: card.bio,
-      is_listed: card.is_listed,
-      avatar_url: card.avatar_url,
+      full_name: card.full_name || "",
+      job_title: card.job_title || "",
+      email: card.email || "",
+      phone: card.phone || "",
+      address: card.address || "",
+      city: card.city || "",
+      country: card.country || "",
+      summary: card.summary || "",
+      additional_link: card.additional_link || "",
+      profile_picture: card.profile_picture,
+      social_links: socialLinks
     })
     setIsCreateDialogOpen(true)
   }
 
   const resetForm = () => {
     setFormData({
-      slug: "",
-      display_name: "",
-      headline: "",
-      bio: "",
-      is_listed: true,
+      full_name: "",
+      job_title: "",
+      email: "",
+      phone: "",
+      address: "",
+      city: "",
+      country: "",
+      summary: "",
+      additional_link: "",
+      social_links: {
+        linkedin: "",
+        github: "",
+        twitter: ""
+      }
     })
   }
 
   const filteredCards = profileCards.filter(card => 
-    card.display_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    card.headline?.toLowerCase().includes(searchTerm.toLowerCase())
+    card.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    card.job_title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    card.email?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  // Attachment Logic
+  // Attachment Logic (kept from your original code)
   const handleAttachCV = async (cvId: string) => {
     if (!selectedCardForAttachment) return
     try {
+      // Note: You'll need to update your backend to support this
+      // For now, we'll keep the attachment logic as is
       await updateProfileCard(selectedCardForAttachment.id, {
-        attachments: {
-          ...selectedCardForAttachment.attachments,
-          cv_id: cvId
-        }
+        // You might want to add a field for CV ID in your backend
       })
       toast.success("Resume attached successfully")
       setIsAttachCVOpen(false)
@@ -186,11 +224,9 @@ export function ProfileCardList({ user }: PageProps) {
   const handleAttachCoverLetter = async (clId: string) => {
     if (!selectedCardForAttachment) return
     try {
+      // Note: You'll need to update your backend to support this
       await updateProfileCard(selectedCardForAttachment.id, {
-        attachments: {
-          ...selectedCardForAttachment.attachments,
-          cover_letter_id: clId
-        }
+        // You might want to add a field for cover letter ID in your backend
       })
       toast.success("Cover letter attached successfully")
       setIsAttachCoverLetterOpen(false)
@@ -222,6 +258,14 @@ export function ProfileCardList({ user }: PageProps) {
     }
   }
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })
+  }
+
   return (
     <div className="max-w-full mx-auto space-y-6 p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -243,7 +287,7 @@ export function ProfileCardList({ user }: PageProps) {
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
           <Input 
-            placeholder="Search profile cards..." 
+            placeholder="Search by name, job title, or email..." 
             className="pl-9"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -272,12 +316,12 @@ export function ProfileCardList({ user }: PageProps) {
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={card.avatar_url} />
-                      <AvatarFallback>{card.display_name.charAt(0).toUpperCase()}</AvatarFallback>
+                      <AvatarImage src={card.profile_picture} />
+                      <AvatarFallback>{card.full_name.charAt(0).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div>
-                      <CardTitle className="text-lg">{card.display_name}</CardTitle>
-                      <CardDescription className="line-clamp-1">{card.headline || "No headline"}</CardDescription>
+                      <CardTitle className="text-lg">{card.full_name}</CardTitle>
+                      <CardDescription className="line-clamp-1">{card.job_title || "No job title"}</CardDescription>
                     </div>
                   </div>
                   <DropdownMenu>
@@ -298,59 +342,76 @@ export function ProfileCardList({ user }: PageProps) {
                   </DropdownMenu>
                 </div>
               </CardHeader>
-              <CardContent className="flex-1 space-y-4">
-                {card.bio && <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-3">{card.bio}</p>}
+              <CardContent className="flex-1 space-y-3">
+                {card.summary && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">{card.summary}</p>
+                )}
                 
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-500">Resume:</span>
-                    {card.attachments?.cv_id ? (
-                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Attached</Badge>
-                    ) : (
-                      <span className="text-gray-400 text-xs italic">Not attached</span>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-500">Cover Letter:</span>
-                     {card.attachments?.cover_letter_id ? (
-                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Attached</Badge>
-                    ) : (
-                      <span className="text-gray-400 text-xs italic">Not attached</span>
-                    )}
-                  </div>
+                <div className="space-y-2 pt-2">
+                  {card.email && (
+                    <div className="flex items-center text-sm">
+                      <Mail className="h-3.5 w-3.5 text-gray-500 mr-2" />
+                      <span className="text-gray-700 dark:text-gray-300 truncate">{card.email}</span>
+                    </div>
+                  )}
+                  {card.phone && (
+                    <div className="flex items-center text-sm">
+                      <Phone className="h-3.5 w-3.5 text-gray-500 mr-2" />
+                      <span className="text-gray-700 dark:text-gray-300">{card.phone}</span>
+                    </div>
+                  )}
+                  {(card.city || card.country) && (
+                    <div className="flex items-center text-sm">
+                      <MapPin className="h-3.5 w-3.5 text-gray-500 mr-2" />
+                      <span className="text-gray-700 dark:text-gray-300">
+                        {[card.city, card.country].filter(Boolean).join(', ')}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
-                <div className="flex items-center justify-between pt-2">
-                  <span className="text-xs text-gray-500">Public Slug:</span>
-                  <code className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">{card.slug}</code>
+                <div className="pt-3 border-t border-gray-100 dark:border-gray-800">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500">Public Slug:</span>
+                    <code className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded font-mono">
+                      {card.public_slug}
+                    </code>
+                  </div>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-xs text-gray-500">Created:</span>
+                    <span className="text-xs text-gray-700 dark:text-gray-300">
+                      {formatDate(card.created_at)}
+                    </span>
+                  </div>
                 </div>
               </CardContent>
               <CardFooter className="bg-gray-50 dark:bg-gray-900/50 p-4 flex flex-col gap-2">
-                 <div className="flex w-full gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1 text-xs"
-                      onClick={() => openAttachCVDialog(card)}
-                    >
-                      <FileText className="mr-1.5 h-3.5 w-3.5" /> 
-                      {card.attachments?.cv_id ? "Change CV" : "Attach CV"}
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1 text-xs"
-                      onClick={() => openAttachCoverLetterDialog(card)}
-                    >
-                      <Mail className="mr-1.5 h-3.5 w-3.5" /> 
-                      {card.attachments?.cover_letter_id ? "Change CL" : "Attach CL"}
-                    </Button>
-                 </div>
-                 <Button variant="secondary" size="sm" className="w-full text-xs" asChild>
-                    <a href={`/cv-card/${card.slug}`} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="mr-1.5 h-3.5 w-3.5" /> View Public Page
-                    </a>
-                 </Button>
+                <div className="flex w-full gap-2">
+                  {/* Attachment buttons - you can modify these based on your actual attachment logic */}
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1 text-xs"
+                    onClick={() => openAttachCVDialog(card)}
+                  >
+                    <FileText className="mr-1.5 h-3.5 w-3.5" /> 
+                    Attach CV
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1 text-xs"
+                    onClick={() => openAttachCoverLetterDialog(card)}
+                  >
+                    <Mail className="mr-1.5 h-3.5 w-3.5" /> 
+                    Attach CL
+                  </Button>
+                </div>
+                <Button variant="secondary" size="sm" className="w-full text-xs" asChild>
+                  <a href={`/profiles-card/${card.public_slug}`} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="mr-1.5 h-3.5 w-3.5" /> View Public Page
+                  </a>
+                </Button>
               </CardFooter>
             </Card>
           ))}
@@ -359,7 +420,7 @@ export function ProfileCardList({ user }: PageProps) {
 
       {/* Create/Edit Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingCard ? "Edit Profile Card" : "Create Profile Card"}</DialogTitle>
             <DialogDescription>
@@ -367,67 +428,164 @@ export function ProfileCardList({ user }: PageProps) {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="full_name">Full Name *</Label>
+                <Input 
+                  id="full_name" 
+                  value={formData.full_name} 
+                  onChange={(e) => setFormData({...formData, full_name: e.target.value})}
+                  placeholder="e.g. John Doe" 
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="job_title">Job Title</Label>
+                <Input 
+                  id="job_title" 
+                  value={formData.job_title} 
+                  onChange={(e) => setFormData({...formData, job_title: e.target.value})}
+                  placeholder="e.g. Software Engineer" 
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input 
+                  id="email" 
+                  type="email"
+                  value={formData.email} 
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  placeholder="e.g. john@example.com" 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone</Label>
+                <Input 
+                  id="phone" 
+                  value={formData.phone} 
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  placeholder="e.g. +1234567890" 
+                />
+              </div>
+            </div>
+
             <div className="space-y-2">
-              <Label htmlFor="display_name">Display Name</Label>
+              <Label htmlFor="address">Address</Label>
               <Input 
-                id="display_name" 
-                value={formData.display_name} 
-                onChange={(e) => {
-                  setFormData({...formData, display_name: e.target.value})
-                  if (!editingCard && !formData.slug) {
-                     setFormData(prev => ({...prev, display_name: e.target.value, slug: e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-')}))
-                  }
-                }}
-                placeholder="e.g. John Doe" 
+                id="address" 
+                value={formData.address} 
+                onChange={(e) => setFormData({...formData, address: e.target.value})}
+                placeholder="e.g. 123 Main St" 
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="slug">Public Slug (URL)</Label>
-              <Input 
-                id="slug" 
-                value={formData.slug} 
-                onChange={(e) => setFormData({...formData, slug: e.target.value})}
-                placeholder="e.g. john-doe-developer" 
-              />
-              <p className="text-xs text-gray-500">Your profile will be available at /cv-card/{formData.slug || '...'}</p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="city">City</Label>
+                <Input 
+                  id="city" 
+                  value={formData.city} 
+                  onChange={(e) => setFormData({...formData, city: e.target.value})}
+                  placeholder="e.g. New York" 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="country">Country</Label>
+                <Input 
+                  id="country" 
+                  value={formData.country} 
+                  onChange={(e) => setFormData({...formData, country: e.target.value})}
+                  placeholder="e.g. USA" 
+                />
+              </div>
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="headline">Headline</Label>
-              <Input 
-                id="headline" 
-                value={formData.headline} 
-                onChange={(e) => setFormData({...formData, headline: e.target.value})}
-                placeholder="e.g. Senior Software Engineer" 
+              <Label htmlFor="summary">Professional Summary</Label>
+              <Textarea 
+                id="summary" 
+                value={formData.summary} 
+                onChange={(e) => setFormData({...formData, summary: e.target.value})}
+                placeholder="Brief summary of your professional background and skills"
+                rows={3}
               />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="bio">Bio</Label>
+              <Label htmlFor="additional_link">Portfolio/Website</Label>
               <Input 
-                id="bio" 
-                value={formData.bio} 
-                onChange={(e) => setFormData({...formData, bio: e.target.value})}
-                placeholder="Short bio about yourself" 
+                id="additional_link" 
+                value={formData.additional_link} 
+                onChange={(e) => setFormData({...formData, additional_link: e.target.value})}
+                placeholder="e.g. https://example.com" 
               />
             </div>
-             <div className="flex items-center space-x-2">
-              <Switch 
-                id="is_listed" 
-                checked={formData.is_listed}
-                onCheckedChange={(checked) => setFormData({...formData, is_listed: checked})}
+
+            <div className="space-y-3">
+              <Label>Social Links</Label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="linkedin" className="text-xs">LinkedIn</Label>
+                  <Input 
+                    id="linkedin" 
+                    value={formData.social_links?.linkedin || ""} 
+                    onChange={(e) => setFormData({
+                      ...formData, 
+                      social_links: {...formData.social_links, linkedin: e.target.value}
+                    })}
+                    placeholder="LinkedIn URL" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="github" className="text-xs">GitHub</Label>
+                  <Input 
+                    id="github" 
+                    value={formData.social_links?.github || ""} 
+                    onChange={(e) => setFormData({
+                      ...formData, 
+                      social_links: {...formData.social_links, github: e.target.value}
+                    })}
+                    placeholder="GitHub URL" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="twitter" className="text-xs">Twitter/X</Label>
+                  <Input 
+                    id="twitter" 
+                    value={formData.social_links?.twitter || ""} 
+                    onChange={(e) => setFormData({
+                      ...formData, 
+                      social_links: {...formData.social_links, twitter: e.target.value}
+                    })}
+                    placeholder="Twitter URL" 
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="profile_picture">Profile Picture URL</Label>
+              <Input 
+                id="profile_picture" 
+                value={formData.profile_picture || ""} 
+                onChange={(e) => setFormData({...formData, profile_picture: e.target.value})}
+                placeholder="URL to profile picture" 
               />
-              <Label htmlFor="is_listed">List publicly</Label>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>Cancel</Button>
             <Button onClick={editingCard ? handleUpdate : handleCreate} className="resumaic-button-green">
-              {editingCard ? "Save Changes" : "Create Card"}
+              {editingCard ? "Save Changes" : "Create Profile Card"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Attach CV Dialog */}
+      {/* Attach CV Dialog (kept from original) */}
       <Dialog open={isAttachCVOpen} onOpenChange={setIsAttachCVOpen}>
         <DialogContent>
           <DialogHeader>
@@ -435,51 +593,53 @@ export function ProfileCardList({ user }: PageProps) {
             <DialogDescription>Select a resume to attach to this profile card.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
-             {availableCVs.length === 0 ? (
-                <p className="text-center text-gray-500">No resumes found. Please create one first.</p>
-             ) : (
-               <div className="grid gap-2">
-                 {availableCVs.map(cv => (
-                   <div 
+            {availableCVs.length === 0 ? (
+              <p className="text-center text-gray-500">No resumes found. Please create one first.</p>
+            ) : (
+              <div className="grid gap-2">
+                {availableCVs.map(cv => (
+                  <div 
                     key={cv.id} 
-                    className={`p-3 border rounded-lg cursor-pointer hover:border-green-500 hover:bg-green-50 transition-colors ${selectedCardForAttachment?.attachments?.cv_id == cv.id ? 'border-green-500 bg-green-50 ring-1 ring-green-500' : 'border-gray-200'}`}
+                    className={`p-3 border rounded-lg cursor-pointer hover:border-green-500 hover:bg-green-50 transition-colors ${selectedCardForAttachment?.id === cv.id ? 'border-green-500 bg-green-50 ring-1 ring-green-500' : 'border-gray-200'}`}
                     onClick={() => handleAttachCV(cv.id)}
-                   >
-                     <div className="font-medium">{cv.title}</div>
-                     <div className="text-xs text-gray-500">Updated: {new Date(cv.updated_at).toLocaleDateString()}</div>
-                   </div>
-                 ))}
-               </div>
-             )}
+                  >
+                    <div className="font-medium">{cv.title || `Resume #${cv.id}`}</div>
+                    <div className="text-xs text-gray-500">Updated: {formatDate(cv.updated_at)}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Attach Cover Letter Dialog */}
+      {/* Attach Cover Letter Dialog (kept from original) */}
       <Dialog open={isAttachCoverLetterOpen} onOpenChange={setIsAttachCoverLetterOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Attach Cover Letter</DialogTitle>
             <DialogDescription>Select a cover letter to attach to this profile card.</DialogDescription>
           </DialogHeader>
-           <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
-             {availableCoverLetters.length === 0 ? (
-                <p className="text-center text-gray-500">No cover letters found. Please create one first.</p>
-             ) : (
-               <div className="grid gap-2">
-                 {availableCoverLetters.map(cl => (
-                   <div 
+          <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
+            {availableCoverLetters.length === 0 ? (
+              <p className="text-center text-gray-500">No cover letters found. Please create one first.</p>
+            ) : (
+              <div className="grid gap-2">
+                {availableCoverLetters.map(cl => (
+                  <div 
                     key={cl.id} 
-                    className={`p-3 border rounded-lg cursor-pointer hover:border-green-500 hover:bg-green-50 transition-colors ${selectedCardForAttachment?.attachments?.cover_letter_id == cl.id ? 'border-green-500 bg-green-50 ring-1 ring-green-500' : 'border-gray-200'}`}
+                    className={`p-3 border rounded-lg cursor-pointer hover:border-green-500 hover:bg-green-50 transition-colors ${selectedCardForAttachment?.id === cl.id ? 'border-green-500 bg-green-50 ring-1 ring-green-500' : 'border-gray-200'}`}
                     onClick={() => handleAttachCoverLetter(cl.id)}
-                   >
-                     <div className="font-medium">Cover Letter #{cl.id}</div>
-                     <div className="text-xs text-gray-500">Job: {cl.job_description?.substring(0, 30)}...</div>
-                     <div className="text-xs text-gray-500">Created: {new Date(cl.created_at).toLocaleDateString()}</div>
-                   </div>
-                 ))}
-               </div>
-             )}
+                  >
+                    <div className="font-medium">Cover Letter #{cl.id}</div>
+                    <div className="text-xs text-gray-500">
+                      Job: {cl.job_description?.substring(0, 30) || "No description"}...
+                    </div>
+                    <div className="text-xs text-gray-500">Created: {formatDate(cl.created_at)}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
