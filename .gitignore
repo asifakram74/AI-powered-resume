@@ -28,5 +28,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-\n+# backend folder
+# backend folder
 node-backend/
