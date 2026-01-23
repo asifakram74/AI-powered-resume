@@ -2,7 +2,9 @@
 
 # dependencies
 /node_modules
-
+/profile-card.md
+/new-feature.md
+/postman_collection.json
 # next.js
 /.next/
 /out/
