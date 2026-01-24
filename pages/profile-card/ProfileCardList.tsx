@@ -646,3 +646,4 @@ export function ProfileCardList({ user }: PageProps) {
     </div>
   )
 }
+export default ProfileCardList;
