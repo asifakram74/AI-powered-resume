@@ -8,6 +8,7 @@ export interface CV {
   layout_id: string
   title: string
   job_description: string
+  type?: 'job_based' | 'general'
   created_at: string
   updated_at: string
   generated_content?: string
@@ -19,6 +20,7 @@ export interface CreateCVData {
   layout_id: string
   title: string
   job_description: string
+  type?: 'job_based' | 'general'
   generated_content?: string
 }
 

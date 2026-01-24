@@ -5,6 +5,7 @@ export interface CV {
   layout_id: string
   title: string
   job_description: string
+  type?: 'job_based' | 'general'
   created_at: string
   updated_at: string
 }
@@ -76,9 +77,10 @@ export interface CVTemplate {
 }
 
 export interface CreateCVData {
-  ser_id: number
+  user_id: number
   personas_id: string
   layout_id: string
   title: string
   job_description: string
+  type?: 'job_based' | 'general'
 }

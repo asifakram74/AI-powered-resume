@@ -33,6 +33,14 @@ import {
 import { CVTemplates } from "./ChooseResumeTemplte";
 import { useForm } from "react-hook-form";
 import { useTheme } from "next-themes";
+import {
+  Plus,
+  Trash2,
+  Edit,
+  CheckCircle2,
+  FileText,
+  Briefcase,
+} from "lucide-react"
 
 interface CVTemplate {
   id: string;
@@ -78,6 +86,10 @@ export function CVWizard({
       : null
   );
 
+  const [resumeType, setResumeType] = useState<'general' | 'job_based' | null>(
+    editingCV?.type || (editingCV?.job_description ? 'job_based' : editingCV ? 'general' : null)
+  );
+
   const {
     register,
     handleSubmit,
@@ -92,8 +104,23 @@ export function CVWizard({
       personas_id: personaId || editingCV?.personas_id || "",
       title: editingCV?.title || "",
       job_description: editingCV?.job_description || "",
+      type: resumeType || undefined,
     },
   });
+
+  // Update resume type when editingCV changes or when manually set
+  useEffect(() => {
+    if (editingCV && !resumeType) {
+      setResumeType(editingCV.type || (editingCV.job_description ? 'job_based' : 'general'));
+    }
+  }, [editingCV]);
+
+  // Update form value when resumeType changes
+  useEffect(() => {
+    if (resumeType) {
+      setValue("type", resumeType);
+    }
+  }, [resumeType, setValue]);
 
   const currentPersonaId = watch("personas_id");
 
@@ -192,6 +219,64 @@ export function CVWizard({
   const selectedPersona = personas.find(
     (p) => p.id.toString() === (currentPersonaId || selectedPersonaId)
   );
+
+  // Resume Type Selection Step
+  if (!resumeType && !editingCV) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center space-y-2">
+          <h2 className="text-2xl font-bold dark:text-gray-100">Choose Resume Type</h2>
+          <p className="text-gray-500 dark:text-gray-400">Select how you want to create your resume</p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+          {/* General Resume Card */}
+          <Card 
+            className="cursor-pointer hover:border-emerald-500 hover:shadow-lg transition-all group relative overflow-hidden border-2"
+            onClick={() => setResumeType('general')}
+          >
+            <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+              <CheckCircle2 className="h-6 w-6 text-emerald-500" />
+            </div>
+            <CardHeader>
+              <div className="h-12 w-12 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              </div>
+              <CardTitle>General Resume</CardTitle>
+              <DialogDescription className="mt-2">
+                Create a versatile resume suitable for various applications. Focus on your overall skills and experience without targeting a specific job description.
+              </DialogDescription>
+            </CardHeader>
+          </Card>
+
+          {/* Job-Based Resume Card */}
+          <Card 
+            className="cursor-pointer hover:border-emerald-500 hover:shadow-lg transition-all group relative overflow-hidden border-2"
+            onClick={() => setResumeType('job_based')}
+          >
+            <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+              <CheckCircle2 className="h-6 w-6 text-emerald-500" />
+            </div>
+            <CardHeader>
+              <div className="h-12 w-12 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Briefcase className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+              </div>
+              <CardTitle>Job-Based Resume</CardTitle>
+              <DialogDescription className="mt-2">
+                Tailor your resume for a specific job opening. Provide a job description, and our AI will optimize your content to match the requirements.
+              </DialogDescription>
+            </CardHeader>
+          </Card>
+        </div>
+
+        <div className="flex justify-end pt-4">
+          <Button variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 overflow-x-auto">
@@ -362,47 +447,48 @@ export function CVWizard({
                 )}
               </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="job_description">Job Description *</Label>
-              <Textarea
-                id="job_description"
-                {...register("job_description", {
-                  required: "Job description is required",
-                  validate: (value) => {
-                    // Trim spaces
-                    const input = value.trim();
+            {resumeType === 'job_based' && (
+              <div className="space-y-2">
+                <Label htmlFor="job_description">Job Description *</Label>
+                <Textarea
+                  id="job_description"
+                  {...register("job_description", {
+                    required: "Job description is required for job-based resumes",
+                    validate: (value) => {
+                      // Trim spaces
+                      const input = value.trim();
 
-                    // Minimum length check
-                    if (input.length < 30) {
-                      return "Job description must be at least 30 characters long.";
-                    }
+                      // Minimum length check
+                      if (input.length < 30) {
+                        return "Job description must be at least 30 characters long.";
+                      }
 
-                    // Word count check
-                    if (input.split(/\s+/).length < 3) {
-                      return "Please provide a more detailed job description (at least 3 words).";
-                    }
+                      // Word count check
+                      if (input.split(/\s+/).length < 3) {
+                        return "Please provide a more detailed job description (at least 3 words).";
+                      }
 
-                    // Regex: reject ONLY numbers or ONLY special chars
-                    const onlyNumbers = /^[0-9\s]+$/.test(input);
-                    const onlySymbols = /^[^a-zA-Z0-9]+$/.test(input);
-                    if (onlyNumbers || onlySymbols) {
-                      return "Invalid job description. Please provide meaningful text.";
-                    }
+                      // Regex: reject ONLY numbers or ONLY special chars
+                      const onlyNumbers = /^[0-9\s]+$/.test(input);
+                      const onlySymbols = /^[^a-zA-Z0-9]+$/.test(input);
+                      if (onlyNumbers || onlySymbols) {
+                        return "Invalid job description. Please provide meaningful text.";
+                      }
 
-                    return true; // ✅ valid input
-                  },
-                })}
-                placeholder="Enter the job description..."
-                className="min-h-[200px]"
-                rows={10}
-              />
-              {errors.job_description && (
-                <p className="text-sm text-red-600">
-                  {errors.job_description.message}
-                </p>
-              )}
-            </div>
-
+                      return true; // ✅ valid input
+                    },
+                  })}
+                  placeholder="Paste the job description here..."
+                  className="min-h-[200px]"
+                  rows={10}
+                />
+                {errors.job_description && (
+                  <p className="text-sm text-red-600">
+                    {errors.job_description.message}
+                  </p>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
         <div className="flex justify-end gap-2 pt-4 border-t">

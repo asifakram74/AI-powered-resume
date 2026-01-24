@@ -1,6 +1,16 @@
-import React, { useMemo, useRef, useState, useLayoutEffect } from "react";
-import { Mail, Phone, MapPin, Github, Linkedin } from "lucide-react";
-import type { CVData, CVSectionId, PersonalInfoFieldId } from "../../../types/cv-data";
+"use client"
+
+import React, { useMemo, useRef, useState, useLayoutEffect } from "react"
+import { Mail, Phone, MapPin, Github, Linkedin } from "lucide-react"
+import type {
+  CVBulletStyle,
+  CVData,
+  CVFontFamilyId,
+  CVSectionHeaderIconStyle,
+  CVSectionId,
+  CVStyleSettings,
+  PersonalInfoFieldId,
+} from "../../../types/cv-data"
 
 interface CreativeTemplate2Props {
   data: CVData;
@@ -8,8 +18,105 @@ interface CreativeTemplate2Props {
 }
 
 const PAGE_HEIGHT_PX = 1123;
-const PADDING_PX = 48;
-const CONTENT_HEIGHT_PX = PAGE_HEIGHT_PX - PADDING_PX * 2;
+const MM_TO_PX = 3.7795275591;
+
+const DEFAULT_STYLE_SETTINGS: CVStyleSettings = {
+  bodyFontFamily: "inter",
+  headingFontFamily: "inter",
+  bodyFontSizePx: 12,
+  headingFontSizePx: 20,
+  lineHeight: 1.35,
+  marginLeftRightMm: 16,
+  marginTopBottomMm: 16,
+  spaceBetweenEntriesPx: 12,
+  textColor: "#374151",
+  headingColor: "#111827",
+  mutedColor: "#4b5563",
+  accentColor: "#2563eb", // Professional blue
+  borderColor: "#1f2937",
+  backgroundColor: "#ffffff",
+  backgroundImageUrl: "",
+  colorMode: "basic",
+  borderMode: "single",
+  applyAccentToName: false,
+  applyAccentToJobTitle: true,
+  applyAccentToHeadings: true,
+  applyAccentToHeadingsLine: true,
+  applyAccentToHeaderIcons: true,
+  applyAccentToDotsBarsBubbles: true,
+  applyAccentToDates: false,
+  applyAccentToLinkIcons: true,
+  datesOpacity: 0.7,
+  nameBold: true,
+  locationOpacity: 0.7,
+  align: "left",
+  capitalization: "uppercase",
+  headingsLine: true,
+  headerIcons: "none",
+  linkIcons: "filled",
+  iconFrame: "none",
+  iconSize: "sm",
+  dotsBarsBubbles: "dots",
+  descriptionIndentPx: 16,
+  entryListStyle: "bullet",
+  showPageNumbers: true,
+  showEmail: false,
+  sectionHeaderIconStyle: "none",
+  bulletStyle: "disc",
+};
+
+const fontFamilyCss = (id: CVFontFamilyId) => {
+  switch (id) {
+    case "inter":
+      return "var(--font-inter)";
+    case "serif":
+      return "var(--font-rubik)";
+    case "system-sans":
+      return "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, \"Noto Sans\", sans-serif";
+    case "system-serif":
+      return "ui-serif, Georgia, Cambria, \"Times New Roman\", Times, serif";
+    case "mono":
+      return "ui-monospace, SFMono-Regular, \"SF Mono\", Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace";
+    case "roboto":
+      return "var(--font-roboto), \"Roboto\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Arial, sans-serif";
+    case "open-sans":
+      return "var(--font-open-sans), \"Open Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Arial, sans-serif";
+    case "lato":
+      return "var(--font-lato), \"Lato\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Arial, sans-serif";
+  }
+};
+
+const sectionIconNode = (style: CVSectionHeaderIconStyle, color: string) => {
+  const common = { flexShrink: 0 as const, display: "inline-block" as const };
+  switch (style) {
+    case "none":
+      return null;
+    case "dot":
+      return <span style={{ ...common, width: 8, height: 8, borderRadius: 999, background: color }} />;
+    case "bar":
+      return <span style={{ ...common, width: 18, height: 4, borderRadius: 999, background: color }} />;
+    case "square":
+      return <span style={{ ...common, width: 8, height: 8, background: color }} />;
+    case "circle-outline":
+      return <span style={{ ...common, width: 9, height: 9, borderRadius: 999, border: `2px solid ${color}` }} />;
+  }
+};
+
+const bulletNode = (style: CVBulletStyle, color: string) => {
+  const common = { flexShrink: 0 as const, display: "inline-flex" as const, alignItems: "center", justifyContent: "center" };
+  switch (style) {
+    case "none":
+      return null;
+    case "hyphen":
+      return <span style={{ ...common, width: 10, color, fontWeight: 700, lineHeight: 1 }}>-</span>;
+    case "disc":
+      return <span style={{ ...common, width: 7, height: 7, borderRadius: 999, background: color, marginTop: 6 }} />;
+    case "circle":
+      return <span style={{ ...common, width: 8, height: 8, borderRadius: 999, border: `2px solid ${color}`, marginTop: 6 }} />;
+    case "square":
+      return <span style={{ ...common, width: 7, height: 7, background: color, marginTop: 6 }} />;
+  }
+};
 
 export function CreativeTemplate2({
   data,
@@ -17,281 +124,422 @@ export function CreativeTemplate2({
 }: CreativeTemplate2Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [pages, setPages] = useState<React.ReactNode[][]>([]);
+  const styleSettings = useMemo(() => ({ ...DEFAULT_STYLE_SETTINGS, ...(data.styleSettings || {}) }), [data.styleSettings]);
+  const bodyFont = useMemo(() => fontFamilyCss(styleSettings.bodyFontFamily), [styleSettings.bodyFontFamily]);
+  const headingFont = useMemo(() => fontFamilyCss(styleSettings.headingFontFamily), [styleSettings.headingFontFamily]);
+  const paddingXpx = useMemo(() => styleSettings.marginLeftRightMm * MM_TO_PX, [styleSettings.marginLeftRightMm]);
+  const paddingYpx = useMemo(() => styleSettings.marginTopBottomMm * MM_TO_PX, [styleSettings.marginTopBottomMm]);
+  const contentHeightPx = useMemo(() => PAGE_HEIGHT_PX - paddingYpx * 2, [paddingYpx]);
+  const effectiveHeadingColor = useMemo(
+    () => (styleSettings.applyAccentToHeadings ? styleSettings.accentColor : styleSettings.headingColor),
+    [styleSettings.accentColor, styleSettings.applyAccentToHeadings, styleSettings.headingColor],
+  );
+  const effectiveBulletStyle: CVBulletStyle = useMemo(
+    () => (styleSettings.entryListStyle === "hyphen" ? "hyphen" : styleSettings.bulletStyle),
+    [styleSettings.bulletStyle, styleSettings.entryListStyle],
+  );
+  const rootStyle = useMemo<React.CSSProperties>(() => ({
+    fontFamily: bodyFont,
+    fontSize: `${styleSettings.bodyFontSizePx}px`,
+    lineHeight: styleSettings.lineHeight,
+    color: styleSettings.textColor,
+  }), [bodyFont, styleSettings.bodyFontSizePx, styleSettings.lineHeight, styleSettings.textColor]);
+  const headingBaseStyle = useMemo<React.CSSProperties>(() => ({
+    fontFamily: headingFont,
+    color: effectiveHeadingColor,
+  }), [headingFont, effectiveHeadingColor]);
+  const mutedStyle = useMemo<React.CSSProperties>(() => ({ color: styleSettings.mutedColor }), [styleSettings.mutedColor]);
+  const dateStyle = useMemo<React.CSSProperties>(() => ({ ...mutedStyle, opacity: styleSettings.datesOpacity }), [mutedStyle, styleSettings.datesOpacity]);
+  const locationStyle = useMemo<React.CSSProperties>(() => ({ ...mutedStyle, opacity: styleSettings.locationOpacity }), [mutedStyle, styleSettings.locationOpacity]);
+  const dividerStyle = useMemo<React.CSSProperties>(() => ({ borderColor: styleSettings.applyAccentToHeadingsLine ? styleSettings.accentColor : styleSettings.borderColor }), [styleSettings.accentColor, styleSettings.applyAccentToHeadingsLine, styleSettings.borderColor]);
+  const pageStyle = useMemo<React.CSSProperties>(() => ({
+    ...rootStyle,
+    backgroundColor: styleSettings.backgroundColor,
+    padding: `${paddingYpx}px ${paddingXpx}px`,
+  }), [paddingXpx, paddingYpx, rootStyle, styleSettings.backgroundColor]);
 
   const formatDate = (date: string) => {
     if (!date) return "";
     const s = date.trim();
     if (!s) return "";
-
     const normalized = s.replace(/[\u2012-\u2015\u2212]/g, "-");
-
     if (/^\d{4}$/.test(normalized)) return normalized;
-
     const monthNames = [
       "January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December",
     ];
-
     const isoMatch = normalized.match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?$/);
     if (isoMatch) {
       const year = isoMatch[1];
       const month = Math.max(1, Math.min(12, Number.parseInt(isoMatch[2], 10)));
       return `${monthNames[month - 1]} ${year}`;
     }
-
     const slashMatch = normalized.match(/^(\d{1,2})\/(\d{4})$/);
     if (slashMatch) {
       const month = Math.max(1, Math.min(12, Number.parseInt(slashMatch[1], 10)));
       const year = slashMatch[2];
       return `${monthNames[month - 1]} ${year}`;
     }
-
     if (/^([A-Za-z]{3,9})\s+\d{4}$/.test(normalized)) return normalized;
-
     return normalized;
   };
 
-  // Simplified color scheme - using only blue for highlights
-  const colors = {
-    primary: "#2563eb", // Professional blue
-    background: "#ffffff",
-    text: {
-      primary: "#1f2937",
-      secondary: "#4b5563",
-      light: "#6b7280"
-    }
-  };
+  const locationText = data.personalInfo.city && data.personalInfo.country
+    ? `${data.personalInfo.city}, ${data.personalInfo.country}`
+    : (data.personalInfo.city || data.personalInfo.country || "");
+  const addressText = (data.personalInfo.address || "").trim();
+  const locLower = locationText.toLowerCase();
+  const addrLower = addressText.toLowerCase();
+  const showAddress = Boolean(addressText) && (!locLower || (addrLower !== locLower && !addrLower.includes(locLower)));
 
-  const PersonalInfoSection = () => {
-    const { personalInfo, personalInfoFieldOrder } = data;
-    const defaultOrder: PersonalInfoFieldId[] = [
-      "fullName",
-      "jobTitle",
-      "email",
-      "phone",
-      "location",
-      "address",
-      "linkedin",
-      "github",
-      "summary",
-    ];
-    const order =
-      personalInfoFieldOrder && personalInfoFieldOrder.length > 0
-        ? personalInfoFieldOrder
-        : defaultOrder;
+  const Header = () => (
+    <div data-section-id="personalInfo" className="mb-8">
+      {(() => {
+        const defaultOrder: PersonalInfoFieldId[] = [
+          "fullName",
+          "jobTitle",
+          "email",
+          "phone",
+          "location",
+          "address",
+          "linkedin",
+          "github",
+          "summary",
+        ];
+        const order = (data.personalInfoFieldOrder && data.personalInfoFieldOrder.length > 0) ? data.personalInfoFieldOrder : defaultOrder;
+        const allFields: PersonalInfoFieldId[] = ["fullName", "jobTitle", "email", "phone", "location", "address", "linkedin", "github", "summary"];
+        const finalOrder = [...order.filter((f) => allFields.includes(f)), ...allFields.filter((f) => !order.includes(f))];
 
-    const isContactField = (f: PersonalInfoFieldId) =>
-      ["email", "phone", "location", "address", "linkedin", "github"].includes(f);
-    const contactFields = order.filter(isContactField);
+        const contactValue = (field: PersonalInfoFieldId) => {
+          switch (field) {
+            case "email":
+              return data.personalInfo.email?.trim() ? data.personalInfo.email : "";
+            case "phone":
+              return data.personalInfo.phone?.trim() ? data.personalInfo.phone : "";
+            case "location":
+              return locationText || "";
+            case "address":
+              return data.personalInfo.address?.trim() ? data.personalInfo.address : "";
+            case "linkedin":
+              return (data.personalInfo.linkedin || "").trim();
+            case "github":
+              return (data.personalInfo.github || "").trim();
+            default:
+              return "";
+          }
+        };
 
-    return (
-      <>
-        <div className="p-8 text-white relative overflow-hidden" style={{ backgroundColor: colors.primary }}>
-          <div className="flex items-center gap-6">
-            {/* Profile Image */}
-            <div className="flex-shrink-0">
-              <div className="w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-white">
-                {personalInfo.profilePicture ? (
-                  <img
-                    src={personalInfo.profilePicture}
-                    alt={personalInfo.fullName}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                    <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                    </svg>
+        const contactFields = finalOrder.filter(f => 
+          ["email", "phone", "location", "address", "linkedin", "github"].includes(f)
+        );
+
+        const contactRows: React.ReactNode[] = [];
+        contactFields.forEach((field) => {
+          const v = contactValue(field);
+          if (!v) return;
+
+          if (field === "location" && showAddress && addressText) {
+            contactRows.push(
+              <div key={`${field}-combined`} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <MapPin style={{ width: 12, height: 12, color: '#ffffff' }} />
+                <span style={{ fontSize: `${Math.max(11, styleSettings.bodyFontSizePx - 1)}px`, color: '#ffffff', opacity: 0.9 }}>
+                  {`${locationText} ${addressText}`.trim()}
+                </span>
+              </div>
+            );
+            return;
+          }
+
+          if (field === "address" && (data.personalInfo.city || data.personalInfo.country)) {
+            if (!showAddress) return;
+          }
+
+          let icon = null;
+          switch (field) {
+            case "email":
+              icon = <Mail style={{ width: 12, height: 12, color: '#ffffff' }} />;
+              break;
+            case "phone":
+              icon = <Phone style={{ width: 12, height: 12, color: '#ffffff' }} />;
+              break;
+            case "location":
+            case "address":
+              icon = <MapPin style={{ width: 12, height: 12, color: '#ffffff' }} />;
+              break;
+            case "linkedin":
+              icon = <Linkedin style={{ width: 12, height: 12, color: '#ffffff' }} />;
+              break;
+            case "github":
+              icon = <Github style={{ width: 12, height: 12, color: '#ffffff' }} />;
+              break;
+          }
+
+          contactRows.push(
+            <div key={field} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {icon}
+              <span style={{ fontSize: `${Math.max(11, styleSettings.bodyFontSizePx - 1)}px`, color: '#ffffff', opacity: 0.9 }}>
+                {v}
+              </span>
+            </div>
+          );
+        });
+
+        return (
+          <>
+            <div style={{ 
+              backgroundColor: styleSettings.accentColor,
+              padding: '32px',
+              marginLeft: -paddingXpx,
+              marginRight: -paddingXpx,
+              marginTop: -paddingYpx,
+              color: '#ffffff'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+                {/* Profile Image */}
+                <div style={{ flexShrink: 0 }}>
+                  <div style={{ 
+                    width: '96px', 
+                    height: '96px', 
+                    borderRadius: '999px', 
+                    border: '4px solid #ffffff',
+                    overflow: 'hidden',
+                    backgroundColor: '#ffffff'
+                  }}>
+                    {data.personalInfo.profilePicture ? (
+                      <img
+                        src={data.personalInfo.profilePicture}
+                        alt={data.personalInfo.fullName}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <div style={{ 
+                        width: '100%', 
+                        height: '100%', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        backgroundColor: '#f3f4f6'
+                      }}>
+                        <svg style={{ width: 32, height: 32, color: '#9ca3af' }} fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                        </svg>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
+
+                {/* Header Content */}
+                <div style={{ flex: 1 }}>
+                  <h1 style={{
+                    ...headingBaseStyle,
+                    fontWeight: styleSettings.nameBold ? 900 : 700,
+                    fontSize: `${Math.round(styleSettings.headingFontSizePx * 1.5)}px`,
+                    color: styleSettings.applyAccentToName ? '#ffffff' : '#ffffff',
+                    margin: 0,
+                    marginBottom: 4,
+                  }}>
+                    {data.personalInfo.fullName}
+                  </h1>
+                  
+                  <h2 style={{
+                    ...headingBaseStyle,
+                    fontWeight: 300,
+                    fontSize: `${Math.round(styleSettings.headingFontSizePx * 0.9)}px`,
+                    color: styleSettings.applyAccentToJobTitle ? '#ffffff' : 'rgba(255, 255, 255, 0.9)',
+                    margin: 0,
+                    marginBottom: 16,
+                  }}>
+                    {data.personalInfo.jobTitle}
+                  </h2>
+
+                  {/* Contact Info */}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+                    {contactRows}
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Header Content */}
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold mb-1">{personalInfo.fullName}</h1>
-              <h2 className="text-lg font-light opacity-90 mb-4">{personalInfo.jobTitle}</h2>
-
-              {/* Contact Info */}
-              <div className="flex flex-wrap gap-4 text-sm opacity-90">
-                {contactFields.map((field) => {
-                  switch (field) {
-                    case "email":
-                      return personalInfo.email ? (
-                        <span key="email" className="flex items-center gap-1">
-                          <Mail className="w-3 h-3" />
-                          {personalInfo.email}
-                        </span>
-                      ) : null;
-                    case "phone":
-                      return personalInfo.phone ? (
-                        <span key="phone" className="flex items-center gap-1">
-                          <Phone className="w-3 h-3" />
-                          {personalInfo.phone}
-                        </span>
-                      ) : null;
-                    case "location":
-                      if (!personalInfo.city && !personalInfo.country) return null;
-                      const hasAddress = contactFields.includes("address") && personalInfo.address;
-                      if (hasAddress) return null;
-                      return (
-                        <span key="location" className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
-                          {personalInfo.city}
-                          {personalInfo.city && personalInfo.country ? ", " : ""}
-                          {personalInfo.country}
-                        </span>
-                      );
-                    case "address":
-                      return personalInfo.address ? (
-                        <span key="address" className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
-                          {personalInfo.address}
-                        </span>
-                      ) : null;
-                    case "linkedin":
-                      return personalInfo.linkedin ? (
-                        <span key="linkedin" className="flex items-center gap-1">
-                          <Linkedin className="w-3 h-3" />
-                          {personalInfo.linkedin}
-                        </span>
-                      ) : null;
-                    case "github":
-                      return personalInfo.github ? (
-                        <span key="github" className="flex items-center gap-1">
-                          <Github className="w-3 h-3" />
-                          {personalInfo.github}
-                        </span>
-                      ) : null;
-                    default:
-                      return null;
-                  }
-                })}
+            {/* Summary */}
+            {data.personalInfo.summary && (
+              <div style={{ marginTop: 24 }}>
+                <h3 style={{ 
+                  ...headingBaseStyle, 
+                  fontWeight: 600, 
+                  fontSize: `${Math.round(styleSettings.headingFontSizePx * 0.8)}px`,
+                  marginBottom: 12
+                }}>
+                  PROFESSIONAL SUMMARY
+                </h3>
+                <p style={{ 
+                  color: styleSettings.textColor, 
+                  fontSize: `${styleSettings.bodyFontSizePx}px`,
+                  lineHeight: 1.6
+                }}>
+                  {data.personalInfo.summary}
+                </p>
               </div>
-            </div>
-          </div>
-        </div>
-        {personalInfo.summary && (
-          <div className="mt-6 px-8">
-            <h3 className="text-base font-semibold text-gray-900 mb-3">Professional Summary</h3>
-            <p className="text-gray-700 text-sm leading-relaxed">{personalInfo.summary}</p>
-          </div>
-        )}
-      </>
-    );
-  };
-
-  const Skills = () => (
-    <div className="mb-6 px-8">
-      <h3 className="text-base font-semibold text-gray-900 mb-3">Skills</h3>
-      <div className="space-y-3">
-        {data.skills.technical.length > 0 && (
-          <div>
-            <h4 className="font-medium text-gray-900 text-sm mb-2">Technical</h4>
-            <p className="text-gray-700 text-sm">{data.skills.technical.join(" • ")}</p>
-          </div>
-        )}
-        {data.skills.soft.length > 0 && (
-          <div>
-            <h4 className="font-medium text-gray-900 text-sm mb-2">Professional</h4>
-            <p className="text-gray-700 text-sm">{data.skills.soft.join(" • ")}</p>
-          </div>
-        )}
-      </div>
+            )}
+          </>
+        );
+      })()}
     </div>
-  )
+  );
 
-  const ExperienceItem = ({ exp }: { exp: CVData["experience"][number] }) => (
-    <div className="mb-4 px-8">
-      <div className="flex justify-between items-start mb-2">
-        <div>
-          <h4 className="font-semibold text-gray-900 text-sm">{exp.jobTitle}</h4>
-          <p className="text-gray-700 font-medium text-sm" style={{ color: colors.primary }}>
-            {exp.companyName}
-            {exp.location && ` • ${exp.location}`}
-          </p>
-        </div>
-        <span className="text-xs text-gray-500 whitespace-nowrap">
+  const SectionTitle = ({ title, sectionId }: { title: string; sectionId?: string }) => (
+    <div
+      data-section-id={sectionId}
+      className="flex items-center gap-3 mb-4 pb-2 border-b"
+      style={dividerStyle}
+    >
+      {sectionIconNode(styleSettings.sectionHeaderIconStyle, styleSettings.accentColor)}
+      <h2
+        style={{
+          ...headingBaseStyle,
+          fontWeight: 600,
+          fontSize: `${Math.round(styleSettings.headingFontSizePx * 0.8)}px`,
+          margin: 0,
+          textTransform: styleSettings.capitalization,
+        }}
+      >
+        {title}
+      </h2>
+    </div>
+  );
+
+  const ExperienceHeader = ({ exp }: { exp: CVData["experience"][number] }) => (
+    <div className="flex justify-between items-start mb-2">
+      <div>
+        <h3 style={{ ...headingBaseStyle, fontWeight: 600, fontSize: `${Math.round(styleSettings.bodyFontSizePx * 1.1)}px` }}>
+          {exp.jobTitle}
+        </h3>
+        <p style={{ 
+          color: styleSettings.accentColor, 
+          fontWeight: 600, 
+          fontSize: `${styleSettings.bodyFontSizePx}px` 
+        }}>
+          {exp.companyName}
+          {exp.location && ` • ${exp.location}`}
+        </p>
+      </div>
+      {(formatDate(exp.startDate) || exp.current || formatDate(exp.endDate)) && (
+        <span style={{
+          ...dateStyle,
+          fontSize: `${Math.max(10, styleSettings.bodyFontSizePx - 2)}px`,
+          whiteSpace: 'nowrap'
+        }}>
           {formatDate(exp.startDate)}
-          {formatDate(exp.startDate) && (exp.current || formatDate(exp.endDate)) ? " - " : ""}
+          {(formatDate(exp.startDate) && (exp.current || formatDate(exp.endDate))) ? " - " : ""}
           {exp.current ? "Present" : formatDate(exp.endDate)}
         </span>
-      </div>
-      <ul className="text-gray-700 text-sm space-y-1 ml-4">
-        {exp.responsibilities.map((resp, index) => (
-          <li key={index} className="list-disc">
-            {resp}
-          </li>
-        ))}
-      </ul>
+      )}
     </div>
-  )
+  );
 
-  const EducationItem = ({ edu }: { edu: CVData["education"][number] }) => (
-    <div className="mb-4 px-8">
-      <div className="flex justify-between items-start mb-1">
-        <div>
-          <h4 className="font-semibold text-gray-900 text-sm">{edu.degree}</h4>
-          <p className="text-gray-700 font-medium text-sm" style={{ color: colors.primary }}>
-            {edu.institutionName}
-          </p>
-          {edu.location && (
-            <p className="text-gray-600 text-xs">{edu.location}</p>
-          )}
-        </div>
-        {edu.graduationDate && (
-          <span className="text-xs text-gray-500">
-            {formatDate(edu.graduationDate)}
-          </span>
-        )}
-      </div>
-      <div className="flex flex-wrap gap-2 text-xs text-gray-600">
-        {edu.gpa && (
-          <span>GPA: {edu.gpa}</span>
-        )}
-        {edu.honors && (
-          <span>{edu.honors}</span>
-        )}
+  const ExperienceDescriptionLine = ({ text }: { text: string }) => (
+    <div className="flex gap-2" style={{ marginLeft: styleSettings.descriptionIndentPx }}>
+      {bulletNode(effectiveBulletStyle, styleSettings.accentColor)}
+      <div style={{ color: styleSettings.textColor, flex: 1, fontSize: `${styleSettings.bodyFontSizePx}px` }}>
+        {text}
       </div>
     </div>
-  )
+  );
+
+  const EducationHeader = ({ edu }: { edu: CVData["education"][number] }) => (
+    <div className="flex justify-between items-start">
+      <div>
+        <h3 style={{ ...headingBaseStyle, fontWeight: 600, fontSize: `${styleSettings.bodyFontSizePx}px` }}>
+          {edu.degree}
+        </h3>
+        <p style={{ 
+          color: styleSettings.accentColor, 
+          fontWeight: 600,
+          fontSize: `${styleSettings.bodyFontSizePx}px`
+        }}>
+          {edu.institutionName}
+        </p>
+        {edu.location && <p style={locationStyle}>{edu.location}</p>}
+      </div>
+      {edu.graduationDate && <span style={dateStyle}>{formatDate(edu.graduationDate)}</span>}
+    </div>
+  );
 
   const ProjectItem = ({ project }: { project: CVData["projects"][number] }) => (
-    <div className="mb-4 px-8">
-      <h4 className="font-semibold text-gray-900 text-sm mb-1">{project.name}</h4>
-      <p className="text-gray-700 text-sm mb-2" style={{ color: colors.primary }}>{project.role}</p>
-      <p className="text-gray-700 text-sm mb-2">{project.description}</p>
-      <p className="text-gray-600 text-xs">{project.technologies.join(" • ")}</p>
+    <div style={{ marginBottom: 16 }}>
+      <h3 style={{ ...headingBaseStyle, fontWeight: 600, fontSize: `${styleSettings.bodyFontSizePx}px`, marginBottom: 4 }}>
+        {project.name}
+      </h3>
+      <p style={{ 
+        color: styleSettings.accentColor, 
+        fontSize: `${styleSettings.bodyFontSizePx}px`,
+        marginBottom: 8,
+        fontWeight: 600
+      }}>
+        {project.role}
+      </p>
+      <p style={{ 
+        color: styleSettings.textColor, 
+        fontSize: `${styleSettings.bodyFontSizePx}px`,
+        marginBottom: 8,
+        lineHeight: 1.5
+      }}>
+        {project.description}
+      </p>
+      <p style={{ 
+        ...mutedStyle, 
+        fontSize: `${Math.max(10, styleSettings.bodyFontSizePx - 2)}px`
+      }}>
+        {project.technologies.join(" • ")}
+      </p>
     </div>
-  )
+  );
 
   const LanguageItem = ({ lang }: { lang: CVData["languages"][number] }) => (
-    <div className="mb-2">
-      <div className="flex justify-between items-center">
-        <span className="font-medium text-gray-900 text-sm">{lang.name}</span>
-        <span className="text-gray-600 text-xs">{lang.proficiency}</span>
-      </div>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+      <span style={{ 
+        color: styleSettings.textColor, 
+        fontWeight: 600,
+        fontSize: `${styleSettings.bodyFontSizePx}px`
+      }}>
+        {lang.name}
+      </span>
+      <span style={{ 
+        color: styleSettings.textColor,
+        fontSize: `${Math.max(10, styleSettings.bodyFontSizePx - 2)}px`
+      }}>
+        {lang.proficiency}
+      </span>
     </div>
-  )
+  );
 
   const CertificationItem = ({ cert }: { cert: CVData["certifications"][number] }) => (
-    <div className="mb-3 px-8">
-      <div className="font-semibold text-gray-900 text-sm">{cert.title}</div>
-      <div className="text-gray-600 text-sm">{cert.issuingOrganization}</div>
-      <div className="text-gray-500 text-xs" style={{ color: colors.primary }}>
+    <div style={{ marginBottom: 12 }}>
+      <h3 style={{ ...headingBaseStyle, fontWeight: 600, fontSize: `${styleSettings.bodyFontSizePx}px` }}>
+        {cert.title}
+      </h3>
+      <p style={{ 
+        color: styleSettings.textColor, 
+        fontSize: `${styleSettings.bodyFontSizePx}px`,
+        marginBottom: 4
+      }}>
+        {cert.issuingOrganization}
+      </p>
+      <p style={{ 
+        color: styleSettings.accentColor,
+        fontSize: `${Math.max(10, styleSettings.bodyFontSizePx - 2)}px`
+      }}>
         {formatDate(cert.dateObtained)}
-      </div>
+      </p>
     </div>
-  )
-
-  const SectionTitle = ({ title }: { title: string }) => (
-    <h3 className="text-base font-semibold text-gray-900 mb-3 px-8 border-b pb-2" style={{ borderColor: colors.primary }}>
-      {title}
-    </h3>
-  )
+  );
 
   const blocks = useMemo(() => {
-    const items: React.ReactNode[] = [];
+    interface SectionBlock {
+      type: "section";
+      id: string;
+      children: React.ReactNode[];
+    }
+    const items: (React.ReactNode | SectionBlock)[] = [];
     const allSections = [
       "personalInfo",
       "skills",
@@ -312,85 +560,198 @@ export function CreativeTemplate2({
     const finalOrder = ordered.filter((s) => s === "personalInfo" || !hidden.includes(s));
 
     const addPersonalInfo = () => {
-       items.push(<PersonalInfoSection key="personalInfo" />);
+      items.push(<Header key="header" />);
     };
 
     const addSkills = () => {
       if (data.skills.technical.length === 0 && data.skills.soft.length === 0) return;
-      items.push(<Skills key="skills" />);
+      const children: React.ReactNode[] = [];
+      children.push(<SectionTitle key="skills-title" title="SKILLS" />);
+      
+      children.push(
+        <div key="skills-content" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {data.skills.technical.length > 0 && (
+            <div>
+              <h3 style={{ 
+                ...headingBaseStyle, 
+                fontWeight: 600, 
+                fontSize: `${styleSettings.bodyFontSizePx}px`,
+                marginBottom: 8
+              }}>
+                Technical
+              </h3>
+              <p style={{ 
+                color: styleSettings.textColor, 
+                fontSize: `${styleSettings.bodyFontSizePx}px`,
+                lineHeight: 1.5
+              }}>
+                {data.skills.technical.join(" • ")}
+              </p>
+            </div>
+          )}
+          
+          {data.skills.soft.length > 0 && (
+            <div>
+              <h3 style={{ 
+                ...headingBaseStyle, 
+                fontWeight: 600, 
+                fontSize: `${styleSettings.bodyFontSizePx}px`,
+                marginBottom: 8
+              }}>
+                Professional
+              </h3>
+              <p style={{ 
+                color: styleSettings.textColor, 
+                fontSize: `${styleSettings.bodyFontSizePx}px`,
+                lineHeight: 1.5
+              }}>
+                {data.skills.soft.join(" • ")}
+              </p>
+            </div>
+          )}
+        </div>
+      );
+      
+      items.push({ type: "section", id: "skills", children });
     };
 
     const addExperience = () => {
       if (data.experience.length === 0) return;
-      items.push(<SectionTitle key="exp-title" title="Professional Experience" />);
-      data.experience.forEach((exp) => {
-        items.push(<ExperienceItem key={`exp-${exp.id}`} exp={exp} />);
+      const children: React.ReactNode[] = [];
+      children.push(<SectionTitle key="exp-title" title="PROFESSIONAL EXPERIENCE" />);
+      data.experience.forEach((exp, index) => {
+        const isLast = index === data.experience.length - 1;
+        children.push(
+          <div key={`exp-container-${exp.id}`}>
+            <ExperienceHeader exp={exp} />
+            {exp.responsibilities.map((resp, i) => {
+              const t = resp.trim();
+              if (t) return <ExperienceDescriptionLine key={`exp-l-${exp.id}-${i}`} text={t} />;
+              return null;
+            })}
+          </div>
+        );
+        if (!isLast) children.push(<div key={`exp-sp-${exp.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
       });
+      items.push({ type: "section", id: "experience", children });
     };
 
     const addEducation = () => {
       if (data.education.length === 0) return;
-      items.push(<SectionTitle key="edu-title" title="Education" />);
-      data.education.forEach((edu) => {
-        items.push(<EducationItem key={`edu-${edu.id}`} edu={edu} />);
+      const children: React.ReactNode[] = [];
+      children.push(<SectionTitle key="edu-title" title="EDUCATION" />);
+      data.education.forEach((edu, index) => {
+        const isLast = index === data.education.length - 1;
+        children.push(<EducationHeader key={`edu-h-${edu.id}`} edu={edu} />);
+        
+        const details: string[] = [];
+        if (edu.gpa) details.push(`GPA: ${edu.gpa}`);
+        if (edu.honors) details.push(edu.honors);
+        if (edu.additionalInfo) details.push(...edu.additionalInfo.split("\n").map(s => s.trim()).filter(Boolean));
+        
+        details.forEach((line, i) => children.push(
+          <div key={`edu-l-${edu.id}-${i}`} style={{ 
+            color: styleSettings.textColor, 
+            fontSize: `${Math.max(10, styleSettings.bodyFontSizePx - 1)}px`,
+            marginTop: 4
+          }}>
+            {line}
+          </div>
+        ));
+        
+        if (!isLast) children.push(<div key={`edu-sp-${edu.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
       });
-    };
-
-    const addProjects = () => {
-      if (data.projects.length === 0) return;
-      items.push(<SectionTitle key="proj-title" title="Projects" />);
-      data.projects.forEach((project) => {
-        items.push(<ProjectItem key={`proj-${project.id}`} project={project} />);
-      });
+      items.push({ type: "section", id: "education", children });
     };
 
     const addLanguages = () => {
       if (data.languages.length === 0) return;
-      items.push(<SectionTitle key="lang-title" title="Languages" />);
+      const children: React.ReactNode[] = [];
+      children.push(<SectionTitle key="lang-title" title="LANGUAGES" />);
       data.languages.forEach((lang) => {
-        items.push(<LanguageItem key={`lang-${lang.id}`} lang={lang} />);
+        children.push(<LanguageItem key={`lang-${lang.id}`} lang={lang} />);
       });
+      items.push({ type: "section", id: "languages", children });
+    };
+
+    const addProjects = () => {
+      if (data.projects.length === 0) return;
+      const children: React.ReactNode[] = [];
+      children.push(<SectionTitle key="proj-title" title="PROJECTS" />);
+      data.projects.forEach((project, index) => {
+        const isLast = index === data.projects.length - 1;
+        children.push(<ProjectItem key={`proj-${project.id}`} project={project} />);
+        if (!isLast) children.push(<div key={`proj-sp-${project.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
+      });
+      items.push({ type: "section", id: "projects", children });
     };
 
     const addCertifications = () => {
       if (data.certifications.length === 0) return;
-      items.push(<SectionTitle key="cert-title" title="Certifications" />);
-      data.certifications.forEach((cert) => {
-        items.push(<CertificationItem key={`cert-${cert.id}`} cert={cert} />);
+      const children: React.ReactNode[] = [];
+      children.push(<SectionTitle key="cert-title" title="CERTIFICATIONS" />);
+      data.certifications.forEach((cert, index) => {
+        const isLast = index === data.certifications.length - 1;
+        children.push(<CertificationItem key={`cert-${cert.id}`} cert={cert} />);
+        if (!isLast) children.push(<div key={`cert-sp-${cert.id}`} style={{ height: Math.max(4, Math.round(styleSettings.spaceBetweenEntriesPx / 2)) }} />);
       });
+      items.push({ type: "section", id: "certifications", children });
     };
 
     const addInterests = () => {
       if (data.additional.interests.length === 0) return;
-      items.push(<SectionTitle key="int-title" title="Interests" />);
-      items.push(
-        <div key="int-body" className="px-8">
-          <p className="text-gray-700 text-sm">{data.additional.interests.join(" • ")}</p>
+      const children: React.ReactNode[] = [];
+      children.push(<SectionTitle key="int-title" title="INTERESTS" />);
+      children.push(
+        <div key="int-body">
+          <p style={{ 
+            color: styleSettings.textColor, 
+            fontSize: `${styleSettings.bodyFontSizePx}px`
+          }}>
+            {data.additional.interests.join(" • ")}
+          </p>
         </div>
       );
+      items.push({ type: "section", id: "interests", children });
     };
 
     finalOrder.forEach((section) => {
       switch (section) {
-        case "personalInfo": addPersonalInfo(); break;
-        case "skills": addSkills(); break;
-        case "experience": addExperience(); break;
-        case "projects": addProjects(); break;
-        case "education": addEducation(); break;
-        case "certifications": addCertifications(); break;
-        case "languages": addLanguages(); break;
-        case "interests": addInterests(); break;
+        case "personalInfo":
+          addPersonalInfo();
+          break;
+        case "skills":
+          addSkills();
+          break;
+        case "experience":
+          addExperience();
+          break;
+        case "projects":
+          addProjects();
+          break;
+        case "education":
+          addEducation();
+          break;
+        case "certifications":
+          addCertifications();
+          break;
+        case "languages":
+          addLanguages();
+          break;
+        case "interests":
+          addInterests();
+          break;
       }
     });
-
     return items;
-  }, [data]);
+  }, [data, headingBaseStyle, mutedStyle, dateStyle, locationStyle, styleSettings, effectiveBulletStyle, paddingXpx, paddingYpx]);
 
   useLayoutEffect(() => {
     if (!containerRef.current) return;
     const newPages: React.ReactNode[][] = [];
     let currentPage: React.ReactNode[] = [];
     let currentHeight = 0;
+
     const pushPage = () => {
       if (currentPage.length > 0) {
         newPages.push(currentPage);
@@ -398,35 +759,102 @@ export function CreativeTemplate2({
         currentHeight = 0;
       }
     };
-    const elements = Array.from(containerRef.current.children) as HTMLElement[];
-    elements.forEach((el, index) => {
-      const style = window.getComputedStyle(el);
-      const marginTop = parseFloat(style.marginTop) || 0;
-      const marginBottom = parseFloat(style.marginBottom) || 0;
-      const elementHeight = el.offsetHeight + marginTop + marginBottom;
-      if (currentHeight + elementHeight > CONTENT_HEIGHT_PX) {
+
+    const processItem = (elementHeight: number, node: React.ReactNode) => {
+      if (currentHeight + elementHeight > contentHeightPx) {
         pushPage();
       }
-      currentPage.push(blocks[index]);
+      currentPage.push(node);
       currentHeight += elementHeight;
+    };
+
+    const elements = Array.from(containerRef.current.children) as HTMLElement[];
+    
+    const isSectionBlock = (block: any): block is { type: "section"; id: string; children: React.ReactNode[] } => {
+      return block && typeof block === 'object' && block.type === 'section' && 'id' in block && Array.isArray(block.children);
+    };
+
+    elements.forEach((el, index) => {
+      const block = blocks[index];
+      
+      if (isSectionBlock(block)) {
+        const sectionId = block.id;
+        const children = Array.from(el.children) as HTMLElement[];
+        let sectionNodesBuffer: React.ReactNode[] = [];
+        
+        children.forEach((childEl, childIndex) => {
+          const style = window.getComputedStyle(childEl);
+          const marginTop = parseFloat(style.marginTop) || 0;
+          const marginBottom = parseFloat(style.marginBottom) || 0;
+          const childHeight = childEl.offsetHeight + marginTop + marginBottom;
+          
+          if (currentHeight + childHeight > contentHeightPx) {
+            if (sectionNodesBuffer.length > 0) {
+              currentPage.push(
+                <div key={`${sectionId}-part-${newPages.length}`} data-section-id={sectionId}>
+                  {sectionNodesBuffer}
+                </div>
+              );
+              sectionNodesBuffer = [];
+            }
+            pushPage();
+          }
+          sectionNodesBuffer.push(block.children[childIndex]);
+          currentHeight += childHeight;
+        });
+        
+        if (sectionNodesBuffer.length > 0) {
+          currentPage.push(
+            <div key={`${sectionId}-part-${newPages.length}`} data-section-id={sectionId}>
+              {sectionNodesBuffer}
+            </div>
+          );
+        }
+      } else {
+        const style = window.getComputedStyle(el);
+        const marginTop = parseFloat(style.marginTop) || 0;
+        const marginBottom = parseFloat(style.marginBottom) || 0;
+        const elementHeight = el.offsetHeight + marginTop + marginBottom;
+        processItem(elementHeight, block as React.ReactNode);
+      }
     });
+
     if (currentPage.length > 0) newPages.push(currentPage);
     setPages(newPages);
-  }, [blocks]);
+  }, [blocks, contentHeightPx]);
 
   return (
     <div className="flex flex-col items-center gap-8 pb-20 print:block print:gap-0 print:pb-0">
-      <div ref={containerRef} className="cv-measure fixed top-0 left-0 w-[210mm] p-12 opacity-0 pointer-events-none z-[-999]" style={{ visibility: "hidden" }}>
-        {blocks}
+      <div
+        ref={containerRef}
+        className="cv-measure fixed top-0 left-0 w-[210mm] opacity-0 pointer-events-none z-[-999]"
+        style={{ ...pageStyle, visibility: "hidden" }}
+      >
+        {blocks.map((block, i) => {
+           if (block && typeof block === 'object' && 'type' in block && block.type === 'section' && 'children' in block) {
+             return (
+               <div key={i}>
+                 {(block as { children: React.ReactNode[] }).children}
+               </div>
+             );
+           }
+           return <div key={i}>{block as React.ReactNode}</div>;
+        })}
       </div>
       {pages.length === 0 ? (
-        <div className="w-[210mm] min-h-[297mm] p-12 bg-white"></div>
+        <div className="w-[210mm] min-h-[297mm]" style={pageStyle}></div>
       ) : (
         pages.map((pageContent, i) => (
-          <div key={i} className="a4-page w-[210mm] min-h-[297mm] p-12 bg-white text-gray-900 relative print:shadow-none" style={{ breakAfter: i < pages.length - 1 ? "page" : "auto" }}>
+          <div
+            key={i}
+            className="a4-page w-[210mm] min-h-[297mm] relative print:shadow-none"
+            style={{ ...pageStyle, breakAfter: i < pages.length - 1 ? "page" : "auto" }}
+          >
             {pageContent}
-            {pages.length > 1 && (
-              <div className="absolute bottom-4 right-12 text-[10px] text-gray-400 print:hidden">Page {i + 1} of {pages.length}</div>
+            {styleSettings.showPageNumbers && pages.length > 1 && (
+              <div className="absolute bottom-4 right-12 text-[10px] print:hidden" style={mutedStyle}>
+                Page {i + 1} of {pages.length}
+              </div>
             )}
           </div>
         ))

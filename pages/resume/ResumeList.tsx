@@ -163,6 +163,12 @@ export function ResumePage({ user }: PageProps) {
     }
   };
 
+  const getResumeType = (cv: CV): "job_based" | "general" => {
+    if (cv.type === "job_based" || cv.type === "general") return cv.type;
+    if ((cv.job_description || "").trim().length > 0) return "job_based";
+    return "general";
+  };
+
   // Filter CVs based on search term
   const filteredCVs = cvs.filter(
     (cv) =>
@@ -378,8 +384,11 @@ export function ResumePage({ user }: PageProps) {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredCVs.map((cv) => (
-                      <TableRow key={cv.id}>
+                    {filteredCVs.map((cv) => {
+                      const resumeType = getResumeType(cv);
+
+                      return (
+                        <TableRow key={cv.id}>
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10 border-2 border-gray-200 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-400 transition-colors">
@@ -409,6 +418,18 @@ export function ResumePage({ user }: PageProps) {
                             </Avatar>
                             <div>
                               <div className="font-medium">{cv.title.length > 25 ? `${cv.title.substring(0, 25)}...` : cv.title}</div>
+                              <div className="mt-1">
+                                <Badge
+                                  variant="outline"
+                                  className={
+                                    resumeType === "job_based"
+                                      ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-900/20 dark:text-emerald-300"
+                                      : "border-gray-200 bg-gray-50 text-gray-700 dark:border-gray-800 dark:bg-gray-900/30 dark:text-gray-300"
+                                  }
+                                >
+                                  {resumeType === "job_based" ? "Job Based" : "General"}
+                                </Badge>
+                              </div>
                             </div>
                           </div>
                         </TableCell>
@@ -463,7 +484,8 @@ export function ResumePage({ user }: PageProps) {
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))}
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -472,11 +494,14 @@ export function ResumePage({ user }: PageProps) {
 
           {/* Grid/Card view - always visible on mobile/tablet, conditionally visible on lg screens */}
           <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ${viewMode === "table" ? "lg:hidden" : ""}`}>
-            {filteredCVs.map((cv) => (
-              <Card
-                key={cv.id}
-                className="hover:shadow-lg transition-shadow"
-              >
+            {filteredCVs.map((cv) => {
+              const resumeType = getResumeType(cv);
+
+              return (
+                <Card
+                  key={cv.id}
+                  className="hover:shadow-lg transition-shadow"
+                >
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
@@ -506,7 +531,19 @@ export function ResumePage({ user }: PageProps) {
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <CardTitle className="text-lg">{cv.title}</CardTitle>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <CardTitle className="text-lg">{cv.title}</CardTitle>
+                          <Badge
+                            variant="outline"
+                            className={
+                              resumeType === "job_based"
+                                ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-900/20 dark:text-emerald-300"
+                                : "border-gray-200 bg-gray-50 text-gray-700 dark:border-gray-800 dark:bg-gray-900/30 dark:text-gray-300"
+                            }
+                          >
+                            {resumeType === "job_based" ? "Job Based" : "General"}
+                          </Badge>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -573,7 +610,8 @@ export function ResumePage({ user }: PageProps) {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+              );
+            })}
           </div>
         </>
       )}

@@ -70,6 +70,14 @@ export function CVSidebarSection({
   onAddItem
 }: CVSidebarSectionProps) {
   
+  const moveItem = (fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex) return;
+    const newItems = [...items];
+    const [movedItem] = newItems.splice(fromIndex, 1);
+    newItems.splice(toIndex, 0, movedItem);
+    onUpdateItems(newItems);
+  };
+
   const handleToggleVisibility = (e: React.MouseEvent, index: number) => {
     e.stopPropagation();
     const newItems = [...items];
@@ -223,20 +231,36 @@ export function CVSidebarSection({
           {items.map((item, index) => (
             <div 
               key={index}
-              className="group flex items-center gap-3 p-3 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl hover:border-emerald-200 dark:hover:border-emerald-900/50 hover:shadow-sm transition-all cursor-pointer relative"
+              draggable={items.length > 1}
+              onDragStart={(e) => {
+                e.dataTransfer.effectAllowed = "move";
+                e.dataTransfer.setData("text/plain", index.toString());
+              }}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                const fromIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
+                if (!isNaN(fromIndex) && fromIndex !== index) {
+                   moveItem(fromIndex, index);
+                }
+              }}
+              className={`group flex items-center gap-3 p-3 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl hover:border-emerald-200 dark:hover:border-emerald-900/50 hover:shadow-sm transition-all relative ${item.isHidden ? "opacity-60" : ""} ${items.length > 1 ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"}`}
               onClick={() => onEditItem(index)}
             >
               {/* Drag Handle */}
-              <div className="text-gray-300 dark:text-gray-600 cursor-grab active:cursor-grabbing hover:text-gray-500 dark:hover:text-gray-400">
+              <div className={`text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 ${items.length > 1 ? "cursor-grab active:cursor-grabbing" : ""}`}>
                 <GripVertical className="h-4 w-4" />
               </div>
 
               {/* Content */}
               <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">
+                <h4 className={`text-sm font-semibold truncate ${item.isHidden ? "text-gray-500 dark:text-gray-400 line-through" : "text-gray-800 dark:text-gray-200"}`}>
                   {getItemTitle(item)}
                 </h4>
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                <p className={`text-xs truncate ${item.isHidden ? "text-gray-400 dark:text-gray-500" : "text-gray-500 dark:text-gray-400"}`}>
                   {getItemSubtitle(item)}
                 </p>
               </div>

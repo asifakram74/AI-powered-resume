@@ -139,22 +139,25 @@ interface OptimizedCV {
     company: string
     duration: string
     description: string
+    isHidden?: boolean
   }>
   education: Array<{
     degree: string
     institution: string
     year: string
     gpa: string
+    isHidden?: boolean
   }>
-  skills: string[]
+  skills: Array<string | { title: string; isHidden?: boolean }>
   projects: Array<{
     name: string
     description: string
     technologies: string[]
+    isHidden?: boolean
   }>
-  certifications: string[]
-  languages: string[]
-  interests: string[]
+  certifications: Array<string | { title: string; isHidden?: boolean }>
+  languages: Array<string | { name: string; isHidden?: boolean }>
+  interests: Array<string | { title: string; isHidden?: boolean }>
 }
 interface AIResponse {
   optimizedCV: OptimizedCV
@@ -646,6 +649,48 @@ export function CVPageClientContent() {
       }
     }
 
+    const visibleWorkExperience = (aiResponse.optimizedCV.workExperience || []).filter((exp) => !exp?.isHidden)
+    const visibleEducation = (aiResponse.optimizedCV.education || []).filter((edu) => !edu?.isHidden)
+    const visibleProjects = (aiResponse.optimizedCV.projects || []).filter((proj) => !proj?.isHidden)
+
+    const visibleSkills = (aiResponse.optimizedCV.skills || [])
+      .map((skill) =>
+        typeof skill === "string" ? { value: skill, isHidden: false } : { value: skill?.title || "", isHidden: !!skill?.isHidden },
+      )
+      .filter((skill) => !skill.isHidden)
+      .map((skill) => skill.value)
+      .map((skill) => skill.trim())
+      .filter(Boolean)
+
+    const visibleLanguages = (aiResponse.optimizedCV.languages || [])
+      .map((lang) =>
+        typeof lang === "string" ? { value: lang, isHidden: false } : { value: lang?.name || "", isHidden: !!lang?.isHidden },
+      )
+      .filter((lang) => !lang.isHidden)
+      .map((lang) => lang.value)
+      .map((lang) => lang.trim())
+      .filter(Boolean)
+
+    const visibleCertifications = (aiResponse.optimizedCV.certifications || [])
+      .map((cert) =>
+        typeof cert === "string" ? { value: cert, isHidden: false } : { value: cert?.title || "", isHidden: !!cert?.isHidden },
+      )
+      .filter((cert) => !cert.isHidden)
+      .map((cert) => cert.value)
+      .map((cert) => cert.trim())
+      .filter(Boolean)
+
+    const visibleInterests = (aiResponse.optimizedCV.interests || [])
+      .map((interest) =>
+        typeof interest === "string"
+          ? { value: interest, isHidden: false }
+          : { value: interest?.title || "", isHidden: !!interest?.isHidden },
+      )
+      .filter((interest) => !interest.isHidden)
+      .map((interest) => interest.value)
+      .map((interest) => interest.trim())
+      .filter(Boolean)
+
     return {
       id: existingCV?.id || "generated-cv",
       sectionOrder,
@@ -665,7 +710,7 @@ export function CVPageClientContent() {
         linkedin: aiResponse.optimizedCV.personalInfo.linkedin,
         github: "",
       },
-      experience: aiResponse.optimizedCV.workExperience.map((exp, index) => {
+      experience: visibleWorkExperience.map((exp, index) => {
         const normalizedDuration = (exp.duration || "").replace(/[–—]/g, "-")
         const parts = normalizedDuration.split("-").map((s) => s.trim())
         const start = parts[0] || ""
@@ -683,7 +728,7 @@ export function CVPageClientContent() {
           responsibilities: [exp.description],
         }
       }),
-      education: aiResponse.optimizedCV.education.map((edu, index) => ({
+      education: visibleEducation.map((edu, index) => ({
         id: `edu-${index}`,
         degree: edu.degree,
         institutionName: edu.institution,
@@ -694,22 +739,22 @@ export function CVPageClientContent() {
         additionalInfo: (edu as any).additionalInfo || "",
       })),
       skills: {
-        technical: aiResponse.optimizedCV.skills || [],
+        technical: visibleSkills,
         soft: [],
       },
-      languages: (aiResponse.optimizedCV.languages || []).map((lang, index) => ({
+      languages: visibleLanguages.map((lang, index) => ({
         id: `lang-${index}`,
         name: lang,
         proficiency: "Fluent" as const,
       })),
-      certifications: (aiResponse.optimizedCV.certifications || []).map((title, index) => ({
+      certifications: visibleCertifications.map((title, index) => ({
         id: `cert-${index}`,
         title,
         issuingOrganization: "",
         dateObtained: "",
         verificationLink: "",
       })),
-      projects: (aiResponse.optimizedCV.projects || []).map((proj, index) => ({
+      projects: visibleProjects.map((proj, index) => ({
         id: `proj-${index}`,
         name: proj.name || "",
         role: "",
@@ -719,7 +764,7 @@ export function CVPageClientContent() {
         githubLink: (proj as any).githubLink || "",
       })),
       additional: {
-        interests: aiResponse.optimizedCV.interests || [],
+        interests: visibleInterests,
       },
       createdAt: new Date().toISOString(),
       generatedPersona: persona?.generatedPersona || "",
@@ -1082,10 +1127,10 @@ export function CVPageClientContent() {
     const cv = aiResponse.optimizedCV
 
     if (sectionId === "personalInfo") return [{ ...cv.personalInfo, summary: cv.summary }]
-    if (sectionId === "skills") return (cv.skills || []).map((s) => ({ title: s }))
-    if (sectionId === "languages") return (cv.languages || []).map((s) => ({ name: s }))
-    if (sectionId === "certifications") return (cv.certifications || []).map((s) => ({ title: s }))
-    if (sectionId === "interests") return (cv.interests || []).map((s) => ({ title: s }))
+    if (sectionId === "skills") return (cv.skills || []).map((s) => (typeof s === "string" ? { title: s } : { title: asString(s.title), isHidden: !!s.isHidden }))
+    if (sectionId === "languages") return (cv.languages || []).map((s) => (typeof s === "string" ? { name: s } : { name: asString(s.name), isHidden: !!s.isHidden }))
+    if (sectionId === "certifications") return (cv.certifications || []).map((s) => (typeof s === "string" ? { title: s } : { title: asString(s.title), isHidden: !!s.isHidden }))
+    if (sectionId === "interests") return (cv.interests || []).map((s) => (typeof s === "string" ? { title: s } : { title: asString(s.title), isHidden: !!s.isHidden }))
     if (sectionId === "experience") return (cv.workExperience || []) as unknown as SectionItem[]
     if (sectionId === "education") return (cv.education || []) as unknown as SectionItem[]
     if (sectionId === "projects") return (cv.projects || []) as unknown as SectionItem[]
@@ -1114,16 +1159,36 @@ export function CVPageClientContent() {
       }
 
       if (sectionId === "skills") {
-        return { ...prev, skills: items.map((i) => asString(i.title || i.name)).map((s) => s.trim()).filter(Boolean) }
+        return {
+          ...prev,
+          skills: items
+            .map((i) => ({ title: asString(i.title || i.name).trim(), isHidden: !!i.isHidden }))
+            .filter((i) => i.title.length > 0),
+        }
       }
       if (sectionId === "languages") {
-        return { ...prev, languages: items.map((i) => asString(i.name || i.title)).map((s) => s.trim()).filter(Boolean) }
+        return {
+          ...prev,
+          languages: items
+            .map((i) => ({ name: asString(i.name || i.title).trim(), isHidden: !!i.isHidden }))
+            .filter((i) => i.name.length > 0),
+        }
       }
       if (sectionId === "certifications") {
-        return { ...prev, certifications: items.map((i) => asString(i.title || i.name)).map((s) => s.trim()).filter(Boolean) }
+        return {
+          ...prev,
+          certifications: items
+            .map((i) => ({ title: asString(i.title || i.name).trim(), isHidden: !!i.isHidden }))
+            .filter((i) => i.title.length > 0),
+        }
       }
       if (sectionId === "interests") {
-        return { ...prev, interests: items.map((i) => asString(i.title || i.name)).map((s) => s.trim()).filter(Boolean) }
+        return {
+          ...prev,
+          interests: items
+            .map((i) => ({ title: asString(i.title || i.name).trim(), isHidden: !!i.isHidden }))
+            .filter((i) => i.title.length > 0),
+        }
       }
       if (sectionId === "experience") {
         return {
@@ -1133,6 +1198,7 @@ export function CVPageClientContent() {
             company: asString(i.company || i.companyName),
             duration: asString(i.duration),
             description: asString(i.description),
+            isHidden: !!i.isHidden,
           })),
         }
       }
@@ -1144,6 +1210,7 @@ export function CVPageClientContent() {
             institution: asString(i.institution || i.institutionName),
             year: asString(i.year || i.graduationDate),
             gpa: asString(i.gpa),
+            isHidden: !!i.isHidden,
           })),
         }
       }
@@ -1154,6 +1221,7 @@ export function CVPageClientContent() {
             name: asString(i.name || i.title),
             description: asString(i.description),
             technologies: asStringArray(i.technologies),
+            isHidden: !!i.isHidden,
           })),
         }
       }
