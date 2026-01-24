@@ -4,7 +4,7 @@ import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { useRouter } from "next/navigation";
 import { Label } from "../../components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Textarea } from "../../components/ui/textarea";
 import { toast } from "sonner"
 import {
@@ -243,9 +243,9 @@ export function CVWizard({
                 <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
               <CardTitle>General Resume</CardTitle>
-              <DialogDescription className="mt-2">
+              <CardDescription className="mt-2">
                 Create a versatile resume suitable for various applications. Focus on your overall skills and experience without targeting a specific job description.
-              </DialogDescription>
+              </CardDescription>
             </CardHeader>
           </Card>
 
@@ -262,9 +262,9 @@ export function CVWizard({
                 <Briefcase className="h-6 w-6 text-purple-600 dark:text-purple-400" />
               </div>
               <CardTitle>Job-Based Resume</CardTitle>
-              <DialogDescription className="mt-2">
+              <CardDescription className="mt-2">
                 Tailor your resume for a specific job opening. Provide a job description, and our AI will optimize your content to match the requirements.
-              </DialogDescription>
+              </CardDescription>
             </CardHeader>
           </Card>
         </div>
