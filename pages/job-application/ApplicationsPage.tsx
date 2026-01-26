@@ -33,6 +33,7 @@ import {
   listPipelines,
   updatePipeline,
   updateJobApplication,
+  type CreateJobApplicationPayload,
   type JobApplication,
   type Pipeline,
 } from "../../lib/redux/service/jobTrackerService"
@@ -351,19 +352,21 @@ export default function ApplicationsPage() {
   )
 
   const submitAddApplication = async () => {
-    if (!addCompany.trim() || !addTitle.trim() || !addDate.trim() || !addPipelineId || !addCvId) {
+    if (!addCompany.trim() || !addTitle.trim() || !addDate.trim() || !addPipelineId) {
       showErrorToast("Missing fields", "Please fill all fields")
       return
     }
     try {
       setIsAdding(true)
-      await createJobApplication({
+      const payload: CreateJobApplicationPayload = {
         company_name: addCompany.trim(),
         job_title: addTitle.trim(),
         application_date: addDate,
         pipeline_id: addPipelineId,
-        cv_id: addCvId,
-      })
+      }
+      if (addCvId) payload.cv_id = addCvId
+
+      await createJobApplication(payload)
       showSuccessToast("Application created")
       setIsAddOpen(false)
       setAddCompany("")
@@ -589,7 +592,7 @@ export default function ApplicationsPage() {
   if (isLoading) {
     return (
       <div className="fixed inset-0 flex justify-center items-center bg-white dark:bg-gray-950">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#70E4A8]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-gray-100"></div>
       </div>
     )
   }
@@ -621,7 +624,7 @@ export default function ApplicationsPage() {
             >
               {isCreatingPipeline ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="h-4 w-4 mr-2" />
                   Creating…
                 </>
               ) : (
@@ -633,7 +636,7 @@ export default function ApplicationsPage() {
           <Button
             className="resumaic-gradient-green hover:opacity-90 button-press dark:text-gray-100"
             onClick={() => setIsAddOpen(true)}
-            disabled={pipelines.length === 0 || cvs.length === 0}
+            disabled={pipelines.length === 0}
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Application
@@ -1115,10 +1118,10 @@ export default function ApplicationsPage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label className="text-gray-700 dark:text-gray-300">Attached CV</Label>
-              <Select value={addCvId} onValueChange={setAddCvId}>
+              <Label className="text-gray-700 dark:text-gray-300">Attached CV (optional)</Label>
+              <Select value={addCvId} onValueChange={setAddCvId} disabled={cvs.length === 0}>
                 <SelectTrigger className="dark:bg-gray-900 dark:border-gray-800">
-                  <SelectValue placeholder="Select CV" />
+                  <SelectValue placeholder="Select CV (optional)" />
                 </SelectTrigger>
                 <SelectContent className="dark:bg-[#0B0F1A] dark:border-gray-800">
                   {cvs.map((cv) => (

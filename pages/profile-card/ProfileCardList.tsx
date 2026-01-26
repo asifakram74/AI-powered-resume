@@ -646,3 +646,7 @@ export function ProfileCardList({ user }: PageProps) {
     </div>
   )
 }
+
+export default function ProfileCardListPage() {
+  return null
+}

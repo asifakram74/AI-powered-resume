@@ -270,7 +270,7 @@ export default function JobSearchPage() {
             {isLoadingMeta && (
               <div className="flex items-center justify-center p-4">
                 <div className="flex flex-col items-center gap-3">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#70E4A8]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-gray-100"></div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     Loading your pipelines and CVs…
                   </p>

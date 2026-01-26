@@ -14,7 +14,7 @@ export type JobApplication = {
   job_title: string
   application_date: string
   pipeline_id: number | string
-  cv_id: number | string
+  cv_id?: number | string | null
 }
 
 export type CreatePipelinePayload = {
@@ -27,7 +27,7 @@ export type CreateJobApplicationPayload = {
   job_title: string
   application_date: string
   pipeline_id: number | string
-  cv_id: number | string
+  cv_id?: number | string | null
 }
 
 function toArray<T = any>(data: any): T[] {

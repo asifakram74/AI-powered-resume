@@ -894,6 +894,14 @@ export function CVPageClientContent() {
         setExistingCV(newCV)
         setHasUnsavedChanges(false)
 
+        if (typeof window !== "undefined") {
+          const url = new URL(window.location.href)
+          url.searchParams.set("cvId", String(newCV.id))
+          url.searchParams.set("templateId", selectedTemplate.id)
+          url.searchParams.delete("personaId")
+          router.replace(url.toString())
+        }
+
         if (!isAutoSave && loadingToastId) {
           toast.dismiss(loadingToastId)
           showSuccessToast(
