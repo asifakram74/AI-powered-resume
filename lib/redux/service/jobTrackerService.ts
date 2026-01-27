@@ -1,4 +1,5 @@
 import { api } from "../../api"
+import { store } from "../store"
 
 export type JobSearchResult = Record<string, any>
 
@@ -30,6 +31,22 @@ export type CreateJobApplicationPayload = {
   cv_id?: number | string | null
 }
 
+export interface JobSearchFilters {
+  what?: string
+  where?: string
+  page?: number
+  results_per_page?: number
+  sort_by?: "salary" | "date" | "relevance"
+  salary_min?: number
+  salary_max?: number
+  full_time?: boolean
+  part_time?: boolean
+  permanent?: boolean
+  contract?: boolean
+  temp?: boolean
+  what_exclude?: string
+}
+
 function toArray<T = any>(data: any): T[] {
   if (Array.isArray(data)) return data
   if (Array.isArray(data?.data)) return data.data
@@ -38,13 +55,84 @@ function toArray<T = any>(data: any): T[] {
   return []
 }
 
-export async function searchJobs(query: string): Promise<JobSearchResult[]> {
-  const response = await api.get(`/jobs/search`, { params: { q: query } })
+export async function searchJobs(filters: JobSearchFilters | string): Promise<JobSearchResult[]> {
+  const params: any = typeof filters === "string" ? { what: filters } : { ...filters }
+
+  // Clean up params: only send '1' for true, remove false/0/undefined/null
+  if (typeof params !== "string") {
+    // Helper to process boolean fields
+    const processBool = (key: string) => {
+      if (params[key]) {
+        params[key] = 1
+      } else {
+        delete params[key]
+      }
+    }
+
+    processBool('full_time')
+    processBool('part_time')
+    processBool('permanent')
+    processBool('contract')
+    processBool('temp')
+
+    // Remove empty strings or undefined for other fields
+    Object.keys(params).forEach(key => {
+      if (params[key] === "" || params[key] === undefined || params[key] === null) {
+        delete params[key]
+      }
+    })
+  }
+
+  const config: any = { params }
+  
+  // Try to get token from localStorage or Redux store
+  let token: string | null = null
+  if (typeof window !== "undefined") {
+    token = localStorage.getItem("token")
+  }
+  
+  if (!token) {
+    const state = store.getState()
+    token = state.auth.token
+  }
+
+  console.log("JobSearch: Retrieved token for searchJobs:", token ? `Yes (Length: ${token.length})` : "No")
+
+  if (token) {
+    config.headers = {
+      ...config.headers,
+      Authorization: `Bearer ${token}`
+    }
+  }
+
+  const response = await api.get(`/jobs/search`, config)
   return toArray<JobSearchResult>(response.data)
 }
 
 export async function googleSearchJobs(query: string): Promise<JobSearchResult[]> {
-  const response = await api.get(`/jobs/google-search`, { params: { q: query } })
+  const config: any = { params: { q: query } }
+  
+  // Try to get token from localStorage or Redux store
+  let token: string | null = null
+  if (typeof window !== "undefined") {
+    token = localStorage.getItem("token")
+  }
+  
+  if (!token) {
+    const state = store.getState()
+    token = state.auth.token
+  }
+
+  console.log("JobSearch: Retrieved token for googleSearchJobs:", token ? `Yes (Length: ${token.length})` : "No")
+
+  if (token) {
+    config.headers = {
+      ...config.headers,
+      Authorization: `Bearer ${token}`
+    }
+  }
+
+  const response = await api.get(`/jobs/google-search`, config)
   return toArray<JobSearchResult>(response.data)
 }
 

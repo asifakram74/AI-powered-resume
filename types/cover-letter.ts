@@ -6,6 +6,7 @@ export interface CoverLetter {
   generated_letter: string
   created_at: string
   updated_at: string
+  public_slug?: string
 }
 
 export interface CreateCoverLetterData {

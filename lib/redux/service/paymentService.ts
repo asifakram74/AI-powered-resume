@@ -7,7 +7,7 @@ export const createCheckoutSession = async (): Promise<void> => {
   }
 
   try {
-    const response = await fetch("https://stagingbackend.resumaic.com /api/create-checkout-session", {
+    const response = await fetch("https://stagingbackend.resumaic.com/public/api/public /api/create-checkout-session", {
       method: "POST",
       mode: "cors",
       headers: {

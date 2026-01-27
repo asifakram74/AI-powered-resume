@@ -16,8 +16,10 @@ import {
   MoreVertical,
   ChevronDown,
   FileDown,
-  ArrowLeft
+  ArrowLeft,
+  Share2
 } from "lucide-react"
+import { toast } from "sonner"
 
 type Props = {
   isViewMode: boolean
@@ -66,6 +68,21 @@ export function CVHeaderActions({
     { id: 'customize', label: 'Customize', icon: Wand2 },
     // { id: 'ai-tools', label: 'AI Tools', icon: Sparkles },
   ]
+
+  const handleShare = () => {
+    if (!existingCV?.public_slug) {
+      toast.error("Public link not available", {
+        description: "This CV hasn't been published yet or is missing a public link."
+      })
+      return
+    }
+    
+    const url = `${window.location.origin}/cv-card?slug=${existingCV.public_slug}`
+    navigator.clipboard.writeText(url)
+    toast.success("Public link copied!", {
+      description: "The public link has been copied to your clipboard."
+    })
+  }
 
   return (
     <div className="flex items-center justify-between w-full bg-white dark:bg-gray-900 px-3 md:px-6 py-2 rounded-b-xl shadow-sm border border-gray-200/80 dark:border-gray-800">
@@ -188,6 +205,10 @@ export function CVHeaderActions({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 md:w-48 rounded-xl shadow-xl border-gray-200 dark:border-gray-800 p-1.5 md:p-1">
+            <DropdownMenuItem onClick={handleShare} className="cursor-pointer py-3 md:py-2 px-3 text-sm font-medium">
+              <Share2 className="mr-3 h-4 w-4 text-blue-500" />
+              <span>Share Public Link</span>
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={onChangeTemplate} className="cursor-pointer py-3 md:py-2 px-3 text-sm font-medium">
               <LayoutGrid className="mr-3 h-4 w-4 text-gray-500" />
               <span>Change Template</span>

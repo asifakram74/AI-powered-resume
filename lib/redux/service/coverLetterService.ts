@@ -10,6 +10,7 @@ export interface CoverLetter {
   generated_letter: string
   created_at: string
   updated_at: string
+  public_slug?: string
 }
 
 export interface CreateCoverLetterData {
@@ -98,6 +99,16 @@ export const deleteCoverLetter = async (id: string): Promise<void> => {
     await api.delete(`/cover-letters/${id}`)
   } catch (error) {
     console.error(`Error deleting cover letter ${id}:`, error)
+    throw error
+  }
+}
+
+export const getCoverLetterBySlug = async (slug: string): Promise<CoverLetter> => {
+  try {
+    const response = await api.get(`/public/cover-letter/${slug}`)
+    return response.data
+  } catch (error) {
+    console.error(`Error fetching cover letter by slug ${slug}:`, error)
     throw error
   }
 }

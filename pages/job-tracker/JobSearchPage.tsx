@@ -6,7 +6,7 @@ import type { RootState } from "../../lib/redux/store"
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../../components/ui/dialog"
 import { Label } from "../../components/ui/label"
 import {
@@ -25,10 +25,11 @@ import {
   searchJobs,
   type JobSearchResult,
   type Pipeline,
+  type JobSearchFilters,
 } from "../../lib/redux/service/jobTrackerService"
-import { ExternalLink, Loader2, Plus, Search, Sparkles, Building, MapPin, Calendar, Briefcase } from "lucide-react"
+import { ExternalLink, Loader2, Plus, Search, Sparkles, Building, MapPin, Briefcase, Filter, X, Check } from "lucide-react"
 import { Badge } from "../../components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
+import { Avatar, AvatarFallback } from "../../components/ui/avatar"
 
 function firstString(obj: any, keys: string[]) {
   for (const k of keys) {
@@ -50,13 +51,30 @@ function todayYMD() {
 }
 
 export default function JobSearchPage() {
-  const { user, profile } = useAppSelector((state: RootState) => state.auth)
+  const { user } = useAppSelector((state: RootState) => state.auth)
   const userId = user?.id
 
   const [activeSource, setActiveSource] = useState<"internal" | "google">("internal")
-  const [query, setQuery] = useState("")
+  
+  // Search State
+  const [what, setWhat] = useState("")
+  const [where, setWhere] = useState("")
   const [isSearching, setIsSearching] = useState(false)
   const [results, setResults] = useState<JobSearchResult[]>([])
+  const [showFilters, setShowFilters] = useState(false)
+
+  // Advanced Filters
+  const [sortBy, setSortBy] = useState<"relevance" | "date" | "salary">("relevance")
+  const [salaryMin, setSalaryMin] = useState("")
+  const [salaryMax, setSalaryMax] = useState("")
+  const [whatExclude, setWhatExclude] = useState("")
+  const [employmentType, setEmploymentType] = useState({
+    full_time: false,
+    part_time: false,
+    permanent: false,
+    contract: false,
+    temp: false,
+  })
 
   const [pipelines, setPipelines] = useState<Pipeline[]>([])
   const [cvs, setCvs] = useState<CV[]>([])
@@ -106,17 +124,37 @@ export default function JobSearchPage() {
   }, [addCvId, cvs])
 
   const runSearch = async () => {
-    const q = query.trim()
-    if (!q) {
+    if (!what.trim()) {
       showErrorToast("Empty Search", "Please enter a job title or keyword")
       return
     }
+
     try {
       setIsSearching(true)
-      const data = activeSource === "google" ? await googleSearchJobs(q) : await searchJobs(q)
+      let data: JobSearchResult[] = []
+
+      if (activeSource === "google") {
+        data = await googleSearchJobs(what.trim())
+      } else {
+        const filters: JobSearchFilters = {
+          what: what.trim(),
+          where: where.trim(),
+          sort_by: sortBy,
+          salary_min: salaryMin ? Number(salaryMin) : undefined,
+          salary_max: salaryMax ? Number(salaryMax) : undefined,
+          full_time: employmentType.full_time,
+          part_time: employmentType.part_time,
+          permanent: employmentType.permanent,
+          contract: employmentType.contract,
+          temp: employmentType.temp,
+          what_exclude: whatExclude.trim() || undefined,
+        }
+        data = await searchJobs(filters)
+      }
+      
       setResults(data)
       if (data.length === 0) {
-        showErrorToast("No Results", "Try different keywords or search source")
+        showErrorToast("No Results", "Try different keywords or filters")
       }
     } catch (e: any) {
       showErrorToast("Failed to search jobs", e?.message || "Please try again")
@@ -168,6 +206,10 @@ export default function JobSearchPage() {
       .join('')
       .toUpperCase()
       .slice(0, 2)
+  }
+
+  const toggleEmployment = (type: keyof typeof employmentType) => {
+    setEmploymentType(prev => ({ ...prev, [type]: !prev[type] }))
   }
 
   return (
@@ -229,55 +271,151 @@ export default function JobSearchPage() {
 
       {/* Search Card */}
       <Card className="border-[#70E4A8]/25 bg-white/80 dark:bg-gray-950/30 hover:shadow-lg transition-shadow duration-300">
-        <CardContent className="pt-6">
-          <div className="space-y-4">
-            <div className="flex flex-col lg:flex-row lg:items-center gap-3">
-              <div className="flex-1">
-                <div className="relative">
-                  <Input
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search jobs… e.g., backend engineer, remote developer, product manager"
-                    className="pl-10 py-6 text-base bg-white text-gray-900 border-gray-200/80 shadow-sm focus-visible:ring-[#70E4A8]/30 dark:bg-[#0B0F1A] dark:text-gray-100 dark:border-gray-800"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") runSearch()
-                    }}
-                  />
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
-                </div>
+        <CardContent className="pt-6 space-y-6">
+          <div className="flex flex-col lg:flex-row gap-3">
+            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="relative">
+                <Input
+                  value={what}
+                  onChange={(e) => setWhat(e.target.value)}
+                  placeholder="Job title, keywords..."
+                  className="pl-10 py-6 text-base bg-white text-gray-900 border-gray-200/80 shadow-sm focus-visible:ring-[#70E4A8]/30 dark:bg-[#0B0F1A] dark:text-gray-100 dark:border-gray-800"
+                  onKeyDown={(e) => e.key === "Enter" && runSearch()}
+                />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
               </div>
+              <div className="relative">
+                <Input
+                  value={where}
+                  onChange={(e) => setWhere(e.target.value)}
+                  placeholder="Location (city, state, zip)..."
+                  className="pl-10 py-6 text-base bg-white text-gray-900 border-gray-200/80 shadow-sm focus-visible:ring-[#70E4A8]/30 dark:bg-[#0B0F1A] dark:text-gray-100 dark:border-gray-800"
+                  onKeyDown={(e) => e.key === "Enter" && runSearch()}
+                />
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
+              </div>
+            </div>
 
-
+            <div className="flex gap-2">
+              {activeSource === "internal" && (
+                <Button
+                  variant="outline"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`h-full px-4 border-gray-200/80 dark:border-gray-800 ${showFilters ? "bg-[#70E4A8]/10 border-[#70E4A8]/30 text-[#70E4A8]" : ""}`}
+                >
+                  <Filter className="h-5 w-5" />
+                </Button>
+              )}
+              
               <Button
                 onClick={runSearch}
-                className="resumaic-gradient-green text-white hover:opacity-90 button-press py-6 px-8 shadow-sm min-w-[160px]"
-                disabled={isSearching || !query.trim()}
+                className="resumaic-gradient-green text-white hover:opacity-90 button-press py-6 px-8 shadow-sm min-w-[140px]"
+                disabled={isSearching || !what.trim()}
               >
                 {isSearching ? (
                   <>
                     <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                    Searching…
+                    Searching
                   </>
                 ) : (
                   <>
                     <Search className="h-5 w-5 mr-2" />
-                    Search Jobs
+                    Search
                   </>
                 )}
               </Button>
             </div>
+          </div>
 
-            {isLoadingMeta && (
-              <div className="flex items-center justify-center p-4">
-                <div className="flex flex-col items-center gap-3">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-gray-100"></div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Loading your pipelines and CVs…
-                  </p>
+          {/* Advanced Filters */}
+          {showFilters && activeSource === "internal" && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-gray-100 dark:border-gray-800 animate-in slide-in-from-top-2 duration-300">
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-gray-500 uppercase">Sort By</Label>
+                <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+                  <SelectTrigger className="w-full bg-white dark:bg-[#0B0F1A]">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="relevance">Relevance</SelectItem>
+                    <SelectItem value="date">Date</SelectItem>
+                    <SelectItem value="salary">Salary</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-gray-500 uppercase">Salary Range</Label>
+                <div className="flex gap-2">
+                  <Input 
+                    type="number" 
+                    placeholder="Min" 
+                    value={salaryMin} 
+                    onChange={(e) => setSalaryMin(e.target.value)}
+                    className="bg-white dark:bg-[#0B0F1A]"
+                  />
+                  <Input 
+                    type="number" 
+                    placeholder="Max" 
+                    value={salaryMax} 
+                    onChange={(e) => setSalaryMax(e.target.value)}
+                    className="bg-white dark:bg-[#0B0F1A]"
+                  />
                 </div>
               </div>
-            )}
-          </div>
+
+              <div className="space-y-2 lg:col-span-2">
+                <Label className="text-xs font-medium text-gray-500 uppercase">Employment Type</Label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { id: "full_time", label: "Full Time" },
+                    { id: "part_time", label: "Part Time" },
+                    { id: "contract", label: "Contract" },
+                    { id: "permanent", label: "Permanent" },
+                    { id: "temp", label: "Temporary" },
+                  ].map((type) => (
+                    <button
+                      key={type.id}
+                      onClick={() => toggleEmployment(type.id as keyof typeof employmentType)}
+                      className={`
+                        flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors border
+                        ${employmentType[type.id as keyof typeof employmentType]
+                          ? "bg-[#70E4A8]/20 border-[#70E4A8] text-[#0ea5e9] dark:text-[#70E4A8]"
+                          : "bg-white dark:bg-[#0B0F1A] border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 hover:border-gray-300"
+                        }
+                      `}
+                    >
+                      {employmentType[type.id as keyof typeof employmentType] && <Check className="h-3 w-3" />}
+                      {type.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2 lg:col-span-4">
+                 <div className="flex items-center gap-2">
+                   <Label className="text-xs font-medium text-gray-500 uppercase">Exclude Keywords</Label>
+                 </div>
+                 <Input
+                    value={whatExclude}
+                    onChange={(e) => setWhatExclude(e.target.value)}
+                    placeholder="e.g. senior, manager (words to exclude)"
+                    className="bg-white dark:bg-[#0B0F1A]"
+                 />
+              </div>
+            </div>
+          )}
+
+          {isLoadingMeta && (
+            <div className="flex items-center justify-center p-4">
+              <div className="flex flex-col items-center gap-3">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100"></div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Loading your pipelines and CVs...
+                </p>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -300,11 +438,12 @@ export default function JobSearchPage() {
               const location = firstString(job, ["location", "job_location", "city", "country"])
               const url = firstUrl(job)
               const salary = firstString(job, ["salary", "compensation", "pay_range"])
+              const description = firstString(job, ["description", "snippet", "summary"])
               
               return (
                 <Card 
                   key={`${company}-${title}-${idx}`} 
-                  className="border-[#70E4A8]/20 hover:border-[#70E4A8]/40 hover:shadow-lg transition-all duration-300 group overflow-hidden"
+                  className="border-[#70E4A8]/20 hover:border-[#70E4A8]/40 hover:shadow-lg transition-all duration-300 group overflow-hidden flex flex-col"
                 >
                   <div className="absolute top-0 left-0 w-1 h-full resumaic-gradient-green opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   <CardHeader className="pb-3">
@@ -329,23 +468,28 @@ export default function JobSearchPage() {
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
+                  <CardContent className="space-y-4 flex-1 flex flex-col">
+                    <div className="space-y-2 flex-1">
                       {location && (
                         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                          <MapPin className="h-4 w-4" />
+                          <MapPin className="h-4 w-4 shrink-0" />
                           <span>{location}</span>
                         </div>
                       )}
                       {salary && (
                         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                          <Briefcase className="h-4 w-4" />
+                          <Briefcase className="h-4 w-4 shrink-0" />
                           <span>{salary}</span>
                         </div>
                       )}
+                      {description && (
+                         <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-3 mt-2">
+                           {description.replace(/<[^>]*>/g, '')}
+                         </p>
+                      )}
                     </div>
 
-                    <div className="flex items-center gap-2 pt-2">
+                    <div className="flex items-center gap-2 pt-2 mt-auto">
                       <Button
                         className="resumaic-gradient-green text-white hover:opacity-90 flex-1 button-press"
                         onClick={() => openAddFromResult(job)}
@@ -383,7 +527,7 @@ export default function JobSearchPage() {
       )}
 
       {/* Empty State */}
-      {!isSearching && results.length === 0 && query && (
+      {!isSearching && results.length === 0 && what && (
         <Card className="border-dashed border-2 border-gray-300 dark:border-gray-700">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <div className="rounded-full bg-gray-100 dark:bg-gray-900 p-6 mb-4">
@@ -398,21 +542,21 @@ export default function JobSearchPage() {
             <div className="flex flex-wrap gap-2 justify-center">
               <Button 
                 variant="outline" 
-                onClick={() => setQuery("Software Engineer")}
+                onClick={() => setWhat("Software Engineer")}
                 className="text-sm"
               >
                 Software Engineer
               </Button>
               <Button 
                 variant="outline" 
-                onClick={() => setQuery("Product Manager")}
+                onClick={() => setWhat("Product Manager")}
                 className="text-sm"
               >
                 Product Manager
               </Button>
               <Button 
                 variant="outline" 
-                onClick={() => setQuery("Remote Developer")}
+                onClick={() => setWhat("Remote Developer")}
                 className="text-sm"
               >
                 Remote Developer
@@ -423,7 +567,7 @@ export default function JobSearchPage() {
       )}
 
       {/* Initial State */}
-      {!isSearching && results.length === 0 && !query && (
+      {!isSearching && results.length === 0 && !what && (
         <Card className="border-dashed border-2 border-gray-300 dark:border-gray-700 bg-gradient-to-br from-white to-gray-50 dark:from-[#0B0F1A] dark:to-gray-900/50">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <div className="rounded-full resumaic-gradient-green p-6 mb-4 animate-float">
@@ -477,7 +621,7 @@ export default function JobSearchPage() {
               Searching for jobs...
             </h3>
             <p className="text-gray-500 dark:text-gray-400">
-              Scanning {activeSource === 'google' ? 'Google Jobs' : 'our database'} for "{query}"
+              Scanning {activeSource === 'google' ? 'Google Jobs' : 'our database'} for "{what}"
             </p>
           </CardContent>
         </Card>
