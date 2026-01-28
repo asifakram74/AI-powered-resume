@@ -105,7 +105,7 @@ export const deleteCoverLetter = async (id: string): Promise<void> => {
 
 export const getCoverLetterBySlug = async (slug: string): Promise<CoverLetter> => {
   try {
-    const response = await api.get(`/public/cover-letter/${slug}`)
+    const response = await api.get(`/cover-letter/${slug}`)
     return response.data
   } catch (error) {
     console.error(`Error fetching cover letter by slug ${slug}:`, error)

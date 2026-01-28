@@ -5,5 +5,5 @@ import { ResumePage } from "../../../pages/resume/ResumeList"
 
 export default function Page() {
   const { user, profile } = useAppSelector((state) => state.auth)
-  return <ResumePage user={profile as any} />
+  return <ResumePage user={user as any} />
 }

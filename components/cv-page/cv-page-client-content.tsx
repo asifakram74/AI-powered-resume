@@ -860,7 +860,7 @@ export function CVPageClientContent() {
       layout_id: selectedTemplate.id,
       personas_id: persona.id.toString(),
       title: titleToUse,
-      job_description: jobDescription || "AI-generated CV based on persona",
+      job_description: jobDescription,
       generated_content: JSON.stringify({ ...aiResponse.optimizedCV, sectionOrder, personalInfoFieldOrder, hiddenSections, styleSettings }),
     };
 

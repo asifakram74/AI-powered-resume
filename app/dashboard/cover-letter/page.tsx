@@ -5,5 +5,5 @@ import { CoverLetterPage } from "../../../pages/cover-letter/CoverLetterList"
 
 export default function Page() {
   const { user, profile } = useAppSelector((state) => state.auth)
-  return <CoverLetterPage user={profile as any} />
+  return <CoverLetterPage user={user as any} />
 }

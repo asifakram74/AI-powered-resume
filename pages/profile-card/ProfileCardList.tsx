@@ -23,6 +23,8 @@ import {
   Phone,
   MapPin,
   Globe,
+  Paperclip,
+  X
 } from "lucide-react"
 import { Input } from "../../components/ui/input"
 import { Badge } from "../../components/ui/badge"
@@ -54,8 +56,16 @@ import {
 import { toast } from "sonner"
 import { PageProps } from "../../types/page-props"
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
-import { getCVs, CV } from "../../lib/redux/service/resumeService"
-import { getCoverLetters, CoverLetter } from "../../lib/redux/service/coverLetterService"
+import {
+  getAllCVs,
+  getCVs,
+  CV
+} from "../../lib/redux/service/resumeService"
+import {
+  getAllCoverLetters,
+  getCoverLetters,
+  CoverLetter
+} from "../../lib/redux/service/coverLetterService"
 
 export function ProfileCardList({ user }: PageProps) {
   const [profileCards, setProfileCards] = useState<ProfileCard[]>([])
@@ -82,16 +92,84 @@ export function ProfileCardList({ user }: PageProps) {
     }
   })
 
-  // Attachment states (kept from your original code)
-  const [isAttachCVOpen, setIsAttachCVOpen] = useState(false)
-  const [isAttachCoverLetterOpen, setIsAttachCoverLetterOpen] = useState(false)
-  const [selectedCardForAttachment, setSelectedCardForAttachment] = useState<ProfileCard | null>(null)
   const [availableCVs, setAvailableCVs] = useState<CV[]>([])
   const [availableCoverLetters, setAvailableCoverLetters] = useState<CoverLetter[]>([])
+
+  const [customLinkTitle, setCustomLinkTitle] = useState("")
+  const [customLinkUrl, setCustomLinkUrl] = useState("")
+  
+  const [viewingAttachments, setViewingAttachments] = useState<ProfileCard | null>(null)
 
   useEffect(() => {
     fetchProfileCards()
   }, [])
+
+  const addCustomLink = () => {
+    if (!customLinkTitle || !customLinkUrl) return
+    const newLink = {
+      id: Date.now().toString(),
+      type: 'custom',
+      title: customLinkTitle,
+      url: customLinkUrl
+    } as const
+    const currentLinks = formData.social_links?.custom_links || []
+    setFormData({
+      ...formData,
+      social_links: {
+        ...formData.social_links,
+        custom_links: [...currentLinks, newLink]
+      }
+    })
+    setCustomLinkTitle("")
+    setCustomLinkUrl("")
+  }
+
+  const removeLink = (index: number) => {
+    const currentLinks = formData.social_links?.custom_links || []
+    const newLinks = [...currentLinks]
+    newLinks.splice(index, 1)
+    setFormData({
+      ...formData,
+      social_links: {
+        ...formData.social_links,
+        custom_links: newLinks
+      }
+    })
+  }
+  
+  const addResourceLink = (type: 'cv' | 'cover_letter', item: CV | CoverLetter) => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : ''
+    let url = ''
+    let title = ''
+    
+    if (type === 'cv') {
+      const cv = item as CV
+      url = `${origin}/cv-card/${cv.public_slug}`
+      title = cv.title || `Resume #${cv.id}`
+    } else {
+      const cl = item as CoverLetter
+      url = `${origin}/cover-letter/${cl.public_slug}`
+      title = `Cover Letter for ${cl.job_description?.substring(0, 20)}...`
+    }
+
+    const newLink = {
+      id: Date.now().toString(),
+      type,
+      title,
+      url
+    } as const
+
+    const currentLinks = formData.social_links?.custom_links || []
+    setFormData({
+      ...formData,
+      social_links: {
+        ...formData.social_links,
+        custom_links: [...currentLinks, newLink]
+      }
+    })
+    
+    toast.success(`${type === 'cv' ? 'Resume' : 'Cover Letter'} attached`)
+  }
 
   const fetchProfileCards = async () => {
     try {
@@ -143,16 +221,30 @@ export function ProfileCardList({ user }: PageProps) {
     }
   }
 
-  const openCreateDialog = () => {
+  const openCreateDialog = async () => {
     setEditingCard(null)
     resetForm()
+    
+    // Fetch available resources
+    try {
+      const isAdmin = user?.role?.toLowerCase() === 'admin'
+      const [cvs, cls] = await Promise.all([
+        isAdmin ? getAllCVs() : getCVs(user?.id?.toString() || ""),
+        isAdmin ? getAllCoverLetters() : getCoverLetters(user?.id?.toString() || "")
+      ])
+      setAvailableCVs(cvs)
+      setAvailableCoverLetters(cls)
+    } catch (error) {
+      console.error("Failed to fetch resources:", error)
+    }
+
     setIsCreateDialogOpen(true)
   }
 
-  const openEditDialog = (card: ProfileCard) => {
+  const openEditDialog = async (card: ProfileCard) => {
     setEditingCard(card)
     // Parse social_links string back to object
-    let socialLinks = { linkedin: "", github: "", twitter: "" }
+    let socialLinks: any = { linkedin: "", github: "", twitter: "", custom_links: [] }
     if (card.social_links && typeof card.social_links === 'string') {
       try {
         socialLinks = JSON.parse(card.social_links)
@@ -160,9 +252,14 @@ export function ProfileCardList({ user }: PageProps) {
         console.error("Failed to parse social links:", e)
       }
     } else if (typeof card.social_links === 'object') {
-      socialLinks = card.social_links as any
+      socialLinks = card.social_links
     }
     
+    // Ensure custom_links exists
+    if (!socialLinks.custom_links) {
+      socialLinks.custom_links = []
+    }
+
     setFormData({
       full_name: card.full_name || "",
       job_title: card.job_title || "",
@@ -176,6 +273,20 @@ export function ProfileCardList({ user }: PageProps) {
       profile_picture: card.profile_picture,
       social_links: socialLinks
     })
+    
+    // Fetch available resources
+    try {
+      const isAdmin = user?.role?.toLowerCase() === 'admin'
+      const [cvs, cls] = await Promise.all([
+        isAdmin ? getAllCVs() : getCVs(user?.id?.toString() || ""),
+        isAdmin ? getAllCoverLetters() : getCoverLetters(user?.id?.toString() || "")
+      ])
+      setAvailableCVs(cvs)
+      setAvailableCoverLetters(cls)
+    } catch (error) {
+      console.error("Failed to fetch resources:", error)
+    }
+
     setIsCreateDialogOpen(true)
   }
 
@@ -193,7 +304,8 @@ export function ProfileCardList({ user }: PageProps) {
       social_links: {
         linkedin: "",
         github: "",
-        twitter: ""
+        twitter: "",
+        custom_links: []
       }
     })
   }
@@ -203,60 +315,6 @@ export function ProfileCardList({ user }: PageProps) {
     card.job_title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     card.email?.toLowerCase().includes(searchTerm.toLowerCase())
   )
-
-  // Attachment Logic (kept from your original code)
-  const handleAttachCV = async (cvId: string) => {
-    if (!selectedCardForAttachment) return
-    try {
-      // Note: You'll need to update your backend to support this
-      // For now, we'll keep the attachment logic as is
-      await updateProfileCard(selectedCardForAttachment.id, {
-        // You might want to add a field for CV ID in your backend
-      })
-      toast.success("Resume attached successfully")
-      setIsAttachCVOpen(false)
-      fetchProfileCards()
-    } catch (error) {
-      toast.error("Failed to attach resume")
-    }
-  }
-
-  const handleAttachCoverLetter = async (clId: string) => {
-    if (!selectedCardForAttachment) return
-    try {
-      // Note: You'll need to update your backend to support this
-      await updateProfileCard(selectedCardForAttachment.id, {
-        // You might want to add a field for cover letter ID in your backend
-      })
-      toast.success("Cover letter attached successfully")
-      setIsAttachCoverLetterOpen(false)
-      fetchProfileCards()
-    } catch (error) {
-      toast.error("Failed to attach cover letter")
-    }
-  }
-
-  const openAttachCVDialog = async (card: ProfileCard) => {
-    setSelectedCardForAttachment(card)
-    try {
-      const cvs = await getCVs(user?.id?.toString() || "")
-      setAvailableCVs(cvs)
-      setIsAttachCVOpen(true)
-    } catch (error) {
-      toast.error("Failed to fetch resumes")
-    }
-  }
-
-  const openAttachCoverLetterDialog = async (card: ProfileCard) => {
-    setSelectedCardForAttachment(card)
-    try {
-      const cls = await getCoverLetters(user?.id?.toString() || "")
-      setAvailableCoverLetters(cls)
-      setIsAttachCoverLetterOpen(true)
-    } catch (error) {
-      toast.error("Failed to fetch cover letters")
-    }
-  }
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -383,31 +441,36 @@ export function ProfileCardList({ user }: PageProps) {
                       {formatDate(card.created_at)}
                     </span>
                   </div>
+
+                  {/* Attachments Button */}
+                  {(() => {
+                    let links: any[] = []
+                    try {
+                      const social = typeof card.social_links === 'string' ? JSON.parse(card.social_links) : card.social_links
+                      links = social?.custom_links || []
+                    } catch (e) {}
+
+                    if (links.length > 0) {
+                      return (
+                        <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="w-full text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:border-emerald-200 dark:hover:border-emerald-800 transition-colors"
+                            onClick={() => setViewingAttachments(card)}
+                          >
+                            <Paperclip className="mr-2 h-3.5 w-3.5" /> 
+                            View Attachments ({links.length})
+                          </Button>
+                        </div>
+                      )
+                    }
+                    return null
+                  })()}
                 </div>
               </CardContent>
-              <CardFooter className="bg-gray-50 dark:bg-gray-900/50 p-4 flex flex-col gap-2">
-                <div className="flex w-full gap-2">
-                  {/* Attachment buttons - you can modify these based on your actual attachment logic */}
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1 text-xs"
-                    onClick={() => openAttachCVDialog(card)}
-                  >
-                    <FileText className="mr-1.5 h-3.5 w-3.5" /> 
-                    Attach CV
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1 text-xs"
-                    onClick={() => openAttachCoverLetterDialog(card)}
-                  >
-                    <Mail className="mr-1.5 h-3.5 w-3.5" /> 
-                    Attach CL
-                  </Button>
-                </div>
-                <Button variant="secondary" size="sm" className="w-full text-xs" asChild>
+              <CardFooter className="bg-gray-50 dark:bg-gray-900/50 p-4">
+                <Button variant="secondary" size="sm" className="w-full text-xs font-medium hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-900/20 dark:hover:text-emerald-400 transition-colors" asChild>
                   <a href={`/profiles-card/${card.public_slug}`} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="mr-1.5 h-3.5 w-3.5" /> View Public Page
                   </a>
@@ -566,6 +629,101 @@ export function ProfileCardList({ user }: PageProps) {
               </div>
             </div>
 
+            <div className="space-y-3 pt-2 border-t">
+              <Label>Attached Links</Label>
+              
+              {/* List of links */}
+              <div className="space-y-2">
+                {formData.social_links?.custom_links?.map((link, index) => (
+                  <div key={index} className="flex items-center justify-between p-2 border rounded-md bg-gray-50 dark:bg-gray-900">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      {link.type === 'cv' && <FileText className="h-4 w-4 text-blue-500" />}
+                      {link.type === 'cover_letter' && <Mail className="h-4 w-4 text-green-500" />}
+                      {link.type === 'custom' && <ExternalLink className="h-4 w-4 text-gray-500" />}
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-sm font-medium truncate">{link.title}</span>
+                        <span className="text-xs text-gray-500 truncate">{link.url}</span>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={() => removeLink(index)} className="text-red-500 hover:text-red-700">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                {(!formData.social_links?.custom_links || formData.social_links.custom_links.length === 0) && (
+                  <p className="text-sm text-gray-500 italic">No links attached yet.</p>
+                )}
+              </div>
+
+              {/* Add Resource Buttons */}
+              <div className="flex gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="flex-1">
+                      <FileText className="mr-2 h-4 w-4" /> Attach Resume
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    {availableCVs.length === 0 ? (
+                      <DropdownMenuItem disabled>No resumes found</DropdownMenuItem>
+                    ) : (
+                      availableCVs.map(cv => (
+                        <DropdownMenuItem key={cv.id} onClick={() => addResourceLink('cv', cv)}>
+                          {cv.title || `Resume #${cv.id}`}
+                        </DropdownMenuItem>
+                      ))
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="flex-1">
+                      <Mail className="mr-2 h-4 w-4" /> Attach Cover Letter
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    {availableCoverLetters.length === 0 ? (
+                      <DropdownMenuItem disabled>No cover letters found</DropdownMenuItem>
+                    ) : (
+                      availableCoverLetters.map(cl => (
+                        <DropdownMenuItem key={cl.id} onClick={() => addResourceLink('cover_letter', cl)}>
+                          {cl.job_description?.substring(0, 20) || `CL #${cl.id}`}...
+                        </DropdownMenuItem>
+                      ))
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              {/* Add Custom Link */}
+              <div className="flex items-end gap-2 pt-2">
+                <div className="flex-1 space-y-2">
+                  <Label htmlFor="customLinkTitle" className="text-xs">Custom Link Title</Label>
+                  <Input 
+                    id="customLinkTitle"
+                    value={customLinkTitle}
+                    onChange={(e) => setCustomLinkTitle(e.target.value)}
+                    placeholder="e.g. My Portfolio"
+                    className="h-8"
+                  />
+                </div>
+                <div className="flex-1 space-y-2">
+                  <Label htmlFor="customLinkUrl" className="text-xs">URL</Label>
+                  <Input 
+                    id="customLinkUrl"
+                    value={customLinkUrl}
+                    onChange={(e) => setCustomLinkUrl(e.target.value)}
+                    placeholder="https://..."
+                    className="h-8"
+                  />
+                </div>
+                <Button onClick={addCustomLink} size="sm" className="h-8 mb-[1px]" disabled={!customLinkTitle || !customLinkUrl}>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="profile_picture">Profile Picture URL</Label>
               <Input 
@@ -585,62 +743,60 @@ export function ProfileCardList({ user }: PageProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Attach CV Dialog (kept from original) */}
-      <Dialog open={isAttachCVOpen} onOpenChange={setIsAttachCVOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Attach Resume</DialogTitle>
-            <DialogDescription>Select a resume to attach to this profile card.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
-            {availableCVs.length === 0 ? (
-              <p className="text-center text-gray-500">No resumes found. Please create one first.</p>
-            ) : (
-              <div className="grid gap-2">
-                {availableCVs.map(cv => (
-                  <div 
-                    key={cv.id} 
-                    className={`p-3 border rounded-lg cursor-pointer hover:border-green-500 hover:bg-green-50 transition-colors ${selectedCardForAttachment?.id === cv.id ? 'border-green-500 bg-green-50 ring-1 ring-green-500' : 'border-gray-200'}`}
-                    onClick={() => handleAttachCV(cv.id)}
-                  >
-                    <div className="font-medium">{cv.title || `Resume #${cv.id}`}</div>
-                    <div className="text-xs text-gray-500">Updated: {formatDate(cv.updated_at)}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Attach CV Dialog (kept from original) - REMOVED */}
+      {/* Attach Cover Letter Dialog (kept from original) - REMOVED */}
 
-      {/* Attach Cover Letter Dialog (kept from original) */}
-      <Dialog open={isAttachCoverLetterOpen} onOpenChange={setIsAttachCoverLetterOpen}>
-        <DialogContent>
+      {/* View Attachments Dialog */}
+      <Dialog open={!!viewingAttachments} onOpenChange={(open) => !open && setViewingAttachments(null)}>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Attach Cover Letter</DialogTitle>
-            <DialogDescription>Select a cover letter to attach to this profile card.</DialogDescription>
+            <DialogTitle>Attachments</DialogTitle>
+            <DialogDescription>
+              Links attached to {viewingAttachments?.full_name}'s profile card.
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
-            {availableCoverLetters.length === 0 ? (
-              <p className="text-center text-gray-500">No cover letters found. Please create one first.</p>
-            ) : (
-              <div className="grid gap-2">
-                {availableCoverLetters.map(cl => (
-                  <div 
-                    key={cl.id} 
-                    className={`p-3 border rounded-lg cursor-pointer hover:border-green-500 hover:bg-green-50 transition-colors ${selectedCardForAttachment?.id === cl.id ? 'border-green-500 bg-green-50 ring-1 ring-green-500' : 'border-gray-200'}`}
-                    onClick={() => handleAttachCoverLetter(cl.id)}
-                  >
-                    <div className="font-medium">Cover Letter #{cl.id}</div>
-                    <div className="text-xs text-gray-500">
-                      Job: {cl.job_description?.substring(0, 30) || "No description"}...
-                    </div>
-                    <div className="text-xs text-gray-500">Created: {formatDate(cl.created_at)}</div>
+          <div className="space-y-3 py-4">
+            {(() => {
+              if (!viewingAttachments) return null
+              let links: any[] = []
+              try {
+                const social = typeof viewingAttachments.social_links === 'string' 
+                  ? JSON.parse(viewingAttachments.social_links) 
+                  : viewingAttachments.social_links
+                links = social?.custom_links || []
+              } catch (e) {}
+
+              if (links.length === 0) return <p className="text-center text-gray-500">No attachments found.</p>
+
+              return links.map((link: any, i: number) => (
+                <a 
+                  key={i} 
+                  href={link.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:border-emerald-200 dark:hover:border-emerald-800 transition-all group overflow-hidden w-full"
+                >
+                  <div className="h-10 w-10 flex-shrink-0 flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 shadow-sm group-hover:scale-105 transition-transform">
+                    {link.type === 'cv' && <FileText className="h-5 w-5 text-blue-500" />}
+                    {link.type === 'cover_letter' && <Mail className="h-5 w-5 text-green-500" />}
+                    {link.type === 'custom' && <ExternalLink className="h-5 w-5 text-gray-400 group-hover:text-emerald-500" />}
                   </div>
-                ))}
-              </div>
-            )}
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-gray-900 dark:text-gray-100 truncate group-hover:text-emerald-700 dark:group-hover:text-emerald-400" title={link.title}>
+                      {link.title}
+                    </div>
+                    <div className="text-xs text-gray-500 truncate group-hover:text-emerald-600/70 dark:group-hover:text-emerald-400/70">
+                      {link.type === 'cv' ? 'Resume' : link.type === 'cover_letter' ? 'Cover Letter' : 'External Link'}
+                    </div>
+                  </div>
+                  <ExternalLink className="h-4 w-4 flex-shrink-0 text-gray-400 group-hover:text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </a>
+              ))
+            })()}
           </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewingAttachments(null)}>Close</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

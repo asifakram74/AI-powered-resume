@@ -46,6 +46,7 @@ import {
 } from "../../components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
 import { CoverLetterGenerator } from "./AddEditCoverLetter"
+import { ShareDialog } from "../../components/cover-letter/share-dialog"
 import {
   getAllCoverLetters,
   getCoverLetters,
@@ -87,6 +88,8 @@ export function CoverLetterPage({ user }: PageProps) {
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false)
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false)
   const [letterToDelete, setLetterToDelete] = useState<CoverLetter | null>(null)
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
+  const [selectedShareLetter, setSelectedShareLetter] = useState<CoverLetter | null>(null)
 
   const tones = [
     {
@@ -204,12 +207,8 @@ export function CoverLetterPage({ user }: PageProps) {
       })
       return
     }
-    
-    const url = `${window.location.origin}/cover-letter?slug=${letter.public_slug}`
-    navigator.clipboard.writeText(url)
-    toast.success("Public link copied!", {
-      description: "The public link has been copied to your clipboard."
-    })
+    setSelectedShareLetter(letter)
+    setIsShareDialogOpen(true)
   }
 
   const handleGenerate = async (jobDescription: string, tone: string, cvId: string, userId: string) => {
@@ -776,6 +775,12 @@ export function CoverLetterPage({ user }: PageProps) {
             </div>
           </DialogContent>
           </Dialog>
+
+          <ShareDialog
+            isOpen={isShareDialogOpen}
+            onClose={() => setIsShareDialogOpen(false)}
+            publicSlug={selectedShareLetter?.public_slug || ""}
+          />
 
           {/* Upgrade Plan Dialog */}
           <Dialog open={isUpgradeDialogOpen} onOpenChange={setIsUpgradeDialogOpen}>

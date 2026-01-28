@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react"
 import { useAppSelector } from "../../lib/redux/hooks"
 import type { RootState } from "../../lib/redux/store"
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
+import { formatDistanceToNow } from "date-fns"
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "../../components/ui/card"
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs"
@@ -27,7 +28,7 @@ import {
   type Pipeline,
   type JobSearchFilters,
 } from "../../lib/redux/service/jobTrackerService"
-import { ExternalLink, Loader2, Plus, Search, Sparkles, Building, MapPin, Briefcase, Filter, X, Check } from "lucide-react"
+import { ExternalLink, Loader2, Plus, Search, Sparkles, Building, MapPin, Briefcase, Filter, X, Check, Calendar, DollarSign, Clock, Globe, Tag } from "lucide-react"
 import { Badge } from "../../components/ui/badge"
 import { Avatar, AvatarFallback } from "../../components/ui/avatar"
 
@@ -40,7 +41,18 @@ function firstString(obj: any, keys: string[]) {
 }
 
 function firstUrl(obj: any) {
-  return firstString(obj, ["url", "apply_url", "applyUrl", "job_url", "jobUrl", "link"])
+  return firstString(obj, ["url", "apply_url", "applyUrl", "job_url", "jobUrl", "link", "redirect_url"])
+}
+
+function formatSalary(min?: number, max?: number) {
+  if (!min && !max) return null
+  
+  const fmt = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
+  
+  if (min && max && min !== max) {
+    return `${fmt(min)} - ${fmt(max)}`
+  }
+  return fmt(min || max || 0)
 }
 
 function todayYMD() {
@@ -60,8 +72,72 @@ export default function JobSearchPage() {
   const [what, setWhat] = useState("")
   const [where, setWhere] = useState("")
   const [isSearching, setIsSearching] = useState(false)
-  const [results, setResults] = useState<JobSearchResult[]>([])
+  
+  // Dual Storage for Persistence
+  const [internalResults, setInternalResults] = useState<JobSearchResult[]>([])
+  const [googleResults, setGoogleResults] = useState<JobSearchResult[]>([])
+  const [isLoaded, setIsLoaded] = useState(false)
+  
+  const currentResults = activeSource === "internal" ? internalResults : googleResults
+  
   const [showFilters, setShowFilters] = useState(false)
+
+  // Load from localStorage
+  useEffect(() => {
+    const savedInternal = localStorage.getItem('jobSearch_internalResults')
+    const savedGoogle = localStorage.getItem('jobSearch_googleResults')
+    
+    if (savedInternal) {
+      try {
+        setInternalResults(JSON.parse(savedInternal))
+      } catch (e) {
+        console.error('Failed to parse saved internal results:', e)
+      }
+    }
+    
+    if (savedGoogle) {
+      try {
+        setGoogleResults(JSON.parse(savedGoogle))
+      } catch (e) {
+        console.error('Failed to parse saved google results:', e)
+      }
+    }
+    setIsLoaded(true)
+  }, [])
+
+  // Save to localStorage
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem('jobSearch_internalResults', JSON.stringify(internalResults))
+    }
+  }, [internalResults, isLoaded])
+
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem('jobSearch_googleResults', JSON.stringify(googleResults))
+    }
+  }, [googleResults, isLoaded])
+
+  const clearResults = (source?: "internal" | "google" | "all") => {
+    if (source === "internal" || source === "all") {
+      setInternalResults([])
+      localStorage.removeItem('jobSearch_internalResults')
+    }
+    if (source === "google" || source === "all") {
+      setGoogleResults([])
+      localStorage.removeItem('jobSearch_googleResults')
+    }
+    if (!source) {
+      // Clear current tab results
+      if (activeSource === "internal") {
+        setInternalResults([])
+        localStorage.removeItem('jobSearch_internalResults')
+      } else {
+        setGoogleResults([])
+        localStorage.removeItem('jobSearch_googleResults')
+      }
+    }
+  }
 
   // Advanced Filters
   const [sortBy, setSortBy] = useState<"relevance" | "date" | "salary">("relevance")
@@ -152,21 +228,34 @@ export default function JobSearchPage() {
         data = await searchJobs(filters)
       }
       
-      setResults(data)
+      if (activeSource === "google") {
+        setGoogleResults(data)
+      } else {
+        setInternalResults(data)
+      }
+      
       if (data.length === 0) {
         showErrorToast("No Results", "Try different keywords or filters")
       }
     } catch (e: any) {
       showErrorToast("Failed to search jobs", e?.message || "Please try again")
-      setResults([])
+      if (activeSource === "google") {
+        setGoogleResults([])
+      } else {
+        setInternalResults([])
+      }
     } finally {
       setIsSearching(false)
     }
   }
 
   const openAddFromResult = (job: JobSearchResult) => {
-    const company = firstString(job, ["company_name", "company", "employer", "organization", "source"])
-    const title = firstString(job, ["job_title", "title", "position", "role"])
+    const company = typeof job.company === 'object' 
+      ? job.company?.display_name 
+      : firstString(job, ["company_name", "company", "employer", "organization", "source"])
+      
+    const title = job.title || firstString(job, ["job_title", "title", "position", "role"])
+
     setAddCompany(company || "")
     setAddTitle(title || "")
     setAddDate(todayYMD())
@@ -420,105 +509,164 @@ export default function JobSearchPage() {
       </Card>
 
       {/* Results Section */}
-      {results.length > 0 && (
+      {currentResults.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-              Found {results.length} {results.length === 1 ? 'Job' : 'Jobs'}
+              Found {currentResults.length} {currentResults.length === 1 ? 'Job' : 'Jobs'}
             </h2>
-            <Badge variant="outline" className="border-[#70E4A8]/30 text-[#70E4A8]">
-              {activeSource === 'google' ? 'Google Search' : 'Internal Search'}
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => clearResults()}
+                className="text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10"
+              >
+                <X className="h-4 w-4 mr-1" />
+                Clear
+              </Button>
+              <Badge variant="outline" className="border-[#70E4A8]/30 text-[#70E4A8]">
+                {activeSource === 'google' ? 'Google Search' : 'Internal Search'}
+              </Badge>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {results.map((job, idx) => {
-              const title = firstString(job, ["job_title", "title", "position", "role"]) || "Untitled role"
-              const company = firstString(job, ["company_name", "company", "employer", "organization"]) || "Unknown company"
-              const location = firstString(job, ["location", "job_location", "city", "country"])
-              const url = firstUrl(job)
-              const salary = firstString(job, ["salary", "compensation", "pay_range"])
-              const description = firstString(job, ["description", "snippet", "summary"])
+            {currentResults.map((job, idx) => {
+              // Extract data with fallbacks for nested objects
+              const title = job.title || firstString(job, ["job_title", "position", "role"]) || "Untitled role"
               
+              // Company handling
+              const companyName = typeof job.company === 'object' 
+                ? job.company?.display_name 
+                : firstString(job, ["company_name", "company", "employer", "organization"]) || "Unknown company"
+                
+              // Location handling
+              const locationName = typeof job.location === 'object' 
+                ? job.location?.display_name 
+                : firstString(job, ["location", "job_location", "city", "country"])
+
+              // Category handling
+              const categoryLabel = typeof job.category === 'object'
+                ? job.category?.label
+                : job.category
+
+              const url = job.redirect_url || firstUrl(job)
+              const salary = formatSalary(job.salary_min, job.salary_max) || firstString(job, ["salary", "compensation", "pay_range"])
+              const description = firstString(job, ["description", "snippet", "summary"])
+              const created = job.created ? new Date(job.created) : null
+              
+              const contractTime = job.contract_time ? job.contract_time.replace(/_/g, ' ') : null
+              const contractType = job.contract_type ? job.contract_type.replace(/_/g, ' ') : null
+
               return (
                 <Card 
-                  key={`${company}-${title}-${idx}`} 
-                  className="border-[#70E4A8]/20 hover:border-[#70E4A8]/40 hover:shadow-lg transition-all duration-300 group overflow-hidden flex flex-col"
+                  key={`${companyName}-${title}-${idx}`} 
+                  className="border-[#70E4A8]/20 hover:border-[#70E4A8]/40 hover:shadow-lg transition-all duration-300 group overflow-hidden flex flex-col h-full bg-white dark:bg-[#0B0F1A] p-0 gap-0"
                 >
                   <div className="absolute top-0 left-0 w-1 h-full resumaic-gradient-green opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-12 w-12 border-2 border-gray-200 dark:border-gray-800">
-                          <AvatarFallback className="bg-[#70E4A8]/20 text-[#70E4A8] font-semibold">
-                            {getCompanyInitials(company)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <CardTitle className="text-lg font-bold text-gray-900 dark:text-gray-100 line-clamp-1">
-                            {title}
-                          </CardTitle>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Building className="h-4 w-4 text-gray-400" />
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                              {company}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                  
+                  <CardHeader className="p-4 pb-2 relative">
+                     <div className="flex justify-between items-start gap-3">
+                         <div className="flex gap-3 overflow-hidden">
+                            <Avatar className="h-10 w-10 sm:h-12 sm:w-12 border-2 border-gray-100 dark:border-gray-800 shrink-0">
+                              <AvatarFallback className="bg-gradient-to-br from-[#70E4A8]/20 to-[#70E4A8]/5 text-[#70E4A8] font-bold text-sm sm:text-base">
+                                {getCompanyInitials(companyName)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0 flex-1">
+                               <h3 className="font-bold text-base sm:text-lg leading-tight pr-2 text-gray-900 dark:text-gray-100 line-clamp-2 sm:line-clamp-3 mb-1" title={title}>
+                                 {title}
+                               </h3>
+                               <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                                 <Building className="h-3.5 w-3.5 shrink-0" />
+                                 <span className="truncate font-medium">{companyName}</span>
+                               </div>
+                            </div>
+                         </div>
+                         {created && (
+                            <div className="shrink-0 flex items-center text-[10px] sm:text-xs text-gray-400 whitespace-nowrap bg-gray-50 dark:bg-gray-900 px-2 py-1 rounded-md border border-gray-100 dark:border-gray-800 mt-0.5">
+                               <Clock className="h-3 w-3 mr-1" />
+                               {formatDistanceToNow(created, { addSuffix: true }).replace("about ", "")}
+                            </div>
+                         )}
+                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-4 flex-1 flex flex-col">
-                    <div className="space-y-2 flex-1">
-                      {location && (
-                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                          <MapPin className="h-4 w-4 shrink-0" />
-                          <span>{location}</span>
-                        </div>
-                      )}
-                      {salary && (
-                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                          <Briefcase className="h-4 w-4 shrink-0" />
-                          <span>{salary}</span>
-                        </div>
-                      )}
-                      {description && (
-                         <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-3 mt-2">
-                           {description.replace(/<[^>]*>/g, '')}
-                         </p>
-                      )}
-                    </div>
+                  
+                  <CardContent className="flex-1 space-y-3 p-4 pt-2">
+                     {/* Tags Row */}
+                     <div className="flex flex-wrap gap-2 text-xs">
+                        {locationName && (
+                           <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 border-transparent font-normal">
+                             <MapPin className="h-3 w-3 mr-1" />
+                             {locationName}
+                           </Badge>
+                        )}
+                        {salary && (
+                           <Badge variant="secondary" className="bg-[#70E4A8]/10 text-[#0ea5e9] dark:text-[#70E4A8] hover:bg-[#70E4A8]/20 border-transparent font-normal">
+                             <DollarSign className="h-3 w-3 mr-1" />
+                             {salary}
+                           </Badge>
+                        )}
+                        {categoryLabel && (
+                           <Badge variant="outline" className="text-gray-500 font-normal border-dashed">
+                              <Tag className="h-3 w-3 mr-1" />
+                              {categoryLabel}
+                           </Badge>
+                        )}
+                        {contractTime && (
+                           <Badge variant="outline" className="text-gray-500 capitalize font-normal">
+                              {contractTime}
+                           </Badge>
+                        )}
+                        {contractType && (
+                           <Badge variant="outline" className="text-gray-500 capitalize font-normal">
+                              {contractType}
+                           </Badge>
+                        )}
+                     </div>
 
-                    <div className="flex items-center gap-2 pt-2 mt-auto">
-                      <Button
-                        className="resumaic-gradient-green text-white hover:opacity-90 flex-1 button-press"
-                        onClick={() => openAddFromResult(job)}
-                        disabled={pipelines.length === 0 || cvs.length === 0}
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add to Wishlist
-                      </Button>
-                      {url && (
-                        <Button
-                          variant="outline"
-                          className="border-[#70E4A8]/30 hover:border-[#70E4A8]/50 hover:bg-[#70E4A8]/10"
-                          onClick={() => window.open(url, "_blank", "noopener,noreferrer")}
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-
-                    {pipelines.length === 0 ? (
-                      <div className="text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 p-2 rounded">
-                        Create pipelines first in Applications page
-                      </div>
-                    ) : cvs.length === 0 ? (
-                      <div className="text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 p-2 rounded">
-                        Create a CV first to attach with application
-                      </div>
-                    ) : null}
+                     {/* Description */}
+                     {description && (
+                       <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-3 leading-relaxed">
+                         {description.replace(/<[^>]*>/g, '')}
+                       </p>
+                     )}
                   </CardContent>
+
+                  <CardFooter className="p-4 pt-0 flex flex-col gap-2">
+                     <div className="flex w-full gap-2">
+                        <Button
+                          className="resumaic-gradient-green text-white hover:opacity-90 flex-1 shadow-sm h-10"
+                          onClick={() => openAddFromResult(job)}
+                          disabled={pipelines.length === 0 || cvs.length === 0}
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add to Wishlist
+                        </Button>
+                        {url && (
+                           <Button
+                             variant="outline"
+                             className="px-3 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 h-10 w-10 p-0 shrink-0"
+                             onClick={() => window.open(url, "_blank", "noopener,noreferrer")}
+                             title="Apply on site"
+                           >
+                             <ExternalLink className="h-4 w-4" />
+                           </Button>
+                        )}
+                     </div>
+                     
+                     {/* Warnings */}
+                     {pipelines.length === 0 ? (
+                       <div className="w-full text-center text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/10 py-1.5 rounded">
+                         Create pipelines first
+                       </div>
+                     ) : cvs.length === 0 ? (
+                       <div className="w-full text-center text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/10 py-1.5 rounded">
+                         Create CV first
+                       </div>
+                     ) : null}
+                  </CardFooter>
                 </Card>
               )
             })}
@@ -527,7 +675,7 @@ export default function JobSearchPage() {
       )}
 
       {/* Empty State */}
-      {!isSearching && results.length === 0 && what && (
+      {!isSearching && currentResults.length === 0 && what && (
         <Card className="border-dashed border-2 border-gray-300 dark:border-gray-700">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <div className="rounded-full bg-gray-100 dark:bg-gray-900 p-6 mb-4">
@@ -567,7 +715,7 @@ export default function JobSearchPage() {
       )}
 
       {/* Initial State */}
-      {!isSearching && results.length === 0 && !what && (
+      {!isSearching && currentResults.length === 0 && !what && (
         <Card className="border-dashed border-2 border-gray-300 dark:border-gray-700 bg-gradient-to-br from-white to-gray-50 dark:from-[#0B0F1A] dark:to-gray-900/50">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <div className="rounded-full resumaic-gradient-green p-6 mb-4 animate-float">
