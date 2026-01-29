@@ -83,7 +83,7 @@ export default function ProfileCardPublicClient({ slug }: ProfileCardPublicClien
           
           <div className="flex justify-center mb-4">
             <Avatar className="h-32 w-32 border-4 border-white shadow-lg">
-              <AvatarImage src={card.profile_picture} alt={card.full_name} />
+              <AvatarImage src={card.profile_picture || "/profile-img.png"} alt={card.full_name} />
               <AvatarFallback className="text-4xl bg-emerald-100 text-emerald-600">
                 {card.full_name.charAt(0).toUpperCase()}
               </AvatarFallback>
