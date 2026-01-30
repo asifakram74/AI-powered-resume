@@ -56,6 +56,8 @@ type Props = {
 
 import { useRouter } from "next/navigation"
 
+import { trackEvent } from "../../lib/redux/service/analyticsService"
+
 export function CVHeaderActions({
   isViewMode,
   aiResponse,
@@ -101,6 +103,17 @@ export function CVHeaderActions({
     if (!publicUrl) return
     try {
       await navigator.clipboard.writeText(publicUrl)
+      
+      if (existingCV) {
+        trackEvent({
+          resource_type: 'cv',
+          resource_id: parseInt(existingCV.id), // Assuming ID can be parsed, or use resource_key
+          resource_key: existingCV.public_slug,
+          event_type: 'copy',
+          meta: { url: publicUrl }
+        })
+      }
+
       toast.success("Public link copied!", {
         description: "The public link has been copied to your clipboard."
       })
@@ -113,6 +126,17 @@ export function CVHeaderActions({
 
   const handleNativeShare = async () => {
     if (!publicUrl) return
+    
+    if (existingCV) {
+      trackEvent({
+        resource_type: 'cv',
+        resource_id: parseInt(existingCV.id),
+        resource_key: existingCV.public_slug,
+        event_type: 'share',
+        meta: { method: 'native' }
+      })
+    }
+
     if (navigator.share) {
       try {
         await navigator.share({

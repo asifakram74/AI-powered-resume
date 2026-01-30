@@ -12,6 +12,7 @@ import {
 import { Input } from "../ui/input"
 import { Copy, ExternalLink, Share2, Link2, QrCode, Download } from "lucide-react"
 import { toast } from "sonner"
+import { trackEvent } from "../../lib/redux/service/analyticsService"
 
 interface ShareDialogProps {
   isOpen: boolean
@@ -36,6 +37,14 @@ export function ShareDialog({ isOpen, onClose, publicSlug }: ShareDialogProps) {
     if (!publicUrl) return
     try {
       await navigator.clipboard.writeText(publicUrl)
+      
+      trackEvent({
+        resource_type: 'cover_letter',
+        resource_key: publicSlug,
+        event_type: 'copy',
+        meta: { url: publicUrl }
+      })
+
       toast.success("Public link copied!", {
         description: "The public link has been copied to your clipboard.",
       })
@@ -48,6 +57,14 @@ export function ShareDialog({ isOpen, onClose, publicSlug }: ShareDialogProps) {
 
   const handleNativeShare = async () => {
     if (!publicUrl) return
+    
+    trackEvent({
+      resource_type: 'cover_letter',
+      resource_key: publicSlug,
+      event_type: 'share',
+      meta: { method: 'native' }
+    })
+
     if (navigator.share) {
       try {
         await navigator.share({

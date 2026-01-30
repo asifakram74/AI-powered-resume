@@ -71,9 +71,25 @@ export default function ProfileCardPublicClient({ slug }: ProfileCardPublicClien
         title: `${card.full_name} - Profile`,
         url: window.location.href
       }).catch(console.error)
+      
+      trackEvent({
+        resource_type: 'profile_card',
+        resource_id: Number(card.id),
+        resource_key: slug,
+        event_type: 'share',
+        meta: { method: 'native' }
+      })
     } else {
       navigator.clipboard.writeText(window.location.href)
       toast.success("Link copied to clipboard")
+      
+      trackEvent({
+        resource_type: 'profile_card',
+        resource_id: Number(card.id),
+        resource_key: slug,
+        event_type: 'copy',
+        meta: { url: window.location.href }
+      })
     }
   }
 
