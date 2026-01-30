@@ -11,6 +11,7 @@ import {
   FileText, ExternalLink, Share2 
 } from "lucide-react"
 import { toast } from "sonner"
+import { trackEvent } from "../../../lib/redux/service/analyticsService"
 
 interface ProfileCardPublicClientProps {
   slug: string
@@ -28,6 +29,14 @@ export default function ProfileCardPublicClient({ slug }: ProfileCardPublicClien
         setLoading(true)
         const data = await getPublicProfileBySlug(slug)
         setCard(data)
+        
+        // Track view
+        trackEvent({
+          resource_type: 'profile_card',
+          resource_key: slug,
+          event_type: 'view',
+          referrer: document.referrer
+        })
       } catch (err) {
         console.error(err)
         setError("Failed to load profile card")

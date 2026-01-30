@@ -13,6 +13,7 @@ import {
 } from "../../../components/ui/dropdown-menu"
 import { useCVExport } from "../../../components/cv-page/use-cv-export"
 import { PublicPageLoading } from "../../../components/shared/public-page-loading"
+import { trackEvent } from "../../../lib/redux/service/analyticsService"
 
 
 
@@ -26,7 +27,9 @@ export default function CVCardClient({ slug }: CVCardClientProps) {
   const [error, setError] = useState<string | null>(null)
   const { handleExport } = useCVExport({
     selectedTemplateId: cv?.layout_id || "modern",
-    personaFullName: cv ? (JSON.parse(cv.generated_content || "{}").personalInfo?.fullName || "resume") : "resume"
+    personaFullName: cv ? (JSON.parse(cv.generated_content || "{}").personalInfo?.fullName || "resume") : "resume",
+    resourceKey: slug,
+    resourceType: 'cv'
   })
 
   useEffect(() => {
@@ -36,6 +39,15 @@ export default function CVCardClient({ slug }: CVCardClientProps) {
         setLoading(true)
         const data = await getCVBySlug(slug)
         setCV(data)
+        
+        // Track view
+        trackEvent({
+          resource_type: 'cv',
+          resource_key: slug,
+          event_type: 'view',
+          referrer: document.referrer,
+          meta: { layout: data.layout_id }
+        })
       } catch (err) {
         console.error(err)
         setError("Failed to load CV")

@@ -281,7 +281,9 @@ export function CVPageClientContent() {
 
   const { handleExport, exportAsPNG, handleDocxExport } = useCVExport({
     selectedTemplateId: selectedTemplate?.id,
-    personaFullName: persona?.full_name
+    personaFullName: persona?.full_name,
+    resourceId: cvId ? parseInt(cvId) : undefined,
+    resourceType: 'cv'
   })
 
   const defaultTemplate: CVTemplate = {

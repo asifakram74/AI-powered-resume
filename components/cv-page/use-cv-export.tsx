@@ -4,15 +4,30 @@ import { toast } from "sonner"
 import jsPDF from "jspdf"
 import * as htmlToImage from "html-to-image"
 import { showSuccessToast, showErrorToast, showLoadingToast } from "./cv-toasts"
+import { trackEvent } from "../../lib/redux/service/analyticsService"
 
 interface UseCVExportProps {
   selectedTemplateId?: string
   personaFullName?: string
+  resourceId?: number
+  resourceKey?: string
+  resourceType?: 'cv' | 'cover_letter' | 'profile_card'
 }
 
-export function useCVExport({ selectedTemplateId, personaFullName }: UseCVExportProps) {
+export function useCVExport({ selectedTemplateId, personaFullName, resourceId, resourceKey, resourceType = 'cv' }: UseCVExportProps) {
   const handleExport = async (format: "pdf" | "docx" | "png") => {
     try {
+      // Track export event
+      if (resourceId || resourceKey) {
+        trackEvent({
+          resource_type: resourceType,
+          resource_id: resourceId,
+          resource_key: resourceKey,
+          event_type: 'download',
+          meta: { format, template: selectedTemplateId }
+        })
+      }
+
       const cvElement = document.getElementById("cv-preview-content")
       if (!cvElement) {
         showErrorToast("Export Failed", "CV preview not found. Please refresh and try again.")

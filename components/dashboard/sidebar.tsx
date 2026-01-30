@@ -149,6 +149,12 @@ const regularMenuItems: SidebarItem[] = [
     icon: IdCard,
   },
   {
+    id: "analytics",
+    path: "/dashboard/analytics",
+    label: "Analytics",
+    icon: BarChart3,
+  },
+  {
     id: "job-application-system",
     label: "Job Applications",
     icon: Kanban,

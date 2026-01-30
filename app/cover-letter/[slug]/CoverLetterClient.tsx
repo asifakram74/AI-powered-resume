@@ -11,9 +11,9 @@ import {
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu"
 import { toast } from "sonner"
+import { trackEvent } from "../../../lib/redux/service/analyticsService"
 import { ShareDialog } from "../../../components/cover-letter/share-dialog"
 import { PublicPageLoading } from "../../../components/shared/public-page-loading"
-
 interface CoverLetterClientProps {
   slug: string
 }
@@ -33,12 +33,11 @@ export default function CoverLetterClient({ slug }: CoverLetterClientProps) {
         setLetter(data)
       } catch (err) {
         console.error(err)
-        setError("Failed to load cover letter")
+        setError('Failed to load cover letter')
       } finally {
         setLoading(false)
       }
     }
-
     fetchLetter()
   }, [slug])
 
@@ -64,6 +63,15 @@ export default function CoverLetterClient({ slug }: CoverLetterClientProps) {
 
   const handleDownload = () => {
     if (!letter) return
+
+    // Track download
+    trackEvent({
+      resource_type: 'cover_letter',
+      resource_key: slug,
+      event_type: 'download',
+      meta: { format: 'txt' }
+    })
+
     const element = document.createElement("a")
     const file = new Blob([letter.generated_letter], { type: "text/plain" })
     element.href = URL.createObjectURL(file)
@@ -78,6 +86,15 @@ export default function CoverLetterClient({ slug }: CoverLetterClientProps) {
 
   const handleExportCoverLetter = async (format: 'pdf' | 'docx' | 'png') => {
     if (!letter) return
+    
+    // Track download
+    trackEvent({
+      resource_type: 'cover_letter',
+      resource_key: slug,
+      event_type: 'download',
+      meta: { format }
+    })
+
     try {
       const filename = getCoverLetterFilename(letter, format)
 

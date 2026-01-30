@@ -16,12 +16,14 @@ import {
   DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu"
 import {
-  Select,
+  Select as UISelect,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select"
+import Select from "react-select"
+import { useTheme } from "next-themes"
 import { showErrorToast, showSuccessToast } from "../../components/ui/toast"
 import { getCVs, type CV } from "../../lib/redux/service/resumeService"
 import {
@@ -37,16 +39,16 @@ import {
   type JobApplication,
   type Pipeline,
 } from "../../lib/redux/service/jobTrackerService"
-import { 
-  Loader2, 
-  MoreHorizontal, 
-  Pencil, 
-  Plus, 
-  Trash2, 
-  Sparkles, 
-  TrendingUp, 
-  Target, 
-  Award, 
+import {
+  Loader2,
+  MoreHorizontal,
+  Pencil,
+  Plus,
+  Trash2,
+  Sparkles,
+  TrendingUp,
+  Target,
+  Award,
   Users,
   Briefcase,
   Calendar,
@@ -93,6 +95,8 @@ function nameEquals(p: Pipeline, name: string) {
 export default function ApplicationsPage() {
   const { user, profile } = useAppSelector((state: RootState) => state.auth)
   const userId = user?.id
+  const { theme } = useTheme()
+  const isDark = theme === "dark"
 
   const [pipelines, setPipelines] = useState<Pipeline[]>([])
   const [applications, setApplications] = useState<JobApplication[]>([])
@@ -215,7 +219,7 @@ export default function ApplicationsPage() {
         pipelineOrderStorageKey,
         JSON.stringify(pipelines.map((p) => String(p.id))),
       )
-    } catch {}
+    } catch { }
   }, [pipelines, pipelineOrderStorageKey])
 
   useEffect(() => {
@@ -455,13 +459,13 @@ export default function ApplicationsPage() {
         all.map((a) =>
           String(a.id) === String(editingApplicationId)
             ? {
-                ...a,
-                company_name: editCompany.trim(),
-                job_title: editTitle.trim(),
-                application_date: editDate,
-                pipeline_id: editPipelineId,
-                cv_id: editCvId,
-              }
+              ...a,
+              company_name: editCompany.trim(),
+              job_title: editTitle.trim(),
+              application_date: editDate,
+              pipeline_id: editPipelineId,
+              cv_id: editCvId,
+            }
             : a,
         ),
       )
@@ -754,22 +758,21 @@ export default function ApplicationsPage() {
                 if (payload?.type === "pipeline" && payload?.id !== undefined && payload?.id !== null) {
                   movePipeline(String(payload.id), null)
                 }
-              } catch {}
+              } catch { }
             }}
           >
             {pipelines.map((pipeline, index) => {
               const pid = String(pipeline.id)
               const color = normalizePipelineColor(pipeline, index)
               const items = getOrderedApps(pid)
-              
+
               return (
                 <div
                   key={pid}
-                  className={`min-w-[320px] w-[320px] rounded-xl border-2 ${
-                    dragOverPipelineId === pid 
-                      ? "border-dashed border-[#70E4A8] shadow-lg" 
+                  className={`min-w-[320px] w-[320px] rounded-xl border-2 ${dragOverPipelineId === pid
+                      ? "border-dashed border-[#70E4A8] shadow-lg"
                       : "border-gray-200/60 dark:border-gray-800/60"
-                  } bg-white/50 dark:bg-gray-900/30 backdrop-blur-sm transition-all duration-300`}
+                    } bg-white/50 dark:bg-gray-900/30 backdrop-blur-sm transition-all duration-300`}
                   onDragOver={(e) => {
                     e.preventDefault()
                     setDragOverPipelineId(pid)
@@ -787,7 +790,7 @@ export default function ApplicationsPage() {
                         return
                       }
                       moveInOrder(payload, pid, null)
-                    } catch {}
+                    } catch { }
                   }}
                 >
                   {/* Pipeline Header */}
@@ -795,8 +798,8 @@ export default function ApplicationsPage() {
                     <div className="flex items-center justify-between">
                       <div className="min-w-0 pr-2 flex-1 select-none group">
                         <div className="flex items-center gap-3">
-                          <div 
-                            className="w-3 h-3 rounded-full flex-shrink-0" 
+                          <div
+                            className="w-3 h-3 rounded-full flex-shrink-0"
                             style={{ backgroundColor: color }}
                           />
                           <div className="flex-1 min-w-0">
@@ -806,8 +809,8 @@ export default function ApplicationsPage() {
                             <div className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2">
                               <span>{items.length} applications</span>
                               {items.length > 0 && (
-                                <span className="text-xs font-medium px-1.5 py-0.5 rounded-full" 
-                                      style={{ backgroundColor: `${color}20`, color: color }}>
+                                <span className="text-xs font-medium px-1.5 py-0.5 rounded-full"
+                                  style={{ backgroundColor: `${color}20`, color: color }}>
                                   {items.length}
                                 </span>
                               )}
@@ -871,11 +874,10 @@ export default function ApplicationsPage() {
                     {items.map((app) => (
                       <div
                         key={String(app.id)}
-                        className={`group bg-white dark:bg-gray-900 border rounded-lg p-4 shadow-sm cursor-grab active:cursor-grabbing select-none relative hover:shadow-md transition-all duration-200 ${
-                          dragOverApplicationId === String(app.id)
+                        className={`group bg-white dark:bg-gray-900 border rounded-lg p-4 shadow-sm cursor-grab active:cursor-grabbing select-none relative hover:shadow-md transition-all duration-200 ${dragOverApplicationId === String(app.id)
                             ? "border-dashed border-[#70E4A8] ring-1 ring-[#70E4A8]"
                             : "border-gray-200/60 dark:border-gray-800/60"
-                        }`}
+                          }`}
                         draggable
                         onDragStart={(e) => {
                           e.dataTransfer.setData("text/plain", JSON.stringify({ id: app.id, fromPipelineId: pid }))
@@ -897,7 +899,7 @@ export default function ApplicationsPage() {
                             const payload = JSON.parse(e.dataTransfer.getData("text/plain") || "{}")
                             if (payload?.type === "pipeline") return
                             moveInOrder(payload, pid, String(app.id))
-                          } catch {}
+                          } catch { }
                         }}
                       >
                         <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -938,10 +940,10 @@ export default function ApplicationsPage() {
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
-                        
+
                         <div className="flex items-start gap-3">
                           <Avatar className="h-10 w-10 border-2 border-gray-200 dark:border-gray-800">
-                            <AvatarFallback 
+                            <AvatarFallback
                               className="text-sm font-semibold"
                               style={{ backgroundColor: `${color}20`, color: color }}
                             >
@@ -961,7 +963,7 @@ export default function ApplicationsPage() {
                             </div>
                           </div>
                         </div>
-                        
+
                         {/* Status indicator */}
                         <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
                           <div className="flex items-center justify-between">
@@ -1077,34 +1079,34 @@ export default function ApplicationsPage() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label className="text-gray-700 dark:text-gray-300">Company Name</Label>
-              <Input 
-                value={addCompany} 
-                onChange={(e) => setAddCompany(e.target.value)} 
-                placeholder="e.g., Google, Microsoft, Apple" 
+              <Input
+                value={addCompany}
+                onChange={(e) => setAddCompany(e.target.value)}
+                placeholder="e.g., Google, Microsoft, Apple"
                 className="dark:bg-gray-900 dark:border-gray-800"
               />
             </div>
             <div className="space-y-2">
               <Label className="text-gray-700 dark:text-gray-300">Job Title</Label>
-              <Input 
-                value={addTitle} 
-                onChange={(e) => setAddTitle(e.target.value)} 
-                placeholder="e.g., Senior Software Engineer, Product Manager" 
+              <Input
+                value={addTitle}
+                onChange={(e) => setAddTitle(e.target.value)}
+                placeholder="e.g., Senior Software Engineer, Product Manager"
                 className="dark:bg-gray-900 dark:border-gray-800"
               />
             </div>
             <div className="space-y-2">
               <Label className="text-gray-700 dark:text-gray-300">Application Date</Label>
-              <Input 
-                type="date" 
-                value={addDate} 
-                onChange={(e) => setAddDate(e.target.value)} 
+              <Input
+                type="date"
+                value={addDate}
+                onChange={(e) => setAddDate(e.target.value)}
                 className="dark:bg-gray-900 dark:border-gray-800"
               />
             </div>
             <div className="space-y-2">
               <Label className="text-gray-700 dark:text-gray-300">Pipeline Stage</Label>
-              <Select value={addPipelineId} onValueChange={setAddPipelineId}>
+              <UISelect value={addPipelineId} onValueChange={setAddPipelineId}>
                 <SelectTrigger className="dark:bg-gray-900 dark:border-gray-800">
                   <SelectValue placeholder="Select stage" />
                 </SelectTrigger>
@@ -1115,37 +1117,95 @@ export default function ApplicationsPage() {
                     </SelectItem>
                   ))}
                 </SelectContent>
-              </Select>
+              </UISelect>
             </div>
             <div className="space-y-2">
-              <Label className="text-gray-700 dark:text-gray-300">Attached CV (optional)</Label>
-              <Select value={addCvId} onValueChange={setAddCvId} disabled={cvs.length === 0}>
-                <SelectTrigger className="dark:bg-gray-900 dark:border-gray-800">
-                  <SelectValue placeholder="Select CV (optional)" />
-                </SelectTrigger>
-                <SelectContent className="dark:bg-[#0B0F1A] dark:border-gray-800">
-                  {cvs.map((cv) => (
-                    <SelectItem key={String(cv.id)} value={String(cv.id)} className="dark:hover:bg-gray-900">
-                      {cv.title || `CV ${cv.id}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label className="text-gray-700 dark:text-gray-300">Attached CV</Label>
+              <Select
+                value={
+                  addCvId
+                    ? {
+                      value: addCvId,
+                      label: cvs.find((c) => c.id.toString() === addCvId)?.title || "Unknown CV",
+                    }
+                    : null
+                }
+                onChange={(option) => setAddCvId(option ? option.value : "")}
+                options={cvs.map((cv) => ({
+                  value: String(cv.id),
+                  label: cv.title || `CV ${cv.id}`,
+                }))}
+                placeholder="Select CV"
+                isClearable={false}
+                isDisabled={cvs.length === 0}
+                styles={{
+                  control: (base, state) => ({
+                    ...base,
+                    minHeight: 40,
+                    borderRadius: 6,
+                    borderColor: isDark ? "#374151" : "#d1d5db",
+                    backgroundColor: isDark ? "#0b1220" : "white",
+                    boxShadow: state.isFocused
+                      ? isDark
+                        ? "0 0 0 1px rgba(112, 228, 168, 0.6)"
+                        : base.boxShadow
+                      : base.boxShadow,
+                    paddingLeft: 4,
+                    paddingRight: 4,
+                  }),
+                  menu: (base) => ({
+                    ...base,
+                    borderRadius: 6,
+                    marginTop: 4,
+                    border: isDark ? "1px solid #374151" : "1px solid #e5e7eb",
+                    backgroundColor: isDark ? "#0b1220" : "white",
+                    boxShadow: "0 4px 8px rgba(0,0,0,0.05)",
+                    zIndex: 9999,
+                  }),
+                  option: (base, state) => ({
+                    ...base,
+                    backgroundColor: state.isSelected
+                      ? isDark
+                        ? "rgba(112, 228, 168, 0.25)"
+                        : "#eff6ff"
+                      : state.isFocused
+                        ? isDark
+                          ? "#111827"
+                          : "#f3f4f6"
+                        : isDark
+                          ? "#0b1220"
+                          : "white",
+                    color: isDark ? "#e5e7eb" : "#1f2937",
+                  }),
+                  singleValue: (base) => ({
+                    ...base,
+                    color: isDark ? "#e5e7eb" : "#111827",
+                  }),
+                  placeholder: (base) => ({
+                    ...base,
+                    color: isDark ? "#9ca3af" : "#6b7280",
+                  }),
+                  input: (base) => ({
+                    ...base,
+                    color: isDark ? "#e5e7eb" : "#111827",
+                  }),
+                }}
+              />
             </div>
           </div>
 
           <DialogFooter className="mt-6">
-            <Button 
-              variant="outline" 
-              onClick={() => setIsAddOpen(false)} 
+            <Button
+              variant="outline"
+              onClick={() => setIsAddOpen(false)}
               disabled={isAdding}
               className="border-gray-300 dark:border-gray-700"
             >
               Cancel
             </Button>
-            <Button 
-              className="resumaic-gradient-green text-white hover:opacity-90 button-press" 
-              onClick={submitAddApplication} 
+            <Button
+              className="resumaic-gradient-green text-white hover:opacity-90 button-press"
+              onClick={submitAddApplication}
               disabled={isAdding}
             >
               {isAdding ? (
@@ -1190,11 +1250,10 @@ export default function ApplicationsPage() {
                   <button
                     key={c}
                     type="button"
-                    className={`h-10 rounded-lg border-2 transition-all ${
-                      newPipelineColor === c 
-                        ? "border-gray-900 dark:border-gray-100 scale-105" 
+                    className={`h-10 rounded-lg border-2 transition-all ${newPipelineColor === c
+                        ? "border-gray-900 dark:border-gray-100 scale-105"
                         : "border-gray-200 dark:border-gray-800 hover:scale-105"
-                    }`}
+                      }`}
                     style={{ backgroundColor: c }}
                     onClick={() => setNewPipelineColor(c)}
                   />
@@ -1204,9 +1263,9 @@ export default function ApplicationsPage() {
           </div>
 
           <DialogFooter className="mt-6">
-            <Button 
-              variant="outline" 
-              onClick={() => setIsCreatePipelineOpen(false)} 
+            <Button
+              variant="outline"
+              onClick={() => setIsCreatePipelineOpen(false)}
               disabled={isCreatingPipeline}
               className="border-gray-300 dark:border-gray-700"
             >
@@ -1254,35 +1313,105 @@ export default function ApplicationsPage() {
               <Label className="text-gray-700 dark:text-gray-300">Application Date</Label>
               <Input type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} className="dark:bg-gray-900 dark:border-gray-800" />
             </div>
-            <div className="space-y-2">
-              <Label className="text-gray-700 dark:text-gray-300">Pipeline Stage</Label>
-              <Select value={editPipelineId} onValueChange={setEditPipelineId}>
-                <SelectTrigger className="dark:bg-gray-900 dark:border-gray-800">
+            <div className="space-y-2 w-full">
+              <Label className="text-gray-700 dark:text-gray-300">
+                Pipeline Stage
+              </Label>
+
+              <UISelect value={editPipelineId} onValueChange={setEditPipelineId}>
+                <SelectTrigger
+                  style={{ width: "100%" }}
+                  className="dark:bg-gray-900 dark:border-gray-800"
+                >
                   <SelectValue placeholder="Select stage" />
                 </SelectTrigger>
-                <SelectContent className="dark:bg-[#0B0F1A] dark:border-gray-800">
+
+                <SelectContent
+                  className="dark:bg-[#0B0F1A] dark:border-gray-800 min-w-[var(--radix-select-trigger-width)]"
+                >
                   {pipelines.map((p) => (
-                    <SelectItem key={String(p.id)} value={String(p.id)} className="dark:hover:bg-gray-900">
+                    <SelectItem key={p.id} value={String(p.id)}>
                       {p.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
-              </Select>
+              </UISelect>
             </div>
+
+
+
             <div className="space-y-2">
               <Label className="text-gray-700 dark:text-gray-300">Attached CV</Label>
-              <Select value={editCvId} onValueChange={setEditCvId}>
-                <SelectTrigger className="dark:bg-gray-900 dark:border-gray-800">
-                  <SelectValue placeholder="Select CV" />
-                </SelectTrigger>
-                <SelectContent className="dark:bg-[#0B0F1A] dark:border-gray-800">
-                  {cvs.map((cv) => (
-                    <SelectItem key={String(cv.id)} value={String(cv.id)} className="dark:hover:bg-gray-900">
-                      {cv.title || `CV ${cv.id}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Select
+                value={
+                  editCvId
+                    ? {
+                      value: editCvId,
+                      label: cvs.find((c) => c.id.toString() === editCvId)?.title || "Unknown CV",
+                    }
+                    : null
+                }
+                onChange={(option) => setEditCvId(option ? option.value : "")}
+                options={cvs.map((cv) => ({
+                  value: String(cv.id),
+                  label: cv.title || `CV ${cv.id}`,
+                }))}
+                placeholder="Select CV"
+                isClearable={false}
+                isDisabled={cvs.length === 0}
+                styles={{
+                  control: (base, state) => ({
+                    ...base,
+                    minHeight: 40,
+                    borderRadius: 6,
+                    borderColor: isDark ? "#374151" : "#d1d5db",
+                    backgroundColor: isDark ? "#0b1220" : "white",
+                    boxShadow: state.isFocused
+                      ? isDark
+                        ? "0 0 0 1px rgba(112, 228, 168, 0.6)"
+                        : base.boxShadow
+                      : base.boxShadow,
+                    paddingLeft: 4,
+                    paddingRight: 4,
+                  }),
+                  menu: (base) => ({
+                    ...base,
+                    borderRadius: 6,
+                    marginTop: 4,
+                    border: isDark ? "1px solid #374151" : "1px solid #e5e7eb",
+                    backgroundColor: isDark ? "#0b1220" : "white",
+                    boxShadow: "0 4px 8px rgba(0,0,0,0.05)",
+                    zIndex: 9999,
+                  }),
+                  option: (base, state) => ({
+                    ...base,
+                    backgroundColor: state.isSelected
+                      ? isDark
+                        ? "rgba(112, 228, 168, 0.25)"
+                        : "#eff6ff"
+                      : state.isFocused
+                        ? isDark
+                          ? "#111827"
+                          : "#f3f4f6"
+                        : isDark
+                          ? "#0b1220"
+                          : "white",
+                    color: isDark ? "#e5e7eb" : "#1f2937",
+                  }),
+                  singleValue: (base) => ({
+                    ...base,
+                    color: isDark ? "#e5e7eb" : "#111827",
+                  }),
+                  placeholder: (base) => ({
+                    ...base,
+                    color: isDark ? "#9ca3af" : "#6b7280",
+                  }),
+                  input: (base) => ({
+                    ...base,
+                    color: isDark ? "#e5e7eb" : "#111827",
+                  }),
+                }}
+              />
             </div>
           </div>
 
@@ -1360,11 +1489,10 @@ export default function ApplicationsPage() {
                   <button
                     key={c}
                     type="button"
-                    className={`h-10 rounded-lg border-2 transition-all ${
-                      editPipelineColor === c 
-                        ? "border-gray-900 dark:border-gray-100 scale-105" 
+                    className={`h-10 rounded-lg border-2 transition-all ${editPipelineColor === c
+                        ? "border-gray-900 dark:border-gray-100 scale-105"
                         : "border-gray-200 dark:border-gray-800 hover:scale-105"
-                    }`}
+                      }`}
                     style={{ backgroundColor: c }}
                     onClick={() => setEditPipelineColor(c)}
                   />
@@ -1439,11 +1567,10 @@ export default function ApplicationsPage() {
             {pipelines.map((p, index) => (
               <div
                 key={String(p.id)}
-                className={`flex items-center gap-3 p-3 rounded-lg border transition-all cursor-move select-none ${
-                  movingPipelineId === String(p.id)
+                className={`flex items-center gap-3 p-3 rounded-lg border transition-all cursor-move select-none ${movingPipelineId === String(p.id)
                     ? "bg-gray-100 dark:bg-gray-800 border-dashed border-[#70E4A8] opacity-50"
                     : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 hover:border-[#70E4A8]/50 hover:shadow-sm"
-                }`}
+                  }`}
                 draggable
                 onDragStart={(e) => {
                   setMovingPipelineId(String(p.id))
@@ -1465,8 +1592,8 @@ export default function ApplicationsPage() {
               >
                 <GripVertical className="h-5 w-5 text-gray-400" />
                 <div className="flex-1 font-medium text-gray-900 dark:text-gray-100">{p.name}</div>
-                <div 
-                  className="w-3 h-3 rounded-full" 
+                <div
+                  className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: normalizePipelineColor(p, index) }}
                 />
               </div>
