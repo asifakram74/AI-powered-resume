@@ -12,6 +12,7 @@ export interface CV {
   created_at: string
   updated_at: string
   generated_content?: string
+  public_slug?: string
 }
 
 export interface CreateCVData {
@@ -50,6 +51,16 @@ export const getCVById = async (id: string): Promise<CV> => {
     return response.data;
   } catch (error) {
     console.error(`Error fetching CV ${id}:`, error);
+    throw error;
+  }
+};
+
+export const getCVBySlug = async (slug: string): Promise<CV> => {
+  try {
+    const response = await api.get(`/cv-card/${slug}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching CV by slug ${slug}:`, error);
     throw error;
   }
 };

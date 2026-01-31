@@ -1,10 +1,17 @@
 import { api } from "../../api"
 
+export interface AttachedLink {
+  id: string
+  type: 'cv' | 'cover_letter' | 'custom'
+  title: string
+  url: string
+}
+
 export interface SocialLinks {
   linkedin?: string
   github?: string
   twitter?: string
-  [key: string]: string | undefined
+  custom_links?: AttachedLink[]
 }
 
 export interface ProfileCard {
@@ -68,7 +75,7 @@ export const getProfileCards = async (): Promise<ProfileCard[]> => {
 // Get a single profile card by ID
 export const getProfileCardById = async (id: string | number): Promise<ProfileCard> => {
   try {
-    const response = await api.get(`/profiles/${id}`)
+    const response = await api.get(`/profile-card/${id}`)
     return response.data
   } catch (error) {
     console.error(`Error fetching profile card ${id}:`, error)
@@ -113,7 +120,7 @@ export const updateProfileCard = async (id: string | number, data: UpdateProfile
       social_links: data.social_links ? JSON.stringify(data.social_links) : undefined
     }
     
-    const response = await api.put(`/profiles/${id}`, payload)
+    const response = await api.put(`/profile-card/${id}`, payload)
     return response.data
   } catch (error) {
     console.error(`Error updating profile card ${id}:`, error)
@@ -124,7 +131,7 @@ export const updateProfileCard = async (id: string | number, data: UpdateProfile
 // Delete a profile card
 export const deleteProfileCard = async (id: string | number): Promise<void> => {
   try {
-    await api.delete(`/profiles/${id}`)
+    await api.delete(`/profile-card/${id}`)
   } catch (error) {
     console.error(`Error deleting profile card ${id}:`, error)
     throw error

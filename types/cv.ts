@@ -6,6 +6,7 @@ export interface CV {
   title: string
   job_description: string
   type?: 'job_based' | 'general'
+  public_slug?: string
   created_at: string
   updated_at: string
 }

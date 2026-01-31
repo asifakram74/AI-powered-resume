@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { Button } from "../../components/ui/button"
 import {
   DropdownMenu,
@@ -7,8 +8,15 @@ import {
   DropdownMenuTrigger,
   DropdownMenuItem,
 } from "../../components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../../components/ui/dialog"
+import { Input } from "../../components/ui/input"
 import { 
-  Download, 
   FileText, 
   LayoutGrid, 
   Wand2, 
@@ -16,8 +24,15 @@ import {
   MoreVertical,
   ChevronDown,
   FileDown,
-  ArrowLeft
+  ArrowLeft,
+  Share2,
+  Link2,
+  QrCode,
+  Copy,
+  ExternalLink,
+  Download
 } from "lucide-react"
+import { toast } from "sonner"
 
 type Props = {
   isViewMode: boolean
@@ -41,6 +56,8 @@ type Props = {
 
 import { useRouter } from "next/navigation"
 
+import { trackEvent } from "../../lib/redux/service/analyticsService"
+
 export function CVHeaderActions({
   isViewMode,
   aiResponse,
@@ -60,12 +77,89 @@ export function CVHeaderActions({
   onTabChange,
 }: Props) {
   const router = useRouter()
+  const [isShareOpen, setIsShareOpen] = useState(false)
+  const publicUrl = existingCV?.public_slug ? `${window.location.origin}/cv-card/${existingCV.public_slug}` : ""
+  const qrUrl = publicUrl
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(publicUrl)}`
+    : ""
   const navItems = [
     { id: 'overview', label: 'Overview', icon: LayoutGrid },
     { id: 'content', label: 'Content', icon: FileText },
     { id: 'customize', label: 'Customize', icon: Wand2 },
     // { id: 'ai-tools', label: 'AI Tools', icon: Sparkles },
   ]
+
+  const handleShare = () => {
+    if (!existingCV?.public_slug) {
+      toast.error("Public link not available", {
+        description: "This CV hasn't been published yet or is missing a public link."
+      })
+      return
+    }
+    setIsShareOpen(true)
+  }
+
+  const handleCopyLink = async () => {
+    if (!publicUrl) return
+    try {
+      await navigator.clipboard.writeText(publicUrl)
+      
+      if (existingCV) {
+        trackEvent({
+          resource_type: 'cv',
+          resource_id: parseInt(existingCV.id), // Assuming ID can be parsed, or use resource_key
+          resource_key: existingCV.public_slug,
+          event_type: 'copy',
+          meta: { url: publicUrl }
+        })
+      }
+
+      toast.success("Public link copied!", {
+        description: "The public link has been copied to your clipboard."
+      })
+    } catch {
+      toast.error("Copy failed", {
+        description: "Please try again."
+      })
+    }
+  }
+
+  const handleNativeShare = async () => {
+    if (!publicUrl) return
+    
+    if (existingCV) {
+      trackEvent({
+        resource_type: 'cv',
+        resource_id: parseInt(existingCV.id),
+        resource_key: existingCV.public_slug,
+        event_type: 'share',
+        meta: { method: 'native' }
+      })
+    }
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "CV",
+          url: publicUrl
+        })
+      } catch {
+        return
+      }
+    } else {
+      await handleCopyLink()
+    }
+  }
+
+  const handleDownloadQr = () => {
+    if (!qrUrl) return
+    const link = document.createElement("a")
+    link.href = qrUrl
+    link.download = "cv-qr.png"
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
 
   return (
     <div className="flex items-center justify-between w-full bg-white dark:bg-gray-900 px-3 md:px-6 py-2 rounded-b-xl shadow-sm border border-gray-200/80 dark:border-gray-800">
@@ -163,12 +257,12 @@ export function CVHeaderActions({
                   <span>Export PDF</span>
                 </DropdownMenuItem>
               )}
-              {onExportPNG && (
+              {/* {onExportPNG && (
                 <DropdownMenuItem onClick={onExportPNG} className="cursor-pointer py-2.5">
                   <FileText className="mr-2 h-4 w-4 text-blue-500" />
                   <span>Export PNG</span>
                 </DropdownMenuItem>
-              )}
+              )} */}
               {onExportDOCX && (
                 <DropdownMenuItem onClick={onExportDOCX} className="cursor-pointer py-2.5">
                   <FileText className="mr-2 h-4 w-4 text-blue-500" />
@@ -188,6 +282,10 @@ export function CVHeaderActions({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 md:w-48 rounded-xl shadow-xl border-gray-200 dark:border-gray-800 p-1.5 md:p-1">
+            <DropdownMenuItem onClick={handleShare} className="cursor-pointer py-3 md:py-2 px-3 text-sm font-medium">
+              <Share2 className="mr-3 h-4 w-4 text-blue-500" />
+              <span>Share Public Link</span>
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={onChangeTemplate} className="cursor-pointer py-3 md:py-2 px-3 text-sm font-medium">
               <LayoutGrid className="mr-3 h-4 w-4 text-gray-500" />
               <span>Change Template</span>
@@ -197,6 +295,71 @@ export function CVHeaderActions({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      <Dialog open={isShareOpen} onOpenChange={setIsShareOpen}>
+        <DialogContent className="p-0 overflow-hidden sm:max-w-3xl">
+          <div className="px-6 pt-6">
+            <DialogHeader>
+              <DialogTitle className="text-xl">Share CV</DialogTitle>
+              <DialogDescription>
+                Share your public CV link or let others scan the QR code.
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+          <div className="px-6 pb-6 grid gap-6 md:grid-cols-[1.35fr_0.65fr]">
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/40 p-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-gray-800 dark:text-gray-100">
+                  <Link2 className="h-4 w-4 text-emerald-500" />
+                  Public link
+                </div>
+                <div className="mt-3 flex gap-2">
+                  <Input readOnly value={publicUrl} className="bg-white dark:bg-gray-950 font-mono text-xs md:text-sm" />
+                  <Button variant="outline" onClick={handleCopyLink} className="gap-2">
+                    <Copy className="h-4 w-4" />
+                    Copy
+                  </Button>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Button variant="outline" onClick={() => window.open(publicUrl, "_blank")} className="gap-2">
+                    <ExternalLink className="h-4 w-4" />
+                    Open
+                  </Button>
+                  <Button className="gap-2 resumaic-gradient-green text-white hover:opacity-90" onClick={handleNativeShare}>
+                    <Share2 className="h-4 w-4" />
+                    Share
+                  </Button>
+                </div>
+              </div>
+              <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-gray-800 dark:text-gray-100">
+                  <Share2 className="h-4 w-4 text-blue-500" />
+                  Share tips
+                </div>
+                <div className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                  Use the link for email, the Share button for mobile apps, and the QR for print or live demos.
+                </div>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-4 flex flex-col items-center gap-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-gray-800 dark:text-gray-100">
+                <QrCode className="h-4 w-4 text-purple-500" />
+                QR code
+              </div>
+              {qrUrl ? (
+                <img src={qrUrl} alt="CV QR code" className="h-44 w-44 rounded-xl border border-gray-200 dark:border-gray-800 bg-white" />
+              ) : (
+                <div className="h-44 w-44 rounded-xl border border-dashed border-gray-300 dark:border-gray-700 flex items-center justify-center text-sm text-gray-500">
+                  QR unavailable
+                </div>
+              )}
+              <Button variant="outline" onClick={handleDownloadQr} disabled={!qrUrl} className="gap-2">
+                <Download className="h-4 w-4" />
+                Download QR
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -25,6 +25,9 @@ import {
   FileText,
   Crown,
   UserCircle,
+  Share2,
+  MoreVertical,
+  AlertCircle
 } from "lucide-react"
 import {
   Dialog,
@@ -33,6 +36,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "../../components/ui/dialog"
 import {
   DropdownMenu,
@@ -42,6 +46,7 @@ import {
 } from "../../components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
 import { CoverLetterGenerator } from "./AddEditCoverLetter"
+import { ShareDialog } from "../../components/cover-letter/share-dialog"
 import {
   getAllCoverLetters,
   getCoverLetters,
@@ -57,7 +62,6 @@ import {
   type CV
 } from "../../lib/redux/service/resumeService"
 import { getAllPersonas, getPersonas, type PersonaResponse } from "../../lib/redux/service/pasonaService"
-import { ConfirmDialog } from "../../components/ui/ConfirmDialog"
 import { PageProps } from "../../types/page-props";
 import { createCheckoutSession } from "../../lib/redux/service/paymentService";
 
@@ -82,6 +86,10 @@ export function CoverLetterPage({ user }: PageProps) {
   const userId = user?.id
   const [personaMap, setPersonaMap] = useState<Record<string, string>>({})
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false)
+  const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false)
+  const [letterToDelete, setLetterToDelete] = useState<CoverLetter | null>(null)
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
+  const [selectedShareLetter, setSelectedShareLetter] = useState<CoverLetter | null>(null)
 
   const tones = [
     {
@@ -191,6 +199,17 @@ export function CoverLetterPage({ user }: PageProps) {
 
     fetchCoverLetters()
   }, [user?.id, user?.role])
+
+  const handleShare = (letter: CoverLetter) => {
+    if (!letter.public_slug) {
+      toast.error("Public link not available", {
+        description: "This cover letter hasn't been published yet or is missing a public link."
+      })
+      return
+    }
+    setSelectedShareLetter(letter)
+    setIsShareDialogOpen(true)
+  }
 
   const handleGenerate = async (jobDescription: string, tone: string, cvId: string, userId: string) => {
     setIsGenerating(true)
@@ -708,6 +727,13 @@ export function CoverLetterPage({ user }: PageProps) {
 
                     {isViewMode && viewingLetter && (
                       <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => handleShare(viewingLetter)}
+                        >
+                          <Share2 className="h-4 w-4 mr-2" />
+                          Share
+                        </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="outline">
@@ -749,6 +775,12 @@ export function CoverLetterPage({ user }: PageProps) {
             </div>
           </DialogContent>
           </Dialog>
+
+          <ShareDialog
+            isOpen={isShareDialogOpen}
+            onClose={() => setIsShareDialogOpen(false)}
+            publicSlug={selectedShareLetter?.public_slug || ""}
+          />
 
           {/* Upgrade Plan Dialog */}
           <Dialog open={isUpgradeDialogOpen} onOpenChange={setIsUpgradeDialogOpen}>
@@ -923,79 +955,55 @@ export function CoverLetterPage({ user }: PageProps) {
                         </TableCell>
                         <TableCell>{new Date(letter.updated_at).toLocaleDateString()}</TableCell>
                         <TableCell>
-                          <div className="flex gap-1 justify-end">
-                            <Button
-                              variant="ghost"
-                              className="cursor-pointer"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleView(letter)
-                              }}
-                              title="View"
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
+                          <div className="flex justify-end">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="cursor-pointer"
-                                  title="Download"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <Download className="h-4 w-4" />
+                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                  <span className="sr-only">Open menu</span>
+                                  <MoreVertical className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleView(letter)}>
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  View
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleEdit(letter)}>
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleShare(letter)}>
+                                  <Share2 className="mr-2 h-4 w-4" />
+                                  Share Public Link
+                                </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleDownload(letter)}>
-                                  <FileText className="h-4 w-4 mr-2" />
-                                  Text (.txt)
+                                  <FileText className="mr-2 h-4 w-4" />
+                                  Download Text
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleExportCoverLetter(letter, 'pdf')}>
-                                  <FileText className="h-4 w-4 mr-2" />
-                                  PDF (.pdf)
+                                  <FileText className="mr-2 h-4 w-4" />
+                                  Download PDF
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleExportCoverLetter(letter, 'docx')}>
-                                  <FileText className="h-4 w-4 mr-2" />
-                                  Word (.docx)
+                                  <FileText className="mr-2 h-4 w-4" />
+                                  Download DOCX
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleExportCoverLetter(letter, 'png')}>
-                                  <FileText className="h-4 w-4 mr-2" />
-                                  Image (.png)
+                                  <FileText className="mr-2 h-4 w-4" />
+                                  Download PNG
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="text-red-600 focus:text-red-600"
+                                  onClick={() => {
+                                    setLetterToDelete(letter)
+                                    setDeleteConfirmationOpen(true)
+                                  }}
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
-                            <Button
-                              variant="ghost"
-                              className="cursor-pointer"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleEdit(letter)
-                              }}
-                              title="Edit"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <ConfirmDialog
-                              title="Delete Cover Letter"
-                              description={`Are you sure you want to delete the cover letter ${letter.job_description || 'Untitled'}? This action is irreversible and cannot be undone.`}
-                              confirmText="Delete"
-                              cancelText="Cancel"
-                              onConfirm={() => handleDelete(letter)}
-                              trigger={
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-red-600 hover:text-red-700 cursor-pointer"
-                                  title="Delete"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              }
-                            />
                           </div>
                         </TableCell>
                       </TableRow>
@@ -1082,71 +1090,55 @@ export function CoverLetterPage({ user }: PageProps) {
                         Last Modified: {new Date(letter.updated_at).toLocaleDateString()}
                       </div>
 
-                      <div className="flex gap-2 items-center">
-
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleView(letter)}
-                          className="bg-transparent p-2"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
+                      <div className="flex items-center justify-end">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="cursor-pointer"
-                              title="Download"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <Download className="h-4 w-4" />
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleView(letter)}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              View
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEdit(letter)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleShare(letter)}>
+                              <Share2 className="mr-2 h-4 w-4" />
+                              Share Public Link
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleDownload(letter)}>
-                              <FileText className="h-4 w-4 mr-2" />
-                              Text (.txt)
+                              <FileText className="mr-2 h-4 w-4" />
+                              Download Text
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleExportCoverLetter(letter, 'pdf')}>
-                              <FileText className="h-4 w-4 mr-2" />
-                              PDF (.pdf)
+                              <FileText className="mr-2 h-4 w-4" />
+                              Download PDF
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleExportCoverLetter(letter, 'docx')}>
-                              <FileText className="h-4 w-4 mr-2" />
-                              Word (.docx)
+                              <FileText className="mr-2 h-4 w-4" />
+                              Download DOCX
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleExportCoverLetter(letter, 'png')}>
-                              <FileText className="h-4 w-4 mr-2" />
-                              Image (.png)
+                              <FileText className="mr-2 h-4 w-4" />
+                              Download PNG
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-red-600 focus:text-red-600"
+                              onClick={() => {
+                                setLetterToDelete(letter)
+                                setDeleteConfirmationOpen(true)
+                              }}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(letter)}
-                          className="bg-transparent p-2"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <ConfirmDialog
-                          title="Delete Cover Letter"
-                          description={`Are you sure you want to delete this cover letter? This action is irreversible and cannot be undone.`}
-                          confirmText="Delete"
-                          cancelText="Cancel"
-                          onConfirm={() => handleDelete(letter)}
-                          trigger={
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-red-600 hover:text-red-700 bg-transparent"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          }
-                        />
                       </div>
                     </div>
                   </CardContent>
@@ -1236,6 +1228,42 @@ export function CoverLetterPage({ user }: PageProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteConfirmationOpen} onOpenChange={setDeleteConfirmationOpen}>
+        <DialogContent className="sm:max-w-md rounded-2xl dark:border-0 dark:p-[1px] dark:overflow-hidden dark:bg-transparent">
+          <div className="hidden dark:block absolute inset-0 gradient-border-moving -z-10" />
+          <div className="dark:bg-[#0B0F1A] dark:rounded-2xl p-6 h-full w-full">
+            <DialogHeader className="relative pb-2">
+              <div className="absolute -left-4 -top-4 w-24 h-24 resumaic-gradient-orange opacity-10 blur-2xl -z-10" />
+              <DialogTitle className="flex items-center gap-2 text-lg font-semibold dark:text-gray-100">
+                <AlertCircle className="h-5 w-5 text-red-500" />
+                Delete Cover Letter
+              </DialogTitle>
+              <DialogDescription className="text-gray-500 dark:text-gray-400">
+                Are you sure you want to delete this cover letter? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex gap-2 sm:justify-end mt-4">
+              <Button variant="outline" onClick={() => setDeleteConfirmationOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={async () => {
+                  if (letterToDelete) {
+                    await handleDelete(letterToDelete)
+                    setDeleteConfirmationOpen(false)
+                    setLetterToDelete(null)
+                  }
+                }}
+              >
+                Delete
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

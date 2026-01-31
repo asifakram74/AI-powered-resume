@@ -837,33 +837,6 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
         </div>
       </div>
 
-      {/* Navigation Buttons */}
-      <div className="flex justify-between items-center pt-2 pb-4">
-        <Button
-          variant="outline"
-          onClick={goToPreviousTab}
-          disabled={activeTab === tabs[0].id}
-          className="flex items-center"
-        >
-          <ChevronLeft className="h-4 w-4 mr-2" />
-          Previous
-        </Button>
-
-        <div className="text-sm text-muted-foreground">
-          {tabs.findIndex(t => t.id === activeTab) + 1} of {tabs.length}
-        </div>
-
-        <Button
-          variant="outline"
-          onClick={goToNextTab}
-          disabled={activeTab === tabs[tabs.length - 1].id}
-          className="flex items-center"
-        >
-          Next
-          <ChevronRight className="h-4 w-4 ml-2" />
-        </Button>
-      </div>
-
       {/* Tab Content */}
       <div className="tab-content">
         {/* Personal Information Tab */}
@@ -2223,33 +2196,65 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
       </div>
 
       {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4 border-t">
-        <Button variant="outline" onClick={onCancel} className="w-full sm:w-auto order-2 sm:order-1">
-          Cancel
-        </Button>
-        <Button
-          onClick={generatePersona}
-          disabled={
-            !formData.personalInfo.fullName ||
-            !formData.personalInfo.jobTitle ||
-            isGenerating
-          }
-          className="resumaic-gradient-green hover:opacity-90 button-press w-full sm:w-auto order-1 sm:order-2"
-        >
-          {isGenerating ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              Generating Persona...
-            </>
-          ) : (
-            <>
-              <Sparkles className="h-4 w-4 mr-1" />
-              Generate Persona
-            </>
-          )}
-        </Button>
-      </div>
+      {activeTab === tabs[tabs.length - 1].id ? (
+        <div className="grid grid-cols-3 items-center gap-2 pt-4 border-t">
+          <div className="flex justify-start">
+            {activeTab !== tabs[0].id && (
+              <Button variant="outline" size="icon" onClick={goToPreviousTab} aria-label="Previous">
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+
+          <div className="text-sm text-muted-foreground text-center">
+            {tabs.findIndex((t) => t.id === activeTab) + 1} of {tabs.length}
+          </div>
+
+          <div className="flex justify-end">
+            <Button
+              onClick={generatePersona}
+              disabled={!formData.personalInfo.fullName || !formData.personalInfo.jobTitle || isGenerating}
+              className="resumaic-gradient-green hover:opacity-90 button-press w-full sm:w-auto"
+            >
+              {isGenerating ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Generating Persona...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4 mr-1" />
+                  Generate Persona
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 items-center gap-2 pt-4 border-t">
+          <div className="flex justify-start">
+            {activeTab !== tabs[0].id && (
+              <Button variant="outline" size="icon" onClick={goToPreviousTab} aria-label="Previous">
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+
+          <div className="text-sm text-muted-foreground text-center">
+            {tabs.findIndex((t) => t.id === activeTab) + 1} of {tabs.length}
+          </div>
+
+          <div className="flex justify-end">
+            <Button variant="outline" size="icon" onClick={goToNextTab} aria-label="Next">
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-export default PersonaForm;
+
+export default function PersonaFormPage() {
+  return null;
+}

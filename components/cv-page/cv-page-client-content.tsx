@@ -281,7 +281,9 @@ export function CVPageClientContent() {
 
   const { handleExport, exportAsPNG, handleDocxExport } = useCVExport({
     selectedTemplateId: selectedTemplate?.id,
-    personaFullName: persona?.full_name
+    personaFullName: persona?.full_name,
+    resourceId: cvId ? parseInt(cvId) : undefined,
+    resourceType: 'cv'
   })
 
   const defaultTemplate: CVTemplate = {
@@ -860,7 +862,7 @@ export function CVPageClientContent() {
       layout_id: selectedTemplate.id,
       personas_id: persona.id.toString(),
       title: titleToUse,
-      job_description: jobDescription || "AI-generated CV based on persona",
+      job_description: jobDescription,
       generated_content: JSON.stringify({ ...aiResponse.optimizedCV, sectionOrder, personalInfoFieldOrder, hiddenSections, styleSettings }),
     };
 
@@ -893,6 +895,14 @@ export function CVPageClientContent() {
         const newCV = await createCV(cvDataToSave)
         setExistingCV(newCV)
         setHasUnsavedChanges(false)
+
+        if (typeof window !== "undefined") {
+          const url = new URL(window.location.href)
+          url.searchParams.set("cvId", String(newCV.id))
+          url.searchParams.set("templateId", selectedTemplate.id)
+          url.searchParams.delete("personaId")
+          router.replace(url.toString())
+        }
 
         if (!isAutoSave && loadingToastId) {
           toast.dismiss(loadingToastId)

@@ -472,22 +472,24 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
     };
 
     const addSkills = () => {
-      if (data.skills.technical.length === 0 && data.skills.soft.length === 0) return;
+      const technicalSkills = data.skills?.technical ?? [];
+      const softSkills = data.skills?.soft ?? [];
+      if (technicalSkills.length === 0 && softSkills.length === 0) return;
       // Skills is small enough to be treated as a single block usually, but let's wrap it for consistency
       const children: React.ReactNode[] = [];
       children.push(<SectionTitle key="skills-title" title="SKILLS" />);
       children.push(
         <div key="skills-content" className="space-y-3">
-          {data.skills.technical.length > 0 && (
+          {technicalSkills.length > 0 && (
             <div>
               <span style={{ ...headingBaseStyle, fontWeight: 700, color: styleSettings.headingColor }}>Technical Skills: </span>
-              <span style={{ color: styleSettings.textColor }}>{data.skills.technical.join(", ")}</span>
+              <span style={{ color: styleSettings.textColor }}>{technicalSkills.join(", ")}</span>
             </div>
           )}
-          {data.skills.soft.length > 0 && (
+          {softSkills.length > 0 && (
             <div>
               <span style={{ ...headingBaseStyle, fontWeight: 700, color: styleSettings.headingColor }}>Soft Skills: </span>
-              <span style={{ color: styleSettings.textColor }}>{data.skills.soft.join(", ")}</span>
+              <span style={{ color: styleSettings.textColor }}>{softSkills.join(", ")}</span>
             </div>
           )}
         </div>
@@ -496,42 +498,48 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
     };
 
     const addExperience = () => {
-      if (data.experience.length === 0) return;
+      const experience = data.experience ?? [];
+      if (experience.length === 0) return;
       const children: React.ReactNode[] = [];
       children.push(<SectionTitle key="exp-title" title="PROFESSIONAL EXPERIENCE" />);
-      data.experience.forEach((exp, index) => {
-        const isLast = index === data.experience.length - 1;
-        children.push(<ExperienceHeader key={`exp-h-${exp.id}`} exp={exp} />);
+      experience.forEach((exp, index) => {
+        const isLast = index === experience.length - 1;
+        const keyBase = exp.id || `exp-${index}`;
+        children.push(<ExperienceHeader key={`exp-h-${keyBase}`} exp={exp} />);
         exp.responsibilities.forEach((resp, i) => {
           const t = resp.trim();
-          if (t) children.push(<ExperienceDescriptionLine key={`exp-l-${exp.id}-${i}`} text={t} />);
+          if (t) children.push(<ExperienceDescriptionLine key={`exp-l-${keyBase}-${i}`} text={t} />);
         });
-        if (!isLast) children.push(<div key={`exp-sp-${exp.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
+        if (!isLast) children.push(<div key={`exp-sp-${keyBase}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
       });
       items.push({ type: "section", id: "experience", children });
     };
 
     const addEducation = () => {
-      if (data.education.length === 0) return;
+      const education = data.education ?? [];
+      if (education.length === 0) return;
       const children: React.ReactNode[] = [];
       children.push(<SectionTitle key="edu-title" title="EDUCATION" />);
-      data.education.forEach((edu, index) => {
-        const isLast = index === data.education.length - 1;
-        children.push(<EducationHeader key={`edu-h-${edu.id}`} edu={edu} />);
+      education.forEach((edu, index) => {
+        const isLast = index === education.length - 1;
+        const keyBase = edu.id || `edu-${index}`;
+        children.push(<EducationHeader key={`edu-h-${keyBase}`} edu={edu} />);
         const details = (edu.additionalInfo || "").split("\n").map((s) => s.trim()).filter(Boolean);
-        details.forEach((line, i) => children.push(<EducationDetailsLine key={`edu-l-${edu.id}-${i}`} text={line} />));
-        if (!isLast) children.push(<div key={`edu-sp-${edu.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
+        details.forEach((line, i) => children.push(<EducationDetailsLine key={`edu-l-${keyBase}-${i}`} text={line} />));
+        if (!isLast) children.push(<div key={`edu-sp-${keyBase}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
       });
       items.push({ type: "section", id: "education", children });
     };
 
     const addLanguages = () => {
-      if (data.languages.length === 0) return;
+      const languages = data.languages ?? [];
+      if (languages.length === 0) return;
       const children: React.ReactNode[] = [];
       children.push(<SectionTitle key="lang-title" title="LANGUAGES" />);
-      data.languages.forEach((lang) => {
+      languages.forEach((lang, index) => {
+        const keyBase = lang.id || `lang-${index}`;
         children.push(
-          <div key={`lang-${lang.id}`} style={{ color: styleSettings.textColor }}>
+          <div key={keyBase} style={{ color: styleSettings.textColor }}>
             <span style={{ ...headingBaseStyle, fontWeight: 700 }}>{lang.name}: </span>
             <span>{lang.proficiency}</span>
           </div>
@@ -541,30 +549,34 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
     };
 
     const addProjects = () => {
-      if (data.projects.length === 0) return;
+      const projects = data.projects ?? [];
+      if (projects.length === 0) return;
       const children: React.ReactNode[] = [];
       children.push(<SectionTitle key="proj-title" title="PROJECTS" />);
-      data.projects.forEach((project, index) => {
+      projects.forEach((project, index) => {
+        const keyBase = project.id || `proj-${index}`;
         children.push(
-          <div key={`proj-${project.id}`}>
+          <div key={keyBase}>
             <h3 style={{ ...headingBaseStyle, fontWeight: 700 }}>{project.name}</h3>
             <p style={{ ...mutedStyle, fontWeight: 600 }}>{project.role}</p>
             <p className="mb-2" style={{ color: styleSettings.textColor }}>{project.description}</p>
             <p style={mutedStyle}><span style={{ fontWeight: 600 }}>Technologies: </span>{project.technologies.join(", ")}</p>
           </div>
         );
-        if (index < data.projects.length - 1) children.push(<div key={`proj-sp-${project.id}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
+        if (index < projects.length - 1) children.push(<div key={`proj-sp-${keyBase}`} style={{ height: styleSettings.spaceBetweenEntriesPx }} />);
       });
       items.push({ type: "section", id: "projects", children });
     };
 
     const addCertifications = () => {
-      if (data.certifications.length === 0) return;
+      const certifications = data.certifications ?? [];
+      if (certifications.length === 0) return;
       const children: React.ReactNode[] = [];
       children.push(<SectionTitle key="cert-title" title="CERTIFICATIONS & AWARDS" />);
-      data.certifications.forEach((cert, index) => {
+      certifications.forEach((cert, index) => {
+        const keyBase = cert.id || `cert-${index}`;
         children.push(
-          <div key={`cert-${cert.id}`} className="flex justify-between items-center">
+          <div key={keyBase} className="flex justify-between items-center">
             <div>
               <span style={{ ...headingBaseStyle, fontWeight: 700 }}>{cert.title}</span>
               <span style={{ color: styleSettings.textColor }}> - {cert.issuingOrganization}</span>
@@ -572,16 +584,17 @@ export function ClassicTemplate({ data, isPreview = false }: ClassicTemplateProp
             <span style={mutedStyle}>{formatDate(cert.dateObtained)}</span>
           </div>
         );
-        if (index < data.certifications.length - 1) children.push(<div key={`cert-sp-${cert.id}`} style={{ height: Math.max(4, Math.round(styleSettings.spaceBetweenEntriesPx / 2)) }} />);
+        if (index < certifications.length - 1) children.push(<div key={`cert-sp-${keyBase}`} style={{ height: Math.max(4, Math.round(styleSettings.spaceBetweenEntriesPx / 2)) }} />);
       });
       items.push({ type: "section", id: "certifications", children });
     };
 
     const addInterests = () => {
-      if (data.additional.interests.length === 0) return;
+      const interests = data.additional?.interests ?? [];
+      if (interests.length === 0) return;
       const children: React.ReactNode[] = [];
       children.push(<SectionTitle key="int-title" title="INTERESTS & HOBBIES" />);
-      children.push(<div key="int-body" style={{ color: styleSettings.textColor }}>{data.additional.interests.join(", ")}</div>);
+      children.push(<div key="int-body" style={{ color: styleSettings.textColor }}>{interests.join(", ")}</div>);
       items.push({ type: "section", id: "interests", children });
     };
 
