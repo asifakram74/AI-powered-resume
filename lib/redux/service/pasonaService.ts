@@ -62,7 +62,11 @@ const constructProfilePictureUrl = (profilePicture: string | null | undefined): 
     return profilePicture;
   }
   if (profilePicture.startsWith('media/')) {
+<<<<<<< Updated upstream
     return `https://stagingbackend.resumaic.com/storage/app/public/${profilePicture}`;
+=======
+    return `https://stagingbackend.resumaic.com/api/public /storage/app/public/${profilePicture}`;
+>>>>>>> Stashed changes
   }
   return profilePicture;
 };
