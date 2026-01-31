@@ -1,5 +1,9 @@
 import ProfileCardPublicClient from "./ProfileCardPublicClient"
 
+export async function generateStaticParams() {
+  return [{ slug: 'demo' }]
+}
+
 export default async function PublicProfileCardPage({
   params,
 }: {

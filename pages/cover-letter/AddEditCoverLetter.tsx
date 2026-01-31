@@ -12,10 +12,11 @@ import {
   getCVs,
   type CV
 } from "../../lib/redux/service/resumeService"
+import { Input } from "../../components/ui/input"
 import Select from 'react-select'
 
 interface CoverLetterGeneratorProps {
-  onGenerate: (jobDescription: string, tone: string, cvId: string, userId: string) => void
+  onGenerate: (title: string, jobDescription: string, tone: string, cvId: string, userId: string) => void
   isGenerating: boolean
   cvs: CV[]
 }
@@ -54,6 +55,7 @@ const tones = [
 ]
 
 export function CoverLetterGenerator({ onGenerate, isGenerating }: CoverLetterGeneratorProps) {
+  const [title, setTitle] = useState("")
   const [jobDescription, setJobDescription] = useState("")
   const [selectedTone, setSelectedTone] = useState("")
   const [selectedCVId, setSelectedCVId] = useState<string>("")
@@ -86,11 +88,11 @@ export function CoverLetterGenerator({ onGenerate, isGenerating }: CoverLetterGe
   }, [userId, user?.role]);
 
   const handleGenerate = () => {
-    if (!jobDescription.trim() || !selectedTone || !selectedCVId || !userId) {
-      alert("Please fill in all required fields and select a CV")
+    if (!title.trim() || !jobDescription.trim() || !selectedTone || !selectedCVId || !userId) {
+      alert("Please fill in all required fields (including Title) and select a CV")
       return
     }
-    onGenerate(jobDescription, selectedTone, selectedCVId, userId.toString())
+    onGenerate(title, jobDescription, selectedTone, selectedCVId, userId.toString())
   }
 
   const handleCVChange = (option: { value: string; label: string } | null) => {
@@ -112,10 +114,20 @@ export function CoverLetterGenerator({ onGenerate, isGenerating }: CoverLetterGe
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            Select CV
+            Cover Letter Details
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="title">Title *</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. Software Engineer Application at Google"
+            />
+          </div>
+
           <div className="space-y-2">
             <Label>Choose a CV to pre-fill job description *</Label>
             <Select

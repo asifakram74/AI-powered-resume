@@ -5,6 +5,7 @@ export interface CoverLetter {
   id: string
   user_id: string
   cv_id: string
+  title: string
   job_description: string
   tone: string
   generated_letter: string
@@ -16,6 +17,7 @@ export interface CoverLetter {
 export interface CreateCoverLetterData {
   user_id: string
   cv_id: string
+  title: string
   job_description: string
   tone: string
   generated_letter: string
@@ -56,10 +58,17 @@ export const createCoverLetter = async (data: CreateCoverLetterData): Promise<Co
     const response = await api.post("/cover-letters", {
       user_id: data.user_id,
       cv_id: data.cv_id,
+      title: data.title,
       job_description: data.job_description,
       tone: data.tone,
       generated_letter: data.generated_letter
     })
+
+    // Fallback: Ensure title is present in response
+    if (!response.data.title && data.title) {
+      response.data.title = data.title
+    }
+
     return response.data
   } catch (error: any) {
     if (axios.isAxiosError(error)) {
@@ -87,6 +96,12 @@ export const updateCoverLetter = async (id: string, data: Partial<CreateCoverLet
       ...data,
       cv_id: data.cv_id // Include cv_id in updates if provided
     })
+
+    // Fallback: Ensure title is present in response
+    if (!response.data.title && data.title) {
+      response.data.title = data.title
+    }
+
     return response.data
   } catch (error) {
     console.error(`Error updating cover letter ${id}:`, error)

@@ -497,7 +497,7 @@ export function ProfileCardList({ user }: PageProps) {
                         <div className="flex items-center justify-between mb-1">
                           <span>Public Slug:</span>
                           <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
-                            {card.public_slug.substring(0, 10)}...
+                            {(card.public_slug || "N/A").substring(0, 10)}...
                           </code>
                         </div>
                         <div className="flex items-center justify-between">

@@ -1,7 +1,7 @@
 import CVCardClient from "./CVCardClient"
 
 export async function generateStaticParams() {
-  return []
+  return [{ slug: 'demo' }]
 }
 
 export default async function PublicCVPage({

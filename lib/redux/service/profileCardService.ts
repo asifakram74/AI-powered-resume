@@ -104,6 +104,12 @@ export const createProfileCard = async (data: CreateProfileCardData): Promise<Pr
     }
     
     const response = await api.post("/profile-card", payload)
+
+    // Fallback: Ensure full_name is present in response
+    if (!response.data.full_name && data.full_name) {
+      response.data.full_name = data.full_name
+    }
+
     return response.data
   } catch (error) {
     console.error("Error creating profile card:", error)
@@ -121,6 +127,12 @@ export const updateProfileCard = async (id: string | number, data: UpdateProfile
     }
     
     const response = await api.put(`/profile-card/${id}`, payload)
+
+    // Fallback: Ensure full_name is present in response
+    if (!response.data.full_name && data.full_name) {
+      response.data.full_name = data.full_name
+    }
+
     return response.data
   } catch (error) {
     console.error(`Error updating profile card ${id}:`, error)
