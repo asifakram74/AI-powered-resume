@@ -1014,13 +1014,33 @@ export default function CreateCard() {
         }
 
         try {
+            let response;
             if (id) {
-                await updateProfileCard(id, payload)
+                response = await updateProfileCard(id, payload)
                 toast.success("Profile card updated successfully")
             } else {
-                await createProfileCard(payload)
+                response = await createProfileCard(payload)
                 toast.success("Profile card created successfully")
             }
+            
+            // Check if slug is missing and prompt user
+            if (!response.public_slug) {
+                 // Fallback for missing slug from backend
+                 const fallbackSlug = response.public_slug || profile.full_name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+                 
+                 toast.warning("Public link not generated", {
+                    description: "The backend didn't return a public link. Please try saving again or contact support.",
+                    action: {
+                        label: "Retry Save",
+                        onClick: () => handleSaveProfile()
+                    }
+                 })
+                 // We can't really do much if the backend doesn't generate it, 
+                 // but we can at least warn the user or try to optimistically redirect using a guessed slug 
+                 // (though that might 404).
+                 // Better to redirect to the list page as originally intended.
+            }
+
             router.push("/dashboard/profile-card")
         } catch (error: any) {
             toast.error(error?.message || "Failed to save profile card")

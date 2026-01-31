@@ -1,7 +1,7 @@
 import CoverLetterClient from "./CoverLetterClient"
 
 export async function generateStaticParams() {
-  return []
+  return [{ slug: 'demo' }]
 }
 
 export default async function PublicCoverLetterPage({

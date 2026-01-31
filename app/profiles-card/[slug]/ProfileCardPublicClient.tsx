@@ -74,7 +74,7 @@ export default function ProfileCardPublicClient({ slug }: ProfileCardPublicClien
       
       trackEvent({
         resource_type: 'profile_card',
-        resource_id: Number(card.id),
+        resource_id: card.id ? Number(card.id) : 0,
         resource_key: slug,
         event_type: 'share',
         meta: { method: 'native' }
@@ -85,7 +85,7 @@ export default function ProfileCardPublicClient({ slug }: ProfileCardPublicClien
       
       trackEvent({
         resource_type: 'profile_card',
-        resource_id: Number(card.id),
+        resource_id: card.id ? Number(card.id) : 0,
         resource_key: slug,
         event_type: 'copy',
         meta: { url: window.location.href }

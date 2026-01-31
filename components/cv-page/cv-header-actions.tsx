@@ -90,9 +90,14 @@ export function CVHeaderActions({
   ]
 
   const handleShare = () => {
+    // Check if public slug exists
     if (!existingCV?.public_slug) {
       toast.error("Public link not available", {
-        description: "This CV hasn't been published yet or is missing a public link."
+        description: "This CV hasn't been published yet or is missing a public link. Try saving the CV to generate a link.",
+        action: onSave ? {
+          label: "Save & Publish",
+          onClick: () => onSave(false)
+        } : undefined
       })
       return
     }

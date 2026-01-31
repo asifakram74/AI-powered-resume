@@ -78,6 +78,7 @@ export function CoverLetterPage({ user }: PageProps) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedLetter, setGeneratedLetter] = useState("")
   const [currentJobDescription, setCurrentJobDescription] = useState("")
+  const [currentTitle, setCurrentTitle] = useState("")
   const [currentTone, setCurrentTone] = useState("")
   const [isLoading, setIsLoading] = useState(true)
   const [analysisResult, setAnalysisResult] = useState<any>(null)
@@ -203,7 +204,11 @@ export function CoverLetterPage({ user }: PageProps) {
   const handleShare = (letter: CoverLetter) => {
     if (!letter.public_slug) {
       toast.error("Public link not available", {
-        description: "This cover letter hasn't been published yet or is missing a public link."
+        description: "This cover letter hasn't been published yet or is missing a public link. Try editing and saving it to generate a link.",
+        action: {
+          label: "Edit & Save",
+          onClick: () => handleEdit(letter)
+        }
       })
       return
     }
@@ -211,9 +216,10 @@ export function CoverLetterPage({ user }: PageProps) {
     setIsShareDialogOpen(true)
   }
 
-  const handleGenerate = async (jobDescription: string, tone: string, cvId: string, userId: string) => {
+  const handleGenerate = async (title: string, jobDescription: string, tone: string, cvId: string, userId: string) => {
     setIsGenerating(true)
     setCurrentJobDescription(jobDescription)
+    setCurrentTitle(title || "Untitled Cover Letter")
     setCurrentTone(tone)
     setSelectedCVId(cvId)
 
@@ -316,6 +322,7 @@ export function CoverLetterPage({ user }: PageProps) {
       const letterData: CreateCoverLetterData = {
         user_id: userId.toString(),
         cv_id: selectedCVId,
+        title: currentTitle || "Untitled Cover Letter",
         job_description: currentJobDescription,
         tone: currentTone,
         generated_letter: generatedLetter,
@@ -340,6 +347,7 @@ export function CoverLetterPage({ user }: PageProps) {
       setShowGenerator(true)
       setGeneratedLetter("")
       setCurrentJobDescription("")
+      setCurrentTitle("")
       setCurrentTone("")
       setSelectedCVId("")
       setEditingLetter(null)
@@ -359,6 +367,7 @@ export function CoverLetterPage({ user }: PageProps) {
     setEditingLetter(letter)
     setViewingLetter(null)
     setCurrentJobDescription(letter.job_description)
+    setCurrentTitle(letter.title || "")
     setCurrentTone(letter.tone)
     setGeneratedLetter(letter.generated_letter)
     setSelectedCVId(letter.cv_id.toString()) // Add this line to set the selected CV ID
@@ -371,6 +380,7 @@ export function CoverLetterPage({ user }: PageProps) {
     setViewingLetter(letter)
     setEditingLetter(null)
     setCurrentJobDescription(letter.job_description)
+    setCurrentTitle(letter.title || "")
     setCurrentTone(letter.tone)
     setGeneratedLetter(letter.generated_letter)
     setShowGenerator(false)
@@ -425,6 +435,7 @@ export function CoverLetterPage({ user }: PageProps) {
           content: letter.generated_letter,
           filename: filename,
           letterData: {
+            title: letter.title,
             jobDescription: letter.job_description,
             tone: letter.tone,
             generatedLetter: letter.generated_letter
@@ -473,6 +484,7 @@ export function CoverLetterPage({ user }: PageProps) {
     setEditingLetter(null)
     setViewingLetter(null)
     setCurrentJobDescription("")
+    setCurrentTitle("")
     setCurrentTone("")
     setSelectedCVId("")
     setGeneratedLetter("")
@@ -485,6 +497,7 @@ export function CoverLetterPage({ user }: PageProps) {
   const filteredLetters = coverLetters.filter((letter) => {
     const searchLower = searchTerm.toLowerCase()
     return (
+      (letter.title && letter.title.toLowerCase().includes(searchLower)) ||
       letter.job_description.toLowerCase().includes(searchLower) ||
       letter.tone.toLowerCase().includes(searchLower) ||
       letter.generated_letter.toLowerCase().includes(searchLower)
@@ -618,6 +631,16 @@ export function CoverLetterPage({ user }: PageProps) {
                         </Select>
                       )}
                     </div> */}
+                    <div>
+                      <Label className="text-sm font-medium">Title</Label>
+                      <Input
+                        value={currentTitle}
+                        onChange={(e) => setCurrentTitle(e.target.value)}
+                        placeholder="e.g. Software Engineer Application"
+                        readOnly={isViewMode}
+                        className="mt-1 mb-4"
+                      />
+                    </div>
                     <div>
                       <Label className="text-sm font-medium">{isViewMode ? "Cover Letter" : "Edit Cover Letter"}</Label>
                       <Textarea
@@ -892,7 +915,7 @@ export function CoverLetterPage({ user }: PageProps) {
                     <TableRow>
                       <TableHead>Profile</TableHead>
                       <TableHead>Resume</TableHead>
-                      <TableHead>Job Description</TableHead>
+                      <TableHead>Title</TableHead>
                       <TableHead>Tone</TableHead>
                       <TableHead>Last Modified</TableHead>
                       <TableHead className="text-right pr-5">Actions</TableHead>
@@ -944,7 +967,10 @@ export function CoverLetterPage({ user }: PageProps) {
                         <TableCell>
                           <div className="max-w-xs">
                             <p className="text-sm font-medium truncate">
-                              {letter.job_description.substring(0, 100)}...
+                              {letter.title || "Untitled Cover Letter"}
+                            </p>
+                            <p className="text-xs text-gray-500 truncate">
+                              {letter.job_description.substring(0, 50)}...
                             </p>
                           </div>
                         </TableCell>
