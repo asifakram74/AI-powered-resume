@@ -3,9 +3,6 @@
 import { useEffect, useState } from "react"
 import { getPublicProfileBySlug, ProfileCard, SocialLinks } from "../../../lib/redux/service/profileCardService"
 import { PublicPageLoading } from "../../../components/shared/public-page-loading"
-import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar"
-import { Button } from "../../../components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../../components/ui/card"
 import { 
   Mail, Phone, MapPin, Globe, Linkedin, Github, Twitter, 
   FileText, ExternalLink, Share2 
@@ -21,6 +18,14 @@ export default function ProfileCardPublicClient({ slug }: ProfileCardPublicClien
   const [card, setCard] = useState<ProfileCard | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  const gradientOptions = [
+      { id: "emerald", className: "from-emerald-400 via-teal-500 to-black" },
+      { id: "purple", className: "from-purple-400 via-fuchsia-500 to-black" },
+      { id: "orange", className: "from-amber-400 via-orange-500 to-black" },
+      { id: "blue", className: "from-sky-400 via-indigo-500 to-black" }
+  ]
+  const selectedGradient = gradientOptions[0] // Default to emerald as it's not saved
 
   useEffect(() => {
     const fetchCard = async () => {
@@ -93,129 +98,155 @@ export default function ProfileCardPublicClient({ slug }: ProfileCardPublicClien
     }
   }
 
+  const profileImage = card.profile_picture || "/profile-img.png"
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl shadow-xl border-t-4 border-t-emerald-500">
-        <CardHeader className="text-center relative">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="absolute right-4 top-4"
-            onClick={handleShare}
-          >
-            <Share2 className="h-5 w-5 text-gray-500" />
-          </Button>
-          
-          <div className="flex justify-center mb-4">
-            <Avatar className="h-32 w-32 border-4 border-white shadow-lg">
-              <AvatarImage src={card.profile_picture || "/profile-img.png"} alt={card.full_name} />
-              <AvatarFallback className="text-4xl bg-emerald-100 text-emerald-600">
-                {card.full_name.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          </div>
-          <CardTitle className="text-3xl font-bold text-gray-900 dark:text-gray-100">{card.full_name}</CardTitle>
-          {card.job_title && (
-            <CardDescription className="text-xl text-emerald-600 font-medium mt-1">
-              {card.job_title}
-            </CardDescription>
-          )}
-        </CardHeader>
-        <CardContent className="space-y-8">
-          {/* Summary */}
-          {card.summary && (
-            <div className="text-center max-w-lg mx-auto">
-              <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                {card.summary}
-              </p>
-            </div>
-          )}
-
-          {/* Contact Info */}
-          <div className="flex flex-wrap justify-center gap-4 text-sm">
-            {card.email && (
-              <a href={`mailto:${card.email}`} className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-full hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors">
-                <Mail className="h-4 w-4 text-emerald-500" />
-                <span>{card.email}</span>
-              </a>
-            )}
-            {card.phone && (
-              <a href={`tel:${card.phone}`} className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-full hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors">
-                <Phone className="h-4 w-4 text-emerald-500" />
-                <span>{card.phone}</span>
-              </a>
-            )}
-            {(card.city || card.country) && (
-              <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-full">
-                <MapPin className="h-4 w-4 text-emerald-500" />
-                <span>{[card.city, card.country].filter(Boolean).join(', ')}</span>
-              </div>
-            )}
-            {card.additional_link && (
-              <a href={card.additional_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-full hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors">
-                <Globe className="h-4 w-4 text-emerald-500" />
-                <span>Website</span>
-              </a>
-            )}
-          </div>
-
-          {/* Social Links */}
-          {(socialLinks.linkedin || socialLinks.github || socialLinks.twitter) && (
-            <div className="flex justify-center gap-4">
-              {socialLinks.linkedin && (
-                <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="p-3 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 transition-colors">
-                  <Linkedin className="h-6 w-6" />
-                </a>
-              )}
-              {socialLinks.github && (
-                <a href={socialLinks.github} target="_blank" rel="noopener noreferrer" className="p-3 bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition-colors">
-                  <Github className="h-6 w-6" />
-                </a>
-              )}
-              {socialLinks.twitter && (
-                <a href={socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="p-3 bg-sky-50 text-sky-500 rounded-full hover:bg-sky-100 transition-colors">
-                  <Twitter className="h-6 w-6" />
-                </a>
-              )}
-            </div>
-          )}
-
-          {/* Attached Links (Custom/CV/CL) */}
-          {socialLinks.custom_links && socialLinks.custom_links.length > 0 && (
-            <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
-              <h3 className="text-center text-sm font-semibold text-gray-500 uppercase tracking-wider">
-                Attached Documents & Links
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {socialLinks.custom_links.map((link, index) => (
-                  <a 
-                    key={index} 
-                    href={link.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-emerald-500 hover:shadow-md transition-all group bg-white dark:bg-gray-900"
-                  >
-                    <div className="h-10 w-10 flex items-center justify-center rounded-lg bg-gray-50 dark:bg-gray-800 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-900/30 transition-colors">
-                      {link.type === 'cv' && <FileText className="h-5 w-5 text-blue-500" />}
-                      {link.type === 'cover_letter' && <Mail className="h-5 w-5 text-green-500" />}
-                      {link.type === 'custom' && <ExternalLink className="h-5 w-5 text-gray-500" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-gray-900 dark:text-gray-100 truncate group-hover:text-emerald-600 transition-colors">
-                        {link.title}
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center p-4 sm:p-8">
+      <div className="w-full max-w-4xl">
+          <div className="rounded-[36px] bg-black p-3 shadow-2xl">
+              <div className="rounded-[28px] overflow-hidden bg-black">
+                  <div className="relative h-[420px] bg-gray-900 group overflow-hidden">
+                      {/* Background Image */}
+                      <div className="absolute inset-0">
+                          <img
+                              src={profileImage}
+                              alt={card.full_name}
+                              className="h-full w-full object-cover object-top transition-transform duration-700 hover:scale-105"
+                              onError={(e) => {
+                                  e.currentTarget.src = "/profile-img.png"
+                              }}
+                          />
+                          {/* Theme Gradient Overlay */}
+                          <div className={`absolute inset-0 bg-gradient-to-b ${selectedGradient.className} opacity-60 mix-blend-overlay`} />
+                          {/* Dark Gradient for Text Readability */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
                       </div>
-                      <div className="text-xs text-gray-500 truncate">
-                        {link.type === 'cv' ? 'Resume' : link.type === 'cover_letter' ? 'Cover Letter' : 'External Link'}
+
+                      {/* Share Button */}
+                      <button 
+                        onClick={handleShare}
+                        className="absolute top-4 right-4 z-20 p-2 rounded-full bg-black/20 backdrop-blur-md border border-white/10 text-white hover:bg-black/40 transition-colors"
+                      >
+                        <Share2 className="h-5 w-5" />
+                      </button>
+
+                      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full px-6 z-20 flex flex-col items-center">
+                          <div className="text-center text-3xl font-bold text-white uppercase tracking-wide drop-shadow-lg">
+                              {card.full_name}
+                          </div>
+                          {card.job_title && (
+                            <div className="mt-1 text-center text-xs text-white/80 font-medium tracking-wide">
+                                {card.job_title}
+                            </div>
+                          )}
+                          <div className="mt-1 text-center text-sm text-white/60">@{card.public_slug}</div>
                       </div>
-                    </div>
-                    <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-emerald-500" />
-                  </a>
-                ))}
+                  </div>
+
+                  <div className="bg-black px-4 py-5 space-y-3">
+                      {card.summary && (
+                          <div className="rounded-2xl bg-white/10 p-4">
+                              <div className="text-sm font-semibold text-white mb-2">Bio</div>
+                              <div className="text-sm text-white/80 leading-relaxed">{card.summary}</div>
+                          </div>
+                      )}
+
+                      {(card.email || card.phone || card.city || card.country) && (
+                          <div className="rounded-2xl bg-white/10 p-4">
+                              <div className="text-sm font-semibold text-white mb-3">Contact</div>
+                              <div className="space-y-2">
+                                  {card.email && (
+                                      <a href={`mailto:${card.email}`} className="flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors">
+                                          <Mail className="h-4 w-4" />
+                                          {card.email}
+                                      </a>
+                                  )}
+                                  {card.phone && (
+                                      <a href={`tel:${card.phone}`} className="flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors">
+                                          <Phone className="h-4 w-4" />
+                                          {card.phone}
+                                      </a>
+                                  )}
+                                  {(card.city || card.country) && (
+                                      <div className="flex items-center gap-2 text-sm text-white/80">
+                                          <MapPin className="h-4 w-4" />
+                                          {[card.city, card.country].filter(Boolean).join(", ")}
+                                      </div>
+                                  )}
+                              </div>
+                          </div>
+                      )}
+
+                      {(socialLinks.linkedin || socialLinks.github || socialLinks.twitter || card.additional_link || (socialLinks.custom_links?.some(l => l.type === 'custom'))) && (
+                          <div className="rounded-2xl bg-white/10 p-4">
+                              <div className="text-sm font-semibold text-white mb-3">Social Links</div>
+                              <div className="space-y-2">
+                                  {socialLinks.linkedin && (
+                                      <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-2 rounded-lg bg-black/40 hover:bg-black/60 transition">
+                                          <Linkedin className="h-4 w-4 text-blue-400" />
+                                          <span className="text-sm text-white/90 truncate">LinkedIn</span>
+                                      </a>
+                                  )}
+                                  {socialLinks.github && (
+                                      <a href={socialLinks.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-2 rounded-lg bg-black/40 hover:bg-black/60 transition">
+                                          <Github className="h-4 w-4 text-gray-400" />
+                                          <span className="text-sm text-white/90 truncate">GitHub</span>
+                                      </a>
+                                  )}
+                                  {socialLinks.twitter && (
+                                      <a href={socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-2 rounded-lg bg-black/40 hover:bg-black/60 transition">
+                                          <Twitter className="h-4 w-4 text-sky-400" />
+                                          <span className="text-sm text-white/90 truncate">Twitter</span>
+                                      </a>
+                                  )}
+                                  {card.additional_link && (
+                                      <a href={card.additional_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-2 rounded-lg bg-black/40 hover:bg-black/60 transition">
+                                          <Globe className="h-4 w-4 text-emerald-400" />
+                                          <span className="text-sm text-white/90 truncate">Website</span>
+                                      </a>
+                                  )}
+                                  {/* Custom Links (type=custom) */}
+                                  {socialLinks.custom_links?.filter(l => l.type === 'custom').map(link => (
+                                      <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-2 rounded-lg bg-black/40 hover:bg-black/60 transition">
+                                          <ExternalLink className="h-4 w-4 text-gray-400" />
+                                          <span className="text-sm text-white/90 truncate">{link.title}</span>
+                                      </a>
+                                  ))}
+                              </div>
+                          </div>
+                      )}
+
+                      {socialLinks.custom_links?.some(l => l.type === 'cv') && (
+                          <div className="rounded-2xl bg-white/10 p-4">
+                              <div className="text-sm font-semibold text-white mb-3">Attached Resumes</div>
+                              <div className="space-y-2">
+                                  {socialLinks.custom_links.filter(l => l.type === 'cv').map((link) => (
+                                      <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-2 rounded-lg bg-black/40 hover:bg-black/60 transition">
+                                          <FileText className="h-4 w-4 text-blue-400" />
+                                          <span className="text-sm text-white/90 truncate">{link.title}</span>
+                                      </a>
+                                  ))}
+                              </div>
+                          </div>
+                      )}
+
+                      {socialLinks.custom_links?.some(l => l.type === 'cover_letter') && (
+                          <div className="rounded-2xl bg-white/10 p-4">
+                              <div className="text-sm font-semibold text-white mb-3">Attached Cover Letters</div>
+                              <div className="space-y-2">
+                                  {socialLinks.custom_links.filter(l => l.type === 'cover_letter').map((link) => (
+                                      <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-2 rounded-lg bg-black/40 hover:bg-black/60 transition">
+                                          <Mail className="h-4 w-4 text-green-400" />
+                                          <span className="text-sm text-white/90 truncate">{link.title}</span>
+                                      </a>
+                                  ))}
+                              </div>
+                          </div>
+                      )}
+                  </div>
               </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+      </div>
     </div>
   )
 }

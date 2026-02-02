@@ -808,10 +808,10 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
   return (
     <div className="space-y-4 sm:space-y-6 max-h-[70vh] overflow-y-auto px-2 sm:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
       {/* Tabs Navigation */}
-      <div className="sticky top-0 z-10 bg-background pt-2 pb-2 border-b">
-        <div className="flex items-center justify-between">
-          <div className="flex-1 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-            <div className="flex space-x-1 w-full">
+      <div className="sticky top-0 z-10 bg-background pt-2 pb-2 border-b mx-auto">
+        <div className="flex items-center justify-between mx-auto">
+          <div className="flex-1 overflow-x-auto mx-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+            <div className="flex space-x-1 w-max mx-auto px-2">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -820,15 +820,15 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`
-                      flex items-center justify-center flex-1 min-w-0 px-1 sm:px-3 py-2 rounded-md text-sm font-medium transition-all
+                      flex items-center justify-center px-3 py-2 rounded-md text-xs font-medium transition-all whitespace-nowrap flex-shrink-0
                       ${isActive
-                        ? 'bg-primary text-primary-foreground'
+                        ? 'resumaic-gradient-green text-white shadow-sm'
                         : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                       }
                     `}
                   >
                     <Icon className="h-4 w-4 sm:mr-2 flex-shrink-0" />
-                    <span className="hidden sm:inline truncate">{tab.label}</span>
+                    <span className="hidden sm:inline">{tab.label}</span>
                   </button>
                 );
               })}
@@ -838,7 +838,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
       </div>
 
       {/* Tab Content */}
-      <div className="tab-content">
+      <div className="tab-content pb-20">
         {/* Personal Information Tab */}
         {activeTab === "personal" && (
           <Card>
@@ -2196,61 +2196,45 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
       </div>
 
       {/* Action Buttons */}
-      {activeTab === tabs[tabs.length - 1].id ? (
-        <div className="grid grid-cols-3 items-center gap-2 pt-4 border-t">
+      <div className="absolute bottom-0 left-0 right-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 border-t z-20">
+        <div className="flex items-center justify-between">
           <div className="flex justify-start">
             {activeTab !== tabs[0].id && (
-              <Button variant="outline" size="icon" onClick={goToPreviousTab} aria-label="Previous">
-                <ChevronLeft className="h-4 w-4" />
+              <Button variant="outline" size="sm" onClick={goToPreviousTab} aria-label="Previous">
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Back
               </Button>
             )}
           </div>
 
-          <div className="text-sm text-muted-foreground text-center">
-            {tabs.findIndex((t) => t.id === activeTab) + 1} of {tabs.length}
-          </div>
-
           <div className="flex justify-end">
-            <Button
-              onClick={generatePersona}
-              disabled={!formData.personalInfo.fullName || !formData.personalInfo.jobTitle || isGenerating}
-              className="resumaic-gradient-green hover:opacity-90 button-press w-full sm:w-auto"
-            >
-              {isGenerating ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Generating Persona...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4 mr-1" />
-                  Generate Persona
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-3 items-center gap-2 pt-4 border-t">
-          <div className="flex justify-start">
-            {activeTab !== tabs[0].id && (
-              <Button variant="outline" size="icon" onClick={goToPreviousTab} aria-label="Previous">
-                <ChevronLeft className="h-4 w-4" />
+            {activeTab === tabs[tabs.length - 1].id ? (
+              <Button
+                onClick={generatePersona}
+                disabled={!formData.personalInfo.fullName || !formData.personalInfo.jobTitle || isGenerating}
+                className="resumaic-gradient-green hover:opacity-90 button-press"
+              >
+                {isGenerating ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-1" />
+                    Generate Persona
+                  </>
+                )}
+              </Button>
+            ) : (
+              <Button variant="outline" size="sm" onClick={goToNextTab} aria-label="Next">
+                Next
+                <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             )}
           </div>
-
-          <div className="text-sm text-muted-foreground text-center">
-            {tabs.findIndex((t) => t.id === activeTab) + 1} of {tabs.length}
-          </div>
-
-          <div className="flex justify-end">
-            <Button variant="outline" size="icon" onClick={goToNextTab} aria-label="Next">
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

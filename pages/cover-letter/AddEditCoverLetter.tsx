@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "../../components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
 import { Textarea } from "../../components/ui/textarea"
 import { Label } from "../../components/ui/label"
-import { Sparkles, FileText } from "lucide-react"
+import { Sparkles } from "lucide-react"
 import { useAppSelector } from "../../lib/redux/hooks"
 import {
   getAllCVs,
@@ -110,231 +109,136 @@ export function CoverLetterGenerator({ onGenerate, isGenerating }: CoverLetterGe
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Cover Letter Details
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Title *</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Software Engineer Application at Google"
-            />
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="title">Title *</Label>
+          <Input
+            id="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="e.g. Software Engineer Application"
+          />
+        </div>
 
-          <div className="space-y-2">
-            <Label>Choose a CV to pre-fill job description *</Label>
-            <Select
-              options={cvs.map((cv) => ({
-                value: cv.id.toString(),
-                label: cv.title || `CV ${cv.id}`,
-              }))}
-              value={
-                cvs
-                  .map((cv) => ({
-                    value: cv.id.toString(),
-                    label: cv.title || `CV ${cv.id}`,
-                  }))
-                  .find((option) => option.value === selectedCVId) || null
-              }
-              onChange={handleCVChange}
-              isLoading={isLoading}
-              isSearchable
-              placeholder="Search or select CV..."
-              styles={{
-                control: (base) => ({
-                  ...base,
-                  minHeight: 40,
-                  borderRadius: 6,
-                  borderColor: "#d1d5db",
-                  paddingLeft: 4,
-                  paddingRight: 4,
-                }),
-                menu: (base) => ({
-                  ...base,
-                  borderRadius: 6,
-                  marginTop: 4,
-                  border: "1px solid #e5e7eb",
-                  boxShadow: "0 4px 8px rgba(0,0,0,0.05)",
-                }),
-                option: (base, state) => ({
-                  ...base,
-                  backgroundColor: state.isSelected
-                    ? "#eff6ff"
-                    : state.isFocused
-                      ? "#f3f4f6"
-                      : "white",
-                  color: "#1f2937",
-                }),
-              }}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Job Description
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <Label htmlFor="job_description">Paste the job description here *</Label>
-
-            <Textarea
-              id="job_description"
-              rows={10}
-              value={jobDescription}
-              onChange={(e) => setJobDescription(e.target.value)}
-              placeholder="Paste the complete job description..."
-              className="min-h-[200px] w-full resize-none" style={{ wordBreak: 'break-all' }}
-            />
-
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Include as much detail as possible for a more tailored cover letter
-            </p>
-
-            {/* Validation errors */}
-            {jobDescription.trim() && (() => {
-              const input = jobDescription.trim();
-
-              if (input.length < 30) {
-                return <p className="text-sm text-red-600">Job description must be at least 30 characters.</p>;
-              }
-
-              if (input.split(/\s+/).length < 3) {
-                return <p className="text-sm text-red-600">Please provide at least 3 words.</p>;
-              }
-
-              if (/^[0-9\s]+$/.test(input)) {
-                return <p className="text-sm text-red-600">Job description cannot be only numbers.</p>;
-              }
-
-              if (/^[^a-zA-Z0-9]+$/.test(input)) {
-                return <p className="text-sm text-red-600">Job description cannot be only special characters.</p>;
-              }
-
-              return null; // ✅ valid
-            })()}
-          </div>
-
-
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5" />
-            Writing Tone
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Select your preferred tone *</Label>
-              <Select
-                options={tones.map((tone) => ({
+        <div className="space-y-2">
+          <Label>Tone *</Label>
+          <Select
+            options={tones.map((tone) => ({
+              value: tone.id,
+              label: tone.name,
+              description: tone.description,
+            }))}
+            value={
+              tones
+                .map((tone) => ({
                   value: tone.id,
                   label: tone.name,
                   description: tone.description,
-                }))}
-                value={
-                  tones
-                    .map((tone) => ({
-                      value: tone.id,
-                      label: tone.name,
-                      description: tone.description,
-                    }))
-                    .find((option) => option.value === selectedTone) || null
-                }
-                onChange={(option) => option && setSelectedTone(option.value)}
-                isSearchable
-                placeholder="Search or select tone..."
-                formatOptionLabel={(option) => (
-                  <div className="flex flex-col">
-                    <span className="font-medium">{option.label}</span>
-                    <span className="text-sm text-gray-500 dark:text-gray-400">{option.description}</span>
-                  </div>
-                )}
-                styles={{
-                  control: (base) => ({
-                    ...base,
-                    minHeight: 40,
-                    borderRadius: 6,
-                    borderColor: "#d1d5db",
-                    paddingLeft: 4,
-                    paddingRight: 4,
-                  }),
-                  menu: (base) => ({
-                    ...base,
-                    borderRadius: 6,
-                    marginTop: 4,
-                    border: "1px solid #e5e7eb",
-                    boxShadow: "0 4px 8px rgba(0,0,0,0.05)",
-                  }),
-                  option: (base, state) => ({
-                    ...base,
-                    backgroundColor: state.isSelected
-                      ? "#eff6ff"
-                      : state.isFocused
-                        ? "#f3f4f6"
-                        : "white",
-                    color: "#1f2937",
-                  }),
-                }}
-              />
-            </div>
-
-            {selectedToneData && (
-              <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border">
-                <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">Example opening:</Label>
-                <p className="text-sm text-gray-600 dark:text-gray-300 italic mt-1">"{selectedToneData.example}"</p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="flex justify-center">
-        <Button
-          onClick={handleGenerate}
-          disabled={!jobDescription.trim() || !selectedTone || !selectedCVId || isGenerating}
-          className="resumaic-gradient-green hover:opacity-90  button-press px-4 py-3 text-lg"
-          size="lg"
-        >
-          {isGenerating ? (
-            <>
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-              Generating Cover Letter...
-            </>
-          ) : (
-            <>
-              <Sparkles className="h-5 w-5 mr-2" />
-              Generate Cover Letter
-            </>
-          )}
-        </Button>
+                }))
+                .find((option) => option.value === selectedTone) || null
+            }
+            onChange={(option) => option && setSelectedTone(option.value)}
+            isSearchable
+            placeholder="Select tone..."
+            classNames={{
+              control: (state) => 
+                `!min-h-[40px] !rounded-md !border !border-gray-300 dark:!border-gray-700 !bg-white dark:!bg-gray-950 !text-gray-900 dark:!text-gray-100 ${state.isFocused ? '!ring-1 !ring-blue-500 !border-blue-500' : ''}`,
+              menu: () => 
+                "!bg-white dark:!bg-gray-950 !border !border-gray-200 dark:!border-gray-700 !rounded-md !shadow-lg !mt-1 !z-50",
+              option: (state) => 
+                `!cursor-pointer !px-3 !py-2 ${state.isSelected ? '!bg-blue-500 !text-white' : state.isFocused ? '!bg-gray-100 dark:!bg-gray-800 !text-gray-900 dark:!text-gray-100' : '!bg-transparent !text-gray-900 dark:!text-gray-100'}`,
+              singleValue: () => "!text-gray-900 dark:!text-gray-100",
+              input: () => "!text-gray-900 dark:!text-gray-100",
+              placeholder: () => "!text-gray-500 dark:!text-gray-400",
+            }}
+          />
+        </div>
       </div>
 
-      <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/60 rounded-lg p-4">
+      <div className="space-y-2">
+        <Label>Resume Source *</Label>
+        <Select
+          options={cvs.map((cv) => ({
+            value: cv.id.toString(),
+            label: cv.title || `CV ${cv.id}`,
+          }))}
+          value={
+            cvs
+              .map((cv) => ({
+                value: cv.id.toString(),
+                label: cv.title || `CV ${cv.id}`,
+              }))
+              .find((option) => option.value === selectedCVId) || null
+          }
+          onChange={handleCVChange}
+          isLoading={isLoading}
+          isSearchable
+          placeholder="Select a CV to use as a base..."
+          classNames={{
+            control: (state) => 
+              `!min-h-[40px] !rounded-md !border !border-gray-300 dark:!border-gray-700 !bg-white dark:!bg-gray-950 !text-gray-900 dark:!text-gray-100 ${state.isFocused ? '!ring-1 !ring-blue-500 !border-blue-500' : ''}`,
+            menu: () => 
+              "!bg-white dark:!bg-gray-950 !border !border-gray-200 dark:!border-gray-700 !rounded-md !shadow-lg !mt-1 !z-50",
+            option: (state) => 
+              `!cursor-pointer !px-3 !py-2 ${state.isSelected ? '!bg-blue-500 !text-white' : state.isFocused ? '!bg-gray-100 dark:!bg-gray-800 !text-gray-900 dark:!text-gray-100' : '!bg-transparent !text-gray-900 dark:!text-gray-100'}`,
+            singleValue: () => "!text-gray-900 dark:!text-gray-100",
+            input: () => "!text-gray-900 dark:!text-gray-100",
+            placeholder: () => "!text-gray-500 dark:!text-gray-400",
+          }}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="job_description">Job Description *</Label>
+        <Textarea
+          id="job_description"
+          rows={8}
+          value={jobDescription}
+          onChange={(e) => setJobDescription(e.target.value)}
+          placeholder="Paste the complete job description here..."
+          className="min-h-[150px] w-full resize-none bg-white dark:bg-gray-950"
+          style={{ wordBreak: 'break-all' }}
+        />
+        
+        {/* Validation errors */}
+        {jobDescription.trim() && (() => {
+          const input = jobDescription.trim();
+          if (input.length < 30) return <p className="text-sm text-red-600">Job description must be at least 30 characters.</p>;
+          if (input.split(/\s+/).length < 3) return <p className="text-sm text-red-600">Please provide at least 3 words.</p>;
+          if (/^[0-9\s]+$/.test(input)) return <p className="text-sm text-red-600">Job description cannot be only numbers.</p>;
+          if (/^[^a-zA-Z0-9]+$/.test(input)) return <p className="text-sm text-red-600">Job description cannot be only special characters.</p>;
+          return null;
+        })()}
+      </div>
+
+      <Button
+        onClick={handleGenerate}
+        disabled={!jobDescription.trim() || !selectedTone || !selectedCVId || isGenerating}
+        className="w-full resumaic-gradient-green hover:opacity-90 button-press h-12 text-base font-medium shadow-lg shadow-emerald-500/20"
+      >
+        {isGenerating ? (
+          <>
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+            Generating Cover Letter...
+          </>
+        ) : (
+          <>
+            <Sparkles className="h-5 w-5 mr-2" />
+            Generate Cover Letter
+          </>
+        )}
+      </Button>
+
+      <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/60 rounded-lg p-4 mb-12">
         <div className="flex items-start gap-3">
           <div className="rounded-full bg-blue-100 dark:bg-blue-900/30 p-1">
             <Sparkles className="h-4 w-4 text-blue-600" />
           </div>
-          <div>
+          <div className="">
             <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-1">AI-Powered Personalization</h4>
             <p className="text-sm text-blue-700 dark:text-blue-200">
               Our AI analyzes the job description and creates a tailored cover letter that highlights your relevant
-              skills and experience while matching the company's requirements and culture.
+              skills and experience.
             </p>
           </div>
         </div>

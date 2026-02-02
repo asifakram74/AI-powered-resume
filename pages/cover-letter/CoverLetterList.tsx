@@ -547,8 +547,8 @@ export function CoverLetterPage({ user }: PageProps) {
             <DialogContent className="w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] !max-w-none max-h-[90vh] overflow-hidden dark:border-0 dark:p-[1px] dark:bg-transparent">
               <div className="hidden dark:block absolute inset-0 gradient-border-moving -z-10" />
               <div className="dark:bg-[#0B0F1A] dark:rounded-2xl p-6 h-full w-full overflow-y-auto custom-scrollbar max-h-[calc(90vh-2px)]">
-                <DialogHeader className="relative pb-4 mb-4 border-b dark:border-gray-800">
-                  <div className="absolute -left-6 -top-6 w-32 h-32 resumaic-gradient-green opacity-10 blur-3xl -z-10" />
+                <DialogHeader className="relative pb-2 mb-2 border-b dark:border-gray-800">
+                  <div className="absolute -left-6 -top-6 w-32 h-32  opacity-10 blur-3xl -z-10" />
                   <DialogTitle className="text-2xl font-bold dark:text-gray-100">
                     {isViewMode ? "View Cover Letter" : editingLetter ? "Edit Cover Letter" : "Generate AI Cover Letter"}
                   </DialogTitle>
@@ -564,42 +564,39 @@ export function CoverLetterPage({ user }: PageProps) {
               {showGenerator ? (
                 <CoverLetterGenerator onGenerate={handleGenerate} isGenerating={isGenerating} cvs={cvs} />
               ) : (
-                <div className="space-y-6">
+                <div className="space-y-3">
                   {analysisResult && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Sparkles className="h-5 w-5" />
-                          AI Analysis Results
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div>
-                            <Label className="text-sm font-medium">Score</Label>
-                            <Badge variant="default" className="ml-2">
-                              {analysisResult.score}/100
-                            </Badge>
-                          </div>
-                          <div>
-                            <Label className="text-sm font-medium">Keywords</Label>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {analysisResult.keywords?.map((keyword: string) => (
-                                <Badge key={keyword} variant="secondary" className="text-xs">
-                                  {keyword}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                          <div>
-                            <Label className="text-sm font-medium">Tone</Label>
-                            <Badge variant="outline" className="ml-2">
-                              {analysisResult.tone}
-                            </Badge>
-                          </div>
+                    <div className="flex flex-col md:flex-row gap-3 items-start md:items-center bg-green-50/50 dark:bg-green-900/10 p-3 rounded-lg border border-green-100 dark:border-green-800/30">
+                      <div className="flex items-center gap-2 shrink-0">
+                        <div className="p-1 rounded-full bg-green-100 dark:bg-green-800/30 text-green-600 dark:text-green-400">
+                          <Sparkles className="h-3.5 w-3.5" />
                         </div>
-                      </CardContent>
-                    </Card>
+                        <span className="text-sm font-medium text-green-900 dark:text-green-100">Score:</span>
+                        <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/50 dark:text-green-300 border-0 h-6">
+                          {analysisResult.score}/100
+                        </Badge>
+                      </div>
+
+                      <div className="w-px h-4 bg-green-200 dark:bg-green-800 hidden md:block mx-1" />
+
+                      <div className="flex items-center gap-2 shrink-0">
+                         <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Tone:</span>
+                         <Badge variant="outline" className="h-6 text-xs font-normal border-green-200 dark:border-green-800 text-gray-700 dark:text-gray-300">
+                           {analysisResult.tone}
+                         </Badge>
+                      </div>
+
+                      <div className="w-px h-4 bg-green-200 dark:bg-green-800 hidden md:block mx-1" />
+
+                      <div className="flex flex-wrap gap-1.5 items-center">
+                         <span className="text-sm font-medium text-gray-500 dark:text-gray-400 mr-1">Keywords:</span>
+                         {analysisResult.keywords?.map((keyword: string) => (
+                            <Badge key={keyword} variant="secondary" className="text-[10px] h-5 px-1.5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-600 dark:text-gray-300 shadow-sm">
+                              {keyword}
+                            </Badge>
+                         ))}
+                      </div>
+                    </div>
                   )}
 
                   <div className="space-y-4">
@@ -631,18 +628,9 @@ export function CoverLetterPage({ user }: PageProps) {
                         </Select>
                       )}
                     </div> */}
-                    <div>
-                      <Label className="text-sm font-medium">Title</Label>
-                      <Input
-                        value={currentTitle}
-                        onChange={(e) => setCurrentTitle(e.target.value)}
-                        placeholder="e.g. Software Engineer Application"
-                        readOnly={isViewMode}
-                        className="mt-1 mb-4"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium">{isViewMode ? "Cover Letter" : "Edit Cover Letter"}</Label>
+                    
+                    <div className="mt-0">
+
                       <Textarea
                         value={generatedLetter}
                         rows={10}
@@ -654,7 +642,7 @@ export function CoverLetterPage({ user }: PageProps) {
                     </div>
                   </div>
 
-                  <div className="flex justify-end items-center space-x-1">
+                  <div className="flex justify-end items-center space-x-1 mb-9">
                     {(!editingLetter || isViewMode) && (
                       <Button
                         variant="outline"

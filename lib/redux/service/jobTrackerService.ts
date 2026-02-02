@@ -7,6 +7,8 @@ export type Pipeline = {
   id: number | string
   name: string
   color?: string | null
+  position?: number
+  is_default?: boolean
 }
 
 export type JobApplication = {
@@ -16,11 +18,13 @@ export type JobApplication = {
   application_date: string
   pipeline_id: number | string
   cv_id?: number | string | null
+  position?: number
 }
 
 export type CreatePipelinePayload = {
   name: string
   color?: string
+  position?: number
 }
 
 export type CreateJobApplicationPayload = {
@@ -29,6 +33,7 @@ export type CreateJobApplicationPayload = {
   application_date: string
   pipeline_id: number | string
   cv_id?: number | string | null
+  position?: number
 }
 
 export interface JobSearchFilters {
@@ -155,6 +160,10 @@ export async function deletePipeline(id: number | string): Promise<void> {
   await api.delete(`/pipelines/${id}`)
 }
 
+export async function reorderPipelines(pipelines: { id: number | string; position: number }[]): Promise<void> {
+  await api.post(`/pipelines/reorder`, { pipelines })
+}
+
 export async function listJobApplications(pipelineId?: number | string): Promise<JobApplication[]> {
   const response = await api.get(`/job-applications`, {
     params: pipelineId ? { pipeline_id: pipelineId } : undefined,
@@ -174,7 +183,7 @@ export async function createJobApplication(payload: CreateJobApplicationPayload)
 
 export async function updateJobApplication(
   id: number | string,
-  payload: Partial<Pick<JobApplication, "pipeline_id" | "company_name" | "job_title" | "application_date" | "cv_id">>,
+  payload: Partial<Pick<JobApplication, "pipeline_id" | "company_name" | "job_title" | "application_date" | "cv_id" | "position">>,
 ): Promise<JobApplication> {
   const response = await api.put(`/job-applications/${id}`, payload)
   return response.data

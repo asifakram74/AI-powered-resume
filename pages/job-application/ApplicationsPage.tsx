@@ -35,6 +35,7 @@ import {
   listPipelines,
   updatePipeline,
   updateJobApplication,
+  reorderPipelines,
   type CreateJobApplicationPayload,
   type JobApplication,
   type Pipeline,
@@ -160,38 +161,6 @@ export default function ApplicationsPage() {
     if (!addCvId && cvs.length > 0) setAddCvId(String(cvs[0].id))
   }, [addCvId, cvs])
 
-  const pipelineOrderStorageKey = useMemo(() => {
-    return userId ? `jobTracker:pipelineOrder:${String(userId)}` : "jobTracker:pipelineOrder"
-  }, [userId])
-
-  const applySavedPipelineOrder = useCallback(
-    (list: Pipeline[]) => {
-      try {
-        const raw = window.localStorage.getItem(pipelineOrderStorageKey)
-        const parsed = raw ? JSON.parse(raw) : null
-        if (!Array.isArray(parsed)) return list
-
-        const orderIds = parsed.map((v) => String(v))
-        const orderSet = new Set(orderIds)
-        const byId = new Map<string, Pipeline>()
-        for (const p of list) byId.set(String(p.id), p)
-
-        const ordered: Pipeline[] = []
-        for (const id of orderIds) {
-          const p = byId.get(String(id))
-          if (p) ordered.push(p)
-        }
-        for (const p of list) {
-          if (!orderSet.has(String(p.id))) ordered.push(p)
-        }
-        return ordered
-      } catch {
-        return list
-      }
-    },
-    [pipelineOrderStorageKey],
-  )
-
   const refreshAll = useCallback(async () => {
     try {
       setIsLoading(true)
@@ -200,53 +169,32 @@ export default function ApplicationsPage() {
         listJobApplications().catch(() => [] as JobApplication[]),
         userId ? getCVs(String(userId)).catch(() => [] as CV[]) : (Promise.resolve([]) as Promise<CV[]>),
       ])
-      setPipelines(applySavedPipelineOrder(pipelinesRes))
+      
+      // Sort pipelines by position
+      const sortedPipelines = pipelinesRes.sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+      setPipelines(sortedPipelines)
+      
       setApplications(applicationsRes)
       setCvs(cvsRes)
     } finally {
       setIsLoading(false)
     }
-  }, [applySavedPipelineOrder, userId])
+  }, [userId])
 
   useEffect(() => {
     refreshAll()
   }, [refreshAll])
 
   useEffect(() => {
-    if (pipelines.length === 0) return
-    try {
-      window.localStorage.setItem(
-        pipelineOrderStorageKey,
-        JSON.stringify(pipelines.map((p) => String(p.id))),
-      )
-    } catch { }
-  }, [pipelines, pipelineOrderStorageKey])
-
-  useEffect(() => {
-    setOrderByPipeline((prev) => {
-      const next: Record<string, string[]> = {}
-      for (const pipeline of pipelines) {
-        const pid = String(pipeline.id)
-        const currentApps = applications.filter((a) => String(a.pipeline_id) === pid)
-        const currentIds = currentApps.map((a) => String(a.id))
-        const currentIdSet = new Set(currentIds)
-        const kept = (prev[pid] || []).filter((id) => currentIdSet.has(id))
-        const keptSet = new Set(kept)
-        const missing = currentApps
-          .filter((a) => !keptSet.has(String(a.id)))
-          .slice()
-          .sort((a, b) => {
-            const ad = String(a.application_date || "")
-            const bd = String(b.application_date || "")
-            if (ad < bd) return -1
-            if (ad > bd) return 1
-            return String(a.id).localeCompare(String(b.id))
-          })
-          .map((a) => String(a.id))
-        next[pid] = [...kept, ...missing]
-      }
-      return next
-    })
+    const next: Record<string, string[]> = {}
+    for (const pipeline of pipelines) {
+      const pid = String(pipeline.id)
+      const currentApps = applications
+        .filter((a) => String(a.pipeline_id) === pid)
+        .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+      next[pid] = currentApps.map((a) => String(a.id))
+    }
+    setOrderByPipeline(next)
   }, [applications, pipelines])
 
   const stats = useMemo(() => {
@@ -296,19 +244,31 @@ export default function ApplicationsPage() {
       const next = prev.slice()
       const [moved] = next.splice(fromIndex, 1)
 
-      if (!toId) {
-        next.push(moved)
-        return next
+      let targetIndex = next.length
+      if (toId) {
+        const toIndex = next.findIndex((p) => String(p.id) === toId)
+        if (toIndex >= 0) {
+          targetIndex = toIndex
+        }
       }
 
-      const toIndex = next.findIndex((p) => String(p.id) === toId)
-      if (toIndex < 0) {
-        next.push(moved)
-        return next
-      }
+      next.splice(targetIndex, 0, moved)
 
-      next.splice(toIndex, 0, moved)
-      return next
+      // Recalculate positions for all pipelines
+      const reordered = next.map((p, index) => ({
+        ...p,
+        position: index + 1,
+      }))
+
+      // Update backend with new order
+      const updatePayload = reordered.map(p => ({
+        id: p.id,
+        position: p.position!
+      }))
+      
+      reorderPipelines(updatePayload).catch(console.error)
+
+      return reordered
     })
   }, [])
 
@@ -322,37 +282,41 @@ export default function ApplicationsPage() {
       if (!fromPipelineId) return
 
       const targetPid = String(toPipelineId)
-      const sourcePid = String(fromPipelineId)
-      const movingAcross = sourcePid !== targetPid
+      
+      // Calculate new position using orderByPipeline to find neighbors
+      const targetIds = orderByPipeline[targetPid] || []
+      const filteredIds = targetIds.filter(id => id !== appId)
+      
+      let insertIndex = filteredIds.length
+      if (beforeId) {
+        const idx = filteredIds.indexOf(String(beforeId))
+        if (idx >= 0) insertIndex = idx
+      }
 
-      setOrderByPipeline((prev) => {
-        const next: Record<string, string[]> = { ...prev }
-        const sourceArr = (next[sourcePid] || []).filter((id) => id !== appId)
-        const targetBase = movingAcross ? (next[targetPid] || []).filter((id) => id !== appId) : sourceArr
-        const insertIndex = beforeId ? Math.max(0, targetBase.indexOf(String(beforeId))) : targetBase.length
-        const targetArr = targetBase.slice()
-        targetArr.splice(insertIndex, 0, appId)
-        if (movingAcross) {
-          next[sourcePid] = sourceArr
-          next[targetPid] = targetArr
-        } else {
-          next[sourcePid] = targetArr
-        }
-        return next
-      })
+      // We still use floating point for apps unless backend changes for apps too.
+      // Assuming backend ONLY changed for pipelines as per user input.
+      const prevId = insertIndex > 0 ? filteredIds[insertIndex - 1] : null
+      const nextId = insertIndex < filteredIds.length ? filteredIds[insertIndex] : null
+      
+      const prevApp = prevId ? appById.get(prevId) : null
+      const nextApp = nextId ? appById.get(nextId) : null
+      
+      const p1 = prevApp?.position ?? 0
+      const p2 = nextApp?.position ?? (p1 + 60000)
+      const newPos = (p1 + p2) / 2
 
-      if (movingAcross) {
-        setApplications((all) => all.map((a) => (String(a.id) === appId ? { ...a, pipeline_id: targetPid } : a)))
-        try {
-          await updateJobApplication(appId, { pipeline_id: targetPid })
-          showSuccessToast("Application updated", "Moved to new stage")
-        } catch (e: any) {
-          showErrorToast("Failed to move application", e?.message || "Please try again")
-          await refreshAll()
-        }
+      // Update local state
+      setApplications((all) => all.map((a) => (String(a.id) === appId ? { ...a, pipeline_id: targetPid, position: newPos } : a)))
+
+      try {
+        await updateJobApplication(appId, { pipeline_id: targetPid, position: newPos })
+        showSuccessToast("Application updated", "Moved to new stage")
+      } catch (e: any) {
+        showErrorToast("Failed to move application", e?.message || "Please try again")
+        await refreshAll()
       }
     },
-    [appById, refreshAll],
+    [appById, refreshAll, orderByPipeline],
   )
 
   const submitAddApplication = async () => {
@@ -362,11 +326,16 @@ export default function ApplicationsPage() {
     }
     try {
       setIsAdding(true)
+      
+      const targetApps = applications.filter(a => String(a.pipeline_id) === addPipelineId)
+      const maxPos = Math.max(0, ...targetApps.map(a => a.position ?? 0))
+      
       const payload: CreateJobApplicationPayload = {
         company_name: addCompany.trim(),
         job_title: addTitle.trim(),
         application_date: addDate,
         pipeline_id: addPipelineId,
+        position: maxPos + 60000,
       }
       if (addCvId) payload.cv_id = addCvId
 
@@ -391,7 +360,16 @@ export default function ApplicationsPage() {
     }
     try {
       setIsCreatingPipeline(true)
-      await createPipeline({ name: newPipelineName.trim(), color: newPipelineColor })
+      
+      const maxPos = Math.max(0, ...pipelines.map(p => p.position ?? 0))
+      
+      await createPipeline({ 
+        name: newPipelineName.trim(), 
+        color: newPipelineColor,
+        // Backend auto-assigns position, but we send something just in case, 
+        // though typically we should reload or let backend handle it.
+        // Actually the backend guide says: "Backend automatically appends it to the end of the list."
+      })
       showSuccessToast("Pipeline created")
       setIsCreatePipelineOpen(false)
       setNewPipelineName("")
@@ -414,9 +392,11 @@ export default function ApplicationsPage() {
         { name: "Offer", color: pipelinePalette[3] },
         { name: "Rejected", color: pipelinePalette[4] },
       ]
-      for (const p of defaults) {
+      for (let i = 0; i < defaults.length; i++) {
+        const p = defaults[i]
         const exists = pipelines.some((x) => nameEquals(x, p.name))
-        if (!exists) await createPipeline(p)
+        // We let backend handle positions for new default pipelines
+        if (!exists) await createPipeline({ ...p })
       }
       showSuccessToast("Pipelines created")
       await refreshAll()
@@ -859,6 +839,7 @@ export default function ApplicationsPage() {
                                 openDeletePipeline(pid)
                               }}
                               className="cursor-pointer"
+                              disabled={pipeline.is_default}
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
                               Delete Column

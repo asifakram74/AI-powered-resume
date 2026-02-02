@@ -12,9 +12,10 @@ interface UseCVExportProps {
   resourceId?: number
   resourceKey?: string
   resourceType?: 'cv' | 'cover_letter' | 'profile_card'
+  filenameOverride?: string
 }
 
-export function useCVExport({ selectedTemplateId, personaFullName, resourceId, resourceKey, resourceType = 'cv' }: UseCVExportProps) {
+export function useCVExport({ selectedTemplateId, personaFullName, resourceId, resourceKey, resourceType = 'cv', filenameOverride }: UseCVExportProps) {
   const handleExport = async (format: "pdf" | "docx" | "png") => {
     try {
       // Track export event
@@ -40,10 +41,11 @@ export function useCVExport({ selectedTemplateId, personaFullName, resourceId, r
       )
 
       try {
-        const filename =
-          format === "png"
+        const filename = filenameOverride 
+          ? `${filenameOverride}.${format}`
+          : (format === "png"
             ? `${selectedTemplateId || "resume"}.png`
-            : `${personaFullName || "resume"}-cv.${format}`
+            : `${personaFullName || "resume"}-cv.${format}`)
 
         if (format === "pdf") {
           const pageEls = Array.from(cvElement.querySelectorAll('.a4-page')) as HTMLElement[]

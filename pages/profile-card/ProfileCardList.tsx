@@ -364,7 +364,7 @@ export function ProfileCardList({ user }: PageProps) {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => router.push(`/profiles-card/${card.public_slug}`)} 
+                                onClick={() => window.open(`/profiles-card/${card.public_slug}`, '_blank')} 
                                 className="cursor-pointer"
                               >
                                 <ExternalLink className="h-4 w-4" />
@@ -527,7 +527,7 @@ export function ProfileCardList({ user }: PageProps) {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => router.push(`/profiles-card/${card.public_slug}`)}
+                          onClick={() => window.open(`/profiles-card/${card.public_slug}`, '_blank')}
                           className="bg-transparent p-2 flex-1"
                         >
                           <ExternalLink className="h-4 w-4" />
@@ -684,7 +684,7 @@ export function ProfileCardList({ user }: PageProps) {
       {/* Create/Edit Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
        <DialogContent
-              className="w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto custom-scrollbar dark:border-0 dark:p-[1px] dark:overflow-hidden dark:bg-transparent">
+              className="w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] !max-w-none max-h-[90vh] overflow-x-auto custom-scrollbar dark:bg-[#0B0F1A] dark:border-gray-800">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold dark:text-gray-100">Create Profile Card</DialogTitle>
             <DialogDescription className="text-gray-500 dark:text-gray-400">

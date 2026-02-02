@@ -6,7 +6,7 @@ import { Textarea } from "../../components/ui/textarea"
 import { Label } from "../../components/ui/label"
 import { Switch } from "../../components/ui/switch"
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "../../components/ui/sheet"
-import { createProfileCard, CreateProfileCardData, AttachedLink, getProfileCardById, updateProfileCard } from "../../lib/redux/service/profileCardService"
+import { createProfileCard, CreateProfileCardData, AttachedLink, getProfileCardById, updateProfileCard, uploadProfilePicture } from "../../lib/redux/service/profileCardService"
 import { getPersonaById } from "../../lib/redux/service/pasonaService"
 import { useAppSelector } from "../../lib/redux/hooks"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu"
@@ -238,6 +238,7 @@ function EditForm({
         if (fileInputRef.current) {
             fileInputRef.current.value = ""
         }
+        onImageUpload(undefined)
     }
 
     const renderDisplayForm = () => (
@@ -580,9 +581,12 @@ function EditForm({
                     </h3>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm" className="h-8 gap-1 text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400">
-                        <Lightbulb className="h-4 w-4" />
-                        <span className="text-xs font-medium">Get Tips</span>
+                    <Button 
+                        onClick={onSave}
+                        className="h-8 text-xs font-medium resumaic-gradient-green text-white hover:opacity-90 shadow-md shadow-emerald-200 dark:shadow-none"
+                    >
+                        <Check className="h-3 w-3 mr-1" />
+                        Update
                     </Button>
                 </div>
             </div>
@@ -594,17 +598,6 @@ function EditForm({
                 {sectionKey === "contact" && renderContactForm()}
                 {sectionKey === "links" && renderLinksForm()}
                 {sectionKey === "appearance" && renderAppearanceForm()}
-            </div>
-
-            {/* Footer Actions */}
-            <div className="p-4 border-t border-gray-50 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-900/30">
-                <Button
-                    className="w-full resumaic-gradient-green hover:opacity-90 text-white shadow-md shadow-emerald-200 dark:shadow-none transition-all rounded-xl h-11"
-                    onClick={onSave}
-                >
-                    <Check className="h-4 w-4 mr-2" />
-                    Update
-                </Button>
             </div>
         </div>
     )
@@ -618,6 +611,7 @@ export default function CreateCard() {
     const resumeId = searchParams?.get("resumeId")
     const { user } = useAppSelector((state) => state.auth)
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null)
 
     const [profile, setProfile] = useState<EditableProfile>({
         full_name: "Alex Morgan",
@@ -977,14 +971,18 @@ export default function CreateCard() {
     }
 
     const handleImageUpload = (file?: File) => {
-        if (!file) return
+        if (!file) {
+            setSelectedImageFile(null)
+            return
+        }
+        setSelectedImageFile(file)
         const reader = new FileReader()
         reader.onload = () => {
             const result = typeof reader.result === "string" ? reader.result : ""
             if (!result) return
             setProfile((prev) => ({ ...prev, profile_picture: result }))
             updateDraft({ profile_picture: result })
-            toast.success("Profile picture updated")
+            toast.success("Profile picture selected")
         }
         reader.readAsDataURL(file)
     }
@@ -1004,7 +1002,9 @@ export default function CreateCard() {
             country: profile.country,
             summary: profile.summary,
             additional_link: profile.additional_link,
-            profile_picture: profile.profile_picture || defaultProfileImage,
+            profile_picture: selectedImageFile 
+                ? undefined 
+                : (profile.profile_picture?.startsWith('http') ? undefined : (profile.profile_picture || defaultProfileImage)),
             social_links: {
                 linkedin: profile.linkedin || undefined,
                 github: profile.github || undefined,
@@ -1021,6 +1021,17 @@ export default function CreateCard() {
             } else {
                 response = await createProfileCard(payload)
                 toast.success("Profile card created successfully")
+            }
+            
+            // Upload profile picture if selected
+            if (selectedImageFile && response.id) {
+                try {
+                    await uploadProfilePicture(response.id, selectedImageFile)
+                    toast.success("Profile picture uploaded successfully")
+                } catch (uploadError) {
+                    console.error("Failed to upload profile picture", uploadError)
+                    toast.error("Profile card saved, but failed to upload picture")
+                }
             }
             
             // Check if slug is missing and prompt user
@@ -1060,6 +1071,16 @@ export default function CreateCard() {
 
     return (
         <div className="bg-[#f9fafb] dark:bg-gray-950 overflow-hidden pt-3 mb-20">
+            <div className="w-full px-6 mb-4">
+                <Button 
+                    variant="ghost" 
+                    onClick={() => router.back()}
+                    className="gap-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 pl-0 hover:bg-transparent"
+                >
+                    <ArrowLeft className="h-4 w-4" />
+                    Back
+                </Button>
+            </div>
             <div className="w-full  px-6 h-full">
                 <div className="grid grid-cols-1 lg:grid-cols-[60%_40%]  gap-6 h-full ">
                     {/* Left Column - Profile Preview Card (60%) */}

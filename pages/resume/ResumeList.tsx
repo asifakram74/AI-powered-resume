@@ -230,7 +230,7 @@ export function ResumePage({ user }: PageProps) {
               <div className="hidden dark:block absolute inset-0 gradient-border-moving -z-10" />
               <div className="dark:bg-[#0B0F1A] dark:rounded-2xl p-6 h-full w-full overflow-y-auto custom-scrollbar">
                 <DialogHeader className="relative pb-4 mb-4 border-b dark:border-gray-800">
-                  <div className="absolute -left-6 -top-6 w-32 h-32 resumaic-gradient-green opacity-10 blur-3xl -z-10" />
+                  <div className="absolute -left-6 -top-6 w-32 h-32  opacity-10 blur-3xl -z-10" />
                   <DialogTitle className="text-2xl font-bold dark:text-gray-100">Create New Resume</DialogTitle>
                   <DialogDescription className="text-gray-500 dark:text-gray-400">
                     Create a new resume by filling in the details below.
