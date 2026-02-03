@@ -148,6 +148,7 @@ export const createPersona = async (personaData: PersonaData): Promise<PersonaRe
         interests: personaData.additional?.interests || [],
       },
     }
+    
 
     const response = await api.post("/personas", payload)
     return response.data
