@@ -170,9 +170,8 @@ export default function AnalyticsPage() {
 
   if (loading && !summary) {
     return (
-      <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
-        <p className="text-muted-foreground animate-pulse">Loading analytics...</p>
+      <div className="flex justify-center items-center min-h-[60vh] w-full">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-gray-100"></div>
       </div>
     )
   }
@@ -188,22 +187,27 @@ export default function AnalyticsPage() {
             {isAdmin ? "Global performance overview & leaderboards" : "Track your content performance across all platforms"}
           </p>
         </div>
-        <div className="flex items-center gap-3 bg-white dark:bg-gray-900 p-1 rounded-lg border border-gray-200 dark:border-gray-800 shadow-sm">
-          <Calendar className="h-4 w-4 text-muted-foreground ml-2" />
-          <Select value={days} onValueChange={setDays}>
-            <SelectTrigger className="w-[140px] border-0 focus:ring-0 shadow-none bg-transparent h-8">
-              <SelectValue placeholder="Select period" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7">Last 7 days</SelectItem>
-              <SelectItem value="30">Last 30 days</SelectItem>
-              <SelectItem value="90">Last 3 months</SelectItem>
-              <SelectItem value="180">Last 6 months</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button variant="outline" size="sm" onClick={handleExport} disabled={loading || !summary} className="h-8">
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <span className="text-sm text-muted-foreground whitespace-nowrap hidden sm:inline-block">Time Range:</span>
+            <Select value={days} onValueChange={setDays}>
+              <SelectTrigger className="w-full sm:w-[180px] bg-white dark:bg-gray-900 shadow-sm">
+                <div className="flex items-center gap-2 truncate">
+                  <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <SelectValue placeholder="Select period" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">Last 7 days</SelectItem>
+                <SelectItem value="30">Last 30 days</SelectItem>
+                <SelectItem value="90">Last 3 months</SelectItem>
+                <SelectItem value="180">Last 6 months</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Button variant="outline" onClick={handleExport} disabled={loading || !summary} className="bg-white dark:bg-gray-900 shadow-sm w-full sm:w-auto">
             <Download className="h-4 w-4 mr-2" />
-            Export
+            Export Report
           </Button>
         </div>
       </div>
