@@ -70,6 +70,7 @@ export function CVWizard({
   const [formData, setFormData] = useState<CreateCVData | null>(null);
   const [personas, setPersonas] = useState<PersonaResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [selectedPersonaId, setSelectedPersonaId] = useState<string>(
     personaId || editingCV?.personas_id || ""
@@ -296,7 +297,9 @@ export function CVWizard({
             </div>
             {selectedTemplate && selectedPersonaId && (
               <Button
+                disabled={isCreating}
                 onClick={() => {
+                  setIsCreating(true);
                   const currentValues = getValues();
                   const dataToPass = {
                     ...currentValues,
@@ -317,7 +320,7 @@ export function CVWizard({
                 }}
                 className="resumaic-gradient-green hover:opacity-90 button-press"
               >
-                Create CV
+                {isCreating ? "Creating..." : "Create CV"}
               </Button>
             )}
           </DialogHeader>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useAppSelector } from "../../lib/redux/hooks"
 import {
   getUserAnalyticsSummary,
@@ -12,10 +12,47 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
-import { Loader2, Eye, Download, TrendingUp, Share2, FileText, User, Crown, Copy, MousePointerClick, QrCode, MoveVertical, FolderOpen } from "lucide-react"
+import { Button } from "../../components/ui/button"
+import { Loader2, Eye, Download, TrendingUp, Share2, FileText, User, Crown, Copy, MousePointerClick, QrCode, MoveVertical, FolderOpen, PieChart as PieChartIcon, BarChart3, Activity, ArrowUpRight, ArrowDownRight, Calendar } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
-import { Badge } from "../../components/ui/badge"
 import { cn } from "../../lib/utils"
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts"
+
+// --- Theme & Constants ---
+const COLORS = {
+  view: "#10b981", // emerald-500
+  download: "#3b82f6", // blue-500
+  share: "#6366f1", // indigo-500
+  copy: "#f97316", // orange-500
+  click: "#a855f7", // purple-500
+  other: "#94a3b8", // slate-400
+}
+
+const EVENT_CONFIG: Record<string, { label: string, icon: any, color: string, hex: string }> = {
+  view: { label: "Views", icon: Eye, color: "text-emerald-600", hex: COLORS.view },
+  download: { label: "Downloads", icon: Download, color: "text-blue-600", hex: COLORS.download },
+  share: { label: "Shares", icon: Share2, color: "text-indigo-600", hex: COLORS.share },
+  copy: { label: "Copies", icon: Copy, color: "text-orange-600", hex: COLORS.copy },
+  click: { label: "Clicks", icon: MousePointerClick, color: "text-purple-600", hex: COLORS.click },
+  qr_scan: { label: "QR Scans", icon: QrCode, color: "text-pink-600", hex: "#db2777" },
+  scroll: { label: "Scrolls", icon: MoveVertical, color: "text-gray-600", hex: "#4b5563" },
+  upgrade_click: { label: "Upgrades", icon: Crown, color: "text-yellow-600", hex: "#ca8a04" },
+  directory_view: { label: "Dir Views", icon: FolderOpen, color: "text-teal-600", hex: "#0d9488" },
+}
 
 export default function AnalyticsPage() {
   const { user, profile } = useAppSelector((state) => state.auth)
@@ -52,203 +89,358 @@ export default function AnalyticsPage() {
     }
   }
 
-  const EVENT_CONFIG: Record<string, { label: string, icon: any, color: string }> = {
-    view: { label: "Views", icon: Eye, color: "text-emerald-600" },
-    download: { label: "Downloads", icon: Download, color: "text-blue-600" },
-    share: { label: "Shares", icon: Share2, color: "text-indigo-600" },
-    copy: { label: "Copies", icon: Copy, color: "text-orange-600" },
-    click: { label: "Clicks", icon: MousePointerClick, color: "text-purple-600" },
-    qr_scan: { label: "QR Scans", icon: QrCode, color: "text-pink-600" },
-    scroll: { label: "Scrolls", icon: MoveVertical, color: "text-gray-600" },
-    upgrade_click: { label: "Upgrades", icon: Crown, color: "text-yellow-600" },
-    directory_view: { label: "Dir Views", icon: FolderOpen, color: "text-teal-600" },
+  // --- Data Transformation for Charts ---
+
+  const dailyViewsData = useMemo(() => {
+    if (!summary?.daily) return []
+    return summary.daily.map(d => ({
+      date: new Date(d.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+      fullDate: d.date,
+      views: Number(d.views || 0),
+      downloads: Number(d.downloads || 0)
+    }))
+  }, [summary])
+
+  const eventDistributionData = useMemo(() => {
+    if (!summary?.totals) return []
+    // Filter out 0 values and map to chart format
+    return Object.entries(summary.totals)
+      .filter(([key, value]) => value > 0 && key !== 'view') // Exclude views from pie chart as it dominates
+      .map(([key, value]) => ({
+        name: EVENT_CONFIG[key]?.label || key,
+        value: Number(value),
+        color: EVENT_CONFIG[key]?.hex || COLORS.other
+      }))
+      .sort((a, b) => b.value - a.value)
+  }, [summary])
+
+  const resourceTypeData = useMemo(() => {
+    if (!summary?.by_resource_type) return []
+    return Object.entries(summary.by_resource_type).map(([type, stats]) => ({
+      name: type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      views: Number(stats.view || 0),
+      downloads: Number(stats.download || 0),
+      shares: Number(stats.share || 0)
+    }))
+  }, [summary])
+
+  // Calculate trends (simple comparison if we had previous period, here we just show total)
+  const totalViews = summary?.totals?.view || 0
+  const totalDownloads = summary?.totals?.download || 0
+  const conversionRate = totalViews > 0 ? ((Number(totalDownloads) / Number(totalViews)) * 100).toFixed(1) : "0.0"
+
+  // --- Render Components ---
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-3 rounded-lg shadow-lg">
+          <p className="text-sm font-semibold mb-2">{label}</p>
+          {payload.map((entry: any, index: number) => (
+            <div key={index} className="flex items-center gap-2 text-xs">
+              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+              <span className="capitalize text-muted-foreground">{entry.name}:</span>
+              <span className="font-medium">{entry.value}</span>
+            </div>
+          ))}
+        </div>
+      )
+    }
+    return null
   }
 
-  const StatCard = ({ title, value, icon: Icon, subtext, className, iconColor }: any) => (
-    <Card className={cn("border-l-4 shadow-sm", className)}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
-          {title}
-        </CardTitle>
-        <Icon className={cn("h-4 w-4", iconColor || "text-emerald-600")} />
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{value}</div>
-        {subtext && <p className="text-xs text-muted-foreground mt-1">{subtext}</p>}
-      </CardContent>
-    </Card>
-  )
-
-  const SimpleBarChart = ({ data }: { data: { label: string; value: number }[] }) => {
-    if (!data || data.length === 0) return <div className="text-center py-10 text-muted-foreground">No data available</div>
-    const maxValue = Math.max(...data.map(d => d.value)) || 1
+  const handleExport = () => {
+    if (!summary) return
     
-    // Ensure we have enough bars to look good, or center them
-    return (
-      <div className="h-64 flex items-end justify-center gap-1 pt-6 pb-2 w-full">
-        {data.map((item, i) => (
-          <div key={i} className="flex flex-col items-center flex-1 max-w-[40px] group h-full justify-end">
-            <div 
-              className="w-full bg-emerald-500/20 hover:bg-emerald-500/40 transition-all rounded-t-sm relative group-hover:shadow-md"
-              style={{ height: `${Math.max((item.value / maxValue) * 100, 4)}%` }} 
-            >
-              <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap z-10 pointer-events-none">
-                {item.value} views
-                <div className="text-[9px] opacity-70">{item.label}</div>
-              </div>
-            </div>
-             {/* Only show every 5th label or if small dataset */}
-            <span className="text-[10px] text-muted-foreground mt-2 rotate-45 origin-left truncate w-full text-center h-4">
-               {(data.length < 15 || i % Math.ceil(data.length / 7) === 0) ? item.label : ''}
-            </span>
-          </div>
-        ))}
-      </div>
-    )
+    const csvContent = [
+      ["Date", "Views", "Downloads"],
+      ...summary.daily.map(d => [d.date, d.views, d.downloads])
+    ].map(e => e.join(",")).join("\n")
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const link = document.createElement("a")
+    const url = URL.createObjectURL(blob)
+    link.setAttribute("href", url)
+    link.setAttribute("download", `analytics_${days}days_${new Date().toISOString().split('T')[0]}.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   }
 
   if (loading && !summary) {
     return (
-      <div className="flex items-center justify-center h-[50vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+      <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <p className="text-muted-foreground animate-pulse">Loading analytics...</p>
       </div>
     )
   }
 
-  const dailyViewsData = summary?.daily?.map(d => ({ 
-    label: new Date(d.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }), 
-    value: Number(d.views || 0)
-  })) || []
-
-  // Calculate dynamic stats
-  const eventTypes = summary?.totals ? Object.keys(summary.totals) : []
-  // Ensure we always have views and downloads if they exist or are 0, but respect other keys
-  const defaultKeys = ['view', 'download']
-  const allKeys = Array.from(new Set([...defaultKeys, ...eventTypes]))
-
   return (
-    <div className="space-y-8 p-6 md:p-8 max-w-7xl mx-auto">
+    <div className="space-y-8 p-6 md:p-8 max-w-7xl mx-auto min-h-screen bg-gray-50/50 dark:bg-gray-950">
       {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-100 dark:border-gray-800 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Analytics Dashboard</h1>
-          <p className="text-muted-foreground mt-1">
-            {isAdmin ? "Global performance overview & leaderboards" : "Track your content performance"}
+          <p className="text-muted-foreground mt-1 flex items-center gap-2">
+            <Activity className="h-4 w-4" />
+            {isAdmin ? "Global performance overview & leaderboards" : "Track your content performance across all platforms"}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 bg-white dark:bg-gray-900 p-1 rounded-lg border border-gray-200 dark:border-gray-800 shadow-sm">
+          <Calendar className="h-4 w-4 text-muted-foreground ml-2" />
           <Select value={days} onValueChange={setDays}>
-            <SelectTrigger className="w-[160px] bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
+            <SelectTrigger className="w-[140px] border-0 focus:ring-0 shadow-none bg-transparent h-8">
               <SelectValue placeholder="Select period" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="7">Last 7 days</SelectItem>
               <SelectItem value="30">Last 30 days</SelectItem>
               <SelectItem value="90">Last 3 months</SelectItem>
+              <SelectItem value="180">Last 6 months</SelectItem>
             </SelectContent>
           </Select>
+          <Button variant="outline" size="sm" onClick={handleExport} disabled={loading || !summary} className="h-8">
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
         </div>
       </div>
 
       {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {allKeys.map(key => {
-            if (summary?.totals[key] === undefined && !defaultKeys.includes(key)) return null
-            const config = EVENT_CONFIG[key] || { label: key, icon: FileText, color: "text-gray-600" }
-            return (
-                <StatCard 
-                    key={key}
-                    title={`Total ${config.label}`} 
-                    value={summary?.totals[key] || 0} 
-                    icon={config.icon}
-                    iconColor={config.color}
-                    className={`border-l-${config.color.replace('text-', '')}`}
-                    subtext={`In the last ${days} days`}
-                />
-            )
-        })}
+        <Card className="border-l-4 border-l-emerald-500 shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Views</CardTitle>
+            <Eye className="h-4 w-4 text-emerald-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalViews.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground mt-1 flex items-center">
+              <span className="text-emerald-500 font-medium flex items-center mr-1">
+                 <ArrowUpRight className="h-3 w-3 mr-0.5" /> 
+                 Top
+              </span> 
+              metric this period
+            </p>
+          </CardContent>
+        </Card>
 
-        <StatCard 
-          title="Conversion Rate" 
-          value={`${((Number(summary?.totals?.download || 0) / Number(summary?.totals?.view || 1)) * 100).toFixed(1)}%`} 
-          icon={TrendingUp}
-          className="border-l-emerald-500"
-          subtext="Views to Downloads"
-        />
+        <Card className="border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Downloads</CardTitle>
+            <Download className="h-4 w-4 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalDownloads.toLocaleString()}</div>
+             <p className="text-xs text-muted-foreground mt-1">
+              Valid downloads
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-l-4 border-l-indigo-500 shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Conversion Rate</CardTitle>
+            <TrendingUp className="h-4 w-4 text-indigo-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{conversionRate}%</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Views to Downloads
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-l-4 border-l-purple-500 shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Shares</CardTitle>
+            <Share2 className="h-4 w-4 text-purple-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{Number(summary?.totals?.share || 0).toLocaleString()}</div>
+             <p className="text-xs text-muted-foreground mt-1">
+              Social shares & links
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all">Overview</TabsTrigger>
-          {isAdmin && <TabsTrigger value="leaderboard" className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all">Leaderboards</TabsTrigger>}
+        <TabsList className="bg-gray-100 dark:bg-gray-800 p-1 rounded-lg w-full md:w-auto grid grid-cols-2 md:inline-flex">
+          <TabsTrigger value="overview" className="gap-2"><BarChart3 className="h-4 w-4" /> Overview</TabsTrigger>
+          {isAdmin && <TabsTrigger value="leaderboard" className="gap-2"><Crown className="h-4 w-4" /> Leaderboards</TabsTrigger>}
         </TabsList>
         
-        <TabsContent value="overview" className="space-y-6">
+        <TabsContent value="overview" className="space-y-6 animate-in fade-in-50 duration-500">
           <div className="grid gap-6 md:grid-cols-7">
-            {/* Main Chart */}
-            <Card className="md:col-span-4 border-gray-100 dark:border-gray-800 shadow-sm">
+            {/* Main Traffic Chart */}
+            <Card className="md:col-span-4 lg:col-span-5 shadow-sm">
               <CardHeader>
                 <CardTitle>Traffic Overview</CardTitle>
-                <CardDescription>Daily views over the selected period</CardDescription>
+                <CardDescription>Daily views and downloads over the last {days} days</CardDescription>
               </CardHeader>
-              <CardContent>
-                <SimpleBarChart data={dailyViewsData} />
+              <CardContent className="pl-0">
+                <div className="h-[350px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={dailyViewsData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor={COLORS.view} stopOpacity={0.2}/>
+                          <stop offset="95%" stopColor={COLORS.view} stopOpacity={0}/>
+                        </linearGradient>
+                        <linearGradient id="colorDownloads" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor={COLORS.download} stopOpacity={0.2}/>
+                          <stop offset="95%" stopColor={COLORS.download} stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" className="dark:stroke-gray-800" />
+                      <XAxis 
+                        dataKey="date" 
+                        tickLine={false} 
+                        axisLine={false} 
+                        tick={{ fontSize: 12, fill: '#6b7280' }} 
+                        dy={10}
+                        minTickGap={30}
+                      />
+                      <YAxis 
+                        tickLine={false} 
+                        axisLine={false} 
+                        tick={{ fontSize: 12, fill: '#6b7280' }} 
+                        dx={-10}
+                      />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
+                      <Area 
+                        type="monotone" 
+                        dataKey="views" 
+                        name="Views"
+                        stroke={COLORS.view} 
+                        strokeWidth={2}
+                        fillOpacity={1} 
+                        fill="url(#colorViews)" 
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="downloads" 
+                        name="Downloads"
+                        stroke={COLORS.download} 
+                        strokeWidth={2}
+                        fillOpacity={1} 
+                        fill="url(#colorDownloads)" 
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
             
-            {/* Resource Breakdown */}
-            <Card className="md:col-span-3 border-gray-100 dark:border-gray-800 shadow-sm">
+            {/* Event Distribution Pie Chart */}
+            <Card className="md:col-span-3 lg:col-span-2 shadow-sm">
               <CardHeader>
-                <CardTitle>Engagement by Type</CardTitle>
-                <CardDescription>Actions Breakdown</CardDescription>
+                <CardTitle>Engagement Distribution</CardTitle>
+                <CardDescription>Actions breakdown (excluding views)</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-6">
-                  {summary?.by_resource_type && Object.entries(summary.by_resource_type).map(([type, stats]) => {
-                     const views = stats.view || 0;
-                     const totalActivity = Object.values(stats).reduce((a, b) => Number(a) + Number(b), 0);
+                <div className="h-[300px] w-full relative">
+                  {eventDistributionData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={eventDistributionData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={80}
+                          paddingAngle={5}
+                          dataKey="value"
+                        >
+                          {eventDistributionData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} strokeWidth={0} />
+                          ))}
+                        </Pie>
+                        <Tooltip content={<CustomTooltip />} />
+                        <Legend 
+                          layout="horizontal" 
+                          verticalAlign="bottom" 
+                          align="center"
+                          wrapperStyle={{ fontSize: '12px' }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-muted-foreground text-sm">
+                      No engagement data yet
+                    </div>
+                  )}
+                  {/* Center Text Overlay */}
+                  {eventDistributionData.length > 0 && (
+                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[65%] text-center pointer-events-none">
+                       <div className="text-2xl font-bold">{eventDistributionData.reduce((acc, curr) => acc + curr.value, 0)}</div>
+                       <div className="text-xs text-muted-foreground">Actions</div>
+                     </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Resource Performance */}
+            <Card className="shadow-sm">
+               <CardHeader>
+                 <CardTitle>Resource Performance</CardTitle>
+                 <CardDescription>Views vs Downloads by content type</CardDescription>
+               </CardHeader>
+               <CardContent>
+                  <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={resourceTypeData} layout="vertical" margin={{ left: 20 }}>
+                         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e5e7eb" className="dark:stroke-gray-800" />
+                         <XAxis type="number" hide />
+                         <YAxis 
+                           dataKey="name" 
+                           type="category" 
+                           tick={{ fontSize: 12, fill: '#6b7280' }} 
+                           width={100}
+                           axisLine={false}
+                           tickLine={false}
+                         />
+                         <Tooltip content={<CustomTooltip />} />
+                         <Legend />
+                         <Bar dataKey="views" name="Views" fill={COLORS.view} radius={[0, 4, 4, 0]} barSize={20} />
+                         <Bar dataKey="downloads" name="Downloads" fill={COLORS.download} radius={[0, 4, 4, 0]} barSize={20} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+               </CardContent>
+            </Card>
+
+            {/* Detailed Stats Grid */}
+            <Card className="shadow-sm">
+              <CardHeader>
+                <CardTitle>Detailed Metrics</CardTitle>
+                <CardDescription>Breakdown of all tracked events</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  {Object.entries(EVENT_CONFIG).map(([key, config]) => {
+                     const value = summary?.totals?.[key] || 0
+                     if (value === 0 && key !== 'view') return null // Skip empty non-view events
                      
                      return (
-                      <div key={type} className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            {type === 'cv' && <FileText className="h-4 w-4 text-blue-500" />}
-                            {type === 'cover_letter' && <FileText className="h-4 w-4 text-purple-500" />}
-                            {type === 'profile_card' && <User className="h-4 w-4 text-emerald-500" />}
-                            <span className="text-sm font-medium capitalize">{type.replace('_', ' ')}</span>
+                       <div key={key} className="flex items-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-100 dark:border-gray-800">
+                          <div className={`p-2 rounded-full bg-white dark:bg-gray-800 shadow-sm mr-3 ${config.color}`}>
+                             <config.icon className="h-4 w-4" />
                           </div>
-                          <span className="text-sm text-muted-foreground">{views} views</span>
-                        </div>
-                        
-                        {/* Dynamic Progress Bars for non-view events */}
-                        <div className="space-y-2">
-                             {Object.entries(stats).map(([eventKey, count]) => {
-                                 if (eventKey === 'view' || count === 0) return null;
-                                 const config = EVENT_CONFIG[eventKey] || { label: eventKey, color: "text-gray-500" };
-                                 const percentage = Math.round((Number(count) / (views || 1)) * 100); // Relative to views
-                                 
-                                 return (
-                                     <div key={eventKey} className="text-xs">
-                                         <div className="flex justify-between mb-1 text-muted-foreground">
-                                             <span>{config.label}</span>
-                                             <span>{count} ({percentage}%)</span>
-                                         </div>
-                                         <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                                             <div 
-                                                 className={`h-full rounded-full ${config.color.replace('text-', 'bg-')}`} 
-                                                 style={{ width: `${Math.min(percentage, 100)}%` }}
-                                             />
-                                         </div>
-                                     </div>
-                                 )
-                             })}
-                        </div>
-                      </div>
-                    )
+                          <div>
+                             <p className="text-xs text-muted-foreground">{config.label}</p>
+                             <p className="text-lg font-bold">{value}</p>
+                          </div>
+                       </div>
+                     )
                   })}
-                  {(!summary?.by_resource_type) && (
-                    <div className="text-center py-8 text-muted-foreground">No data available</div>
-                  )}
                 </div>
               </CardContent>
             </Card>
@@ -256,7 +448,7 @@ export default function AnalyticsPage() {
         </TabsContent>
 
         {isAdmin && adminDashboard && (
-          <TabsContent value="leaderboard" className="space-y-6">
+          <TabsContent value="leaderboard" className="space-y-6 animate-in fade-in-50 duration-500">
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {/* Top CVs */}
               <Card className="border-gray-100 dark:border-gray-800 shadow-sm">

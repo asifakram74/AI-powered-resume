@@ -5,6 +5,7 @@ export interface AttachedLink {
   type: 'cv' | 'cover_letter' | 'custom'
   title: string
   url: string
+  platformId?: string
 }
 
 export interface SocialLinks {

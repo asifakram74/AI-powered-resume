@@ -9,6 +9,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import { trackEvent } from "../../../lib/redux/service/analyticsService"
+import { detectPlatformFromUrl, getPlatformById } from "../../../pages/profile-card/platform-data"
 
 interface ProfileCardPublicClientProps {
   slug: string
@@ -100,6 +101,17 @@ export default function ProfileCardPublicClient({ slug }: ProfileCardPublicClien
 
   const profileImage = card.profile_picture || "/profile-img.png"
 
+  const HeaderSocialIcon = ({ href, icon: Icon, colorClassName }: { href: string, icon: any, colorClassName: string }) => (
+      <a 
+          href={href} 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className={`h-10 w-10 rounded-full flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform ${colorClassName.startsWith('bg-') ? colorClassName : 'bg-gray-700'}`}
+      >
+          <Icon className="h-5 w-5" />
+      </a>
+  )
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center p-4 sm:p-8">
       <div className="w-full max-w-4xl">
@@ -140,6 +152,55 @@ export default function ProfileCardPublicClient({ slug }: ProfileCardPublicClien
                             </div>
                           )}
                           <div className="mt-1 text-center text-sm text-white/60">@{card.public_slug}</div>
+
+                          {/* Social Icons Row */}
+                          <div className="flex items-center justify-center gap-3 mt-4 flex-wrap">
+                              {socialLinks.linkedin && (
+                                  <HeaderSocialIcon 
+                                      href={socialLinks.linkedin}
+                                      icon={Linkedin}
+                                      colorClassName={getPlatformById('linkedin')?.color || "bg-blue-700"}
+                                  />
+                              )}
+                              {socialLinks.github && (
+                                  <HeaderSocialIcon 
+                                      href={socialLinks.github}
+                                      icon={Github}
+                                      colorClassName={getPlatformById('github')?.color || "bg-gray-900"}
+                                  />
+                              )}
+                              {socialLinks.twitter && (
+                                  <HeaderSocialIcon 
+                                      href={socialLinks.twitter}
+                                      icon={Twitter}
+                                      colorClassName={getPlatformById('twitter')?.color || "bg-black"}
+                                  />
+                              )}
+                              {card.additional_link && (
+                                  <HeaderSocialIcon 
+                                      href={card.additional_link}
+                                      icon={Globe}
+                                      colorClassName={getPlatformById('website')?.color || "bg-emerald-600"}
+                                  />
+                              )}
+                              {/* Custom Links (type=custom) */}
+                              {socialLinks.custom_links?.filter(l => l.type === 'custom').map(link => {
+                                  // Type assertion since backend type might not strictly match frontend interface yet
+                                  const platformId = (link as any).platformId;
+                                  const platform = (platformId ? getPlatformById(platformId) : undefined) || detectPlatformFromUrl(link.url)
+                                  const Icon = platform?.icon || ExternalLink
+                                  const color = platform?.color || "bg-gray-500"
+                                  
+                                  return (
+                                      <HeaderSocialIcon 
+                                          key={link.id}
+                                          href={link.url}
+                                          icon={Icon}
+                                          colorClassName={color}
+                                      />
+                                  )
+                              })}
+                          </div>
                       </div>
                   </div>
 
@@ -173,45 +234,6 @@ export default function ProfileCardPublicClient({ slug }: ProfileCardPublicClien
                                           {[card.city, card.country].filter(Boolean).join(", ")}
                                       </div>
                                   )}
-                              </div>
-                          </div>
-                      )}
-
-                      {(socialLinks.linkedin || socialLinks.github || socialLinks.twitter || card.additional_link || (socialLinks.custom_links?.some(l => l.type === 'custom'))) && (
-                          <div className="rounded-2xl bg-white/10 p-4">
-                              <div className="text-sm font-semibold text-white mb-3">Social Links</div>
-                              <div className="space-y-2">
-                                  {socialLinks.linkedin && (
-                                      <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-2 rounded-lg bg-black/40 hover:bg-black/60 transition">
-                                          <Linkedin className="h-4 w-4 text-blue-400" />
-                                          <span className="text-sm text-white/90 truncate">LinkedIn</span>
-                                      </a>
-                                  )}
-                                  {socialLinks.github && (
-                                      <a href={socialLinks.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-2 rounded-lg bg-black/40 hover:bg-black/60 transition">
-                                          <Github className="h-4 w-4 text-gray-400" />
-                                          <span className="text-sm text-white/90 truncate">GitHub</span>
-                                      </a>
-                                  )}
-                                  {socialLinks.twitter && (
-                                      <a href={socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-2 rounded-lg bg-black/40 hover:bg-black/60 transition">
-                                          <Twitter className="h-4 w-4 text-sky-400" />
-                                          <span className="text-sm text-white/90 truncate">Twitter</span>
-                                      </a>
-                                  )}
-                                  {card.additional_link && (
-                                      <a href={card.additional_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-2 rounded-lg bg-black/40 hover:bg-black/60 transition">
-                                          <Globe className="h-4 w-4 text-emerald-400" />
-                                          <span className="text-sm text-white/90 truncate">Website</span>
-                                      </a>
-                                  )}
-                                  {/* Custom Links (type=custom) */}
-                                  {socialLinks.custom_links?.filter(l => l.type === 'custom').map(link => (
-                                      <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-2 rounded-lg bg-black/40 hover:bg-black/60 transition">
-                                          <ExternalLink className="h-4 w-4 text-gray-400" />
-                                          <span className="text-sm text-white/90 truncate">{link.title}</span>
-                                      </a>
-                                  ))}
                               </div>
                           </div>
                       )}

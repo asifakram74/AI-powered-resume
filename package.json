@@ -42,6 +42,7 @@
     "react-hook-form": "^7.60.0",
     "react-redux": "latest",
     "react-select": "^5.10.2",
+    "recharts": "^3.7.0",
     "redux": "latest",
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.5.5"
