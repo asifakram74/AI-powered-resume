@@ -9,7 +9,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import { trackEvent } from "../../../lib/redux/service/analyticsService"
-import { detectPlatformFromUrl, getPlatformById } from "../../../pages/profile-card/platform-data"
+import { detectPlatformFromUrl, getPlatformById } from "../../../lib/profile-card/platform-data"
 
 interface ProfileCardPublicClientProps {
   slug: string
