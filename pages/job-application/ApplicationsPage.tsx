@@ -584,31 +584,31 @@ export default function ApplicationsPage() {
   return (
     <div className="max-w-full mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex flex-col items-center sm:flex-row sm:items-center sm:gap-3 text-center sm:text-left">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg resumaic-gradient-green text-white mb-2 sm:mb-0">
-            <Sparkles className="h-6 w-6" />
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
+        <div className="flex flex-col items-center sm:flex-row sm:items-center sm:gap-4 text-center sm:text-left">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl resumaic-gradient-green text-white shadow-lg shadow-[#70E4A8]/25 mb-3 sm:mb-0 transition-transform hover:scale-105 duration-300">
+            <Sparkles className="h-7 w-7" />
           </div>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
+          <div className="space-y-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
               Application Tracker
             </h1>
-            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base mt-1 sm:mt-0">
+            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base max-w-md mx-auto sm:mx-0">
               Track and manage all your job applications
             </p>
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+        <div className="flex flex-col sm:flex-row gap-3 sm:items-center w-full sm:w-auto">
           {pipelines.length === 0 ? (
             <Button
-              className="resumaic-gradient-green hover:opacity-90 button-press dark:text-gray-100"
+              className="resumaic-gradient-green text-white hover:opacity-90 button-press shadow-md shadow-[#70E4A8]/20 w-full sm:w-auto"
               onClick={createDefaultPipelines}
               disabled={isCreatingPipeline}
             >
               {isCreatingPipeline ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2" />
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   Creating…
                 </>
               ) : (
@@ -618,7 +618,7 @@ export default function ApplicationsPage() {
           ) : null}
 
           <Button
-            className="resumaic-gradient-green hover:opacity-90 button-press dark:text-gray-100"
+            className="resumaic-gradient-green text-white hover:opacity-90 button-press shadow-md shadow-[#70E4A8]/20 w-full sm:w-auto"
             onClick={() => setIsAddOpen(true)}
             disabled={pipelines.length === 0}
           >
@@ -698,7 +698,7 @@ export default function ApplicationsPage() {
               Create pipelines to start tracking your job applications
             </p>
             <Button
-              className="resumaic-gradient-green hover:opacity-90 button-press"
+              className="resumaic-gradient-green text-white hover:opacity-90 button-press shadow-md shadow-[#70E4A8]/20"
               onClick={createDefaultPipelines}
               disabled={isCreatingPipeline}
             >

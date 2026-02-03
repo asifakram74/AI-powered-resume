@@ -931,73 +931,71 @@ export function ProfileCardList({ user }: PageProps) {
 
       {/* View Attachments Dialog */}
       <Dialog open={!!viewingAttachments} onOpenChange={(open) => !open && setViewingAttachments(null)}>
-        <DialogContent className="w-[95vw] sm:max-w-md p-0 overflow-hidden border-0 shadow-xl rounded-xl dark:border-0 dark:p-[1px] dark:overflow-hidden dark:bg-transparent">
-          <div className="hidden dark:block absolute inset-0 gradient-border-moving -z-10" />
-          <div className="dark:bg-[#0B0F1A] dark:rounded-2xl p-0 overflow-hidden">
-            <div className="relative resumaic-gradient-green p-6 text-white rounded-t-xl animate-pulse-glow">
-              <div className="absolute inset-x-0 top-0 h-0.5 shimmer-effect opacity-70" />
-              <div className="flex items-center gap-3">
-                <Paperclip className="h-6 w-6" />
-                <DialogTitle className="text-lg font-semibold">Attachments</DialogTitle>
-              </div>
-              <DialogDescription className="mt-2 text-sm opacity-90">
-                Links attached to {viewingAttachments?.full_name}'s profile card.
-              </DialogDescription>
-              <div className="absolute -right-10 -top-10 w-32 h-32 resumaic-gradient-orange rounded-full blur-2xl opacity-30" />
+        <DialogContent className="w-[95vw] sm:max-w-md p-0 gap-0 overflow-hidden border-0 shadow-xl rounded-xl bg-white dark:bg-[#1a1f2e] dark:border dark:border-gray-800">
+          <div className="relative resumaic-gradient-green p-6 text-white">
+            <div className="flex items-center gap-3">
+              <Paperclip className="h-6 w-6" />
+              <DialogTitle className="text-lg font-semibold text-white">Attachments</DialogTitle>
             </div>
-            <div className="p-6 space-y-3">
-              {(() => {
-                if (!viewingAttachments) return null
-                let links: any[] = []
-                try {
-                  const social = typeof viewingAttachments.social_links === 'string' 
-                    ? JSON.parse(viewingAttachments.social_links) 
-                    : viewingAttachments.social_links
-                  links = social?.custom_links || []
-                } catch (e) {}
+            <DialogDescription className="mt-2 text-sm text-white/90">
+              Links attached to {viewingAttachments?.full_name}'s profile card.
+            </DialogDescription>
+            <div className="absolute -right-10 -top-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+          </div>
+          
+          <div className="p-6 space-y-3 max-h-[60vh] overflow-y-auto custom-scrollbar">
+            {(() => {
+              if (!viewingAttachments) return null
+              let links: any[] = []
+              try {
+                const social = typeof viewingAttachments.social_links === 'string' 
+                  ? JSON.parse(viewingAttachments.social_links) 
+                  : viewingAttachments.social_links
+                links = social?.custom_links || []
+              } catch (e) {}
 
-                if (links.length === 0) return (
-                  <div className="flex flex-col items-center justify-center py-8">
-                    <Paperclip className="h-12 w-12 text-gray-400 mb-4" />
-                    <p className="text-center text-gray-500 dark:text-gray-400">No attachments found.</p>
+              if (links.length === 0) return (
+                <div className="flex flex-col items-center justify-center py-8">
+                  <Paperclip className="h-12 w-12 text-gray-300 dark:text-gray-600 mb-4" />
+                  <p className="text-center text-gray-500 dark:text-gray-400">No attachments found.</p>
+                </div>
+              )
+
+              return links.map((link: any, i: number) => (
+                <a 
+                  key={i} 
+                  href={link.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 hover:bg-emerald-50 dark:hover:bg-emerald-900/10 hover:border-emerald-200 dark:hover:border-emerald-800 transition-all group w-full"
+                >
+                  <div className="h-10 w-10 flex-shrink-0 flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 group-hover:scale-105 transition-transform">
+                    {link.type === 'cv' && <FileText className="h-5 w-5 text-blue-500" />}
+                    {link.type === 'cover_letter' && <Mail className="h-5 w-5 text-green-500" />}
+                    {link.type === 'custom' && <ExternalLink className="h-5 w-5 text-gray-400 group-hover:text-emerald-500" />}
                   </div>
-                )
-
-                return links.map((link: any, i: number) => (
-                  <a 
-                    key={i} 
-                    href={link.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:border-emerald-200 dark:hover:border-emerald-800 transition-all group overflow-hidden w-full"
-                  >
-                    <div className="h-10 w-10 flex-shrink-0 flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 shadow-sm group-hover:scale-105 transition-transform">
-                      {link.type === 'cv' && <FileText className="h-5 w-5 text-blue-500" />}
-                      {link.type === 'cover_letter' && <Mail className="h-5 w-5 text-green-500" />}
-                      {link.type === 'custom' && <ExternalLink className="h-5 w-5 text-gray-400 group-hover:text-emerald-500" />}
+                  <div className="flex-1 min-w-0 text-left">
+                    <div className="font-medium text-gray-900 dark:text-gray-100 truncate group-hover:text-emerald-700 dark:group-hover:text-emerald-400" title={link.title}>
+                      {link.title}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-gray-900 dark:text-gray-100 truncate group-hover:text-emerald-700 dark:group-hover:text-emerald-400" title={link.title}>
-                        {link.title}
-                      </div>
-                      <div className="text-xs text-gray-500 truncate group-hover:text-emerald-600/70 dark:group-hover:text-emerald-400/70">
-                        {link.type === 'cv' ? 'Resume' : link.type === 'cover_letter' ? 'Cover Letter' : 'External Link'}
-                      </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                      {link.type === 'cv' ? 'Resume' : link.type === 'cover_letter' ? 'Cover Letter' : 'External Link'}
                     </div>
-                    <ExternalLink className="h-4 w-4 flex-shrink-0 text-gray-400 group-hover:text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </a>
-                ))
-              })()}
-            </div>
-            <div className="p-6 pt-0 border-t dark:border-gray-800">
-              <Button 
-                variant="outline" 
-                onClick={() => setViewingAttachments(null)} 
-                className="w-full dark:bg-gray-900 dark:border-gray-800 dark:text-gray-300 dark:hover:bg-gray-800"
-              >
-                Close
-              </Button>
-            </div>
+                  </div>
+                  <ExternalLink className="h-4 w-4 flex-shrink-0 text-gray-400 group-hover:text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </a>
+              ))
+            })()}
+          </div>
+          
+          <div className="p-6 pt-0">
+            <Button 
+              variant="outline" 
+              onClick={() => setViewingAttachments(null)} 
+              className="w-full h-11 border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+            >
+              Close
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

@@ -338,7 +338,8 @@ export default function JobSearchPage() {
                 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#70e4a8] data-[state=active]:to-[#4ade80] 
                 data-[state=active]:text-white data-[state=active]:shadow-md
                 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50
-                focus-visible:ring-2 focus-visible:ring-[#70E4A8] focus-visible:ring-offset-2 focus-visible:outline-none"
+                focus-visible:ring-2 focus-visible:ring-[#70E4A8] focus-visible:ring-offset-2 focus-visible:outline-none
+                data-[state=active]:!text-white"
             >
               <Search className="h-4 w-4" />
               <span>Internal</span>
@@ -349,7 +350,8 @@ export default function JobSearchPage() {
                 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#70e4a8] data-[state=active]:to-[#4ade80] 
                 data-[state=active]:text-white data-[state=active]:shadow-md
                 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50
-                focus-visible:ring-2 focus-visible:ring-[#70E4A8] focus-visible:ring-offset-2 focus-visible:outline-none"
+                focus-visible:ring-2 focus-visible:ring-[#70E4A8] focus-visible:ring-offset-2 focus-visible:outline-none
+                data-[state=active]:!text-white"
             >
               <ExternalLink className="h-4 w-4" />
               <span>Google</span>
