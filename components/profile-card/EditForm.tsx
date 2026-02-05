@@ -16,6 +16,7 @@ import { SectionKey, EditableProfile, gradientOptions, defaultProfileImage } fro
 import { LinkPlatformPicker } from "./LinkPlatformPicker"
 import { AddLinkDialog } from "./AddLinkDialog"
 import { Platform, getPlatformById, detectPlatformFromUrl } from "../../lib/profile-card/platform-data"
+import { z } from "zod"
 
 interface EditFormProps {
     sectionKey: SectionKey
@@ -38,6 +39,31 @@ interface EditFormProps {
     onSetCustomLinkUrl: (url: string) => void
     onImageUpload: (file?: File) => void
 }
+
+// Zod schemas for validation
+const displaySchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  username: z.string()
+    .min(3, "Username must be at least 3 characters")
+    .regex(/^[a-zA-Z0-9._-]+$/, "Username can only contain letters, numbers, dots, underscores, and dashes"),
+  job_title: z.string().optional(),
+})
+
+const bioSchema = z.object({
+  summary: z.string().max(500, "Bio must be less than 500 characters").optional(),
+})
+
+const contactSchema = z.object({
+  email: z.string().email("Invalid email address").optional().or(z.literal("")),
+  phone: z.string().optional(), // Basic phone validation could be added if needed
+  city: z.string().optional(),
+  country: z.string().optional(),
+})
+
+const linksSchema = z.object({
+  additional_link: z.string().url("Invalid URL").optional().or(z.literal("")),
+})
 
 export function EditForm({
     sectionKey,
@@ -63,6 +89,7 @@ export function EditForm({
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [firstName, setFirstName] = useState("")
     const [lastName, setLastName] = useState("")
+    const [errors, setErrors] = useState<Record<string, string>>({})
     
     // New state for link management
     const [isAddingLink, setIsAddingLink] = useState(false)
@@ -78,6 +105,53 @@ export function EditForm({
             setLastName(last)
         }
     }, [sectionKey, draft.full_name])
+
+    // Validate on change or section switch
+    useEffect(() => {
+        validateSection()
+    }, [sectionKey, draft, firstName, lastName])
+
+    const validateSection = () => {
+        let result
+        let newErrors: Record<string, string> = {}
+
+        if (sectionKey === "display") {
+            result = displaySchema.safeParse({
+                firstName,
+                lastName,
+                username: draft.username,
+                job_title: draft.job_title
+            })
+        } else if (sectionKey === "bio") {
+            result = bioSchema.safeParse({ summary: draft.summary })
+        } else if (sectionKey === "contact") {
+            result = contactSchema.safeParse({
+                email: draft.email,
+                phone: draft.phone,
+                city: draft.city,
+                country: draft.country
+            })
+        } else if (sectionKey === "links") {
+            result = linksSchema.safeParse({ additional_link: draft.additional_link })
+        }
+
+        if (result && !result.success) {
+            result.error.issues.forEach((issue) => {
+                // Ensure the key is a string
+                const key = String(issue.path[0]);
+                newErrors[key] = issue.message
+            })
+        }
+
+        setErrors(newErrors)
+        return Object.keys(newErrors).length === 0
+    }
+
+    const handleSave = () => {
+        if (validateSection()) {
+            onSave()
+        }
+    }
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -201,7 +275,9 @@ export function EditForm({
                                 onUpdateFullName(next, lastName)
                             }}
                             placeholder="First name"
+                            className={errors.firstName ? "border-red-500" : ""}
                         />
+                        {errors.firstName && <p className="text-xs text-red-500">{errors.firstName}</p>}
                     </div>
                     <div className="space-y-2">
                         <Label>Last Name</Label>
@@ -213,7 +289,9 @@ export function EditForm({
                                 onUpdateFullName(firstName, next)
                             }}
                             placeholder="Last name"
+                            className={errors.lastName ? "border-red-500" : ""}
                         />
+                        {errors.lastName && <p className="text-xs text-red-500">{errors.lastName}</p>}
                     </div>
                 </div>
                 <div className="space-y-2">
@@ -230,7 +308,9 @@ export function EditForm({
                         value={draft.username}
                         onChange={(e) => onUpdateDraft({ username: e.target.value })}
                         placeholder="your.handle"
+                        className={errors.username ? "border-red-500" : ""}
                     />
+                    {errors.username && <p className="text-xs text-red-500">{errors.username}</p>}
                 </div>
             </div>
         </div>
@@ -245,8 +325,9 @@ export function EditForm({
                     onChange={(e) => onUpdateDraft({ summary: e.target.value })}
                     rows={6}
                     placeholder="Tell people about you"
-                    className="min-h-[150px]"
+                    className={`min-h-[150px] ${errors.summary ? "border-red-500" : ""}`}
                 />
+                {errors.summary && <p className="text-xs text-red-500">{errors.summary}</p>}
                 <p className="text-xs text-gray-500">Tip: Keep it concise and highlight your key skills and passions.</p>
             </div>
         </div>
@@ -261,7 +342,9 @@ export function EditForm({
                         value={draft.email || ""}
                         onChange={(e) => onUpdateDraft({ email: e.target.value })}
                         placeholder="you@example.com"
+                        className={errors.email ? "border-red-500" : ""}
                     />
+                    {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
                 </div>
                 <div className="space-y-2">
                     <Label>Phone</Label>
@@ -331,7 +414,9 @@ export function EditForm({
                             value={draft.additional_link || ""}
                             onChange={(e) => onUpdateDraft({ additional_link: e.target.value })}
                             placeholder="https://"
+                            className={errors.additional_link ? "border-red-500" : ""}
                         />
+                        {errors.additional_link && <p className="text-xs text-red-500">{errors.additional_link}</p>}
                     </div>
 
                     <div className="space-y-3">
@@ -485,8 +570,11 @@ export function EditForm({
                 {!isAddingLink && (
                     <div className="flex items-center gap-2">
                         <Button
-                            onClick={onSave}
-                            className="h-8 text-xs font-medium resumaic-gradient-green text-white hover:opacity-90 shadow-md shadow-emerald-200 dark:shadow-none"
+                            onClick={handleSave}
+                            disabled={Object.keys(errors).length > 0}
+                            className={`h-8 text-xs font-medium resumaic-gradient-green text-white hover:opacity-90 shadow-md shadow-emerald-200 dark:shadow-none ${
+                                Object.keys(errors).length > 0 ? "opacity-50 cursor-not-allowed" : ""
+                            }`}
                         >
                             <Check className="h-3 w-3 mr-1" />
                             Update

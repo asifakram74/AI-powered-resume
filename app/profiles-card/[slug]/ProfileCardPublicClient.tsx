@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { getPublicProfileBySlug, ProfileCard, SocialLinks } from "../../../lib/redux/service/profileCardService"
 import { PublicPageLoading } from "../../../components/shared/public-page-loading"
 import { 
@@ -10,10 +11,44 @@ import {
 import { toast } from "sonner"
 import { trackEvent } from "../../../lib/redux/service/analyticsService"
 import { detectPlatformFromUrl, getPlatformById } from "../../../lib/profile-card/platform-data"
+import { Button } from "../../../components/ui/button"
+import { Logo } from "../../../components/ui/logo"
 
 interface ProfileCardPublicClientProps {
   slug: string
 }
+
+const PublicHeader = ({ title }: { title: string }) => (
+  <div className="w-full bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800 px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-50 shadow-sm">
+    <div className="flex items-center gap-4">
+      <div className="hidden md:block">
+        <Link href="/">
+          <Logo width={150} height={45} className="cursor-pointer" />
+        </Link>
+      </div>
+      <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 hidden md:block" />
+      <h1 className="font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[200px] md:max-w-md capitalize">
+        {title}
+      </h1>
+    </div>
+    <div className="flex items-center gap-2">
+      <Button 
+        variant="outline" 
+        size="sm" 
+        className="hidden sm:flex"
+        onClick={() => window.open('https://resumaic.com', '_blank')}
+      >
+        Create Your Own
+      </Button>
+    </div>
+  </div>
+)
+
+const PublicFooter = () => (
+  <div className="w-full py-6 text-center text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 mt-auto">
+    <p>&copy; {new Date().getFullYear()} Resumaic. All rights reserved.</p>
+  </div>
+)
 
 export default function ProfileCardPublicClient({ slug }: ProfileCardPublicClientProps) {
   const [card, setCard] = useState<ProfileCard | null>(null)
@@ -113,7 +148,10 @@ export default function ProfileCardPublicClient({ slug }: ProfileCardPublicClien
   )
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center p-4 sm:p-8">
+    <div className="min-h-screen bg-gray-100 dark:bg-[#030712] flex flex-col">
+      <PublicHeader title={`${card.full_name}'s Profile`} />
+      
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-8">
       <div className="w-full max-w-4xl">
           <div className="rounded-[36px] bg-black p-3 shadow-2xl">
               <div className="rounded-[28px] overflow-hidden bg-black">
@@ -269,6 +307,9 @@ export default function ProfileCardPublicClient({ slug }: ProfileCardPublicClien
               </div>
           </div>
       </div>
+      </div>
+      
+      <PublicFooter />
     </div>
   )
 }

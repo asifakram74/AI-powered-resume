@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { getCoverLetterBySlug, CoverLetter } from "../../../lib/redux/service/coverLetterService"
 import { Loader2, FileDown, FileText, Share2, Copy } from "lucide-react"
 import { Button } from "../../../components/ui/button"
@@ -15,6 +16,13 @@ import { trackEvent } from "../../../lib/redux/service/analyticsService"
 import { ShareDialog } from "../../../components/cover-letter/share-dialog"
 import { PublicPageLoading } from "../../../components/shared/public-page-loading"
 import { useCVExport } from "../../../components/cv-page/use-cv-export"
+import { Logo } from "../../../components/ui/logo"
+
+const PublicFooter = () => (
+  <div className="w-full py-6 text-center text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-black mt-auto">
+    <p>&copy; {new Date().getFullYear()} Resumaic. All rights reserved.</p>
+  </div>
+)
 
 interface CoverLetterClientProps {
   slug: string
@@ -104,13 +112,36 @@ export default function CoverLetterClient({ slug }: CoverLetterClientProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col items-center">
        {/* Header with Download Button */}
-       <div className="w-full bg-white border-b border-gray-200 px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-50 shadow-sm">
-        <h1 className="font-semibold text-gray-900 truncate max-w-[200px] md:max-w-md capitalize">
-          {/* Display User Name or 'Cover Letter' */}
-          {(letter as any).user?.name ? `${(letter as any).user.name}'s Cover Letter` : 'Cover Letter'}
-        </h1>
+      <div className="w-full bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800 px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-50 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="hidden md:block">
+            <Link href="/">
+              <Logo width={150} height={45} className="cursor-pointer" />
+            </Link>
+          </div>
+          <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 hidden md:block" />
+          <h1 className="font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[200px] md:max-w-md capitalize">
+            {/* Display User Name or 'Cover Letter' */}
+            {(() => {
+              const user = (letter as any).user
+              const cv = (letter as any).cv
+              
+              if (user?.name) return `${user.name}'s Cover Letter`
+              
+              if (cv?.generated_content) {
+                try {
+                  const content = JSON.parse(cv.generated_content)
+                  const name = content.personalInfo?.fullName || content.personalInfo?.name
+                  if (name) return `${name}'s Cover Letter`
+                } catch (e) {}
+              }
+
+              return 'Cover Letter'
+            })()}
+          </h1>
+        </div>
         <div className="flex items-center gap-2">
        
           <DropdownMenu>
@@ -142,13 +173,15 @@ export default function CoverLetterClient({ slug }: CoverLetterClientProps) {
         </div>
       </div>
 
-      <div className="p-4 md:p-8 w-full flex justify-center">
+      <div className="flex-1 p-4 md:p-8 w-full flex justify-center">
         <div id="cv-preview-content" className="w-full max-w-[210mm] bg-white shadow-lg p-8 md:p-12 rounded-lg">
           <div className="whitespace-pre-wrap font-sans text-gray-800 leading-relaxed">
             {letter.generated_letter}
           </div>
         </div>
       </div>
+
+      <PublicFooter />
 
       <ShareDialog
         isOpen={isShareDialogOpen}

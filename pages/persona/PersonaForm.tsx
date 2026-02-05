@@ -24,6 +24,57 @@ import { Textarea } from "../../components/ui/textarea";
 import { Switch } from "../../components/ui/switch";
 import type { CVData } from "../../types/cv-data";
 import { isValidEmailFormat } from "../../lib/utils/email-validation";
+import { z } from "zod";
+
+// Zod Schemas
+const personalInfoSchema = z.object({
+  fullName: z.string().min(1, "Full Name is required"),
+  jobTitle: z.string().min(1, "Job Title is required"),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().optional(),
+  city: z.string().optional(),
+  country: z.string().optional(),
+  address: z.string().optional(),
+  linkedin: z.string().url("Invalid LinkedIn URL").optional().or(z.literal("")),
+  github: z.string().url("Invalid GitHub URL").optional().or(z.literal("")),
+  summary: z.string().optional(),
+});
+
+const experienceSchema = z.object({
+  jobTitle: z.string().min(1, "Job Title is required"),
+  companyName: z.string().min(1, "Company Name is required"),
+  location: z.string().optional(),
+  employmentType: z.string().optional(),
+  industry: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  current: z.boolean().optional(),
+});
+
+const educationSchema = z.object({
+  degree: z.string().min(1, "Degree is required"),
+  institutionName: z.string().min(1, "Institution Name is required"),
+  location: z.string().optional(),
+  graduationDate: z.string().optional(),
+  gpa: z.string().optional(),
+  honors: z.string().optional(),
+  additionalInfo: z.string().optional(),
+});
+
+const projectSchema = z.object({
+  name: z.string().min(1, "Project Name is required"),
+  role: z.string().min(1, "Role is required"),
+  description: z.string().optional(),
+  liveDemoLink: z.string().url("Invalid URL").optional().or(z.literal("")),
+  githubLink: z.string().url("Invalid URL").optional().or(z.literal("")),
+});
+
+const certificationSchema = z.object({
+  title: z.string().min(1, "Certification Title is required"),
+  issuingOrganization: z.string().min(1, "Issuing Organization is required"),
+  dateObtained: z.string().optional(),
+  verificationLink: z.string().url("Invalid URL").optional().or(z.literal("")),
+});
 
 // Helper function to validate and format URLs
 const formatUrl = (url: string): string => {
@@ -102,7 +153,7 @@ export function PersonaForm({
   onCancel,
 }: PersonaFormProps) {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [errors, setErrors] = useState<{ fullName?: string; jobTitle?: string; email?: string }>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState<string>("personal");
 
   // Form state with default empty structure
@@ -250,6 +301,40 @@ export function PersonaForm({
     }
   }, [editingPersona]);
 
+  // Real-time validation for Personal Info
+  useEffect(() => {
+    if (activeTab === "personal") {
+      const result = personalInfoSchema.safeParse(formData.personalInfo);
+      if (!result.success) {
+        const newErrors: Record<string, string> = {};
+        result.error.issues.forEach((issue) => {
+          newErrors[issue.path[0] as string] = issue.message;
+        });
+        // Only set errors if fields have been touched (basic implementation: if they are not empty)
+        // Or just set them but only show if touched? For now, let's just set them if the user has started typing or if it's a submission attempt.
+        // To be less intrusive, we can check if the field is not empty before showing error, OR manage a 'touched' state.
+        // For simplicity matching EditForm, we'll validate what's there.
+        // However, we don't want to show "Required" errors on empty initial load.
+        
+        // Let's only set errors for fields that have content but are invalid, OR required fields that are empty BUT only if we are in a "submitting" state or similar.
+        // Actually, EditForm validated everything on change. Let's do that but filter out "Required" errors for empty strings if we want to avoid initial red sea.
+        // But the user requested "validation in profile card form" style which showed red borders immediately? 
+        // In EditForm we had `validateSection` running on `useEffect`.
+        
+        // Let's filter out "Required" errors for untouched fields if needed, but since we don't track touched, let's just show errors.
+        // To avoid initial red on empty form, we can check if formData is not initial default.
+        const isInitial = !formData.personalInfo.fullName && !formData.personalInfo.jobTitle && !formData.personalInfo.email;
+        if (!isInitial) {
+             setErrors(newErrors);
+        }
+      } else {
+        setErrors({});
+      }
+    } else {
+      setErrors({}); // Clear errors when switching tabs
+    }
+  }, [formData.personalInfo, activeTab]);
+
   const addSkill = () => {
     if (skillInput.trim()) {
       setFormData((prev) => ({
@@ -362,6 +447,21 @@ export function PersonaForm({
   };
 
   const addExperience = () => {
+    // Validate current experience using Zod
+    const result = experienceSchema.safeParse(currentExperience);
+    
+    if (!result.success) {
+       const fieldErrors: Record<string, string> = {};
+       result.error.issues.forEach(issue => {
+         fieldErrors[issue.path[0] as string] = issue.message;
+       });
+       
+       // Show first error as toast
+       const firstError = Object.values(fieldErrors)[0];
+       toast.error(firstError || "Please fill required fields");
+       return;
+    }
+
     if (currentExperience.jobTitle && currentExperience.companyName) {
       if (editingExperienceId) {
         setFormData((prev) => ({
@@ -445,6 +545,20 @@ export function PersonaForm({
   };
 
   const addEducation = () => {
+    // Validate current education using Zod
+    const result = educationSchema.safeParse(currentEducation);
+
+    if (!result.success) {
+       const fieldErrors: Record<string, string> = {};
+       result.error.issues.forEach(issue => {
+         fieldErrors[issue.path[0] as string] = issue.message;
+       });
+       
+       const firstError = Object.values(fieldErrors)[0];
+       toast.error(firstError || "Please fill required fields");
+       return;
+    }
+
     if (currentEducation.degree && currentEducation.institutionName) {
       if (editingEducationId) {
         setFormData((prev) => ({
@@ -546,6 +660,20 @@ export function PersonaForm({
   };
 
   const addCertification = () => {
+    // Validate current certification using Zod
+    const result = certificationSchema.safeParse(currentCertification);
+
+    if (!result.success) {
+       const fieldErrors: Record<string, string> = {};
+       result.error.issues.forEach(issue => {
+         fieldErrors[issue.path[0] as string] = issue.message;
+       });
+       
+       const firstError = Object.values(fieldErrors)[0];
+       toast.error(firstError || "Please fill required fields");
+       return;
+    }
+
     if (
       currentCertification.title &&
       currentCertification.issuingOrganization
@@ -615,6 +743,20 @@ export function PersonaForm({
   };
 
   const addProject = () => {
+    // Validate current project using Zod
+    const result = projectSchema.safeParse(currentProject);
+
+    if (!result.success) {
+       const fieldErrors: Record<string, string> = {};
+       result.error.issues.forEach(issue => {
+         fieldErrors[issue.path[0] as string] = issue.message;
+       });
+       
+       const firstError = Object.values(fieldErrors)[0];
+       toast.error(firstError || "Please fill required fields");
+       return;
+    }
+
     if (currentProject.name && currentProject.role) {
       if (editingProjectId) {
         setFormData((prev) => ({
@@ -693,45 +835,27 @@ export function PersonaForm({
   };
 
   const generatePersona = async () => {
-    // Required field validation
-    const newErrors: { fullName?: string; jobTitle?: string; email?: string } = {};
-    if (!formData.personalInfo.fullName.trim()) {
-      newErrors.fullName = "Full Name is mandatory";
-    }
-    if (!formData.personalInfo.jobTitle.trim()) {
-      newErrors.jobTitle = "Job Title is mandatory";
-    }
-    if (!formData.personalInfo.email.trim()) {
-      newErrors.email = "Email is mandatory";
-    } else if (!isValidEmailFormat(formData.personalInfo.email.trim())) {
-      newErrors.email = "Please enter a valid email address";
-    }
-
-    if (Object.keys(newErrors).length > 0) {
+    // Required field validation using Zod
+    const result = personalInfoSchema.safeParse(formData.personalInfo);
+    
+    if (!result.success) {
+      const newErrors: Record<string, string> = {};
+      result.error.issues.forEach((issue) => {
+        newErrors[issue.path[0] as string] = issue.message;
+      });
       setErrors(newErrors);
-      toast("Please fill the mandatory fields");
+      toast.error("Please fill all mandatory fields correctly");
+      // Switch to personal tab to show errors
+      setActiveTab("personal");
       return;
     }
 
     setErrors({});
     setIsGenerating(true);
 
-    // Validate and format URLs
+    // Validate and format URLs (already validated by Zod schema but formatting logic remains useful)
     const formattedLinkedIn = formatUrl(formData.personalInfo.linkedin || "");
     const formattedGitHub = formatUrl(formData.personalInfo.github || "");
-
-    // Validate URLs
-    if (formData.personalInfo.linkedin && !isValidUrl(formattedLinkedIn)) {
-      toast("Please enter a valid LinkedIn URL or leave it empty");
-      setIsGenerating(false);
-      return;
-    }
-
-    if (formData.personalInfo.github && !isValidUrl(formattedGitHub)) {
-      toast("Please enter a valid GitHub URL or leave it empty");
-      setIsGenerating(false);
-      return;
-    }
 
     // Update form data with formatted URLs
     const updatedFormData = {

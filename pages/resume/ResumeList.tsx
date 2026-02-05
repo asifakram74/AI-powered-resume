@@ -24,6 +24,7 @@ import {
   Eye,
   Plus,
   Sparkles,
+  ExternalLink,
 } from "lucide-react";
 import {
   Table,
@@ -454,6 +455,16 @@ export function ResumePage({ user }: PageProps) {
                             <Button
                               variant="ghost"
                               size="sm"
+                              onClick={() => window.open(`/resume/${cv.public_slug}`, '_blank')}
+                              className="cursor-pointer"
+                              disabled={!cv.public_slug}
+                              title={cv.public_slug ? "View Public Link" : "No Public Link Available"}
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               onClick={() => handleView(cv)} className="cursor-pointer"
                             >
                               <Eye className="h-4 w-4" />
@@ -575,6 +586,16 @@ export function ResumePage({ user }: PageProps) {
                     </div>
 
                     <div className="flex gap-2 items-center">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(`/resume/${cv.public_slug}`, '_blank')}
+                        className="bg-transparent p-2"
+                        disabled={!cv.public_slug}
+                        title={cv.public_slug ? "View Public Link" : "No Public Link Available"}
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"
