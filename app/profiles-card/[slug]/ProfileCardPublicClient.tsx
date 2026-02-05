@@ -189,7 +189,7 @@ export default function ProfileCardPublicClient({ slug }: ProfileCardPublicClien
                                 {card.job_title}
                             </div>
                           )}
-                          <div className="mt-1 text-center text-sm text-white/60">@{card.public_slug}</div>
+                          <div className="mt-1 text-center text-sm text-white/60">@{card.public_slug || slug}</div>
 
                           {/* Social Icons Row */}
                           <div className="flex items-center justify-center gap-3 mt-4 flex-wrap">
