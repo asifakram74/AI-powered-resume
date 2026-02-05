@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { getCoverLetterBySlug, CoverLetter } from "../../../lib/redux/service/coverLetterService"
+import { getCVById } from "../../../lib/redux/service/resumeService"
 import { Loader2, FileDown, FileText, Share2, Copy } from "lucide-react"
 import { Button } from "../../../components/ui/button"
 import {
@@ -33,6 +34,7 @@ export default function CoverLetterClient({ slug }: CoverLetterClientProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
+  const [userName, setUserName] = useState<string>("")
 
   useEffect(() => {
     const fetchLetter = async () => {
@@ -41,6 +43,33 @@ export default function CoverLetterClient({ slug }: CoverLetterClientProps) {
         setLoading(true)
         const data = await getCoverLetterBySlug(slug)
         setLetter(data)
+        
+        // Try to get name from letter relations immediately
+        const user = (data as any).user
+        const cv = (data as any).cv
+        
+        if (user?.name) {
+            setUserName(user.name)
+        } else if (cv?.generated_content) {
+             try {
+                  const content = JSON.parse(cv.generated_content)
+                  const name = content.personalInfo?.fullName || content.personalInfo?.name
+                  if (name) setUserName(name)
+             } catch (e) {}
+        } else if (data.cv_id) {
+            // Fallback: try to fetch linked CV (works if logged in)
+            try {
+                const cvData = await getCVById(data.cv_id)
+                if (cvData?.generated_content) {
+                     const content = JSON.parse(cvData.generated_content)
+                     const name = content.personalInfo?.fullName || content.personalInfo?.name
+                     if (name) setUserName(name)
+                }
+            } catch (err) {
+                console.log("Failed to fetch linked CV (likely public view)", err)
+            }
+        }
+
       } catch (err) {
         console.error(err)
         setError('Failed to load cover letter')
@@ -124,22 +153,7 @@ export default function CoverLetterClient({ slug }: CoverLetterClientProps) {
           <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 hidden md:block" />
           <h1 className="font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[200px] md:max-w-md capitalize">
             {/* Display User Name or 'Cover Letter' */}
-            {(() => {
-              const user = (letter as any).user
-              const cv = (letter as any).cv
-              
-              if (user?.name) return `${user.name}'s Cover Letter`
-              
-              if (cv?.generated_content) {
-                try {
-                  const content = JSON.parse(cv.generated_content)
-                  const name = content.personalInfo?.fullName || content.personalInfo?.name
-                  if (name) return `${name}'s Cover Letter`
-                } catch (e) {}
-              }
-
-              return 'Cover Letter'
-            })()}
+            {userName ? `${userName}'s Cover Letter` : 'Cover Letter'}
           </h1>
         </div>
         <div className="flex items-center gap-2">
