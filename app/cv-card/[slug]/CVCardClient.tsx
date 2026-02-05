@@ -17,7 +17,11 @@ import { PublicPageLoading } from "../../../components/shared/public-page-loadin
 import { trackEvent } from "../../../lib/redux/service/analyticsService"
 import { Logo } from "../../../components/ui/logo"
 
-
+const PublicFooter = () => (
+  <div className="w-full py-6 text-center text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-black mt-auto">
+    <p>&copy; {new Date().getFullYear()} Resumaic. All rights reserved.</p>
+  </div>
+)
 
 interface CVCardClientProps {
   slug: string
