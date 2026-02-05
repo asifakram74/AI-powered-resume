@@ -246,7 +246,7 @@ export default function CVCardClient({ slug }: CVCardClientProps) {
           </div>
           <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 hidden md:block" />
           <h1 className="font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[200px] md:max-w-md">
-            {cvData.personalInfo.fullName}'s Resume
+            {normalizedData.personalInfo.fullName}'s Resume
           </h1>
         </div>
         <DropdownMenu>

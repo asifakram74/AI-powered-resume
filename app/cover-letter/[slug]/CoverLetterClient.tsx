@@ -124,7 +124,22 @@ export default function CoverLetterClient({ slug }: CoverLetterClientProps) {
           <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 hidden md:block" />
           <h1 className="font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[200px] md:max-w-md capitalize">
             {/* Display User Name or 'Cover Letter' */}
-            {(letter as any).user?.name ? `${(letter as any).user.name}'s Cover Letter` : 'Cover Letter'}
+            {(() => {
+              const user = (letter as any).user
+              const cv = (letter as any).cv
+              
+              if (user?.name) return `${user.name}'s Cover Letter`
+              
+              if (cv?.generated_content) {
+                try {
+                  const content = JSON.parse(cv.generated_content)
+                  const name = content.personalInfo?.fullName || content.personalInfo?.name
+                  if (name) return `${name}'s Cover Letter`
+                } catch (e) {}
+              }
+
+              return 'Cover Letter'
+            })()}
           </h1>
         </div>
         <div className="flex items-center gap-2">

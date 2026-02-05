@@ -78,7 +78,7 @@ export function CVHeaderActions({
 }: Props) {
   const router = useRouter()
   const [isShareOpen, setIsShareOpen] = useState(false)
-  const publicUrl = existingCV?.public_slug ? `${window.location.origin}/cv-card/${existingCV.public_slug}` : ""
+  const publicUrl = existingCV?.public_slug ? `${window.location.origin}/resume/${existingCV.public_slug}` : ""
   const qrUrl = publicUrl
     ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(publicUrl)}`
     : ""

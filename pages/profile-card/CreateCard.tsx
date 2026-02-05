@@ -358,7 +358,7 @@ export default function CreateCard() {
         let title = ""
         if (type === "cv") {
             const cv = item as CV
-            url = `${origin}/cv-card/${cv.public_slug}`
+            url = `${origin}/resume/${cv.public_slug}`
             title = cv.title || `Resume #${cv.id}`
         } else {
             const cl = item as CoverLetter

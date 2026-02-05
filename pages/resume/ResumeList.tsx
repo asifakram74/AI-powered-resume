@@ -455,7 +455,7 @@ export function ResumePage({ user }: PageProps) {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => window.open(`/cv-card/${cv.public_slug}`, '_blank')}
+                              onClick={() => window.open(`/resume/${cv.public_slug}`, '_blank')}
                               className="cursor-pointer"
                               disabled={!cv.public_slug}
                               title={cv.public_slug ? "View Public Link" : "No Public Link Available"}
@@ -589,7 +589,7 @@ export function ResumePage({ user }: PageProps) {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => window.open(`/cv-card/${cv.public_slug}`, '_blank')}
+                        onClick={() => window.open(`/resume/${cv.public_slug}`, '_blank')}
                         className="bg-transparent p-2"
                         disabled={!cv.public_slug}
                         title={cv.public_slug ? "View Public Link" : "No Public Link Available"}
