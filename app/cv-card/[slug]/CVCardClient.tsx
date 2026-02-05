@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { getCVBySlug, CV } from "../../../lib/redux/service/resumeService"
 import { CVPreview } from "../../../pages/resume/CVPreview"
 import { Loader2, FileDown, FileText } from "lucide-react"
@@ -14,6 +15,7 @@ import {
 import { useCVExport } from "../../../components/cv-page/use-cv-export"
 import { PublicPageLoading } from "../../../components/shared/public-page-loading"
 import { trackEvent } from "../../../lib/redux/service/analyticsService"
+import { Logo } from "../../../components/ui/logo"
 
 
 
@@ -229,12 +231,20 @@ export default function CVCardClient({ slug }: CVCardClientProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#030712] flex flex-col items-center">
       {/* Header with Download Button */}
-      <div className="w-full bg-white border-b border-gray-200 px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-50 shadow-sm">
-        <h1 className="font-semibold text-gray-900 truncate max-w-[200px] md:max-w-md">
-          {cvData.personalInfo.fullName}'s Resume
-        </h1>
+      <div className="w-full bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800 px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-50 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="hidden md:block">
+            <Link href="/">
+              <Logo width={150} height={45} className="cursor-pointer" />
+            </Link>
+          </div>
+          <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 hidden md:block" />
+          <h1 className="font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[200px] md:max-w-md">
+            {cvData.personalInfo.fullName}'s Resume
+          </h1>
+        </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button size="sm" className="flex items-center gap-2 resumaic-gradient-green hover:opacity-90 text-white rounded-lg px-3 md:px-4 h-9 shadow-sm transition-transform active:scale-95">
@@ -259,11 +269,12 @@ export default function CVCardClient({ slug }: CVCardClientProps) {
         </DropdownMenu>
       </div>
 
-      <div className="p-4 md:p-8 w-full flex justify-center">
+      <div className="flex-1 p-4 md:p-8 w-full flex justify-center">
         <div className="w-full max-w-[210mm] shadow-2xl">
           <CVPreview data={normalizedData} template={template as any} />
         </div>
       </div>
+      <PublicFooter />
     </div>
   )
 }

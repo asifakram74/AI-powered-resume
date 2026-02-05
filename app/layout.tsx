@@ -93,7 +93,7 @@ export default function RootLayout({
             })(window, document, "clarity", "script", "v0az88rsoo");
           `}
         </Script>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <ReduxProvider>
             <HydrateAuth />
             <Toaster position="top-right" richColors />

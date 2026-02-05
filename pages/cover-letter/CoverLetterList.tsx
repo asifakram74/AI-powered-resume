@@ -27,7 +27,8 @@ import {
   UserCircle,
   Share2,
   MoreVertical,
-  AlertCircle
+  AlertCircle,
+  ExternalLink
 } from "lucide-react"
 import {
   Dialog,
@@ -969,7 +970,17 @@ export function CoverLetterPage({ user }: PageProps) {
                         </TableCell>
                         <TableCell>{new Date(letter.updated_at).toLocaleDateString()}</TableCell>
                         <TableCell>
-                          <div className="flex justify-end">
+                          <div className="flex justify-end items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                              onClick={() => window.open(`/cover-letter/${letter.public_slug}`, '_blank')}
+                              disabled={!letter.public_slug}
+                              title={letter.public_slug ? "View Public Link" : "No Public Link Available"}
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="h-8 w-8 p-0">
@@ -1104,7 +1115,17 @@ export function CoverLetterPage({ user }: PageProps) {
                         Last Modified: {new Date(letter.updated_at).toLocaleDateString()}
                       </div>
 
-                      <div className="flex items-center justify-end">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                          onClick={() => window.open(`/cover-letter/${letter.public_slug}`, '_blank')}
+                          disabled={!letter.public_slug}
+                          title={letter.public_slug ? "View Public Link" : "No Public Link Available"}
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-8 w-8 p-0">
