@@ -60,6 +60,7 @@ export interface UpdateProfileCardData {
   summary?: string
   social_links?: SocialLinks
   additional_link?: string
+  public_slug?: string
 }
 
 // Helper to construct full storage URL
@@ -151,7 +152,10 @@ export const createProfileCard = async (data: CreateProfileCardData): Promise<Pr
     }
 
     return transformProfileCard(response.data)
-  } catch (error) {
+  } catch (error: any) {
+    if (error.response && error.response.status === 422) {
+      throw new Error("This username is already taken. Please choose a different one.")
+    }
     console.error("Error creating profile card:", error)
     throw error
   }
@@ -174,7 +178,10 @@ export const updateProfileCard = async (id: string | number, data: UpdateProfile
     }
 
     return transformProfileCard(response.data)
-  } catch (error) {
+  } catch (error: any) {
+    if (error.response && error.response.status === 422) {
+      throw new Error("This username is already taken. Please choose a different one.")
+    }
     console.error(`Error updating profile card ${id}:`, error)
     throw error
   }

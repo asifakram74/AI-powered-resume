@@ -124,7 +124,7 @@ export default function CreateCard() {
 
                     setProfile({
                         full_name: persona.full_name,
-                        username: persona.full_name.toLowerCase().replace(/[^a-z0-9]/g, '.'),
+                        username: persona.full_name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
                         job_title: persona.job_title,
                         summary: persona.summary || "",
                         email: persona.email,
@@ -177,7 +177,7 @@ export default function CreateCard() {
 
                     setProfile({
                         full_name: personalInfo.fullName || personalInfo.name || cv.title || "New Profile",
-                        username: (personalInfo.fullName || cv.title || "").toLowerCase().replace(/[^a-z0-9]/g, '.'),
+                        username: (personalInfo.fullName || cv.title || "").toLowerCase().replace(/[^a-z0-9]/g, '-'),
                         job_title: personalInfo.jobTitle || cv.job_description || "",
                         summary: personalInfo.summary || cv.job_description || "",
                         email: personalInfo.email || "",
@@ -409,7 +409,7 @@ export default function CreateCard() {
             return
         }
 
-        const payload: CreateProfileCardData = {
+        const payload: CreateProfileCardData & { public_slug?: string } = {
             full_name: profile.full_name,
             job_title: profile.job_title,
             email: profile.email,
@@ -432,6 +432,10 @@ export default function CreateCard() {
         try {
             let response;
             if (id) {
+                // Include public_slug (username) when updating
+                if (profile.username) {
+                    payload.public_slug = profile.username;
+                }
                 response = await updateProfileCard(id, payload)
                 toast.success("Profile card updated successfully")
             } else {

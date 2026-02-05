@@ -46,7 +46,7 @@ const displaySchema = z.object({
   lastName: z.string().min(1, "Last name is required"),
   username: z.string()
     .min(3, "Username must be at least 3 characters")
-    .regex(/^[a-zA-Z0-9._-]+$/, "Username can only contain letters, numbers, dots, underscores, and dashes"),
+    .regex(/^[a-z0-9-]+$/, "Username can only contain lowercase letters, numbers, and dashes"),
   job_title: z.string().optional(),
 })
 
@@ -56,9 +56,13 @@ const bioSchema = z.object({
 
 const contactSchema = z.object({
   email: z.string().email("Invalid email address").optional().or(z.literal("")),
-  phone: z.string().optional(), // Basic phone validation could be added if needed
-  city: z.string().optional(),
-  country: z.string().optional(),
+  phone: z.string()
+    .min(10, "Phone number must be at least 10 characters")
+    .regex(/^[\d\s\-\+\(\)]+$/, "Invalid phone number format")
+    .optional()
+    .or(z.literal("")),
+  city: z.string().min(2, "City must be at least 2 characters").optional().or(z.literal("")),
+  country: z.string().min(2, "Country must be at least 2 characters").optional().or(z.literal("")),
 })
 
 const linksSchema = z.object({
@@ -352,7 +356,9 @@ export function EditForm({
                         value={draft.phone || ""}
                         onChange={(e) => onUpdateDraft({ phone: e.target.value })}
                         placeholder="+1 555 000 0000"
+                        className={errors.phone ? "border-red-500" : ""}
                     />
+                    {errors.phone && <p className="text-xs text-red-500">{errors.phone}</p>}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -361,7 +367,9 @@ export function EditForm({
                             value={draft.city || ""}
                             onChange={(e) => onUpdateDraft({ city: e.target.value })}
                             placeholder="City"
+                            className={errors.city ? "border-red-500" : ""}
                         />
+                        {errors.city && <p className="text-xs text-red-500">{errors.city}</p>}
                     </div>
                     <div className="space-y-2">
                         <Label>Country</Label>
@@ -369,7 +377,9 @@ export function EditForm({
                             value={draft.country || ""}
                             onChange={(e) => onUpdateDraft({ country: e.target.value })}
                             placeholder="Country"
+                            className={errors.country ? "border-red-500" : ""}
                         />
+                        {errors.country && <p className="text-xs text-red-500">{errors.country}</p>}
                     </div>
                 </div>
             </div>
