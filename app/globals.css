@@ -523,3 +523,5 @@
     font-size: 0.8125rem !important;
   }
 }
+
+body.tour-active .sidebar-footer-area { display: none !important; }

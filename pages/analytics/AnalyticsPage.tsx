@@ -96,8 +96,8 @@ export default function AnalyticsPage() {
     return summary.daily.map(d => ({
       date: new Date(d.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
       fullDate: d.date,
-      views: Number(d.views || 0),
-      downloads: Number(d.downloads || 0)
+      views: Number(d.view || 0),
+      downloads: Number(d.download || 0)
     }))
   }, [summary])
 

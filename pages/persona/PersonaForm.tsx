@@ -31,12 +31,16 @@ const personalInfoSchema = z.object({
   fullName: z.string().min(1, "Full Name is required"),
   jobTitle: z.string().min(1, "Job Title is required"),
   email: z.string().email("Invalid email address"),
-  phone: z.string().optional(),
-  city: z.string().optional(),
-  country: z.string().optional(),
-  address: z.string().optional(),
-  linkedin: z.string().url("Invalid LinkedIn URL").optional().or(z.literal("")),
-  github: z.string().url("Invalid GitHub URL").optional().or(z.literal("")),
+  phone: z.string()
+    .min(10, "Phone number must be at least 10 characters")
+    .regex(/^[\d\s\-\+\(\)]+$/, "Invalid phone number format")
+    .optional()
+    .or(z.literal("")),
+  city: z.string().min(2, "City must be at least 2 characters").optional().or(z.literal("")),
+  country: z.string().min(2, "Country must be at least 2 characters").optional().or(z.literal("")),
+  address: z.string().min(5, "Address must be at least 5 characters").optional().or(z.literal("")),
+  linkedin: z.string().optional().or(z.literal("")),
+  github: z.string().optional().or(z.literal("")),
   summary: z.string().optional(),
 });
 
@@ -839,12 +843,14 @@ export function PersonaForm({
     const result = personalInfoSchema.safeParse(formData.personalInfo);
     
     if (!result.success) {
+      console.log("Validation Failed:", result.error.issues);
+      console.log("Form Data:", formData.personalInfo);
       const newErrors: Record<string, string> = {};
       result.error.issues.forEach((issue) => {
         newErrors[issue.path[0] as string] = issue.message;
+        toast.error(issue.message);
       });
       setErrors(newErrors);
-      toast.error("Please fill all mandatory fields correctly");
       // Switch to personal tab to show errors
       setActiveTab("personal");
       return;

@@ -54,6 +54,7 @@ export function WelcomeTour() {
         popoverClass: 'resumaic-driver-popover',
 
         onDestroyed: () => {
+          document.body.classList.remove('tour-active')
           updateFirstLogin()
         },
 
@@ -74,12 +75,9 @@ export function WelcomeTour() {
                   <p className="text-sm">
                     This is where your journey begins! Create your professional persona once and use it to generate all your resumes and cover letters.
                   </p>
-                  <div className="text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 p-2 rounded" style={{ marginTop: '8px' }}>
-                    <span className="font-semibold" style={{ color: '#70E4A8' }}>Tip:</span> Your persona includes your profile picture, work experience, education, and skills.
-                  </div>
                 </div>
               ),
-              side: "bottom",
+              side: "right",
               align: 'center'
             }
           },
@@ -99,12 +97,9 @@ export function WelcomeTour() {
                   <p className="text-sm">
                     Generate professional resumes tailored to specific job descriptions. Choose from multiple templates and let AI optimize your content.
                   </p>
-                  <div className="text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 p-2 rounded" style={{ marginTop: '8px' }}>
-                    <span className="font-semibold" style={{ color: '#70E4A8' }}>Pro Tip:</span> Free plan allows 3 resumes. Upgrade to Pro for unlimited creations.
-                  </div>
                 </div>
               ),
-              side: "bottom",
+              side: "right",
               align: 'center'
             }
           },
@@ -124,12 +119,9 @@ export function WelcomeTour() {
                   <p className="text-sm">
                     Create compelling cover letters that match your resume. Choose from different tones (Professional, Enthusiastic, Confident, etc.).
                   </p>
-                  <div className="text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 p-2 rounded" style={{ marginTop: '8px' }}>
-                    <span className="font-semibold" style={{ color: '#EA580C' }}>Tip:</span> Paste the job description to get the most tailored cover letter.
-                  </div>
                 </div>
               ),
-              side: "bottom",
+              side: "right",
               align: 'center'
             }
           },
@@ -149,12 +141,125 @@ export function WelcomeTour() {
                   <p className="text-sm">
                     Analyze your resume against Applicant Tracking Systems used by 95% of employers. Get scores and suggestions to improve.
                   </p>
+                </div>
+              ),
+              side: "right",
+              align: 'center'
+            }
+          },
+          {
+            element: '#tour-profile-card',
+            popover: {
+              title: renderToString(
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg" style={{ background: 'linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%)' }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 10h2" /><path d="M16 14h2" /><path d="M6.17 15a3 3 0 0 1 5.66 0" /><circle cx="9" cy="11" r="2" /><rect x="2" y="5" width="20" height="14" rx="2" /></svg>
+                  </div>
+                  <span>Digital Profile Card</span>
+                </div>
+              ),
+              description: renderToString(
+                <div className="space-y-2">
+                  <p className="text-sm">
+                    Create a stunning digital business card. Share your professional identity with a simple link or QR code.
+                  </p>
+                </div>
+              ),
+              side: "right",
+              align: 'center'
+            }
+          },
+          {
+            element: '#tour-analytics',
+            popover: {
+              title: renderToString(
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg" style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)' }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><path d="M18 17V9" /><path d="M13 17V5" /><path d="M8 17v-3" /></svg>
+                  </div>
+                  <span>Performance Analytics</span>
+                </div>
+              ),
+              description: renderToString(
+                <div className="space-y-2">
+                  <p className="text-sm">
+                    Track how your resumes and profile are performing. See views, downloads, and engagement metrics in real-time.
+                  </p>
+                </div>
+              ),
+              side: "right",
+              align: 'center'
+            }
+          },
+          {
+            element: '#tour-job-application-system',
+            popover: {
+              title: renderToString(
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg" style={{ background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="3" rx="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" /></svg>
+                  </div>
+                  <span>Job Application System</span>
+                </div>
+              ),
+              description: renderToString(
+                <div className="space-y-2">
+                  <p className="text-sm">
+                    Your central hub for finding and tracking job opportunities. Manage your entire job search process in one place.
+                  </p>
+                </div>
+              ),
+              side: "right",
+              align: 'center'
+            }
+          },
+          {
+            element: '#tour-job-search',
+            popover: {
+              title: renderToString(
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg" style={{ background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)' }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                  </div>
+                  <span>Search Jobs</span>
+                </div>
+              ),
+              description: renderToString(
+                <div className="space-y-2">
+                  <p className="text-sm">
+                    Search millions of jobs from top boards. Filter by role, location, and salary to find your perfect match.
+                  </p>
                   <div className="text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 p-2 rounded" style={{ marginTop: '8px' }}>
-                    <span className="font-semibold" style={{ color: '#70E4A8' }}>Goal:</span> Aim for 85%+ ATS score for best results.
+                    <span className="font-semibold" style={{ color: '#10B981' }}>Feature:</span> Save jobs directly to your tracker with one click.
                   </div>
                 </div>
               ),
-              side: "bottom",
+              side: "right",
+              align: 'center'
+            }
+          },
+          {
+            element: '#tour-applications',
+            popover: {
+              title: renderToString(
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg" style={{ background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)' }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 5v11" /><path d="M12 5v6" /><path d="M18 5v14" /><rect width="20" height="18" x="2" y="3" rx="2" /></svg>
+                  </div>
+                  <span>Application Tracker</span>
+                </div>
+              ),
+              description: renderToString(
+                <div className="space-y-2">
+                  <p className="text-sm">
+                    Keep track of every application. Move jobs through stages (Applied, Interview, Offer) using our drag-and-drop board.
+                  </p>
+                  <div className="text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 p-2 rounded" style={{ marginTop: '8px' }}>
+                    <span className="font-semibold" style={{ color: '#3B82F6' }}>Pro Tip:</span> Never lose track of a follow-up date again.
+                  </div>
+                </div>
+              ),
+              side: "right",
               align: 'center'
             }
           },
@@ -179,7 +284,7 @@ export function WelcomeTour() {
                   </div>
                 </div>
               ),
-              side: "bottom",
+              side: "right",
               align: 'center'
             }
           }
@@ -187,6 +292,7 @@ export function WelcomeTour() {
       })
 
       const timer = setTimeout(() => {
+        document.body.classList.add('tour-active')
         driverObj.drive()
       }, 1500)
 
