@@ -78,7 +78,7 @@ export function WelcomeTour() {
                 </div>
               ),
               side: "right",
-              align: 'center'
+              align: 'start'
             }
           },
           {
@@ -285,7 +285,7 @@ export function WelcomeTour() {
                 </div>
               ),
               side: "right",
-              align: 'center'
+              align: 'start'
             }
           }
         ]

@@ -1,24 +1,32 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import Link from "next/link"
 import { getPublicProfileBySlug, ProfileCard, SocialLinks } from "../../../lib/redux/service/profileCardService"
 import { PublicPageLoading } from "../../../components/shared/public-page-loading"
 import { 
   Mail, Phone, MapPin, Globe, Linkedin, Github, Twitter, 
-  FileText, ExternalLink, Share2 
+  FileText, ExternalLink, Share2, FileDown, ImageIcon, FileType 
 } from "lucide-react"
 import { toast } from "sonner"
 import { trackEvent } from "../../../lib/redux/service/analyticsService"
 import { detectPlatformFromUrl, getPlatformById } from "../../../lib/profile-card/platform-data"
 import { Button } from "../../../components/ui/button"
 import { Logo } from "../../../components/ui/logo"
+import * as htmlToImage from "html-to-image"
+import jsPDF from "jspdf"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../../components/ui/dropdown-menu"
 
 interface ProfileCardPublicClientProps {
   slug: string
 }
 
-const PublicHeader = ({ title }: { title: string }) => (
+const PublicHeader = ({ title, onExport }: { title: string, onExport: (format: "png" | "pdf") => void }) => (
   <div className="w-full bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800 px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-50 shadow-sm">
     <div className="flex items-center gap-4">
       <div className="hidden md:block">
@@ -32,6 +40,25 @@ const PublicHeader = ({ title }: { title: string }) => (
       </h1>
     </div>
     <div className="flex items-center gap-2">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button size="sm" className="flex items-center gap-2 resumaic-gradient-green hover:opacity-90 text-white rounded-lg px-3 md:px-4 h-9 shadow-sm transition-transform active:scale-95">
+            <span className="hidden md:inline font-semibold">Download</span>
+            <FileDown className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-xl border-gray-200 dark:border-gray-800">
+          <DropdownMenuItem onClick={() => onExport("pdf")} className="cursor-pointer py-2.5">
+            <FileText className="mr-2 h-4 w-4 text-red-500" />
+            <span>Export PDF</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onExport("png")} className="cursor-pointer py-2.5">
+            <ImageIcon className="mr-2 h-4 w-4 text-blue-500" />
+            <span>Export PNG</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
       <Button 
         variant="outline" 
         size="sm" 
@@ -134,6 +161,88 @@ export default function ProfileCardPublicClient({ slug }: ProfileCardPublicClien
     }
   }
 
+  const handleExport = async (format: "png" | "pdf") => {
+    const element = document.getElementById('profile-card-preview')
+    if (!element) {
+        toast.error("Could not find profile card to export")
+        return
+    }
+
+    const toastId = toast.loading(`Generating ${format.toUpperCase()}...`)
+
+    try {
+        // Use html-to-image to get PNG data URL
+        // We use a high pixel ratio for better quality
+        const dataUrl = await htmlToImage.toPng(element, { 
+            quality: 1.0, 
+            pixelRatio: 3,
+            backgroundColor: '#000000', // Ensure black background for card if transparent
+        })
+        
+        const filename = `${card?.full_name || 'profile'}-card`
+
+        if (format === 'png') {
+            const link = document.createElement('a')
+            link.download = `${filename}.png`
+            link.href = dataUrl
+            link.click()
+        } else if (format === 'pdf') {
+            // Calculate dimensions
+            const img = new Image()
+            img.src = dataUrl
+            await new Promise((resolve) => { img.onload = resolve })
+            
+            // Create PDF
+            // Use A4 size or custom size? 
+            // Let's use A4 and center the image
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            })
+            
+            const pageWidth = pdf.internal.pageSize.getWidth()
+            const pageHeight = pdf.internal.pageSize.getHeight()
+            
+            // Calculate image dimensions to fit within margins
+            const margin = 10
+            const maxWidth = pageWidth - (margin * 2)
+            const maxHeight = pageHeight - (margin * 2)
+            
+            let imgWidth = maxWidth
+            let imgHeight = (img.height * maxWidth) / img.width
+            
+            // If height is too big, scale by height
+            if (imgHeight > maxHeight) {
+                imgHeight = maxHeight
+                imgWidth = (img.width * maxHeight) / img.height
+            }
+            
+            // Center content
+            const x = (pageWidth - imgWidth) / 2
+            const y = (pageHeight - imgHeight) / 2
+            
+            pdf.addImage(dataUrl, 'PNG', x, y, imgWidth, imgHeight)
+            pdf.save(`${filename}.pdf`)
+        }
+
+        trackEvent({
+            resource_type: 'profile_card',
+            resource_id: card?.id ? Number(card.id) : 0,
+            resource_key: slug,
+            event_type: 'download',
+            meta: { format }
+        })
+        
+        toast.dismiss(toastId)
+        toast.success("Export successful")
+    } catch (error) {
+        console.error('Export failed', error)
+        toast.dismiss(toastId)
+        toast.error("Export failed. Please try again.")
+    }
+  }
+
   const profileImage = card.profile_picture || "/profile-img.png"
 
   const HeaderSocialIcon = ({ href, icon: Icon, colorClassName }: { href: string, icon: any, colorClassName: string }) => (
@@ -149,10 +258,10 @@ export default function ProfileCardPublicClient({ slug }: ProfileCardPublicClien
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-[#030712] flex flex-col">
-      <PublicHeader title={`${card.full_name}'s Profile`} />
+      <PublicHeader title={`${card.full_name}'s Profile`} onExport={handleExport} />
       
       <div className="flex-1 flex items-center justify-center p-4 sm:p-8">
-      <div className="w-full max-w-4xl">
+      <div className="w-full max-w-4xl" id="profile-card-preview">
           <div className="rounded-[36px] bg-black p-3 shadow-2xl">
               <div className="rounded-[28px] overflow-hidden bg-black">
                   <div className="relative h-[420px] bg-gray-900 group overflow-hidden">

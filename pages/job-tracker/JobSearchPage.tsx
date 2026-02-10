@@ -788,7 +788,7 @@ export default function JobSearchPage() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-4 w-full">
             <div className="space-y-2">
               <Label className="text-gray-700 dark:text-gray-300">Company Name</Label>
               <Input 
@@ -816,10 +816,10 @@ export default function JobSearchPage() {
                 className="dark:bg-gray-900 dark:border-gray-800"
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 w-full">
               <Label className="text-gray-700 dark:text-gray-300">Pipeline Stage</Label>
               <Select value={addPipelineId} onValueChange={setAddPipelineId}>
-                <SelectTrigger className="dark:bg-gray-900 dark:border-gray-800">
+                <SelectTrigger className="w-full dark:bg-gray-900 dark:border-gray-800">
                   <SelectValue placeholder="Select stage" />
                 </SelectTrigger>
                 <SelectContent className="dark:bg-[#0B0F1A] dark:border-gray-800">
@@ -831,10 +831,10 @@ export default function JobSearchPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 w-full">
               <Label className="text-gray-700 dark:text-gray-300">Attached CV</Label>
               <Select value={addCvId} onValueChange={setAddCvId}>
-                <SelectTrigger className="dark:bg-gray-900 dark:border-gray-800">
+                <SelectTrigger className="w-full dark:bg-gray-900 dark:border-gray-800">
                   <SelectValue placeholder="Select CV" />
                 </SelectTrigger>
                 <SelectContent className="dark:bg-[#0B0F1A] dark:border-gray-800">
