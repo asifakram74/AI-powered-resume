@@ -489,7 +489,7 @@ export default function CreateCard() {
 
     return (
         <div className="bg-[#f9fafb] dark:bg-gray-950 overflow-hidden pt-3 mb-20">
-            <div className="w-full px-6 mb-4">
+            <div className="w-full sm:px-6 px-0 mb-4">
                 <Button
                     variant="ghost"
                     onClick={() => router.back()}
@@ -499,7 +499,7 @@ export default function CreateCard() {
                     Back
                 </Button>
             </div>
-            <div className="w-full  px-6 h-full">
+            <div className="w-full  sm:px-6 px-0 h-full">
                 <div className="grid grid-cols-1 lg:grid-cols-[60%_40%]  gap-6 h-full ">
                     {/* Left Column - Profile Preview Card (60%) */}
                     <div className="h-full overflow-y-auto  bg-[#f9fafb] dark:bg-gray-950  no-scrollbar ">
