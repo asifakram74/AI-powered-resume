@@ -178,9 +178,12 @@ export const updateProfile = createAsyncThunk<ProfileResponse, Partial<ProfileRe
     try {
       const response = await AuthService.updateProfile(profileData)
 
-      localStorage.setItem("profile", JSON.stringify(response))
+      // Handle response format from backend where data might be in userInfo
+      const updatedProfile = (response as any).userInfo || response
 
-      return response
+      localStorage.setItem("profile", JSON.stringify(updatedProfile))
+
+      return updatedProfile
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || "Failed to update profile")
     }

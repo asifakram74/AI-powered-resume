@@ -270,7 +270,7 @@ export function Sidebar({
 
         {(user || profile) && (
           <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg flex items-center gap-3">
-            <Avatar className="h-10 w-10 border-2 border-gray-200 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-400 transition-colors">
+            <Avatar className="h-10 w-10 border-2 border-gray-200 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-400 transition-colors shrink-0">
               <AvatarFallback
                 className={`font-semibold ${
                   user?.role === "admin"
@@ -289,8 +289,8 @@ export function Sidebar({
                 )}
               </AvatarFallback>
             </Avatar>
-            <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{profile?.name || user?.name}</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{profile?.name || user?.name}</p>
               
               {
                 user?.role?.toLowerCase() === 'admin' && (
@@ -303,7 +303,7 @@ export function Sidebar({
         )}
       </SidebarHeader>
 
-      <SidebarContent className="px-3">
+      <SidebarContent className="px-3 flex-1 overflow-y-auto pb-24">
         <SidebarGroup>
           <SidebarMenu className="space-y-1">
             {[...regularMenuItems, ...(isAdmin ? adminMenuItems : [])].map((item, index) => (
@@ -439,7 +439,7 @@ export function Sidebar({
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 mt-auto">
+      <SidebarFooter className="p-4 mt-auto sidebar-footer-area">
         <div className="space-y-4">
             {/* User Stats Section */}
             {!!user && !isAdmin && (
