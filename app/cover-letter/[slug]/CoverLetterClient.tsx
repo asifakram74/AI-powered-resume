@@ -44,6 +44,18 @@ export default function CoverLetterClient({ slug }: CoverLetterClientProps) {
         const data = await getCoverLetterBySlug(slug)
         setLetter(data)
         
+        // Track view
+        trackEvent({
+          resource_type: 'cover_letter',
+          resource_key: slug,
+          event_type: 'view',
+          referrer: document.referrer,
+          meta: { 
+            tone: (data as any).tone || 'professional',
+            company: (data as any).company_name
+          }
+        })
+
         // Try to get name from letter relations immediately
         const user = (data as any).user
         const cv = (data as any).cv
