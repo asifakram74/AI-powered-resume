@@ -7,7 +7,8 @@ import {
   getAdminAnalyticsSummary,
   getAdminDashboard,
   type AnalyticsSummary,
-  type AdminDashboardData
+  type AdminDashboardData,
+  type ResourceAnalytics
 } from "../../lib/redux/service/analyticsService"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
@@ -16,6 +17,7 @@ import { Button } from "../../components/ui/button"
 import { Loader2, Eye, Download, TrendingUp, Share2, FileText, User, Crown, Copy, MousePointerClick, QrCode, MoveVertical, FolderOpen, PieChart as PieChartIcon, BarChart3, Activity, ArrowUpRight, ArrowDownRight, Calendar } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
 import { cn } from "../../lib/utils"
+import { AnalyticsComparisonTable } from "../../components/analytics/AnalyticsComparisonTable"
 import {
   Area,
   AreaChart,
@@ -33,6 +35,28 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
+
+import { Badge } from "../../components/ui/badge"
+
+// --- Helper Components ---
+
+const TrendBadge = ({ trend, value }: { trend?: 'up' | 'down' | 'neutral', value?: string | number }) => {
+  if (!trend || trend === 'neutral' || !value) return null
+  
+  const isPositive = trend === 'up'
+  return (
+    <Badge 
+      variant="outline" 
+      className={cn(
+        "text-[10px] px-1 py-0 h-5 gap-0.5 font-normal border-0 ml-2",
+        isPositive ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30" : "bg-red-50 text-red-600 dark:bg-red-950/30"
+      )}
+    >
+      {isPositive ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+      {value}
+    </Badge>
+  )
+}
 
 // --- Updated Theme & Constants with More Distinct Colors ---
 const COLORS = {
@@ -158,7 +182,7 @@ export default function AnalyticsPage() {
     
     const csvContent = [
       ["Date", "Views", "Downloads", "Shares"],
-      ...summary.daily.map(d => [d.date, d.views, d.downloads, d.shares])
+      ...summary.daily.map(d => [d.date, d.views || 0, d.downloads || 0, d.shares || 0])
     ].map(e => e.join(",")).join("\n")
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
@@ -235,7 +259,10 @@ export default function AnalyticsPage() {
             <Eye className="h-4 w-4 text-emerald-500 flex-shrink-0" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalViews.toLocaleString()}</div>
+            <div className="flex items-center">
+              <div className="text-2xl font-bold">{totalViews.toLocaleString()}</div>
+              {/* <TrendBadge trend="up" value="12%" /> */}
+            </div>
             <p className="text-xs text-muted-foreground mt-1 flex items-center">
               <span className="text-emerald-500 font-medium flex items-center mr-1">
                 <ArrowUpRight className="h-3 w-3 mr-0.5" /> 
@@ -252,7 +279,10 @@ export default function AnalyticsPage() {
             <Download className="h-4 w-4 text-blue-500 flex-shrink-0" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalDownloads.toLocaleString()}</div>
+            <div className="flex items-center">
+              <div className="text-2xl font-bold">{totalDownloads.toLocaleString()}</div>
+              {/* <TrendBadge trend="down" value="5%" /> */}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">
               Valid downloads
             </p>
@@ -265,7 +295,9 @@ export default function AnalyticsPage() {
             <TrendingUp className="h-4 w-4 text-indigo-500 flex-shrink-0" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{conversionRate}%</div>
+            <div className="flex items-center">
+              <div className="text-2xl font-bold">{conversionRate}%</div>
+            </div>
             <p className="text-xs text-muted-foreground mt-1">
               Views to Downloads
             </p>
@@ -278,7 +310,10 @@ export default function AnalyticsPage() {
             <Share2 className="h-4 w-4 text-pink-500 flex-shrink-0" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{Number(totalShares).toLocaleString()}</div>
+            <div className="flex items-center">
+              <div className="text-2xl font-bold">{Number(totalShares).toLocaleString()}</div>
+              {/* <TrendBadge trend="up" value="8%" /> */}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">
               Social shares & links
             </p>
@@ -287,15 +322,20 @@ export default function AnalyticsPage() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="bg-gray-100 dark:bg-gray-800 p-1 rounded-lg w-full overflow-auto">
-          <div className="flex min-w-max">
-            <TabsTrigger value="overview" className="gap-2 flex-1 sm:flex-none">
+        <TabsList className="bg-gray-100 dark:bg-gray-800 p-1 rounded-lg w-full h-auto">
+          <div className="flex w-full">
+            <TabsTrigger value="overview" className="gap-2 flex-1">
               <BarChart3 className="h-4 w-4" /> 
               <span className="hidden xs:inline">Overview</span>
               <span className="xs:hidden">View</span>
             </TabsTrigger>
+            <TabsTrigger value="resources" className="gap-2 flex-1">
+              <FileText className="h-4 w-4" />
+              <span className="hidden xs:inline">Resources</span>
+              <span className="xs:hidden">Files</span>
+            </TabsTrigger>
             {isAdmin && (
-              <TabsTrigger value="leaderboard" className="gap-2 flex-1 sm:flex-none">
+              <TabsTrigger value="leaderboard" className="gap-2 flex-1">
                 <Crown className="h-4 w-4" /> 
                 <span className="hidden xs:inline">Leaderboards</span>
                 <span className="xs:hidden">Leaders</span>
@@ -567,6 +607,10 @@ export default function AnalyticsPage() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="resources" className="space-y-6 animate-in fade-in-50 duration-500">
+          <AnalyticsComparisonTable days={parseInt(days)} />
         </TabsContent>
 
         {isAdmin && adminDashboard && (

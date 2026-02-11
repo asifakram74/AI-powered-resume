@@ -69,6 +69,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="antialiased" suppressHydrationWarning>
+      <head>
+        <script src="/scripts/clarity.js" async />
+      </head>
       <body className={`font-sans ${inter.variable} ${rubik.variable} ${roboto.variable} ${openSans.variable} ${lato.variable}`}>
         {/* Tawk.to */}
         <Script id="tawk" strategy="afterInteractive">
@@ -82,15 +85,6 @@ export default function RootLayout({
               s1.setAttribute('crossorigin','*');
               s0.parentNode.insertBefore(s1,s0);
             })();
-          `}
-        </Script>
-        <Script id="clarity" strategy="afterInteractive">
-          {`
-            (function(c,l,a,r,i,t,y){
-              c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-              t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-              y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-            })(window, document, "clarity", "script", "v0az88rsoo");
           `}
         </Script>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>

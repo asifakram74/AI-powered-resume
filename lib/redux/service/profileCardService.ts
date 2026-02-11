@@ -74,7 +74,7 @@ const getStorageUrl = (path: string | undefined) => {
   
   const baseURL = api.defaults.baseURL || ""
   // Remove /api or /public/api from the end to get the root URL
-  // Example: https://stagingbackend.resumaic.com/api -> https://stagingbackend.resumaic.com
+  // Example: http://localhost:8000/api -> http://localhost:8000
   const rootURL = baseURL.replace(/\/api\/?$/, "").replace(/\/public\/?$/, "")
   
   // Ensure path starts with /
