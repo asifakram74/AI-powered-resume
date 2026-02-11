@@ -301,19 +301,27 @@ export default function JobSearchPage() {
     setEmploymentType(prev => ({ ...prev, [type]: !prev[type] }))
   }
 
+  if (isLoadingMeta) {
+    return (
+      <div className="fixed inset-0 flex justify-center items-center bg-white dark:bg-gray-950">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-gray-100"></div>
+      </div>
+    )
+  }
+
   return (
-    <div className="max-w-full mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6 pb-12 px-4 sm:px-6">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
-        <div className="flex flex-col items-center sm:flex-row sm:items-center sm:gap-4 text-center sm:text-left">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl resumaic-gradient-green text-white shadow-lg shadow-[#70E4A8]/25 mb-3 sm:mb-0 transition-transform hover:scale-105 duration-300">
-            <Sparkles className="h-7 w-7" />
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
+        <div className="flex flex-col items-center sm:flex-row sm:items-center gap-3 sm:gap-4 text-center sm:text-left">
+          <div className="flex h-10 w-10 sm:h-14 sm:w-14 items-center justify-center rounded-xl sm:rounded-2xl resumaic-gradient-green text-white shadow-lg shadow-[#70E4A8]/25 mb-1 sm:mb-0 transition-transform hover:scale-105 duration-300">
+            <Sparkles className="h-5 w-5 sm:h-7 sm:w-7" />
           </div>
-          <div className="space-y-1">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
+          <div className="space-y-0.5 sm:space-y-1">
+            <h1 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
               Job Search
             </h1>
-            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base max-w-md mx-auto sm:mx-0">
+            <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-base max-w-md mx-auto sm:mx-0">
               Discover opportunities and add them to your pipeline
             </p>
           </div>
@@ -328,32 +336,26 @@ export default function JobSearchPage() {
               console.error("Tab switch error", e)
             }
           }} 
-          className="w-full sm:w-auto max-w-full"
+          className="w-full sm:w-auto"
           aria-label="Job Search Source"
         >
-          <TabsList className=" grid grid-cols-2 bg-gray-100/80 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-800 p-1 rounded-xl h-auto">
+          <TabsList className="inline-flex items-center justify-center bg-gray-100/80 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-800 p-1 rounded-lg h-auto w-full sm:w-auto">
             <TabsTrigger 
               value="internal" 
-              className="flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-300
-                data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#70e4a8] data-[state=active]:to-[#4ade80] 
-                data-[state=active]:text-white data-[state=active]:shadow-md
-                text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50
-                focus-visible:ring-2 focus-visible:ring-[#70E4A8] focus-visible:ring-offset-2 focus-visible:outline-none
-                data-[state=active]:!text-white"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-sm font-medium transition-all duration-300
+                data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-[#70E4A8] dark:data-[state=active]:text-white data-[state=active]:shadow-sm
+                text-gray-600 dark:text-gray-100 hover:text-gray-900 dark:hover:text-white"
             >
-              <Search className="h-4 w-4" />
+              <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span>Internal</span>
             </TabsTrigger>
             <TabsTrigger 
               value="google" 
-              className="flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-300
-                data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#70e4a8] data-[state=active]:to-[#4ade80] 
-                data-[state=active]:text-white data-[state=active]:shadow-md
-                text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50
-                focus-visible:ring-2 focus-visible:ring-[#70E4A8] focus-visible:ring-offset-2 focus-visible:outline-none
-                data-[state=active]:!text-white"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-sm font-medium transition-all duration-300
+                data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-[#70E4A8] dark:data-[state=active]:text-white data-[state=active]:shadow-sm
+                text-gray-600 dark:text-gray-100 hover:text-gray-900 dark:hover:text-white"
             >
-              <ExternalLink className="h-4 w-4" />
+              <ExternalLink className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span>Google</span>
             </TabsTrigger>
           </TabsList>
@@ -361,56 +363,56 @@ export default function JobSearchPage() {
       </div>
 
       {/* Search Card */}
-      <Card className="border-[#70E4A8]/25 bg-white/80 dark:bg-gray-950/30 hover:shadow-lg transition-shadow duration-300">
-        <CardContent className="pt-6 space-y-6">
+      <Card className="border-[#70E4A8]/25 bg-white/80 dark:bg-gray-950/30 shadow-sm hover:shadow-md transition-all duration-300 overflow-visible z-10">
+        <CardContent className="p-4 sm:pt-6 space-y-3 sm:space-y-6">
           <div className="flex flex-col lg:flex-row gap-3">
-            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="relative">
+            <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="relative group">
                 <Input
                   value={what}
                   onChange={(e) => setWhat(e.target.value)}
                   placeholder="Job title, keywords..."
-                  className="pl-10 py-6 text-base bg-white text-gray-900 border-gray-200/80 shadow-sm focus-visible:ring-[#70E4A8]/30 dark:bg-[#0B0F1A] dark:text-gray-100 dark:border-gray-800"
+                  className="pl-10 h-10 text-sm bg-white text-gray-900 border-gray-200/80 shadow-sm focus-visible:ring-[#70E4A8]/30 dark:bg-[#0B0F1A] dark:text-gray-100 dark:border-gray-800 transition-all group-hover:border-[#70E4A8]/50"
                   onKeyDown={(e) => e.key === "Enter" && runSearch()}
                 />
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-hover:text-[#70E4A8] transition-colors" />
               </div>
-              <div className="relative">
+              <div className="relative group">
                 <Input
                   value={where}
                   onChange={(e) => setWhere(e.target.value)}
                   placeholder="Location (city, state, zip)..."
-                  className="pl-10 py-6 text-base bg-white text-gray-900 border-gray-200/80 shadow-sm focus-visible:ring-[#70E4A8]/30 dark:bg-[#0B0F1A] dark:text-gray-100 dark:border-gray-800"
+                  className="pl-10 h-10 text-sm bg-white text-gray-900 border-gray-200/80 shadow-sm focus-visible:ring-[#70E4A8]/30 dark:bg-[#0B0F1A] dark:text-gray-100 dark:border-gray-800 transition-all group-hover:border-[#70E4A8]/50"
                   onKeyDown={(e) => e.key === "Enter" && runSearch()}
                 />
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-hover:text-[#70E4A8] transition-colors" />
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full lg:w-auto">
               {activeSource === "internal" && (
                 <Button
                   variant="outline"
                   onClick={() => setShowFilters(!showFilters)}
-                  className={`h-full px-4 border-gray-200/80 dark:border-gray-800 ${showFilters ? "bg-[#70E4A8]/10 border-[#70E4A8]/30 text-[#70E4A8]" : ""}`}
+                  className={`flex-none h-10 px-4 border-gray-200/80 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 ${showFilters ? "bg-[#70E4A8]/10 border-[#70E4A8]/30 text-[#70E4A8]" : "text-gray-600"}`}
                 >
-                  <Filter className="h-5 w-5" />
+                  <Filter className="h-4 w-4" />
                 </Button>
               )}
               
               <Button
                 onClick={runSearch}
-                className="resumaic-gradient-green text-white hover:opacity-90 button-press py-6 px-8 shadow-sm min-w-[140px]"
+                className="flex-1 lg:flex-none resumaic-gradient-green text-white hover:opacity-90 button-press h-10 px-6 shadow-md shadow-[#70E4A8]/20 min-w-[100px] text-sm font-medium"
                 disabled={isSearching || !what.trim()}
               >
                 {isSearching ? (
                   <>
-                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Searching
                   </>
                 ) : (
                   <>
-                    <Search className="h-5 w-5 mr-2" />
+                    <Search className="h-4 w-4 mr-2" />
                     Search
                   </>
                 )}
@@ -496,44 +498,33 @@ export default function JobSearchPage() {
               </div>
             </div>
           )}
-
-          {isLoadingMeta && (
-            <div className="flex items-center justify-center p-4">
-              <div className="flex flex-col items-center gap-3">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100"></div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Loading your pipelines and CVs...
-                </p>
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
 
       {/* Results Section */}
       {currentResults.length > 0 && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-              Found {currentResults.length} {currentResults.length === 1 ? 'Job' : 'Jobs'}
+          <div className="flex items-center justify-between gap-2 px-1">
+            <h2 className="text-sm sm:text-base font-medium text-gray-600 dark:text-gray-400">
+              Found <span className="text-gray-900 dark:text-gray-100 font-semibold">{currentResults.length}</span> {currentResults.length === 1 ? 'Job' : 'Jobs'}
             </h2>
             <div className="flex items-center gap-2">
               <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={() => clearResults()}
-                className="text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10"
+                className="h-8 px-2.5 text-xs text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
               >
-                <X className="h-4 w-4 mr-1" />
+                <X className="h-3.5 w-3.5 mr-1.5" />
                 Clear
               </Button>
-              <Badge variant="outline" className="border-[#70E4A8]/30 text-[#70E4A8]">
-                {activeSource === 'google' ? 'Google Search' : 'Internal Search'}
+              <Badge variant="outline" className="h-7 border-[#70E4A8]/30 text-[#70E4A8] bg-[#70E4A8]/5 font-medium">
+                {activeSource === 'google' ? 'Google' : 'Internal'}
               </Badge>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-500">
             {currentResults.map((job, idx) => {
               // Extract data with fallbacks for nested objects
               const title = job.title || firstString(job, ["job_title", "position", "role"]) || "Untitled role"
@@ -564,111 +555,135 @@ export default function JobSearchPage() {
               return (
                 <Card 
                   key={`${companyName}-${title}-${idx}`} 
-                  className="border-[#70E4A8]/20 hover:border-[#70E4A8]/40 hover:shadow-lg transition-all duration-300 group overflow-hidden flex flex-col h-full bg-white dark:bg-[#0B0F1A] p-0 gap-0"
+                  className="group relative overflow-hidden border-[#70E4A8]/20 hover:border-[#70E4A8]/50 transition-all duration-300 hover:shadow-md bg-white dark:bg-[#0B0F1A]"
                 >
-                  <div className="absolute top-0 left-0 w-1 h-full resumaic-gradient-green opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#70E4A8] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   
-                  <CardHeader className="p-4 pb-2 relative">
-                     <div className="flex justify-between items-start gap-3">
-                         <div className="flex gap-3 overflow-hidden">
-                            <Avatar className="h-10 w-10 sm:h-12 sm:w-12 border-2 border-gray-100 dark:border-gray-800 shrink-0">
-                              <AvatarFallback className="bg-gradient-to-br from-[#70E4A8]/20 to-[#70E4A8]/5 text-[#70E4A8] font-bold text-sm sm:text-base">
-                                {getCompanyInitials(companyName)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="min-w-0 flex-1">
-                               <h3 className="font-bold text-base sm:text-lg leading-tight pr-2 text-gray-900 dark:text-gray-100 line-clamp-2 sm:line-clamp-3 mb-1" title={title}>
-                                 {title}
-                               </h3>
-                               <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                                 <Building className="h-3.5 w-3.5 shrink-0" />
-                                 <span className="truncate font-medium">{companyName}</span>
-                               </div>
-                            </div>
-                         </div>
-                         {created && (
-                            <div className="shrink-0 flex items-center text-[10px] sm:text-xs text-gray-400 whitespace-nowrap bg-gray-50 dark:bg-gray-900 px-2 py-1 rounded-md border border-gray-100 dark:border-gray-800 mt-0.5">
-                               <Clock className="h-3 w-3 mr-1" />
-                               {formatDistanceToNow(created, { addSuffix: true }).replace("about ", "")}
-                            </div>
-                         )}
-                     </div>
-                  </CardHeader>
-                  
-                  <CardContent className="flex-1 space-y-3 p-4 pt-2">
-                     {/* Tags Row */}
-                     <div className="flex flex-wrap gap-2 text-xs">
-                        {locationName && (
-                           <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 border-transparent font-normal">
-                             <MapPin className="h-3 w-3 mr-1" />
-                             {locationName}
-                           </Badge>
-                        )}
-                        {salary && (
-                           <Badge variant="secondary" className="bg-[#70E4A8]/10 text-[#0ea5e9] dark:text-[#70E4A8] hover:bg-[#70E4A8]/20 border-transparent font-normal">
-                             <DollarSign className="h-3 w-3 mr-1" />
-                             {salary}
-                           </Badge>
-                        )}
-                        {categoryLabel && (
-                           <Badge variant="outline" className="text-gray-500 font-normal border-dashed">
-                              <Tag className="h-3 w-3 mr-1" />
-                              {categoryLabel}
-                           </Badge>
-                        )}
+                  <div className="flex flex-col md:flex-row gap-3 sm:gap-5 p-3 sm:p-5">
+                    {/* Avatar Column */}
+                    <div className="shrink-0 hidden sm:block">
+                      <Avatar className="h-14 w-14 rounded-xl border border-gray-100 dark:border-gray-800 bg-white shadow-sm">
+                        <AvatarFallback className="rounded-xl bg-gradient-to-br from-[#70E4A8]/10 to-[#70E4A8]/5 text-[#70E4A8] font-bold text-lg">
+                          {getCompanyInitials(companyName)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="flex-1 min-w-0 space-y-2 sm:space-y-3">
+                      <div>
+                        <div className="flex items-start justify-between gap-4 md:hidden mb-2">
+                           <div className="flex items-center gap-2">
+                              <Avatar className="h-9 w-9 rounded-lg border border-gray-100 dark:border-gray-800">
+                                <AvatarFallback className="rounded-lg bg-[#70E4A8]/10 text-[#70E4A8] text-xs font-bold">
+                                  {getCompanyInitials(companyName)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex flex-col">
+                                <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{companyName}</span>
+                                {created && (
+                                  <span className="text-[10px] text-gray-400">
+                                    {formatDistanceToNow(created, { addSuffix: true }).replace("about ", "")}
+                                  </span>
+                                )}
+                              </div>
+                           </div>
+                        </div>
+
+                        <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100 group-hover:text-[#70E4A8] transition-colors line-clamp-1" title={title}>
+                          {title}
+                        </h3>
+                        
+                        <div className="flex flex-wrap items-center gap-y-1 gap-x-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5 sm:mt-1">
+                          <span className="hidden sm:inline-flex items-center gap-1 font-medium text-gray-700 dark:text-gray-300">
+                            <Building className="h-3.5 w-3.5" />
+                            {companyName}
+                          </span>
+                          {locationName && (
+                            <span className="flex items-center gap-1">
+                              <MapPin className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                              {locationName}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Description Snippet */}
+                      {description && (
+                        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed max-w-3xl">
+                          {description.replace(/<[^>]*>/g, '')}
+                        </p>
+                      )}
+
+                      {/* Tags */}
+                      <div className="flex flex-wrap gap-1.5 sm:gap-2 pt-1">
                         {contractTime && (
-                           <Badge variant="outline" className="text-gray-500 capitalize font-normal">
+                           <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 font-normal capitalize text-[10px] sm:text-xs px-2 py-0.5">
                               {contractTime}
                            </Badge>
                         )}
                         {contractType && (
-                           <Badge variant="outline" className="text-gray-500 capitalize font-normal">
+                           <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 font-normal capitalize text-[10px] sm:text-xs px-2 py-0.5">
                               {contractType}
                            </Badge>
                         )}
-                     </div>
+                        {categoryLabel && (
+                           <Badge variant="outline" className="text-gray-500 font-normal border-dashed text-[10px] sm:text-xs px-2 py-0.5">
+                              {categoryLabel}
+                           </Badge>
+                        )}
+                      </div>
+                    </div>
 
-                     {/* Description */}
-                     {description && (
-                       <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-3 leading-relaxed">
-                         {description.replace(/<[^>]*>/g, '')}
-                       </p>
-                     )}
-                  </CardContent>
+                    {/* Actions & Meta Column */}
+                    <div className="flex flex-col md:items-end justify-between gap-3 sm:gap-4 md:min-w-[200px] border-t md:border-t-0 md:border-l border-gray-100 dark:border-gray-800 pt-3 sm:pt-0 md:pl-6 mt-1 sm:mt-0 md:mt-0">
+                      <div className="space-y-1 text-left md:text-right">
+                        {salary ? (
+                          <div className="font-bold text-gray-900 dark:text-gray-100 text-base sm:text-lg">
+                            {salary}
+                          </div>
+                        ) : (
+                          <div className="text-xs sm:text-sm text-gray-400 italic">Salary not specified</div>
+                        )}
+                        {created && (
+                          <div className="hidden md:flex items-center justify-end gap-1 text-xs text-gray-400">
+                            <Clock className="h-3 w-3" />
+                            {formatDistanceToNow(created, { addSuffix: true }).replace("about ", "")}
+                          </div>
+                        )}
+                      </div>
 
-                  <CardFooter className="p-4 pt-0 flex flex-col gap-2">
-                     <div className="flex w-full gap-2">
+                      <div className="flex flex-row md:flex-col gap-2 w-full md:w-auto">
                         <Button
-                          className="resumaic-gradient-green text-white hover:opacity-90 flex-1 shadow-sm h-10"
+                          className="flex-1 md:w-full resumaic-gradient-green text-white hover:opacity-90 shadow-sm h-8 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm"
                           onClick={() => openAddFromResult(job)}
                           disabled={pipelines.length === 0 || cvs.length === 0}
                         >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add to Wishlist
+                          <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                          <span className="truncate">Add to Pipeline</span>
                         </Button>
+                        
                         {url && (
                            <Button
                              variant="outline"
-                             className="px-3 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 h-10 w-10 p-0 shrink-0"
+                             className="flex-1 md:w-full border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 h-8 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm"
                              onClick={() => window.open(url, "_blank", "noopener,noreferrer")}
-                             title="Apply on site"
                            >
-                             <ExternalLink className="h-4 w-4" />
+                             <ExternalLink className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                             <span>Apply</span>
                            </Button>
                         )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Mobile Footer Warnings */}
+                  {(pipelines.length === 0 || cvs.length === 0) && (
+                     <div className="bg-amber-50 dark:bg-amber-900/10 px-5 py-2 text-xs text-amber-600 dark:text-amber-400 flex items-center justify-center gap-2">
+                       <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                       {pipelines.length === 0 ? "Create a pipeline to save jobs" : "Create a CV to save jobs"}
                      </div>
-                     
-                     {/* Warnings */}
-                     {pipelines.length === 0 ? (
-                       <div className="w-full text-center text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/10 py-1.5 rounded">
-                         Create pipelines first
-                       </div>
-                     ) : cvs.length === 0 ? (
-                       <div className="w-full text-center text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/10 py-1.5 rounded">
-                         Create CV first
-                       </div>
-                     ) : null}
-                  </CardFooter>
+                  )}
                 </Card>
               )
             })}
