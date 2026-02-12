@@ -62,7 +62,7 @@ const constructProfilePictureUrl = (profilePicture: string | null | undefined): 
     return profilePicture;
   }
   if (profilePicture.startsWith('media/')) {
-    return `http://localhost:8000/storage/app/public/${profilePicture}`;
+    return `https://stagingbackend.resumaic.com/storage/app/public/${profilePicture}`;
   }
   return profilePicture;
 };
