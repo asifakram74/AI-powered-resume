@@ -14,6 +14,7 @@ import { useAppDispatch, useAppSelector } from "../../../lib/redux/hooks"
 import { loginUser, clearError, loginWithLinkedIn, loginWithGoogle, setCredentials } from "../../../lib/redux/slices/authSlice"
 import { Alert, AlertDescription } from "../../../components/ui/alert"
 import { showSuccessToast, showErrorToast } from "../../../components/ui/toast"
+import { setAuthCookie } from "../../../lib/authCookies"
 
 
 function useSafeSearchParams() {
@@ -53,11 +54,12 @@ export default function SignInPage() {
     if (storedToken && storedUser) {
       try {
         const user = JSON.parse(storedUser)
-        if (user.source && user.source !== 'website') {
-          router.push("/dashboard")
+        if (user.source && user.source !== "website") {
+          router.replace("/dashboard/persona")
+          return
         }
       } catch (e) {
-        console.error('Error parsing stored user:', e)
+        console.error("Error parsing stored user:", e)
       }
     }
   }, [token, router])
@@ -202,6 +204,7 @@ export default function SignInPage() {
                 const user = JSON.parse(decodeURIComponent(userParam));
                 localStorage.setItem("token", token);
                 localStorage.setItem("user", JSON.stringify(user));
+                setAuthCookie();
                 dispatch(setCredentials({ token, user }));
               } catch (e) {
                 console.error("Failed to parse user data from callback:", e);
@@ -213,6 +216,7 @@ export default function SignInPage() {
               const email = safeSearchParams.get("email");
 
               localStorage.setItem("token", token);
+              setAuthCookie();
 
               if (id || name || email) {
                 const user = {

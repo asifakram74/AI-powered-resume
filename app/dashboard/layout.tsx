@@ -149,7 +149,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return "Persona" // Default
   }
 
-  if (!isClient) return null // or loading spinner
+  if (!isClient) return null
 
   return (
     <ProtectedRoute>

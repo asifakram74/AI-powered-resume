@@ -14,6 +14,7 @@ import {
 } from "../service/authService"
 import { setPassword as setPasswordApi, type SetPasswordData } from "../../api/settings"
 import { getUserById as getUserByIdApi } from "../service/userService"
+import { setAuthCookie, removeAuthCookie } from "../../authCookies"
 
 interface AuthState {
   user: User | null
@@ -65,6 +66,7 @@ export const loginUser = createAsyncThunk<AuthResponse, LoginCredentials>(
       localStorage.setItem("token", response.token)
       localStorage.setItem("user", JSON.stringify(response.user))
       localStorage.setItem("loginMethod", "email")
+      setAuthCookie()
 
       // Fetch and store profile after successful login
       try {
@@ -100,6 +102,7 @@ export const loginWithLinkedIn = createAsyncThunk<AuthResponse, string>(
 
       localStorage.setItem("token", response.token);
       localStorage.setItem("user", JSON.stringify(response.user));
+      setAuthCookie();
 
       // Fetch and store profile after successful LinkedIn login
       try {
@@ -125,6 +128,7 @@ export const loginWithGoogle = createAsyncThunk<AuthResponse, string>(
       const response = await AuthService.googleLogin(code);
       localStorage.setItem("token", response.token);
       localStorage.setItem("user", JSON.stringify(response.user));
+      setAuthCookie();
 
       // Fetch and store profile after successful Google login
       try {
@@ -199,6 +203,7 @@ export const logoutUser = createAsyncThunk("auth/logout", async (_, { rejectWith
     localStorage.removeItem("user")
     localStorage.removeItem("profile")
     localStorage.removeItem("loginMethod")
+    removeAuthCookie()
 
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || "Logout failed")
@@ -333,6 +338,7 @@ const authSlice = createSlice({
       localStorage.removeItem("user")
       localStorage.removeItem("profile")
       localStorage.removeItem("loginMethod")
+      removeAuthCookie()
       state.user = null
       state.profile = null
       state.token = null
@@ -346,6 +352,7 @@ const authSlice = createSlice({
       state.token = action.payload.token
       state.user = action.payload.user
       state.requiresPasswordSetup = checkRequiresPasswordSetup(action.payload.user)
+      setAuthCookie()
     },
     setRequiresPasswordSetup: (state, action: PayloadAction<boolean>) => {
       state.requiresPasswordSetup = action.payload
@@ -376,6 +383,7 @@ const authSlice = createSlice({
           localStorage.removeItem("token")
           localStorage.removeItem("user")
           localStorage.removeItem("profile") // Clean up profile too
+          removeAuthCookie()
         }
       }
     },
@@ -546,6 +554,7 @@ const authSlice = createSlice({
         state.error = null
         localStorage.removeItem("token")
         localStorage.removeItem("user")
+        removeAuthCookie()
       })
       .addCase(deleteAccount.rejected, (state, action) => {
         state.loading = false
@@ -555,6 +564,7 @@ const authSlice = createSlice({
       .addCase(logoutUser.fulfilled, (state) => {
         localStorage.removeItem("token")
         localStorage.removeItem("user")
+        removeAuthCookie()
         state.user = null
         state.profile = null
         state.token = null

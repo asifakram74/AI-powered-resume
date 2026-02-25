@@ -1,4 +1,4 @@
-// app/page.tsx  (if you’re using App Router in Next.js 13+)
+// app/page.tsx — Fallback only; middleware handles redirect before this renders
 import { redirect } from "next/navigation"
 
 export default function Home() {

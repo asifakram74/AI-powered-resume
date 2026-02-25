@@ -516,7 +516,7 @@ function CreatePersonaPage({ user }: PageProps) {
 
   if (isLoading && personas.length === 0) {
     return (
-      <div className="fixed inset-0 flex justify-center items-center bg-white dark:bg-gray-950">
+      <div className="flex justify-center items-center h-[60vh] w-full">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-gray-100"></div>
       </div>
     );

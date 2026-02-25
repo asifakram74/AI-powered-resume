@@ -25,6 +25,10 @@ import { Switch } from "../../components/ui/switch";
 import type { CVData } from "../../types/cv-data";
 import { isValidEmailFormat } from "../../lib/utils/email-validation";
 import { z } from "zod";
+import { Autocomplete } from "../../components/Autocomplete";
+import { geocodeForward, geocodeForwardFull, reverseGeocode } from "../../lib/api/location";
+import { loadInterestCatalog, filterInterests, addCustomInterest, recommendInterests } from "../../lib/interests/interests";
+import type { InterestCatalog, InterestItem } from "../../lib/interests/interests";
 
 // Zod Schemas
 const personalInfoSchema = z.object({
@@ -83,27 +87,19 @@ const certificationSchema = z.object({
 // Helper function to validate and format URLs
 const formatUrl = (url: string): string => {
   if (!url || url.trim() === "") return "";
-
   const trimmedUrl = url.trim();
-
-  // If it's already a valid URL, return it
   if (trimmedUrl.startsWith("http://") || trimmedUrl.startsWith("https://")) {
     return trimmedUrl;
   }
-
-  // If it looks like a domain, add https://
   if (trimmedUrl.includes(".") && !trimmedUrl.includes(" ")) {
     return `https://${trimmedUrl}`;
   }
-
-  // If it's not a valid URL format, return empty string
   return "";
 };
 
 // Helper function to validate URL
 const isValidUrl = (url: string): boolean => {
-  if (!url || url.trim() === "") return true; // Empty is valid
-
+  if (!url || url.trim() === "") return true;
   try {
     new URL(url);
     return true;
@@ -122,32 +118,38 @@ const formatDateForPersona = (input?: string) => {
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December",
   ];
-  // YYYY-MM or YYYY-MM-DD
   const iso = normalized.match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?$/);
   if (iso) {
     const year = iso[1];
     const month = Math.max(1, Math.min(12, Number.parseInt(iso[2], 10)));
     return `${monthNames[month - 1]} ${year}`;
   }
-  // MM/YYYY
   const sl = normalized.match(/^(\d{1,2})\/(\d{4})$/);
   if (sl) {
     const month = Math.max(1, Math.min(12, Number.parseInt(sl[1], 10)));
     const year = sl[2];
     return `${monthNames[month - 1]} ${year}`;
   }
-  // Year only
   if (/^\d{4}$/.test(normalized)) return normalized;
-  // Month text like "Jan 2020" or "March 2022"
   if (/^([A-Za-z]{3,9})\s+\d{4}$/.test(normalized)) return normalized;
   return normalized;
 };
+
+// Type for autocomplete items
+interface AutocompleteItem {
+  id: string;
+  name: string;
+  meta?: Record<string, any>;
+}
 
 interface PersonaFormProps {
   prefilledData: Partial<Omit<CVData, "id" | "createdAt">> | null;
   editingPersona: CVData | null;
   onPersonaGenerated: (persona: CVData, profilePictureFile?: File | null) => void;
   onCancel: () => void;
+  onAddSkill?: (item: AutocompleteItem) => void;
+  onAddLanguage?: (item: AutocompleteItem) => void;
+  onAddLocation?: (item: AutocompleteItem) => void;
 }
 
 export function PersonaForm({
@@ -155,6 +157,9 @@ export function PersonaForm({
   editingPersona,
   onPersonaGenerated,
   onCancel,
+  onAddSkill,
+  onAddLanguage,
+  onAddLocation,
 }: PersonaFormProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -235,7 +240,8 @@ export function PersonaForm({
 
   const [skillInput, setSkillInput] = useState("");
   const [skillType, setSkillType] = useState<"technical" | "soft">("technical");
-  const [interestInput, setInterestInput] = useState("");
+  const [interestCatalog, setInterestCatalog] = useState<InterestCatalog | null>(null);
+  const [recommended, setRecommended] = useState<AutocompleteItem[]>([]);
 
   // Editing states
   const [editingExperienceId, setEditingExperienceId] = useState<string | null>(null);
@@ -247,6 +253,9 @@ export function PersonaForm({
   const [profilePictureFile, setProfilePictureFile] = useState<File | null>(null);
   const [profilePicturePreview, setProfilePicturePreview] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [locationId, setLocationId] = useState<string>("");
+  const [experienceCoords, setExperienceCoords] = useState<{ lat: number; lon: number } | null>(null);
+  const [educationCoords, setEducationCoords] = useState<{ lat: number; lon: number } | null>(null);
 
   // Use face detection hook
   const { modelsLoaded, faceDetected, detectionErrorMessage, runFaceDetection } = useFaceDetection();
@@ -262,6 +271,83 @@ export function PersonaForm({
     { id: "projects", label: "Projects", icon: FolderGit2 },
     { id: "interests", label: "Interests", icon: Heart },
   ];
+
+  const fetchSkills = async (q: string): Promise<AutocompleteItem[]> => {
+    const data = (await import("../../data/skills.json")).default as string[];
+    const lower = q.toLowerCase();
+    const filtered = data
+      .filter((s) => s.toLowerCase().includes(lower))
+      .slice(0, 10);
+    return filtered.map((name) => ({
+      id: name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+      name,
+    }));
+  };
+
+  const fetchLanguages = async (q: string): Promise<AutocompleteItem[]> => {
+    const data = (await import("../../data/languages.json")).default as Array<{ code: string; name: string; native: string }>;
+    const sorted = [...data].sort((a, b) => a.code.localeCompare(b.code));
+    const lower = q.toLowerCase();
+    const filtered = sorted.filter((l) => l.name.toLowerCase().includes(lower) || l.native.toLowerCase().includes(lower)).slice(0, 50);
+    return filtered.map((l) => ({
+      id: l.code,
+      name: `${l.name} (${l.native})`,
+      meta: { code: l.code }
+    }));
+  };
+
+  const fetchLocations = async (q: string): Promise<AutocompleteItem[]> => {
+    let prefs: { country?: string } = { country: formData.personalInfo.country };
+    try {
+      const key = "geo:prefs";
+      const cached = typeof window !== "undefined" ? window.sessionStorage.getItem(key) : null;
+      if (cached) {
+        const p = JSON.parse(cached);
+        prefs = { ...prefs, ...p };
+      }
+    } catch {}
+    const full = await geocodeForwardFull(q);
+    return full.map((x) => ({
+      id: x.id,
+      name: x.name,
+      meta: { city: x.city, country: x.country, lat: x.lat, lon: x.lon }
+    }));
+  };
+
+  const buildOsmEmbedUrl = (lat: number, lon: number) => {
+    const d = 0.05;
+    const left = lon - d;
+    const right = lon + d;
+    const top = lat + d;
+    const bottom = lat - d;
+    return `https://www.openstreetmap.org/export/embed.html?bbox=${left}%2C${bottom}%2C${right}%2C${top}&layer=mapnik&marker=${lat}%2C${lon}`;
+  };
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const catalog = await loadInterestCatalog();
+        if (!mounted) return;
+        setInterestCatalog(catalog);
+        const rec = recommendInterests(formData as any, catalog, 12).map(i => ({ id: i.id, name: i.name }));
+        setRecommended(rec);
+      } catch (error) {
+        console.error("Failed to load interest catalog:", error);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // Update recommendations when form data changes
+  useEffect(() => {
+    if (interestCatalog) {
+      const rec = recommendInterests(formData as any, interestCatalog, 12).map(i => ({ id: i.id, name: i.name }));
+      setRecommended(rec);
+    }
+  }, [formData.personalInfo.jobTitle, formData.skills, formData.languages, interestCatalog]);
 
   // Navigation functions
   const goToNextTab = () => {
@@ -298,7 +384,6 @@ export function PersonaForm({
   useEffect(() => {
     if (editingPersona) {
       setFormData(editingPersona);
-      // Set profile picture preview if it exists
       if (editingPersona.personalInfo.profilePicture) {
         setProfilePicturePreview(editingPersona.personalInfo.profilePicture);
       }
@@ -314,28 +399,15 @@ export function PersonaForm({
         result.error.issues.forEach((issue) => {
           newErrors[issue.path[0] as string] = issue.message;
         });
-        // Only set errors if fields have been touched (basic implementation: if they are not empty)
-        // Or just set them but only show if touched? For now, let's just set them if the user has started typing or if it's a submission attempt.
-        // To be less intrusive, we can check if the field is not empty before showing error, OR manage a 'touched' state.
-        // For simplicity matching EditForm, we'll validate what's there.
-        // However, we don't want to show "Required" errors on empty initial load.
-        
-        // Let's only set errors for fields that have content but are invalid, OR required fields that are empty BUT only if we are in a "submitting" state or similar.
-        // Actually, EditForm validated everything on change. Let's do that but filter out "Required" errors for empty strings if we want to avoid initial red sea.
-        // But the user requested "validation in profile card form" style which showed red borders immediately? 
-        // In EditForm we had `validateSection` running on `useEffect`.
-        
-        // Let's filter out "Required" errors for untouched fields if needed, but since we don't track touched, let's just show errors.
-        // To avoid initial red on empty form, we can check if formData is not initial default.
         const isInitial = !formData.personalInfo.fullName && !formData.personalInfo.jobTitle && !formData.personalInfo.email;
         if (!isInitial) {
-             setErrors(newErrors);
+          setErrors(newErrors);
         }
       } else {
         setErrors({});
       }
     } else {
-      setErrors({}); // Clear errors when switching tabs
+      setErrors({});
     }
   }, [formData.personalInfo, activeTab]);
 
@@ -362,18 +434,6 @@ export function PersonaForm({
     }));
   };
 
-  const addInterest = () => {
-    if (interestInput.trim()) {
-      setFormData((prev) => ({
-        ...prev,
-        additional: {
-          interests: [...prev.additional.interests, interestInput.trim()],
-        },
-      }));
-      setInterestInput("");
-    }
-  };
-
   // Profile picture handlers
   const handleProfilePictureChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -382,7 +442,6 @@ export function PersonaForm({
       const allowedExtensions = ["jpg", "jpeg", "png", "gif"];
       const fileExt = file.name.split(".").pop()?.toLowerCase() || "";
 
-      // Validate file type by MIME and extension
       if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExt)) {
         toast.error("Unsupported image format. Allowed: JPG, PNG, GIF");
         event.target.value = "";
@@ -391,20 +450,17 @@ export function PersonaForm({
         return;
       }
 
-      // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast.error("File size must be less than 5MB");
         event.target.value = "";
         return;
       }
 
-      // Ensure models are ready
       if (!modelsLoaded) {
         toast("Loading face detection models. Please try again in a moment.");
         return;
       }
 
-      // Read file and run face detection
       const reader = new FileReader();
       reader.onload = async (e) => {
         const dataUrl = e.target?.result as string;
@@ -416,7 +472,6 @@ export function PersonaForm({
           setProfilePicturePreview("");
           return;
         }
-        // Passed detection
         setProfilePictureFile(file);
         setProfilePicturePreview(dataUrl);
       };
@@ -451,19 +506,16 @@ export function PersonaForm({
   };
 
   const addExperience = () => {
-    // Validate current experience using Zod
     const result = experienceSchema.safeParse(currentExperience);
     
     if (!result.success) {
-       const fieldErrors: Record<string, string> = {};
-       result.error.issues.forEach(issue => {
-         fieldErrors[issue.path[0] as string] = issue.message;
-       });
-       
-       // Show first error as toast
-       const firstError = Object.values(fieldErrors)[0];
-       toast.error(firstError || "Please fill required fields");
-       return;
+      const fieldErrors: Record<string, string> = {};
+      result.error.issues.forEach(issue => {
+        fieldErrors[issue.path[0] as string] = issue.message;
+      });
+      const firstError = Object.values(fieldErrors)[0];
+      toast.error(firstError || "Please fill required fields");
+      return;
     }
 
     if (currentExperience.jobTitle && currentExperience.companyName) {
@@ -473,10 +525,10 @@ export function PersonaForm({
           experience: prev.experience.map((exp) =>
             exp.id === editingExperienceId
               ? {
-                ...currentExperience,
-                endDate: currentExperience.current ? "" : currentExperience.endDate,
-                id: editingExperienceId,
-              }
+                  ...currentExperience,
+                  endDate: currentExperience.current ? "" : currentExperience.endDate,
+                  id: editingExperienceId,
+                }
               : exp
           ),
         }));
@@ -549,18 +601,16 @@ export function PersonaForm({
   };
 
   const addEducation = () => {
-    // Validate current education using Zod
     const result = educationSchema.safeParse(currentEducation);
 
     if (!result.success) {
-       const fieldErrors: Record<string, string> = {};
-       result.error.issues.forEach(issue => {
-         fieldErrors[issue.path[0] as string] = issue.message;
-       });
-       
-       const firstError = Object.values(fieldErrors)[0];
-       toast.error(firstError || "Please fill required fields");
-       return;
+      const fieldErrors: Record<string, string> = {};
+      result.error.issues.forEach(issue => {
+        fieldErrors[issue.path[0] as string] = issue.message;
+      });
+      const firstError = Object.values(fieldErrors)[0];
+      toast.error(firstError || "Please fill required fields");
+      return;
     }
 
     if (currentEducation.degree && currentEducation.institutionName) {
@@ -570,9 +620,9 @@ export function PersonaForm({
           education: prev.education.map((edu) =>
             edu.id === editingEducationId
               ? {
-                ...currentEducation,
-                id: editingEducationId,
-              }
+                  ...currentEducation,
+                  id: editingEducationId,
+                }
               : edu
           ),
         }));
@@ -664,33 +714,28 @@ export function PersonaForm({
   };
 
   const addCertification = () => {
-    // Validate current certification using Zod
     const result = certificationSchema.safeParse(currentCertification);
 
     if (!result.success) {
-       const fieldErrors: Record<string, string> = {};
-       result.error.issues.forEach(issue => {
-         fieldErrors[issue.path[0] as string] = issue.message;
-       });
-       
-       const firstError = Object.values(fieldErrors)[0];
-       toast.error(firstError || "Please fill required fields");
-       return;
+      const fieldErrors: Record<string, string> = {};
+      result.error.issues.forEach(issue => {
+        fieldErrors[issue.path[0] as string] = issue.message;
+      });
+      const firstError = Object.values(fieldErrors)[0];
+      toast.error(firstError || "Please fill required fields");
+      return;
     }
 
-    if (
-      currentCertification.title &&
-      currentCertification.issuingOrganization
-    ) {
+    if (currentCertification.title && currentCertification.issuingOrganization) {
       if (editingCertificationId) {
         setFormData((prev) => ({
           ...prev,
           certifications: prev.certifications.map((cert) =>
             cert.id === editingCertificationId
               ? {
-                ...currentCertification,
-                id: editingCertificationId,
-              }
+                  ...currentCertification,
+                  id: editingCertificationId,
+                }
               : cert
           ),
         }));
@@ -747,18 +792,16 @@ export function PersonaForm({
   };
 
   const addProject = () => {
-    // Validate current project using Zod
     const result = projectSchema.safeParse(currentProject);
 
     if (!result.success) {
-       const fieldErrors: Record<string, string> = {};
-       result.error.issues.forEach(issue => {
-         fieldErrors[issue.path[0] as string] = issue.message;
-       });
-       
-       const firstError = Object.values(fieldErrors)[0];
-       toast.error(firstError || "Please fill required fields");
-       return;
+      const fieldErrors: Record<string, string> = {};
+      result.error.issues.forEach(issue => {
+        fieldErrors[issue.path[0] as string] = issue.message;
+      });
+      const firstError = Object.values(fieldErrors)[0];
+      toast.error(firstError || "Please fill required fields");
+      return;
     }
 
     if (currentProject.name && currentProject.role) {
@@ -768,12 +811,10 @@ export function PersonaForm({
           projects: prev.projects.map((project) =>
             project.id === editingProjectId
               ? {
-                ...currentProject,
-                id: editingProjectId,
-                technologies: currentProject.technologies.filter((tech) =>
-                  tech.trim()
-                ),
-              }
+                  ...currentProject,
+                  id: editingProjectId,
+                  technologies: currentProject.technologies.filter((tech) => tech.trim()),
+                }
               : project
           ),
         }));
@@ -787,9 +828,7 @@ export function PersonaForm({
             {
               ...currentProject,
               id: Date.now().toString(),
-              technologies: currentProject.technologies.filter((tech) =>
-                tech.trim()
-              ),
+              technologies: currentProject.technologies.filter((tech) => tech.trim()),
             },
           ],
         }));
@@ -839,7 +878,6 @@ export function PersonaForm({
   };
 
   const generatePersona = async () => {
-    // Required field validation using Zod
     const result = personalInfoSchema.safeParse(formData.personalInfo);
     
     if (!result.success) {
@@ -851,7 +889,6 @@ export function PersonaForm({
         toast.error(issue.message);
       });
       setErrors(newErrors);
-      // Switch to personal tab to show errors
       setActiveTab("personal");
       return;
     }
@@ -859,11 +896,9 @@ export function PersonaForm({
     setErrors({});
     setIsGenerating(true);
 
-    // Validate and format URLs (already validated by Zod schema but formatting logic remains useful)
     const formattedLinkedIn = formatUrl(formData.personalInfo.linkedin || "");
     const formattedGitHub = formatUrl(formData.personalInfo.github || "");
 
-    // Update form data with formatted URLs
     const updatedFormData = {
       ...formData,
       personalInfo: {
@@ -871,53 +906,46 @@ export function PersonaForm({
         linkedin: formattedLinkedIn,
         github: formattedGitHub,
       },
-      // Ensure these fields are included explicitly to avoid empty arrays
       education: formData.education || [],
       certifications: formData.certifications || [],
       projects: formData.projects || [],
     };
 
-    // Simulate API call
     setTimeout(async () => {
-      const persona = `Professional Summary for ${updatedFormData.personalInfo.fullName
-        }:
+      const persona = `Professional Summary for ${updatedFormData.personalInfo.fullName}:
 
-As a ${updatedFormData.personalInfo.jobTitle} with ${updatedFormData.experience.length
-        } years of professional experience, you bring a unique combination of technical expertise and leadership skills to drive organizational success.
+As a ${updatedFormData.personalInfo.jobTitle} with ${updatedFormData.experience.length} years of professional experience, you bring a unique combination of technical expertise and leadership skills to drive organizational success.
 
 Professional Experience:
 ${updatedFormData.experience
-          .map(
-            (exp) => {
-              const start = formatDateForPersona(exp.startDate);
-              const end = exp.current ? "Present" : formatDateForPersona(exp.endDate);
-              const dash = start && end ? " - " : "";
-              const range = start || end ? `(${start}${dash}${end})` : "";
-              return `• ${exp.jobTitle} at ${exp.companyName} ${range}`;
-            }
-          )
-          .join("\n")}
+  .map((exp) => {
+    const start = formatDateForPersona(exp.startDate);
+    const end = exp.current ? "Present" : formatDateForPersona(exp.endDate);
+    const dash = start && end ? " - " : "";
+    const range = start || end ? `(${start}${dash}${end})` : "";
+    return `• ${exp.jobTitle} at ${exp.companyName} ${range}`;
+  })
+  .join("\n")}
 
 Education:
 ${updatedFormData.education
-          .map((edu) => `• ${edu.degree} from ${edu.institutionName}`)
-          .join("\n")}
+  .map((edu) => `• ${edu.degree} from ${edu.institutionName}`)
+  .join("\n")}
 
 Core Technical Skills: ${updatedFormData.skills.technical.join(", ")}
 Soft Skills: ${updatedFormData.skills.soft.join(", ")}
 
 Languages: ${updatedFormData.languages
-          .map((lang) => `${lang.name} (${lang.proficiency})`)
-          .join(", ")}
+  .map((lang) => `${lang.name} (${lang.proficiency})`)
+  .join(", ")}
 
 Key Projects:
 ${updatedFormData.projects
-          .map((project) => `• ${project.name} - ${project.role}`)
-          .join("\n")}
+  .map((project) => `• ${project.name} - ${project.role}`)
+  .join("\n")}
 
 Career Objective:
-Seeking to leverage extensive experience in ${updatedFormData.personalInfo.jobTitle
-        } to contribute to innovative projects and drive business growth in a dynamic technology environment.
+Seeking to leverage extensive experience in ${updatedFormData.personalInfo.jobTitle} to contribute to innovative projects and drive business growth in a dynamic technology environment.
 
 Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
 
@@ -926,10 +954,8 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
         id: editingPersona?.id || Date.now().toString(),
         createdAt: editingPersona?.createdAt || new Date().toISOString(),
         generatedPersona: persona,
-        // profile picture file is passed separately via onPersonaGenerated
       };
 
-      // Await parent handler to finish creating persona and uploading profile image
       await Promise.resolve(onPersonaGenerated(newPersona, profilePictureFile));
       setIsGenerating(false);
     }, 3000);
@@ -952,7 +978,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                     className={`
                       flex items-center justify-center px-3 py-2 rounded-md text-xs font-medium transition-all whitespace-nowrap flex-shrink-0
                       ${isActive
-                        ? 'resumaic-gradient-green text-white shadow-sm'
+                        ? 'bg-green-600 text-white shadow-sm'
                         : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                       }
                     `}
@@ -1066,37 +1092,33 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label>City</Label>
-                  <Input
-                    value={formData.personalInfo.city}
-                    onChange={(e) =>
+                <div className="space-y-2 sm:col-span-2 lg:col-span-2">
+                  <Label>Location</Label>
+                  <Autocomplete
+                    label={undefined}
+                    placeholder="Start typing a city"
+                    minChars={3}
+                    maxHeight={320}
+                    initialValue={`${formData.personalInfo.city || ""}${formData.personalInfo.country ? `, ${formData.personalInfo.country}` : ""}`.trim()}
+                    fetchOptions={fetchLocations}
+                    onSelect={(opt) => {
+                      setLocationId(opt.id);
                       setFormData((prev) => ({
                         ...prev,
                         personalInfo: {
                           ...prev.personalInfo,
-                          city: e.target.value,
+                          city: opt.meta?.city || "",
+                          country: opt.meta?.country || "",
                         },
-                      }))
-                    }
-                    placeholder="San Francisco"
+                      }));
+                      if (typeof onAddLocation === "function") {
+                        onAddLocation({ id: opt.id, name: opt.name });
+                      }
+                    }}
+                    ariaLabel="Location autocomplete"
+                    sessionKey="location-v2"
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label>Country</Label>
-                  <Input
-                    value={formData.personalInfo.country}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        personalInfo: {
-                          ...prev.personalInfo,
-                          country: e.target.value,
-                        },
-                      }))
-                    }
-                    placeholder="United States"
-                  />
+                  <input type="hidden" id="locationIdHidden" value={locationId} />
                 </div>
                 <div className="space-y-2 sm:col-span-2 lg:col-span-1">
                   <Label>Address</Label>
@@ -1215,33 +1237,21 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                     <div className="rounded-md border bg-white dark:bg-gray-950 p-3">
                       <p className="text-xs font-semibold text-gray-700 dark:text-gray-200 text-center">TIPS</p>
                       <div className="mt-2 flex items-center justify-center gap-4">
-                        {/* Good example 1 */}
                         <div className="text-center">
                           <div className="relative w-16 h-16 rounded-md overflow-hidden border border-green-400">
                             <img src="/men2.png" alt="Good example 1" className="w-full h-full object-cover" />
-                            <span className="absolute -top-1 -right-1 bg-green-500 text-white rounded-full p-0.5">
-                              {/* <Check className="w-3 h-3" /> */}
-                            </span>
                           </div>
                           <span className="mt-1 block text-xs text-green-600">Good</span>
                         </div>
-                        {/* Good example 2 */}
                         <div className="text-center">
                           <div className="relative w-16 h-16 rounded-md overflow-hidden border border-green-400">
                             <img src="/men.png" alt="Good example 2" className="w-full h-full object-cover" />
-                            <span className="absolute -top-1 -right-1 bg-green-500 text-white rounded-full p-0.5">
-                              {/* <Check className="w-3 h-3" /> */}
-                            </span>
                           </div>
                           <span className="mt-1 block text-xs text-green-600">Good</span>
                         </div>
-                        {/* Avoid example */}
                         <div className="text-center">
                           <div className="relative w-16 h-16 rounded-md overflow-hidden border border-red-400">
                             <img src="/men3.png" alt="Avoid example" className="w-full h-full object-cover" />
-                            <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5">
-                              {/* <X className="w-3 h-3" /> */}
-                            </span>
                           </div>
                           <span className="mt-1 block text-xs text-red-600">Avoid</span>
                         </div>
@@ -1314,16 +1324,59 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label>Location</Label>
-                  <Input
-                    value={currentExperience.location}
-                    onChange={(e) =>
+                  <Autocomplete
+                    label={undefined}
+                    placeholder="Start typing a city"
+                    minChars={3}
+                    maxHeight={320}
+                    initialValue={currentExperience.location}
+                    fetchOptions={fetchLocations}
+                    onSelect={(opt) => {
+                      const city = opt.meta?.city || "";
+                      const country = opt.meta?.country || "";
                       setCurrentExperience((prev) => ({
                         ...prev,
-                        location: e.target.value,
-                      }))
-                    }
-                    placeholder="San Francisco, CA"
+                        location: [city, country].filter(Boolean).join(", "),
+                      }));
+                      if (typeof opt.meta?.lat === "number" && typeof opt.meta?.lon === "number") {
+                        setExperienceCoords({ lat: opt.meta.lat, lon: opt.meta.lon });
+                      }
+                    }}
+                    ariaLabel="Experience location autocomplete"
+                    sessionKey="exp-location"
                   />
+                  <div className="mt-2 flex items-center gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={async () => {
+                        if (typeof window !== "undefined" && "geolocation" in window.navigator) {
+                          window.navigator.geolocation.getCurrentPosition(async (pos) => {
+                            try {
+                              const r = await reverseGeocode(pos.coords.latitude, pos.coords.longitude);
+                              setCurrentExperience((prev) => ({
+                                ...prev,
+                                location: r.name,
+                              }));
+                              setExperienceCoords({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+                            } catch {}
+                          });
+                        }
+                      }}
+                    >
+                      Use my location
+                    </Button>
+                  </div>
+                  {experienceCoords && (
+                    <div className="mt-2">
+                      <iframe
+                        title="Experience location map"
+                        src={buildOsmEmbedUrl(experienceCoords.lat, experienceCoords.lon)}
+                        className="w-full h-40 rounded border"
+                      />
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label>Employment Type</Label>
@@ -1468,7 +1521,6 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                           </Button>
                         )}
                       </div>
-
                     </div>
                   ))
                 )}
@@ -1588,18 +1640,45 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex flex-col sm:flex-row gap-2">
-                <div className="flex flex-col sm:flex-row gap-2 flex-1">
-                  <Input
-                    value={skillInput}
-                    onChange={(e) => setSkillInput(e.target.value)}
-                    placeholder="Add a skill..."
-                    onKeyPress={(e) => e.key === "Enter" && addSkill()}
-                    className="flex-1"
+                <div className="flex-1">
+                  <Autocomplete
+                    label={undefined}
+                    placeholder="Type to search skills"
+                    minChars={2}
+                    maxHeight={320}
+                    fetchOptions={fetchSkills}
+                    onSelect={(opt) => {
+                      setFormData((prev) => {
+                        const exists = prev.skills.technical.some((s) => s.toLowerCase() === opt.name.toLowerCase());
+                        if (exists) return prev;
+                        return {
+                          ...prev,
+                          skills: {
+                            ...prev.skills,
+                            technical: [...prev.skills.technical, opt.name],
+                          },
+                        };
+                      });
+                      if (typeof onAddSkill === "function") {
+                        onAddSkill({ id: opt.id, name: opt.name });
+                      }
+                    }}
+                    onAddCustom={(q) => {
+                      setFormData((prev) => {
+                        const exists = prev.skills.technical.some((s) => s.toLowerCase() === q.toLowerCase());
+                        if (exists) return prev;
+                        return {
+                          ...prev,
+                          skills: {
+                            ...prev.skills,
+                            technical: [...prev.skills.technical, q],
+                          },
+                        };
+                      });
+                    }}
+                    ariaLabel="Skills autocomplete"
+                    sessionKey="skills"
                   />
-                  <Button onClick={addSkill} size="sm" variant="outline" className="flex-shrink-0 w-full sm:w-auto">
-                    <Plus className="h-4 w-4 mr-1" />
-                    Add
-                  </Button>
                 </div>
               </div>
 
@@ -1672,16 +1751,59 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label>Location</Label>
-                  <Input
-                    value={currentEducation.location}
-                    onChange={(e) =>
+                  <Autocomplete
+                    label={undefined}
+                    placeholder="Start typing a city"
+                    minChars={3}
+                    maxHeight={320}
+                    initialValue={currentEducation.location}
+                    fetchOptions={fetchLocations}
+                    onSelect={(opt) => {
+                      const city = opt.meta?.city || "";
+                      const country = opt.meta?.country || "";
                       setCurrentEducation((prev) => ({
                         ...prev,
-                        location: e.target.value,
-                      }))
-                    }
-                    placeholder="San Francisco, CA"
+                        location: [city, country].filter(Boolean).join(", "),
+                      }));
+                      if (typeof opt.meta?.lat === "number" && typeof opt.meta?.lon === "number") {
+                        setEducationCoords({ lat: opt.meta.lat, lon: opt.meta.lon });
+                      }
+                    }}
+                    ariaLabel="Education location autocomplete"
+                    sessionKey="edu-location"
                   />
+                  <div className="mt-2 flex items-center gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={async () => {
+                        if (typeof window !== "undefined" && "geolocation" in window.navigator) {
+                          window.navigator.geolocation.getCurrentPosition(async (pos) => {
+                            try {
+                              const r = await reverseGeocode(pos.coords.latitude, pos.coords.longitude);
+                              setCurrentEducation((prev) => ({
+                                ...prev,
+                                location: r.name,
+                              }));
+                              setEducationCoords({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+                            } catch {}
+                          });
+                        }
+                      }}
+                    >
+                      Use my location
+                    </Button>
+                  </div>
+                  {educationCoords && (
+                    <div className="mt-2">
+                      <iframe
+                        title="Education location map"
+                        src={buildOsmEmbedUrl(educationCoords.lat, educationCoords.lon)}
+                        className="w-full h-40 rounded border"
+                      />
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label>Graduation Date</Label>
@@ -1750,7 +1872,6 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                       size="sm"
                       className="w-full sm:flex-1"
                     >
-                      <span className="h-4 w-4 mr-1" />
                       Update Education
                     </Button>
                     <Button
@@ -1829,15 +1950,35 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Language</Label>
-                  <Input
-                    value={currentLanguage.name}
-                    onChange={(e) =>
-                      setCurrentLanguage((prev) => ({
-                        ...prev,
-                        name: e.target.value,
-                      }))
-                    }
-                    placeholder="Spanish"
+                  <Autocomplete
+                    label={undefined}
+                    placeholder="Type to search languages"
+                    minChars={2}
+                    maxHeight={320}
+                    fetchOptions={fetchLanguages}
+                    onSelect={(opt) => {
+                      const plain = opt.name.replace(/\s*\([^)]*\)\s*$/, "");
+                      const exists = formData.languages.some((l) => l.name.toLowerCase() === plain.toLowerCase());
+                      if (!exists) {
+                        setFormData((prev) => ({
+                          ...prev,
+                          languages: [
+                            ...prev.languages,
+                            {
+                              id: typeof opt.id === "string" ? opt.id : Date.now().toString(),
+                              name: plain,
+                              proficiency: currentLanguage.proficiency,
+                            },
+                          ],
+                        }));
+                      }
+                      setCurrentLanguage((prev) => ({ ...prev, name: "" }));
+                      if (typeof onAddLanguage === "function") {
+                        onAddLanguage({ id: opt.id, name: plain });
+                      }
+                    }}
+                    ariaLabel="Languages autocomplete"
+                    sessionKey="languages"
                   />
                 </div>
                 <div className="space-y-2">
@@ -1976,7 +2117,6 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                       size="sm"
                       className="w-full sm:flex-1"
                     >
-                      <span className="h-4 w-4 mr-1" />
                       Update Certification
                     </Button>
                     <Button
@@ -2162,7 +2302,6 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                           </Button>
                         )}
                       </div>
-
                     </div>
                   ))
                 )}
@@ -2208,7 +2347,6 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
                       size="sm"
                       className="w-full sm:w-auto"
                     >
-                      <span className="h-4 w-4 mr-1" />
                       Update Project
                     </Button>
                     <Button
@@ -2284,18 +2422,70 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex flex-col sm:flex-row gap-2">
-                <Input
-                  value={interestInput}
-                  onChange={(e) => setInterestInput(e.target.value)}
-                  placeholder="Add an interest..."
-                  onKeyPress={(e) => e.key === "Enter" && addInterest()}
-                  className="flex-1"
-                />
-                <Button onClick={addInterest} size="sm" variant="outline" className="flex-shrink-0 w-full sm:w-auto">
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add
-                </Button>
+                <div className="flex-1">
+                  <Autocomplete
+                    label={undefined}
+                    placeholder="Type to search interests"
+                    minChars={2}
+                    maxHeight={320}
+                    fetchOptions={async (q): Promise<AutocompleteItem[]> => {
+                      const cat: InterestCatalog = interestCatalog ?? (await loadInterestCatalog().then(c => { setInterestCatalog(c); return c }));
+                      const items = filterInterests(cat, { query: q });
+                      return items.slice(0, 50).map(i => ({ id: i.id, name: i.name }));
+                    }}
+                    onSelect={(opt) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        additional: {
+                          interests: Array.from(new Set([...prev.additional.interests, opt.name]))
+                        }
+                      }));
+                    }}
+                    onAddCustom={async (q) => {
+                      try {
+                        const cat: InterestCatalog = interestCatalog ?? (await loadInterestCatalog().then(c => { setInterestCatalog(c); return c }));
+                        addCustomInterest(cat, q);
+                        setFormData((prev) => ({
+                          ...prev,
+                          additional: {
+                            interests: Array.from(new Set([...prev.additional.interests, q]))
+                          }
+                        }));
+                      } catch (error) {
+                        console.error("Failed to add custom interest:", error);
+                      }
+                    }}
+                    ariaLabel="Best interests autocomplete"
+                    sessionKey="interests"
+                  />
+                </div>
               </div>
+
+              {recommended.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Recommended</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {recommended.map((r) => (
+                      <Button
+                        key={r.id}
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            additional: {
+                              interests: Array.from(new Set([...prev.additional.interests, r.name]))
+                            }
+                          }));
+                        }}
+                      >
+                        {r.name}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {formData.additional.interests.length > 0 && (
                 <div className="space-y-2">
@@ -2342,7 +2532,7 @@ Personal Interests: ${updatedFormData.additional.interests.join(", ")}`;
               <Button
                 onClick={generatePersona}
                 disabled={!formData.personalInfo.fullName || !formData.personalInfo.jobTitle || isGenerating}
-                className="resumaic-gradient-green hover:opacity-90 button-press"
+                className="bg-green-600 hover:bg-green-700 button-press"
               >
                 {isGenerating ? (
                   <>
