@@ -194,6 +194,21 @@ export const updateProfile = createAsyncThunk<ProfileResponse, Partial<ProfileRe
   },
 )
 
+export const uploadProfilePicture = createAsyncThunk<ProfileResponse, File>(
+  "auth/uploadProfilePicture",
+  async (file, { rejectWithValue }) => {
+    try {
+      const response = await AuthService.uploadProfilePicture(file)
+      // Handle response format from backend where data might be in userInfo
+      const updatedProfile = (response as any).userInfo || response
+      localStorage.setItem("profile", JSON.stringify(updatedProfile))
+      return updatedProfile
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || "Failed to upload profile picture")
+    }
+  },
+)
+
 export const logoutUser = createAsyncThunk("auth/logout", async (_, { rejectWithValue }) => {
   try {
     await AuthService.logout()
@@ -512,6 +527,23 @@ const authSlice = createSlice({
         }
       })
       .addCase(updateProfile.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+      // Upload Profile Picture
+      .addCase(uploadProfilePicture.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(uploadProfilePicture.fulfilled, (state, action) => {
+        state.loading = false
+        state.profile = action.payload
+        if (state.user) {
+          // Assuming user object might also need update if it stores profile pic
+          localStorage.setItem("user", JSON.stringify(state.user))
+        }
+      })
+      .addCase(uploadProfilePicture.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload as string
       })

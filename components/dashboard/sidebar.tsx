@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, type ElementType } from "react"
-import { FileText, Mail, CheckCircle, UserCircle, Sparkles, BarChart3, LogOut, ChevronDown, Users, Crown, Moon, Sun, Settings, User, HelpCircle, Search, Kanban, IdCard } from "lucide-react"
+import { FileText, Mail, CheckCircle, UserCircle, Sparkles, BarChart3, LogOut, ChevronDown, Users, Crown, Moon, Sun, Settings, User, HelpCircle, Search, Kanban, IdCard, Menu } from "lucide-react"
 import Link from "next/link"
 import { useTheme } from "next-themes"
 import {
@@ -16,18 +16,22 @@ import {
   SidebarMenuSubItem,
   SidebarFooter,
   SidebarGroup,
+  SidebarRail,
   useSidebar,
+  SidebarTrigger,
 } from "../../components/ui/sidebar"
+import Image from "next/image"
 import { Logo } from "../../components/ui/logo"
 import { Badge } from "../../components/ui/badge"
 import { Button } from "../../components/ui/button"
-import { Avatar, AvatarFallback } from "../../components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "../../components/ui/dropdown-menu"
 import { useAppDispatch, useAppSelector } from "../../lib/redux/hooks"
 import { logoutUser, fetchProfile } from "../../lib/redux/slices/authSlice"
 import { useRouter } from "next/navigation"
 import { getCVs } from "../../lib/redux/service/resumeService"
 import { X } from "lucide-react"
+import { cn } from "../../lib/utils"
 
 function useResumeCount(userId: string | number | undefined) {
   const [resumeCount, setResumeCount] = useState(0)
@@ -144,30 +148,29 @@ const regularMenuItems: SidebarItem[] = [
   },
   {
     id: "profile-card",
-    path: "/dashboard/profile-card",
     label: "Profile Card",
     icon: IdCard,
+    children: [
+      {
+        id: "profile-card-view",
+        path: "/dashboard/profile-card",
+        label: "Profile Card",
+        icon: IdCard,
+      },
+      {
+        id: "analytics",
+        path: "/dashboard/analytics",
+        label: "Analytics",
+        icon: BarChart3,
+      },
+    ]
   },
-  {
-    id: "analytics",
-    path: "/dashboard/analytics",
-    label: "Analytics",
-    icon: BarChart3,
-  },
-  {
-    id: "job-application-system",
-    label: "Job Applications",
-    icon: Kanban,
-    children: jobApplicationSystemItems,
-  },
-  {
-    id: "profile",
-    path: "/dashboard/profile",
-    label: "Profile",
-    icon: UserCircle,
-    badge: "",
-    badgeColor: "transparent",
-  },
+  // {
+  //   id: "job-application-system",
+  //   label: "Job Applications",
+  //   icon: Kanban,
+  //   children: jobApplicationSystemItems,
+  // },
 ]
 
 const adminMenuItems: SidebarLinkItem[] = [
@@ -197,7 +200,7 @@ export function Sidebar({
   const { theme, setTheme } = useTheme()
   const { profile } = useAppSelector((state) => state.auth)
   const { resumeCount, loading } = useResumeCount(user?.id)
-  const { setOpenMobile, isMobile } = useSidebar()
+  const { setOpenMobile, isMobile, state } = useSidebar()
 
   useEffect(() => {
     setIsMounted(true)
@@ -224,16 +227,29 @@ export function Sidebar({
     adminMenuItems.find((item) => pathname?.includes(item.path))?.id ||
     "persona"
 
-  const jobApplicationSystemIsActive = jobApplicationSystemItems.some((item) =>
-    propActivePage ? item.id === propActivePage : pathname?.includes(item.path)
-  )
-  const [isJobApplicationSystemOpen, setIsJobApplicationSystemOpen] = useState(jobApplicationSystemIsActive)
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
-    if (jobApplicationSystemItems.some((item) => pathname?.includes(item.path))) {
-      setIsJobApplicationSystemOpen(true)
-    }
-  }, [pathname])
+    const newOpenGroups: Record<string, boolean> = {}
+    const allItems = [...regularMenuItems, ...(isAdmin ? adminMenuItems : [])]
+
+    allItems.forEach((item) => {
+      if ("children" in item) {
+        const isActive = item.children.some((child) =>
+          propActivePage ? child.id === propActivePage : pathname?.includes(child.path)
+        )
+        if (isActive) {
+          newOpenGroups[item.id] = true
+        }
+      }
+    })
+
+    setOpenGroups((prev) => ({ ...prev, ...newOpenGroups }))
+  }, [pathname, propActivePage, isAdmin])
+
+  const toggleGroup = (id: string) => {
+    setOpenGroups((prev) => ({ ...prev, [id]: !prev[id] }))
+  }
 
   // Function to get user initials
   const getInitials = (name?: string) => {
@@ -246,16 +262,45 @@ export function Sidebar({
       .toUpperCase();
   };
 
+  // Determine if sidebar should be collapsible (only on large screens)
+  const isCollapsible = !isMobile;
+
   return (
     <SidebarPrimitive
-      className={`w-64 border-r border-gray-200/60 bg-white/95 dark:bg-gray-950/95 dark:border-gray-800/60 backdrop-blur-xl shadow-xl ${!isMounted ? "invisible" : "animate-slide-in-left"}`}
+      collapsible={isCollapsible ? "icon" : "offcanvas"} // Use "offcanvas" for mobile/medium screens
+      className={`border-r border-gray-200/60 bg-white/95 dark:bg-gray-950/95 dark:border-gray-800/60 backdrop-blur-xl shadow-xl ${!isMounted ? "invisible" : "animate-slide-in-left"}`}
       aria-hidden={!isMounted}
     >
-      <SidebarHeader className="p-6 pb-4">
-        <div className="flex items-center justify-between">
-          <Link href="/" className="cursor-pointer">
-            <Logo height={120} className="cursor-pointer" />
-          </Link>
+      <SidebarHeader className="p-6 pb-4 group-data-[collapsible=icon]:p-2 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:gap-4">
+        <div className="flex items-center justify-between w-full group-data-[collapsible=icon]:justify-center">
+          {/* Logo (Expanded) */}
+          <div className={cn(
+             "transition-all duration-200 ease-linear overflow-hidden",
+             isCollapsible ? "group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0" : ""
+          )}>
+            <Link href="/dashboard" passHref>
+              <Logo height={120} className="cursor-pointer" />
+            </Link>
+          </div>
+
+          {/* Favicon (Collapsed) */}
+          <div className={cn(
+             "transition-all duration-200 ease-linear overflow-hidden absolute",
+             isCollapsible ? "opacity-0 group-data-[collapsible=icon]:opacity-100 group-data-[collapsible=icon]:relative" : "hidden"
+          )}>
+             <Link href="/dashboard" passHref>
+               <Image src="/favicon.png" width={32} height={32} alt="Resumaic" className="cursor-pointer rounded-md" />
+             </Link>
+          </div>
+          
+          {/* Desktop Toggle - Expanded */}
+          {!isMobile && isCollapsible && (
+            <div className="group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0 transition-all duration-200 ease-linear overflow-hidden">
+              <SidebarTrigger className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200" />
+            </div>
+          )}
+
+          {/* Mobile Close - Only show on mobile/medium screens */}
           {isMobile && (
             <Button
               variant="ghost"
@@ -267,9 +312,22 @@ export function Sidebar({
             </Button>
           )}
         </div>
+        
+        {/* Desktop Toggle - Collapsed - Only show on large screens */}
+        {!isMobile && isCollapsible && (
+           <div className={cn(
+             "flex justify-center w-full transition-all duration-200 ease-linear overflow-hidden",
+             "h-0 opacity-0 group-data-[collapsible=icon]:h-auto group-data-[collapsible=icon]:opacity-100 group-data-[collapsible=icon]:mt-2"
+           )}>
+             <SidebarTrigger className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 w-full flex justify-center" />
+           </div>
+        )}
 
         {(user || profile) && (
-          <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg flex items-center gap-3">
+          <div className={cn(
+            "mt-4 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg flex items-center gap-3 animate-fade-in transition-all duration-200 ease-linear overflow-hidden",
+            isCollapsible ? "group-data-[collapsible=icon]:h-0 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:mt-0" : ""
+          )}>
             <Avatar className="h-10 w-10 border-2 border-gray-200 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-400 transition-colors shrink-0">
               <AvatarFallback
                 className={`font-semibold ${
@@ -303,9 +361,9 @@ export function Sidebar({
         )}
       </SidebarHeader>
 
-      <SidebarContent className="px-3 flex-1 overflow-y-auto pb-24">
-        <SidebarGroup>
-          <SidebarMenu className="space-y-1">
+      <SidebarContent className="px-3 flex-1 overflow-y-auto pb-24 group-data-[collapsible=icon]:overflow-hidden group-data-[collapsible=icon]:px-0">
+        <SidebarGroup className="group-data-[collapsible=icon]:p-0">
+          <SidebarMenu className="gap-2 group-data-[collapsible=icon]:gap-4 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:mt-4">
             {[...regularMenuItems, ...(isAdmin ? adminMenuItems : [])].map((item, index) => (
               <SidebarMenuItem key={item.id} className={`animate-fade-in-up animation-delay-${(index + 1) * 100}`}>
                 {"children" in item ? (
@@ -313,31 +371,45 @@ export function Sidebar({
                     <SidebarMenuButton
                       id={`tour-${item.id}`}
                       type="button"
-                      onClick={() => setIsJobApplicationSystemOpen((open) => !open)}
-                      isActive={activePage === item.id || jobApplicationSystemItems.some((child) => child.id === activePage)}
+                      onClick={() => {
+                         if (state === "collapsed" && isCollapsible) {
+                            useSidebar().setOpen(true);
+                            // Also open the group if not open
+                            if (!openGroups[item.id]) toggleGroup(item.id);
+                         } else {
+                            toggleGroup(item.id);
+                         }
+                      }}
+                      isActive={activePage === item.id || item.children.some((child) => child.id === activePage)}
+                      tooltip={item.label}
                       className={`
                         w-full justify-start gap-3 px-4 py-3.5 text-left rounded-2xl transition-all duration-300
                         data-[active=true]:resumaic-gradient-subtle data-[active=true]:text-gray-900 data-[active=true]:shadow-xl 
                         data-[active=true]:border data-[active=true]:border-green-200/50
                         dark:data-[active=true]:text-gray-50 dark:data-[active=true]:border-gray-800/60
                         cursor-pointer transform
+                        ${isCollapsible ? 'group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:h-10! group-data-[collapsible=icon]:w-10! group-data-[collapsible=icon]:rounded-xl group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:gap-0' : ''}
                       `}
                     >
-                      <div className="flex items-center gap-3 flex-1">
-                        <item.icon className="h-5 w-5 text-gray-600 dark:text-gray-400 group-data-[active=true]:text-green-700 dark:group-data-[active=true]:text-green-400" />
-                        <span className="font-semibold text-gray-700 dark:text-gray-200 group-data-[active=true]:text-gray-900 dark:group-data-[active=true]:text-gray-50">
-                          {item.label}
-                        </span>
+                      <item.icon className="h-5 w-5 text-gray-600 dark:text-gray-400 group-data-[active=true]:text-green-700 dark:group-data-[active=true]:text-green-400 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
+                      
+                      <div className={cn(
+                        "flex flex-1 items-center justify-between overflow-hidden transition-all duration-200 ease-linear",
+                        "group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0"
+                      )}>
+                         <span className="font-semibold text-gray-700 dark:text-gray-200 group-data-[active=true]:text-gray-900 dark:group-data-[active=true]:text-gray-50 truncate">
+                           {item.label}
+                         </span>
+                         <ChevronDown
+                           className={`h-4 w-4 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${
+                             openGroups[item.id] ? "rotate-180" : ""
+                           }`}
+                         />
                       </div>
-                      <ChevronDown
-                        className={`h-4 w-4 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${
-                          isJobApplicationSystemOpen ? "rotate-180" : ""
-                        }`}
-                      />
                     </SidebarMenuButton>
 
-                    {isJobApplicationSystemOpen && (
-                      <SidebarMenuSub className="mt-1">
+                    {openGroups[item.id] && (
+                      <SidebarMenuSub className="mt-1 group-data-[collapsible=icon]:hidden">
                         {item.children.map((child) => (
                           <SidebarMenuSubItem key={child.id}>
                             {setActivePage ? (
@@ -381,24 +453,30 @@ export function Sidebar({
                       if (isMobile) setOpenMobile(false)
                     }}
                     isActive={activePage === item.id}
+                    tooltip={item.label}
                     className={`
                       w-full justify-start gap-3 px-4 py-3.5 text-left rounded-2xl transition-all duration-300
                       data-[active=true]:resumaic-gradient-subtle data-[active=true]:text-gray-900 data-[active=true]:shadow-xl 
                       data-[active=true]:border data-[active=true]:border-green-200/50
                       cursor-pointer transform
+                      ${isCollapsible ? 'group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:h-10! group-data-[collapsible=icon]:w-10! group-data-[collapsible=icon]:rounded-xl group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:gap-0' : ''}
                     `}
                   >
-                    <div className="flex items-center gap-3 flex-1">
-                      <item.icon className="h-5 w-5 text-gray-600 dark:text-gray-400 group-data-[active=true]:text-green-700 dark:group-data-[active=true]:text-green-400" />
-                      <span className="font-semibold text-gray-700 dark:text-gray-200 group-data-[active=true]:text-gray-900 dark:group-data-[active=true]:text-gray-50">
+                    <item.icon className="h-5 w-5 text-gray-600 dark:text-gray-400 group-data-[active=true]:text-green-700 dark:group-data-[active=true]:text-green-400 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
+                    
+                    <div className={cn(
+                      "flex flex-1 items-center justify-between overflow-hidden transition-all duration-200 ease-linear",
+                      "group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0"
+                    )}>
+                      <span className="font-semibold text-gray-700 dark:text-gray-200 group-data-[active=true]:text-gray-900 dark:group-data-[active=true]:text-gray-50 truncate">
                         {item.label}
                       </span>
+                      {item.badge && (item.badge === "Pro" ? (!isProUser && !isAdmin) : true) && (
+                        <Badge className={`text-xs px-3 py-1 font-bold rounded-full ${item.badgeColor || "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200"}`}>
+                          {item.badge}
+                        </Badge>
+                      )}
                     </div>
-                    {item.badge && (item.badge === "Pro" ? (!isProUser && !isAdmin) : true) && (
-                      <Badge className={`text-xs px-3 py-1 font-bold rounded-full ${item.badgeColor || "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200"}`}>
-                        {item.badge}
-                      </Badge>
-                    )}
                   </SidebarMenuButton>
                 ) : (
                   <Link
@@ -411,25 +489,31 @@ export function Sidebar({
                     <SidebarMenuButton
                       id={`tour-${item.id}`}
                       isActive={activePage === item.id}
+                      tooltip={item.label}
                       className={`
                         w-full justify-start gap-3 px-4 py-3.5 text-left rounded-2xl transition-all duration-300
                         data-[active=true]:resumaic-gradient-subtle data-[active=true]:text-gray-900 data-[active=true]:shadow-xl 
                         data-[active=true]:border data-[active=true]:border-green-200/50
                         dark:data-[active=true]:text-gray-50 dark:data-[active=true]:border-gray-800/60
                         cursor-pointer transform
+                        ${isCollapsible ? 'group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:h-10! group-data-[collapsible=icon]:w-10! group-data-[collapsible=icon]:rounded-xl group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:gap-0' : ''}
                       `}
                     >
-                      <div className="flex items-center gap-3 flex-1">
-                        <item.icon className="h-5 w-5 text-gray-600 dark:text-gray-400 group-data-[active=true]:text-green-700 dark:group-data-[active=true]:text-green-400" />
-                        <span className="font-semibold text-gray-700 dark:text-gray-200 group-data-[active=true]:text-gray-900 dark:group-data-[active=true]:text-gray-50">
+                      <item.icon className="h-5 w-5 text-gray-600 dark:text-gray-400 group-data-[active=true]:text-green-700 dark:group-data-[active=true]:text-green-400 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
+                      
+                      <div className={cn(
+                        "flex flex-1 items-center justify-between overflow-hidden transition-all duration-200 ease-linear",
+                        "group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0"
+                      )}>
+                        <span className="font-semibold text-gray-700 dark:text-gray-200 group-data-[active=true]:text-gray-900 dark:group-data-[active=true]:text-gray-50 truncate">
                           {item.label}
                         </span>
+                        {item.badge && (item.badge === "Pro" ? (!isProUser && !isAdmin) : true) && (
+                          <Badge className={`text-xs px-3 py-1 font-bold rounded-full ${item.badgeColor || "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200"}`}>
+                            {item.badge}
+                          </Badge>
+                        )}
                       </div>
-                      {item.badge && (item.badge === "Pro" ? (!isProUser && !isAdmin) : true) && (
-                        <Badge className={`text-xs px-3 py-1 font-bold rounded-full ${item.badgeColor || "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200"}`}>
-                          {item.badge}
-                        </Badge>
-                      )}
                     </SidebarMenuButton>
                   </Link>
                 )}
@@ -439,15 +523,17 @@ export function Sidebar({
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 mt-auto sidebar-footer-area">
-        <div className="space-y-4">
+      <SidebarFooter className="p-4 mt-auto sidebar-footer-area group-data-[collapsible=icon]:p-2">
+        <div className="space-y-4 group-data-[collapsible=icon]:space-y-2">
             {/* User Stats Section */}
             {!!user && !isAdmin && (
-              <div className={`p-3 rounded-2xl ${
+              <div className={cn(
+                "p-3 rounded-2xl transition-all duration-200 ease-linear overflow-hidden",
                 isProUser 
                   ? 'bg-gradient-to-br from-orange-50/50 via-white to-orange-50/20 dark:from-gray-900/60 dark:via-gray-950 dark:to-gray-900/40 border border-orange-100 dark:border-gray-800/60'
-                  : 'bg-gradient-to-br from-green-50/80 via-white to-orange-50/30 dark:from-gray-900/60 dark:via-gray-950 dark:to-gray-900/40 border border-green-200/50 dark:border-gray-800/60'
-              }`}>
+                  : 'bg-gradient-to-br from-green-50/80 via-white to-orange-50/30 dark:from-gray-900/60 dark:via-gray-950 dark:to-gray-900/40 border border-green-200/50 dark:border-gray-800/60',
+                isCollapsible ? "group-data-[collapsible=icon]:h-0 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:mb-0" : ""
+              )}>
                 {isProUser ? (
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-xl resumaic-gradient-green shadow-md">
@@ -503,86 +589,114 @@ export function Sidebar({
             <Button
               variant="outline"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="w-full justify-start gap-3 rounded-2xl border-2 border-gray-200/80 dark:border-gray-800/60 hover:border-blue-300 dark:hover:border-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-950/30 transition-all duration-300 transform hover:scale-[1.02] font-semibold text-gray-700 dark:text-gray-200"
+              className={`
+                w-full justify-start gap-3 rounded-2xl border-2 border-gray-200/80 dark:border-gray-800/60 
+                hover:border-blue-300 dark:hover:border-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-950/30 
+                transition-all duration-300 transform hover:scale-[1.02] font-semibold text-gray-700 dark:text-gray-200
+                ${isCollapsible ? 'group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:rounded-lg group-data-[collapsible=icon]:gap-0' : ''}
+              `}
             >
               {theme === "dark" ? (
                 <Sun className="h-5 w-5 text-orange-500" />
               ) : (
                 <Moon className="h-5 w-5 text-blue-500" />
               )}
-              <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+              <span className={cn(
+                "transition-all duration-200 ease-linear overflow-hidden",
+                isCollapsible ? "group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0" : ""
+              )}>
+                {theme === "dark" ? "Light Mode" : "Dark Mode"}
+              </span>
             </Button>
 
             {/* User Menu Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full justify-between rounded-2xl border-2 border-gray-200/80 dark:border-gray-800/60 hover:border-blue-300 dark:hover:border-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-950/30 transition-all duration-300 transform hover:scale-[1.02] font-semibold"
-                >
-                  <div className="flex items-center gap-2">
-                    <Avatar className="h-6 w-6">
-                      <AvatarFallback className="text-xs font-semibold">
-                        {getInitials(profile?.name || user?.name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span>Account</span>
-                  </div>
-                  <ChevronDown className="h-4 w-4 ml-2" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 rounded-2xl border-gray-200/80 dark:border-gray-800/60 shadow-xl">
-                <div className="p-3 border-b border-gray-100 dark:border-gray-800">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{profile?.name || user?.name}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{profile?.email || user?.email}</p>
-                </div>
-                
-                <DropdownMenuItem 
-                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  className="rounded-xl cursor-pointer"
-                >
-                  {theme === "dark" ? (
-                    <>
-                      <Sun className="mr-2 h-4 w-4" />
-                      <span>Light Mode</span>
-                    </>
-                  ) : (
-                    <>
-                      <Moon className="mr-2 h-4 w-4" />
-                      <span>Dark Mode</span>
-                    </>
-                  )}
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem 
-                  onClick={() => router.push('/dashboard/profile')}
-                  className="rounded-xl cursor-pointer"
-                >
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Profile Settings</span>
-                </DropdownMenuItem>
-                
-                {/* <DropdownMenuItem 
-                  onClick={() => router.push('/help')}
-                  className="rounded-xl cursor-pointer"
-                >
-                  <HelpCircle className="mr-2 h-4 w-4" />
-                  <span>Help & Support</span>
-                </DropdownMenuItem> */}
-                
-                <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-800" />
-                
-                <DropdownMenuItem 
-                  onClick={handleLogout}
-                  className="rounded-xl cursor-pointer text-red-600 hover:text-red-700 focus:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Logout</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+        <DropdownMenu>
+  <DropdownMenuTrigger asChild>
+    <Button
+      variant="outline"
+      className={cn(
+        "w-full flex items-center justify-between rounded-2xl border-2",
+        "border-gray-200/80 dark:border-gray-800/60",
+        "hover:border-blue-300 dark:hover:border-blue-400",
+        "hover:bg-blue-50/50 dark:hover:bg-blue-950/30",
+        "transition-all duration-300 font-semibold",
+        isCollapsible &&
+          "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:rounded-lg"
+      )}
+    >
+      {/* LEFT SIDE */}
+      <div
+        className={cn(
+          "flex items-center gap-2 min-w-0",
+          isCollapsible && "group-data-[collapsible=icon]:gap-0"
+        )}
+      >
+        <Avatar className="h-6 w-6 flex-shrink-0 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5">
+          <AvatarImage src={user?.profilePicture} />
+          <AvatarFallback className="bg-gray-100 dark:bg-gray-800">
+            <User className="h-4 w-4 text-gray-500 group-data-[collapsible=icon]:h-3 group-data-[collapsible=icon]:w-3" />
+          </AvatarFallback>
+        </Avatar>
+
+        <span
+          className={cn(
+            "truncate transition-all duration-200",
+            isCollapsible && "group-data-[collapsible=icon]:hidden"
+          )}
+        >
+          Account
+        </span>
+      </div>
+
+      {/* RIGHT SIDE ICON */}
+      <ChevronDown
+        className={cn(
+          "h-4 w-4 flex-shrink-0 transition-all duration-200",
+          isCollapsible && "group-data-[collapsible=icon]:hidden"
+        )}
+      />
+    </Button>
+  </DropdownMenuTrigger>
+
+  <DropdownMenuContent
+    className="w-56 rounded-2xl border border-gray-200/80 dark:border-gray-800/60 shadow-xl"
+    side={!isCollapsible || state === "collapsed" ? "right" : "top"}
+    align={!isCollapsible || state === "collapsed" ? "end" : "center"}
+  >
+    {/* USER INFO */}
+    <div className="p-3 border-b border-gray-100 dark:border-gray-800">
+      <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+        {profile?.name || user?.name}
+      </p>
+      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+        {profile?.email || user?.email}
+      </p>
+    </div>
+
+    {/* PROFILE SETTINGS */}
+    <DropdownMenuItem
+      onClick={() => router.push("/dashboard/profile")}
+      className="rounded-xl cursor-pointer"
+    >
+      <User className="mr-2 h-4 w-4" />
+      <span>Profile Settings</span>
+    </DropdownMenuItem>
+
+    <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-800" />
+
+    {/* LOGOUT */}
+    <DropdownMenuItem
+      onClick={handleLogout}
+      className="rounded-xl cursor-pointer text-red-600 hover:text-red-700 focus:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+    >
+      <LogOut className="mr-2 h-4 w-4" />
+      <span>Logout</span>
+    </DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
           </div>
       </SidebarFooter>
+      <SidebarRail />
     </SidebarPrimitive>
   )
 }

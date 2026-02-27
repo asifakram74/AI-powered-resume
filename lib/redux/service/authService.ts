@@ -44,6 +44,7 @@ export type ProfileResponse = {
   first_login: number | string | boolean
   email_verified_at: string | null
   source?: string
+  profile_picture?: string
 }
 
 export type RegisterResponse = {
@@ -89,6 +90,7 @@ export type RegisterData = {
 export type UpdateProfileData = {
   name?: string
   email?: string
+  phone_number?: string
   plan_type?: string
 }
 
@@ -105,6 +107,37 @@ export type ResetPasswordData = {
   email: string
   otp: string
   password: string
+}
+
+// Helper to construct full storage URL
+const getStorageUrl = (path: string | undefined) => {
+  if (!path) return undefined
+  // If it's a full URL or a data URI, return as is
+  if (path.startsWith('http') || path.startsWith('data:')) return path
+  
+  // If it's a frontend asset (like the default profile image), return as is
+  if (path === '/profile-img.png' || path === 'profile-img.png') return path
+  
+  const baseURL = api.defaults.baseURL || ""
+  // Remove /api or /public/api from the end to get the root URL
+  // Example: http://localhost:8000/api -> http://localhost:8000
+  const rootURL = baseURL.replace(/\/api\/?$/, "").replace(/\/public\/?$/, "")
+  
+  // Ensure path starts with /
+  let cleanPath = path.startsWith('/') ? path : `/${path}`
+  
+  // Fix for internal storage paths
+  if (cleanPath.includes('/storage/app/public/')) {
+    cleanPath = cleanPath.replace('/storage/app/public/', '/storage/')
+  }
+  
+  // Fix for missing /storage prefix for media files
+  // If it starts with /media/ and doesn't have /storage/ prefix, add it
+  if (cleanPath.startsWith('/media/')) {
+    cleanPath = `/storage${cleanPath}`
+  }
+  
+  return `${rootURL}${cleanPath}`
 }
 
 export const markPasswordAsSet = (): void => {
@@ -160,12 +193,36 @@ export const AuthService = {
 
   getProfile: async (): Promise<ProfileResponse> => {
     const response = await api.get("/profile")
+    if (response.data) {
+      response.data.profile_picture = getStorageUrl(response.data.profile_picture)
+    }
     return response.data
   },
 
   updateProfile: async (data: Partial<UpdateProfileData>): Promise<ProfileResponse> => {
     const response = await api.put("/profile", data)
+    if (response.data) {
+      response.data.profile_picture = getStorageUrl(response.data.profile_picture)
+    }
     return response.data
+  },
+
+  uploadProfilePicture: async (file: File): Promise<ProfileResponse> => {
+    const formData = new FormData()
+    formData.append("profile_picture", file)
+    const response = await api.post("/profile/profile-picture", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+    
+    const responseData = response.data
+    // Handle different response structures
+    if (responseData.data && responseData.data.profile_picture_url) {
+        responseData.profile_picture = getStorageUrl(responseData.data.profile_picture_url)
+    } else if (responseData.profile_picture) {
+        responseData.profile_picture = getStorageUrl(responseData.profile_picture)
+    }
+    
+    return responseData
   },
 
   changePassword: async (oldPassword: string, newPassword: string): Promise<void> => {
@@ -189,7 +246,7 @@ export const AuthService = {
   },
 
   deleteAccount: async (): Promise<void> => {
-    await api.delete("/me")
+    await api.delete("/settings/delete-account")
   },
 
   linkedinLogin: async (code: string): Promise<AuthResponse> => {

@@ -31,7 +31,12 @@ import {
   Users,
   Award,
   Target,
-  TrendingUp
+  TrendingUp,
+  Share2,
+  Copy,
+  QrCode,
+  Download,
+  Link as LinkIcon
 } from "lucide-react"
 import { Input } from "../../components/ui/input"
 import { Badge } from "../../components/ui/badge"
@@ -67,6 +72,8 @@ import {
 } from "../../components/ui/table"
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog"
 import { CheckCircle2 } from "lucide-react"
+import { Input as ShareInput } from "../../components/ui/input"
+import QRCode from "qrcode"
 
 export function ProfileCardList({ user }: PageProps) {
   const router = useRouter()
@@ -77,6 +84,11 @@ export function ProfileCardList({ user }: PageProps) {
   const [viewingAttachments, setViewingAttachments] = useState<ProfileCard | null>(null)
   const { theme } = useTheme()
   const isDark = theme === "dark"
+  
+  // Share Dialog State
+  const [sharingCard, setSharingCard] = useState<ProfileCard | null>(null)
+  const [qrUrl, setQrUrl] = useState<string | null>(null)
+  const [publicUrl, setPublicUrl] = useState<string>("")
   
   // Create Dialog State
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
@@ -98,6 +110,74 @@ export function ProfileCardList({ user }: PageProps) {
       if (cvs.length === 0) fetchCvs()
     }
   }, [isCreateDialogOpen])
+
+  // Generate QR code when sharing card changes
+  useEffect(() => {
+    if (sharingCard && sharingCard.public_slug) {
+      const origin = typeof window !== "undefined" ? window.location.origin : ""
+      const url = `${origin}/profiles-card/${sharingCard.public_slug}`
+      setPublicUrl(url)
+      generateQRCode(url)
+    }
+  }, [sharingCard])
+
+  const generateQRCode = async (url: string) => {
+    try {
+      const qrDataUrl = await QRCode.toDataURL(url, {
+        width: 300,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#ffffff'
+        }
+      })
+      setQrUrl(qrDataUrl)
+    } catch (err) {
+      console.error('Failed to generate QR code:', err)
+      setQrUrl(null)
+    }
+  }
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(publicUrl)
+      toast.success("Link copied to clipboard!")
+    } catch (err) {
+      toast.error("Failed to copy link")
+    }
+  }
+
+  const handleNativeShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${sharingCard?.full_name}'s Profile Card`,
+          text: `Check out ${sharingCard?.full_name}'s professional profile card`,
+          url: publicUrl,
+        })
+        toast.success("Shared successfully!")
+      } catch (err) {
+        if (err instanceof Error && err.name !== 'AbortError') {
+          toast.error("Failed to share")
+        }
+      }
+    } else {
+      // Fallback for browsers that don't support native share
+      handleCopyLink()
+    }
+  }
+
+  const handleDownloadQr = () => {
+    if (!qrUrl || !sharingCard) return
+    
+    const link = document.createElement('a')
+    link.href = qrUrl
+    link.download = `${sharingCard.full_name.toLowerCase().replace(/\s+/g, '-')}-qr-code.png`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    toast.success("QR code downloaded")
+  }
 
   const fetchPersonas = async () => {
      try {
@@ -366,14 +446,25 @@ export function ProfileCardList({ user }: PageProps) {
                                 size="sm"
                                 onClick={() => window.open(`/profiles-card/${card.public_slug}`, '_blank')} 
                                 className="cursor-pointer"
+                                title="View public profile"
                               >
                                 <ExternalLink className="h-4 w-4" />
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="sm"
+                                onClick={() => setSharingCard(card)} 
+                                className="cursor-pointer text-emerald-600 hover:text-emerald-700"
+                                title="Share profile"
+                              >
+                                <Share2 className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
                                 onClick={() => navigateToEdit(card.id)} 
                                 className="cursor-pointer"
+                                title="Edit profile"
                               >
                                 <Edit className="h-4 w-4" />
                               </Button>
@@ -388,6 +479,7 @@ export function ProfileCardList({ user }: PageProps) {
                                     variant="ghost"
                                     size="sm"
                                     className="text-red-600 hover:text-red-700 cursor-pointer"
+                                    title="Delete profile"
                                   >
                                     <Trash2 className="h-4 w-4" />
                                   </Button>
@@ -529,14 +621,25 @@ export function ProfileCardList({ user }: PageProps) {
                           size="sm"
                           onClick={() => window.open(`/profiles-card/${card.public_slug}`, '_blank')}
                           className="bg-transparent p-2 flex-1"
+                          title="View public profile"
                         >
                           <ExternalLink className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
+                          onClick={() => setSharingCard(card)}
+                          className="bg-transparent p-2 flex-1 text-emerald-600 hover:text-emerald-700"
+                          title="Share profile"
+                        >
+                          <Share2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => navigateToEdit(card.id)}
                           className="bg-transparent p-2 flex-1"
+                          title="Edit profile"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -551,6 +654,7 @@ export function ProfileCardList({ user }: PageProps) {
                               variant="outline"
                               size="sm"
                               className="text-red-600 hover:text-red-700 bg-transparent p-2 flex-1"
+                              title="Delete profile"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -680,6 +784,93 @@ export function ProfileCardList({ user }: PageProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Share Dialog */}
+      <Dialog open={!!sharingCard} onOpenChange={(open) => !open && setSharingCard(null)}>
+        <DialogContent className="p-0 overflow-hidden sm:max-w-3xl">
+          <div className="px-6 pt-6">
+            <DialogHeader>
+              <DialogTitle className="text-xl">Share Profile Card</DialogTitle>
+              <DialogDescription>
+                Share {sharingCard?.full_name}'s public profile card link or let others scan the QR code.
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+          <div className="px-6 pb-6 grid gap-6 md:grid-cols-[1.35fr_0.65fr]">
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/40 p-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-gray-800 dark:text-gray-100">
+                  <LinkIcon className="h-4 w-4 text-emerald-500" />
+                  Public link
+                </div>
+                <div className="mt-3 flex gap-2">
+                  <ShareInput 
+                    readOnly 
+                    value={publicUrl} 
+                    className="bg-white dark:bg-gray-950 font-mono text-xs md:text-sm" 
+                  />
+                  <Button variant="outline" onClick={handleCopyLink} className="gap-2">
+                    <Copy className="h-4 w-4" />
+                    Copy
+                  </Button>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => window.open(publicUrl, "_blank")} 
+                    className="gap-2"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Open
+                  </Button>
+                  <Button 
+                    className="gap-2 resumaic-gradient-green text-white hover:opacity-90" 
+                    onClick={handleNativeShare}
+                  >
+                    <Share2 className="h-4 w-4" />
+                    Share
+                  </Button>
+                </div>
+              </div>
+              <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-gray-800 dark:text-gray-100">
+                  <Share2 className="h-4 w-4 text-blue-500" />
+                  Share tips
+                </div>
+                <div className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                  Use the link for email, the Share button for mobile apps, and the QR for print or live demos.
+                </div>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-4 flex flex-col items-center gap-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-gray-800 dark:text-gray-100">
+                <QrCode className="h-4 w-4 text-purple-500" />
+                QR code
+              </div>
+              {qrUrl ? (
+                <img 
+                  src={qrUrl} 
+                  alt="Profile card QR code" 
+                  className="h-44 w-44 rounded-xl border border-gray-200 dark:border-gray-800 bg-white" 
+                />
+              ) : (
+                <div className="h-44 w-44 rounded-xl border border-dashed border-gray-300 dark:border-gray-700 flex items-center justify-center text-sm text-gray-500">
+                  QR unavailable
+                </div>
+              )}
+              <Button 
+                variant="outline" 
+                onClick={handleDownloadQr} 
+                disabled={!qrUrl} 
+                className="gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Download QR
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Create/Edit Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -927,7 +1118,6 @@ export function ProfileCardList({ user }: PageProps) {
           </div>
         </DialogContent>
       </Dialog>
-
 
       {/* View Attachments Dialog */}
       <Dialog open={!!viewingAttachments} onOpenChange={(open) => !open && setViewingAttachments(null)}>

@@ -3,19 +3,20 @@
 import { useState, useEffect, useRef } from "react"
 import { useForm } from "react-hook-form"
 import { useAppDispatch, useAppSelector } from "../../lib/redux/hooks"
-import { updateProfile, fetchProfile, clearProfile } from "../../lib/redux/slices/authSlice" // Import clearProfile
+import { updateProfile, fetchProfile, clearProfile, deleteAccount, uploadProfilePicture, logoutUser } from "../../lib/redux/slices/authSlice" // Import clearProfile
 import { Alert, AlertDescription, AlertTitle } from "../../components/ui/alert"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card"
 import { Label } from "../../components/ui/label"
 import { Input } from "../../components/ui/input"
-import { Loader2, Edit, Shield, Mail, Star, BadgeCheck, FileText, Target, UserCircle, TrendingUp } from "lucide-react"
+import { Loader2, Edit, Shield, Mail, Star, BadgeCheck, FileText, Target, UserCircle, TrendingUp, Trash2, Camera, X, Phone } from "lucide-react"
 import { Crown } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "../../components/ui/dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
 import { Badge } from "../../components/ui/badge"
 import { ChangePassword } from "./ChangePassword"
 import  SetPassword  from "./SetPassword"
+import { ConfirmDialog } from "../../components/ui/ConfirmDialog"
 import { getPersonas } from "../../lib/redux/service/pasonaService"
 import { getCVs } from "../../lib/redux/service/resumeService"
 import { getCoverLetters } from "../../lib/redux/service/coverLetterService"
@@ -34,6 +35,7 @@ interface StatItem {
 interface ProfileFormData {
   name: string
   email: string
+  phone_number: string
   // plan_type?: string
 }
 
@@ -50,6 +52,9 @@ export function ProfilePage() {
   const [loadingError, setLoadingError] = useState<string | null>(null)
   const hasLoaded = useRef(false)
   const [isSubscribing, setIsSubscribing] = useState(false)
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null)
+  const [previewImage, setPreviewImage] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const {
     register,
@@ -60,6 +65,7 @@ export function ProfilePage() {
     defaultValues: {
       name: profile?.name || '',
       email: profile?.email || '',
+      phone_number: profile?.phone || '',
       // plan_type: profile?.plan_type || 'Free',
     }
   })
@@ -127,20 +133,60 @@ export function ProfilePage() {
       reset({
         name: profile.name,
         email: profile.email,
+        phone_number: profile.phone || '',
         // plan_type: profile.plan_type,
       })
     }
   }, [profile, reset])
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setSelectedImageFile(file)
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setPreviewImage(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    try {
+      await dispatch(deleteAccount()).unwrap()
+      await dispatch(logoutUser()) // Ensure logout happens
+      router.push("/login")
+      showSuccessToast("Account deleted successfully")
+    } catch (error: any) {
+      showErrorToast("Failed to delete account", error || "Failed to delete account. Please try again.")
+    }
+  }
+
   const onSubmit = async (data: ProfileFormData) => {
     try {
       setIsUpdating(true)
+      
+      // Update basic info
       await dispatch(updateProfile({
         name: data.name,
+        // If the backend supports email update, uncomment this. 
+        // For now, assume it's allowed if user asked for "fully editable".
+        // However, usually email update requires verification.
+        // We'll try to send it if it's different.
+        ...(data.email !== profile?.email ? { email: data.email } : {}),
+        phone_number: data.phone_number,
       })).unwrap()
+
+      // Update profile picture if selected
+      if (selectedImageFile) {
+        await dispatch(uploadProfilePicture(selectedImageFile)).unwrap()
+      }
+
       await dispatch(fetchProfile()).unwrap()
       showSuccessToast("Profile updated successfully")
       setShowEditModal(false)
+      setSelectedImageFile(null)
+      setPreviewImage(null)
     } catch (error: any) {
       showErrorToast("Failed to update profile", error || "Failed to update profile. Please try again.")
     } finally {
@@ -191,6 +237,9 @@ export function ProfilePage() {
             {/* Profile Info */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
               <Avatar className="h-20 w-20 sm:h-24 sm:w-24 ring-4 ring-white dark:ring-gray-700 shadow-lg">
+                {profile.profile_picture ? (
+                  <AvatarImage src={profile.profile_picture} alt={profile.name} className="object-cover" />
+                ) : null}
                 <AvatarFallback className="resumaic-gradient-green hover:opacity-90 button-press text-white text-2xl sm:text-3xl font-bold">
                   {profile?.name
                     ?.split(" ")
@@ -208,11 +257,14 @@ export function ProfilePage() {
                   </h1>
                   
                   <div className="flex flex-wrap items-center gap-2">
-                    {user?.role?.toLowerCase() !== 'admin' && (
+                    {/* {user?.role?.toLowerCase() !== 'admin' && (
                       <Badge className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700">
                         <span>{profile.plan_type}</span>
                       </Badge>
-                    )}
+                    )} */}
+                    <Badge className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700">
+                      <span>{profile.plan_type}</span>
+                    </Badge>
 
                     {profile.status === 'verified' && (
                       <Badge className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 text-green-700 dark:text-green-300 font-medium">
@@ -316,8 +368,20 @@ export function ProfilePage() {
                       </p>
                     </div>
                   </div>
+
+                  <div className="space-y-3">
+                    <Label className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-gray-500" />
+                      Phone Number
+                    </Label>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                      <p className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">
+                        {profile.phone || 'Not set'}
+                      </p>
+                    </div>
+                  </div>
                   
-                  {user?.role?.toLowerCase() !== 'admin' && (
+                  {/* {user?.role?.toLowerCase() !== 'admin' && (
                     <div className="space-y-3 sm:col-span-2">
                       <Label className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                         <Star className="h-4 w-4 text-gray-500" />
@@ -331,7 +395,7 @@ export function ProfilePage() {
                         </div>
                       </div>
                     </div>
-                  )}
+                  )} */}
                 </div>
               </CardContent>
             </Card>
@@ -446,6 +510,30 @@ export function ProfilePage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Delete Account Section */}
+                <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                   <ConfirmDialog
+                      title="Delete Account"
+                      description="Delete account means the user chooses to permanently close their account and stop using the application. After deleting the account, you will no longer be able to log in or access your data. Are you sure you want to proceed?"
+                      confirmText="Delete Account"
+                      cancelText="Cancel"
+                      onConfirm={handleDeleteAccount}
+                      trigger={
+                        <Button 
+                          variant="ghost" 
+                          className="w-full justify-start h-12 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        >
+                          <Trash2 className="h-4 w-4 mr-3" />
+                          <div className="text-left">
+                            <p className="font-medium">Delete Account</p>
+                            <p className="text-xs text-red-500/70">Permanently remove your account</p>
+                          </div>
+                        </Button>
+                      }
+                    />
+                </div>
+
               </CardContent>
             </Card>
           </div>
@@ -459,6 +547,8 @@ export function ProfilePage() {
             email: profile?.email || '',
             // plan_type: profile?.plan_type,
           });
+          setSelectedImageFile(null);
+          setPreviewImage(null);
         }
         setShowEditModal(open);
       }}>
@@ -469,6 +559,48 @@ export function ProfilePage() {
             </DialogHeader>
 
             <div className="grid gap-4 py-4">
+              
+              {/* Profile Image Upload */}
+              <div className="flex flex-col items-center gap-4">
+                <div className="relative group">
+                  <Avatar className="h-24 w-24 border-2 border-gray-200 dark:border-gray-700">
+                    {previewImage ? (
+                       <AvatarImage src={previewImage} className="object-cover" />
+                    ) : profile?.profile_picture ? (
+                       <AvatarImage src={profile.profile_picture} className="object-cover" />
+                    ) : null}
+                    <AvatarFallback className="resumaic-gradient-green text-white text-xl">
+                      {profile?.name?.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  <div 
+                    className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 rounded-full cursor-pointer"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Camera className="h-8 w-8 text-white" />
+                  </div>
+                </div>
+
+                <div className="text-center">
+                   <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      Change Photo
+                   </Button>
+                   <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      className="hidden" 
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                   />
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name *</Label>
                 <Input
@@ -498,7 +630,7 @@ export function ProfilePage() {
                       message: "Invalid email address"
                     }
                   })}
-                  disabled
+                  // Enable email editing as requested, but user should be aware of verification logic
                 />
                 {errors.email && (
                   <p className="text-sm text-red-600">{errors.email.message}</p>
@@ -506,9 +638,19 @@ export function ProfilePage() {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  {...register("phone_number")}
+                  placeholder="+1 (555) 000-0000"
+                />
+              </div>
+
+              {/* <div className="space-y-2">
                 <Label>Account Type</Label>
                 <Input value={profile?.plan_type} disabled />
-              </div>
+              </div> */}
             </div>
 
             <DialogFooter>
@@ -529,7 +671,7 @@ export function ProfilePage() {
               <Button
                 className="resumaic-gradient-green hover:opacity-90 button-press"
                 type="submit"
-                disabled={!isDirty || isUpdating}  // disable if no changes or updating
+                disabled={(!isDirty && !selectedImageFile) || isUpdating}
               >
                 {isUpdating ? (
                   <>

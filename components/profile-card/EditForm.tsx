@@ -42,8 +42,7 @@ interface EditFormProps {
 
 // Zod schemas for validation
 const displaySchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
+  fullName: z.string().min(1, "Full name is required"),
   username: z.string()
     .min(3, "Username must be at least 3 characters")
     .regex(/^[a-z0-9-]+$/, "Username can only contain lowercase letters, numbers, and dashes"),
@@ -91,8 +90,6 @@ export function EditForm({
     onImageUpload
 }: EditFormProps) {
     const fileInputRef = useRef<HTMLInputElement>(null)
-    const [firstName, setFirstName] = useState("")
-    const [lastName, setLastName] = useState("")
     const [errors, setErrors] = useState<Record<string, string>>({})
     
     // New state for link management
@@ -100,20 +97,10 @@ export function EditForm({
     const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-    useEffect(() => {
-        if (sectionKey === "display") {
-            const parts = (draft.full_name || "").trim().split(" ").filter(Boolean)
-            const first = parts.shift() || ""
-            const last = parts.join(" ")
-            setFirstName(first)
-            setLastName(last)
-        }
-    }, [sectionKey, draft.full_name])
-
     // Validate on change or section switch
     useEffect(() => {
         validateSection()
-    }, [sectionKey, draft, firstName, lastName])
+    }, [sectionKey, draft])
 
     const validateSection = () => {
         let result
@@ -121,8 +108,7 @@ export function EditForm({
 
         if (sectionKey === "display") {
             result = displaySchema.safeParse({
-                firstName,
-                lastName,
+                fullName: draft.full_name,
                 username: draft.username,
                 job_title: draft.job_title
             })
@@ -268,44 +254,24 @@ export function EditForm({
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label>First Name</Label>
-                        <Input
-                            value={firstName}
-                            onChange={(e) => {
-                                const next = e.target.value
-                                setFirstName(next)
-                                onUpdateFullName(next, lastName)
-                            }}
-                            placeholder="First name"
-                            className={errors.firstName ? "border-red-500" : ""}
-                        />
-                        {errors.firstName && <p className="text-xs text-red-500">{errors.firstName}</p>}
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Last Name</Label>
-                        <Input
-                            value={lastName}
-                            onChange={(e) => {
-                                const next = e.target.value
-                                setLastName(next)
-                                onUpdateFullName(firstName, next)
-                            }}
-                            placeholder="Last name"
-                            className={errors.lastName ? "border-red-500" : ""}
-                        />
-                        {errors.lastName && <p className="text-xs text-red-500">{errors.lastName}</p>}
-                    </div>
-                </div>
                 <div className="space-y-2">
+                    <Label>Full Name</Label>
+                    <Input
+                        value={draft.full_name}
+                        onChange={(e) => onUpdateDraft({ full_name: e.target.value })}
+                        placeholder="Full Name"
+                        className={errors.fullName ? "border-red-500" : ""}
+                    />
+                    {errors.fullName && <p className="text-xs text-red-500">{errors.fullName}</p>}
+                </div>
+                {/* <div className="space-y-2">
                     <Label>Headline</Label>
                     <Input
                         value={draft.job_title || ""}
                         onChange={(e) => onUpdateDraft({ job_title: e.target.value })}
                         placeholder="Creative Technologist"
                     />
-                </div>
+                </div> */}
                 <div className="space-y-2">
                     <Label>Username</Label>
                     <Input
